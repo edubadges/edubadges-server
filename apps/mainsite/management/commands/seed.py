@@ -6,16 +6,26 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
 
+from badgeuser.models import BadgeUser
+from mainsite.tests.base import SetupHelper
+from mainsite.seeds.constants import INSTITUTION_UNIVERSITY_EXAMPLE_ORG
+from institution.models import Institution, Faculty
+from issuer.models import Issuer, BadgeClass, BadgeInstance
+
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-c', '--clean', action="store_true")
+        parser.add_argument('-as', '--add_assertions', type=int)
 
     def handle(self, *args, **options):
         if settings.ALLOW_SEEDS:
             if options['clean']:
                 clear_data()
             run_seeds()
+            if options['add_assertions']:
+                nr_of_assertions = options['add_assertions']
+                run_scaled_seed(scale=nr_of_assertions)
 
 
 def clear_data():
@@ -58,3 +68,41 @@ def run_seeds():
             print("\033[91mFAILED!\033[0m")
             traceback.print_exc()
             break
+
+
+def run_scaled_seed(scale):
+    setup_helper = SetupHelper()
+    institution = Institution.objects.get(identifier=INSTITUTION_UNIVERSITY_EXAMPLE_ORG)
+    faculty_name = 'Many Assertions'
+    faculty, _ = Faculty.objects.get_or_create(
+        name_english=faculty_name,
+        description_english=f"Description for {faculty_name}",
+        description_dutch=f"Beschrijving voor {faculty_name}",
+        institution=institution
+    )
+    issuer_name = 'Many Assertions'
+    issuer, _ = Issuer.objects.get_or_create(name_english=issuer_name,
+                                             description_english=f"Description for {issuer_name}",
+                                             description_dutch=f"Beschrijving voor {issuer_name}",
+                                             faculty=faculty, old_json="{}",
+                                             url_english=f"https://issuer", email="issuer@info.nl",
+                                             image_english="uploads/issuers/surf.png")
+    badgeclass, _ = BadgeClass.objects.get_or_create(
+        name='Many Assertions',
+        issuer=issuer,
+        description='Description',
+        formal=True,
+        old_json="{}",
+        image="uploads/badges/eduid.png",
+    )
+
+    issuing_teacher = BadgeUser.objects.get(first_name="Joseph", last_name="Wheeler")
+
+    for i in range(scale):
+        if i % 50 == 0:
+            print('Seeding assertion {} out of {}'.format(i, scale))
+        recipient = setup_helper.setup_student(affiliated_institutions=[institution])
+        assertion = BadgeInstance.objects.create(
+            badgeclass=badgeclass, recipient_identifier=recipient.get_recipient_identifier(),
+            created_by=issuing_teacher,
+            user=recipient)

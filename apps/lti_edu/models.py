@@ -71,12 +71,12 @@ class LtiClient(models.Model):
         return None
 
     def validate_unique(self, *args, **kwargs):
-        super(LtiClient, self).validate_unique(*args, **kwargs)
         if self.__class__.objects.filter(issuer=self.issuer, name=self.name).exists():
             raise ValidationError(
                 message='LtiClient with this name and Issuer already exists.',
                 code='unique_together',
             )
+        return super(LtiClient, self).validate_unique(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         self.validate_unique()

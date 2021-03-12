@@ -39,5 +39,22 @@ class BadgrValidationFieldError(BadgrValidationError):
         super(BadgrValidationFieldError, self).__init__(error_message, 999)
 
 
+class BadgrValidationMultipleFieldError(BadgrValidationError):
+    """Error to use when throwing an exception on a specific field in the form."""
+
+    status_code = 400
+
+    def __init__(self, errors):
+        """
+        :param errors is an array of arrays containing field_name, error_message, error_code
+          example: [[email, email is invalid, 23], etc ]
+        """
+        error_messages = {}
+        for field_name, error_message, error_code in errors:
+            error_messages[field_name] = [{'error_message': error_message,
+                                           'error_code': error_code}]
+        super(BadgrValidationMultipleFieldError, self).__init__(error_messages, 999)
+
+
 class GraphQLException(Exception):
     pass

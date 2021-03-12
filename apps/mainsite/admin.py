@@ -79,7 +79,8 @@ class LegacyTokenAdmin(ModelAdmin):
 badgr_admin.register(LegacyTokenProxy, LegacyTokenAdmin)
 
 from allauth.account.admin import EmailAddressAdmin, EmailConfirmationAdmin
-from allauth.socialaccount.admin import SocialApp, SocialAppAdmin, SocialTokenAdmin, SocialAccountAdmin
+from allauth.socialaccount.admin import SocialApp, SocialAppAdmin, SocialTokenAdmin
+from badgrsocialauth.admin import BadgrSocialAccountAdmin
 from django.contrib.auth.admin import GroupAdmin
 from django.contrib.auth.models import Group
 from django.contrib.sites.admin import SiteAdmin
@@ -87,7 +88,7 @@ from django.contrib.sites.models import Site
 
 badgr_admin.register(SocialApp, SocialAppAdmin)
 badgr_admin.register(SocialToken, SocialTokenAdmin)
-badgr_admin.register(SocialAccount, SocialAccountAdmin)
+badgr_admin.register(SocialAccount, BadgrSocialAccountAdmin)
 
 badgr_admin.register(Site, SiteAdmin)
 badgr_admin.register(Group, GroupAdmin)

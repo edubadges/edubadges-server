@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from institution.models import Institution
 from institution.testfiles.helper import faculty_json, institution_json
 from mainsite.tests import BadgrTestCase
+from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 
 
 class InstitutionTest(BadgrTestCase):
@@ -69,25 +70,31 @@ class InstitutionModelsTest(BadgrTestCase):
     def test_faculty_uniqueness_constraints_when_archiving(self):
         """Checks if uniquness constraints on name dont trigger for archived Faculties"""
         teacher1 = self.setup_teacher(authenticate=True)
-        setup_faculty_kwargs = {'institution': teacher1.institution, 'name': 'The same'}
+        setup_faculty_kwargs = {'institution': teacher1.institution, 'name_english': 'The same'}
         faculty = self.setup_faculty(**setup_faculty_kwargs)
-        self.assertRaises(IntegrityError, self.setup_faculty, **setup_faculty_kwargs)
+        self.assertRaises(BadgrValidationFieldError, self.setup_faculty, **setup_faculty_kwargs)
         setup_faculty_kwargs['archived'] = True
         self.setup_faculty(**setup_faculty_kwargs)
         faculty.archive()
+
+    def test_institution_uniquenss_constraint(self):
+        setup_institution_kwargs = {'name_english': 'same'}
+        self.setup_institution(**setup_institution_kwargs)
+        self.assertRaises(BadgrValidationFieldError, self.setup_institution, **setup_institution_kwargs)
 
 
 class TestInstitutionSchema(BadgrTestCase):
 
     def test_institution_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        query = 'query foo {institutions {entityId grondslagFormeel grondslagInformeel identifier contentTypeId}}'
+        query = 'query foo {institutions {entityId grondslagFormeel grondslagInformeel identifier contentTypeId, defaultLanguage}}'
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['institutions'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['institutions'][0]['entityId']))
         self.assertTrue(bool(response['data']['institutions'][0]['grondslagFormeel']))
         self.assertTrue(bool(response['data']['institutions'][0]['grondslagInformeel']))
+        self.assertTrue(bool(response['data']['institutions'][0]['defaultLanguage']))
 
     def test_faculty_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)

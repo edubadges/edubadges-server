@@ -18,14 +18,14 @@ from rest_framework.exceptions import ErrorDetail
 
 from badgeuser.serializers import BadgeUserIdentifierField
 from institution.serializers import FacultySlugRelatedField
+from institution.models import Faculty
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
-from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.models import BadgrApp
 from mainsite.mixins import InternalValueErrorOverrideMixin
-from mainsite.serializers import HumanReadableBooleanField, StripTagsCharField, MarkdownCharField, \
-    OriginalJsonSerializerMixin, BaseSlugRelatedField
-from mainsite.utils import OriginSetting
+from mainsite.serializers import StripTagsCharField, MarkdownCharField, OriginalJsonSerializerMixin, BaseSlugRelatedField
+from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg
 from mainsite.validators import BadgeExtensionValidator
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
@@ -77,28 +77,42 @@ class ExtensionsSaverMixin(object):
             self.add_extensions(instance, add_these_extensions, extension_items)
 
 
-class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
-                       InternalValueErrorOverrideMixin, serializers.Serializer):
+class IssuerSerializer(OriginalJsonSerializerMixin,
+                       ExtensionsSaverMixin,
+                       InternalValueErrorOverrideMixin,
+                       serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
-    name = StripTagsCharField(max_length=1024)
+    name_english = StripTagsCharField(max_length=1024, required=False, allow_null=True, allow_blank=True)
+    name_dutch = StripTagsCharField(max_length=1024, required=False, allow_null=True, allow_blank=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
-    image = ValidImageField(required=False)
+    image_english = ValidImageField(required=False)
+    image_dutch = ValidImageField(required=False)
     email = serializers.EmailField(max_length=255, required=True)
-    description_english = StripTagsCharField(max_length=16384, required=False)
-    description_dutch = StripTagsCharField(max_length=16384, required=False)
-    url = serializers.URLField(max_length=1024, required=True)
+    description_english = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
+    description_dutch = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
+    url_english = serializers.URLField(max_length=1024, required=False, allow_null=True, allow_blank=True)
+    url_dutch = serializers.URLField(max_length=1024, required=False, allow_null=True, allow_blank=True)
     faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
 
-    class Meta:
-        apispec_definition = ('Issuer', {})
-
-    def validate_image(self, image):
-        if image is not None:
-            img_name, img_ext = os.path.splitext(image.name)
-            image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
+    def _validate_image(self, image):
+        img_name, img_ext = os.path.splitext(image.name)
+        image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
+        image = resize_image(image)
+        if verify_svg(image):
+            image = scrub_svg_image(image)
         return image
+
+    def validate_image_english(self, image_english):
+        if image_english is not None:
+            image_english = self._validate_image(image_english)
+        return image_english
+
+    def validate_image_dutch(self, image_dutch):
+        if image_dutch is not None:
+            image_dutch = self._validate_image(image_dutch)
+        return image_dutch
 
     def create(self, validated_data, **kwargs):
         user_permissions = validated_data['faculty'].get_permissions(validated_data['created_by'])
@@ -106,29 +120,21 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             new_issuer = Issuer(**validated_data)
             # set badgrapp
             new_issuer.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-            try:
-                new_issuer.save()
-            except IntegrityError:
-                raise BadgrValidationFieldError('name',
-                                                "There is already an Issuer with this name inside this Issuer group",
-                                                908)
+            new_issuer.save()
             return new_issuer
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
 
     def update(self, instance, validated_data):
-        if instance.assertions and instance.name != validated_data["name"]:
+        if instance.assertions and instance.name_english != validated_data["name_english"]:
+            raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
+        if instance.assertions and instance.name_dutch != validated_data["name_dutch"]:
             raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         self.save_extensions(validated_data, instance)
         if not instance.badgrapp_id:
             instance.badgrapp = BadgrApp.objects.get_current(self.context.get('request', None))
-        try:
-            instance.save()
-        except IntegrityError:
-            raise BadgrValidationFieldError('name',
-                                            "There is already an Issuer with this name inside this Issuer group",
-                                            908)
+        instance.save()
         return instance
 
     def to_representation(self, obj):
@@ -138,19 +144,36 @@ class IssuerSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         if self.context.get('embed_badgeclasses', False):
             representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True,
                                                                   context=self.context).data
-        if not representation['image']:
-            representation['image'] = obj.institution.image_url()
+        if not representation['image_english']:
+            representation['image_english'] = obj.institution.image_url()
+        if not representation['image_dutch']:
+            representation['image_dutch'] = obj.institution.image_url()
         return representation
 
     def to_internal_value_error_override(self, data):
-        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer excpetions when
-        data is internalised (i.e. the to_internal_value() method is called)"""
+        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions
+        before the instance is saved (i.e. the save() method is called)"""
         errors = OrderedDict()
-        if data.get('email', False):
-            try:
-                EmailValidator().__call__(data.get('email'))
-            except ValidationError:
-                e = OrderedDict([('email', [ErrorDetail('Enter a valid email address.', code=509)])])
+        institution = self.context['request'].user.institution
+        if institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
+            if not data.get('name_dutch', False):
+                e = OrderedDict([('name_dutch', [ErrorDetail('Dutch name is required', code=912)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('description_dutch', False):
+                e = OrderedDict([('description_dutch', [ErrorDetail('Dutch description is required', code=913)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('url_dutch', False):
+                e = OrderedDict([('url_dutch', [ErrorDetail('Dutch url is required', code=915)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+        if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
+            if not data.get('name_english', False):
+                e = OrderedDict([('name_english', [ErrorDetail('English name is required', code=924)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('description_english', False):
+                e = OrderedDict([('description_english', [ErrorDetail('English description is required', code=925)])])
+                errors = OrderedDict(chain(errors.items(), e.items()))
+            if not data.get('url_english', False):
+                e = OrderedDict([('url_english', [ErrorDetail('English url is required', code=923)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
@@ -211,6 +234,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         if image is not None:
             img_name, img_ext = os.path.splitext(image.name)
             image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
+            image = resize_image(image)
+            if verify_svg(image):
+                image = scrub_svg_image(image)
         return image
 
     def validate_criteria_text(self, criteria_text):
@@ -264,6 +290,15 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                                             911)
         return instance
 
+    def validate_alignments(self, alignments):
+        alignment_max = 8
+        if alignments.__len__() >= alignment_max:
+            raise BadgrValidationFieldError('alignments',
+                                            "There are too many Related educational framework objects, the maximum is {}.".format(str(alignment_max),
+                                            922)
+            )
+        return alignments
+
     def to_internal_value_error_override(self, data):
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer excpetions when
         data is internalised (i.e. the to_internal_value() method is called)"""
@@ -303,6 +338,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
 class EvidenceItemSerializer(serializers.Serializer):
     evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
     narrative = MarkdownCharField(required=False, allow_blank=True)
+    name = serializers.CharField(max_length=255, required=False)
+    description = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
 
     def validate(self, attrs):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):

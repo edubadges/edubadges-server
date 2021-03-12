@@ -191,7 +191,9 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                 for evidence_obj in evidence:
                     BadgeInstanceEvidence.objects.create(badgeinstance=new_instance,
                                                          evidence_url=evidence_obj.get('evidence_url'),
-                                                         narrative=evidence_obj.get('narrative'))
+                                                         narrative=evidence_obj.get('narrative'),
+                                                         name=evidence_obj.get('name'),
+                                                         description=evidence_obj.get('description'))
             if extensions is not None:
                 for name, ext in list(extensions.items()):
                     new_instance.badgeinstanceextension_set.create(
@@ -209,6 +211,8 @@ class BadgeInstanceEvidenceManager(models.Manager):
             badgeinstance=badgeinstance,
             evidence_url=evidence_obo.get('id', None),
             narrative=evidence_obo.get('narrative', None),
+            name=evidence_obo.get('name', None),
+            description=evidence_obo.get('description', None),
             original_json=json.dumps(evidence_obo)
         )
 

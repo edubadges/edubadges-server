@@ -7,6 +7,7 @@ import hashlib
 import io
 import os
 import re
+import requests
 import tempfile
 import urllib.parse
 import uuid
@@ -14,12 +15,14 @@ import webbrowser
 from io import BytesIO
 from PIL import Image
 from premailer import transform
+from resizeimage.resizeimage import resize_contain
 from xml.etree import cElementTree as ET
 
-import requests
 from django.conf import settings
 from django.contrib.staticfiles import finders
-from django.core.files.storage import DefaultStorage
+from django.core.exceptions import ValidationError
+from django.core.files.storage import DefaultStorage, default_storage
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core import mail
 from django.template.loader import render_to_string
 from django.urls import get_callable, reverse
@@ -118,6 +121,7 @@ def first_node_match(graph, condition):
     for node in graph:
         if all(item in list(node.items()) for item in list(condition.items())):
             return node
+
 
 def list_of(value):
     if value is None:
@@ -256,3 +260,72 @@ def admin_list_linkify(field_name, label_param=None):
 
     _linkify.short_description = field_name  # Sets column name
     return _linkify
+
+
+def generate_image_url(image):
+    if image.name:
+        if getattr(settings, 'MEDIA_URL').startswith('http'):
+            return default_storage.url(image.name)
+        else:
+            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(image.name)
+
+
+
+def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
+    pixels = image.size[0] * image.size[1]
+    return pixels > max_pixels
+
+
+
+def resize_image(uploaded_image):
+    try:
+        f = open(uploaded_image.name, 'rb')
+        image = Image.open(f)
+        if _decompression_bomb_check(image):
+            raise ValidationError("Invalid image")
+    except IOError as e:
+        return uploaded_image
+    if image.format == 'PNG':
+        max_square = getattr(settings, 'IMAGE_FIELD_MAX_PX', 400)
+        smaller_than_canvas = (image.width < max_square and image.height < max_square)
+        if smaller_than_canvas:
+            max_square = (image.width
+                          if image.width > image.height
+                          else image.height)
+        new_image = resize_contain(image, (max_square, max_square))
+        byte_string = io.BytesIO()
+        new_image.save(byte_string, 'PNG')
+        return InMemoryUploadedFile(byte_string, None,
+                                    uploaded_image.name, 'image/png',
+                                    byte_string.getvalue().__len__(), None)
+
+def scrub_svg_image(uploaded_image):
+    MALICIOUS_SVG_TAGS = [
+        "script"
+    ]
+    MALICIOUS_SVG_ATTRIBUTES = [
+        "onload"
+    ]
+    SVG_NAMESPACE = "http://www.w3.org/2000/svg"
+    uploaded_image.file.seek(0)
+    ET.register_namespace("", SVG_NAMESPACE)
+    tree = ET.parse(uploaded_image.file)
+    root = tree.getroot()
+
+    # strip malicious tags
+    elements_to_strip = []
+    for tag_name in MALICIOUS_SVG_TAGS:
+        elements_to_strip.extend(root.findall('{{{ns}}}{tag}'.format(ns=SVG_NAMESPACE, tag=tag_name)))
+    for e in elements_to_strip:
+        root.remove(e)
+
+    # strip malicious attributes
+    for el in tree.iter():
+        for attrib_name in MALICIOUS_SVG_ATTRIBUTES:
+            if attrib_name in el.attrib:
+                del el.attrib[attrib_name]
+
+    # write out scrubbed svg
+    buf = io.BytesIO()
+    tree.write(buf)
+    return InMemoryUploadedFile(buf, 'image', uploaded_image.name, 'image/svg+xml', buf.getbuffer().nbytes, 'utf8')

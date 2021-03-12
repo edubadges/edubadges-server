@@ -1,16 +1,20 @@
-from collections import OrderedDict
 import cachemodel
-from django.db import models, IntegrityError
+from collections import OrderedDict
+from django.db import models
+from django.db.models import Q
 from django.urls import reverse
+
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
+from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.models import BaseAuditedModel, ArchiveMixin
-from mainsite.mixins import ImageUrlGetterMixin
+from mainsite.mixins import ImageUrlGetterMixin, DefaultLanguageMixin
 from mainsite.utils import OriginSetting
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
 
 
-class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
+class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
+                  ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
     
     def __str__(self):
         return self.name
@@ -18,11 +22,13 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
     DUTCH_NAME = "instelling"
 
     identifier = models.CharField(max_length=255, unique=True, null=True, help_text="This is the schac_home, must be set when creating")
-    name = models.CharField(max_length=255, unique=True, help_text="Must be set when creating")
+    name_english = models.CharField(max_length=255, blank=True, null=True, default=None)
+    name_dutch = models.CharField(max_length=255, blank=True, null=True, default=None)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff", related_name='+')
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
-    image = models.FileField(upload_to='uploads/institution', blank=True, null=True)
+    image_english = models.FileField(upload_to='uploads/institution', blank=True, null=True)
+    image_dutch = models.FileField(upload_to='uploads/institution', blank=True, null=True)
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
     brin = models.CharField(max_length=254, blank=True, null=True, default=None)
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
@@ -46,6 +52,13 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
         (TYPE_MBO, 'MBO'),
     )
     institution_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
+    DEFAULT_LANGUAGE_DUTCH = "nl-NL"
+    DEFAULT_LANGUAGE_ENGLISH = "en-US"
+    DEFAULT_LANGUAGE_CHOICES = (
+        (DEFAULT_LANGUAGE_DUTCH, "nl-NL"),
+        (DEFAULT_LANGUAGE_ENGLISH, "en-US")
+    )
+    default_language = models.CharField(max_length=254, choices=DEFAULT_LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE_DUTCH)
 
     def get_report(self):
         total_assertions_formal = 0
@@ -77,11 +90,61 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
                 'total_assertions_revoked': total_assertions_revoked}
 
     @property
+    def name(self):
+        return self.return_value_according_to_language(self.name_english, self.name_dutch)
+
+    @property
+    def image(self):
+        return self.return_value_according_to_language(self.image_english, self.image_dutch)
+
+    @property
+    def description(self):
+        return self.return_value_according_to_language(self.description_english, self.description_dutch)
+
+    @property
     def children(self):
         return self.cached_faculties()
 
     def get_faculties(self, user, permissions):
         return [fac for fac in self.cached_faculties() if fac.has_permissions(user, permissions)]
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        return super(Institution, self).save(*args, **kwargs)
+
+    def validate_unique(self, exclude=None):
+        if self.name_dutch and self.name_english:
+            query = Q(name_english=self.name_english) | Q(name_dutch=self.name_dutch)
+        elif self.name_english:
+            query = Q(name_english=self.name_english)
+        elif self.name_dutch:
+            query = Q(name_english=self.name_english)
+        else:
+            raise BadgrValidationMultipleFieldError([
+                ['name_english', 'Either Dutch or English name is required', 913],
+                ['name_dutch', 'Either Dutch or English name is required', 913]
+            ])
+        institution_same_name = self.__class__.objects.filter(query).exclude(pk=self.pk).first()
+        if institution_same_name:
+            name_english_the_same = institution_same_name.name_english == self.name_english and bool(
+                institution_same_name.name_english)
+            name_dutch_the_same = institution_same_name.name_dutch == self.name_dutch and bool(institution_same_name.name_dutch)
+            both_the_same = name_english_the_same and name_dutch_the_same
+            if both_the_same:
+                raise BadgrValidationMultipleFieldError([
+                    ['name_english', "There is already an institution with this English name inside this Issuer group", 920],
+                    ['name_dutch', "There is already an institution with this Dutch name inside this Issuer group", 919]
+                ])
+            elif name_dutch_the_same:
+                raise BadgrValidationFieldError('name_dutch',
+                                                "There is already an institution with this Dutch name inside this Issuer group",
+                                                919)
+            elif name_english_the_same:
+                raise BadgrValidationFieldError('name_english',
+                                                "There is already an institution with this English name inside this Issuer group",
+                                                920)
+        return super(Institution, self).validate_unique(exclude=exclude)
+
 
     @property
     def assertions(self):
@@ -147,7 +210,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin, ImageUrl
 
 
 class Faculty(EntityUserProvisionmentMixin,
-              ArchiveMixin,
+              ArchiveMixin, DefaultLanguageMixin,
               PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
     def __str__(self):
@@ -160,11 +223,20 @@ class Faculty(EntityUserProvisionmentMixin,
         verbose_name_plural = 'faculties'
 
     DUTCH_NAME = "issuer group"
-    name = models.CharField(max_length=512)
+    name_dutch = models.CharField(max_length=512, null=True)
+    name_english = models.CharField(max_length=512, null=True)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
+
+    @property
+    def name(self):
+        return self.return_value_according_to_language(self.name_english, self.name_dutch)
+
+    @property
+    def description(self):
+        return self.return_value_according_to_language(self.description_english, self.description_dutch)
 
     def get_report(self):
         total_assertions_formal = 0
@@ -193,15 +265,43 @@ class Faculty(EntityUserProvisionmentMixin,
                 'total_assertions_informal': total_assertions_informal,
                 'total_assertions_revoked': total_assertions_revoked}
 
-
     def validate_unique(self, exclude=None):
         if not self.archived:
-            if self.__class__.objects\
-                    .filter(name=self.name, institution=self.institution, archived=False)\
-                    .exclude(pk=self.pk)\
-                    .exists():
-                raise IntegrityError("Faculty with this name already exists in the same institution.")
-        super(Faculty, self).validate_unique(exclude=exclude)
+            if not self.archived:
+                if self.name_dutch and self.name_english:
+                    query = Q(name_english=self.name_english) | Q(name_dutch=self.name_dutch)
+                elif self.name_english:
+                    query = Q(name_english=self.name_english)
+                elif self.name_dutch:
+                    query = Q(name_english=self.name_english)
+                else:
+                    raise BadgrValidationMultipleFieldError([
+                        ['name_english', 'Either Dutch or English name is required', 913],
+                        ['name_dutch', 'Either Dutch or English name is required', 913]
+                    ])
+                faculty_same_name = self.__class__.objects \
+                    .filter(query,
+                            institution=self.institution,
+                            archived=False) \
+                    .exclude(pk=self.pk).first()
+                if faculty_same_name:
+                    name_english_the_same = faculty_same_name.name_english == self.name_english and bool(faculty_same_name.name_english)
+                    name_dutch_the_same = faculty_same_name.name_dutch == self.name_dutch and bool(faculty_same_name.name_dutch)
+                    both_the_same = name_english_the_same and name_dutch_the_same
+                    if both_the_same:
+                        raise BadgrValidationMultipleFieldError([
+                            ['name_english', "There is already a Faculty with this English name inside this institution", 917],
+                            ['name_dutch', "There is already a Faculty with this Dutch name inside this institution", 916]
+                        ])
+                    elif name_dutch_the_same:
+                        raise BadgrValidationFieldError('name_dutch',
+                                                        "There is already a Faculty with this Dutch name inside this institution",
+                                                        916)
+                    elif name_english_the_same:
+                        raise BadgrValidationFieldError('name_english',
+                                                        "There is already a Faculty with this English name inside this institution",
+                                                        917)
+        return super(Faculty, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
         self.validate_unique()

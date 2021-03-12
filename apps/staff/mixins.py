@@ -182,3 +182,18 @@ class PermissionedModelMixin(object):
             except AttributeError:  # no parent
                 pass
         return ret
+
+    def return_value_according_to_language(self, attribute_english, attribute_dutch):
+        """Convenience function that returns the right attribute according to the
+        language selection of its parent institution"""
+        if self.__class__.__name__ == 'Institution':
+            institution = self
+        else:
+            institution = self.institution
+        if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
+            if attribute_english:
+                return attribute_english
+        elif institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
+            if attribute_dutch:
+                return attribute_dutch
+        return attribute_english if attribute_english else attribute_dutch
