@@ -263,7 +263,7 @@ students = [
     {
         "username": "sarah",
         "first_name": "Sarah",
-        "last_name": "Doe",
+        "last_name": "Weirdćharacter",
         "email": REVOKED_STUDENT_EMAIL,
         "uid": "7fc994786c9e7815da17f5e97f796f67e891509e"
     },
