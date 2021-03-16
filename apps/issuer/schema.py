@@ -210,6 +210,7 @@ class Query(object):
     badge_class = graphene.Field(BadgeClassType, id=graphene.String())
     badge_instance = graphene.Field(BadgeInstanceType, id=graphene.String())
     badge_instances_count = graphene.Int()
+    badge_classes_count = graphene.Int()
 
     def resolve_issuers(self, info, **kwargs):
         return [issuer for issuer in Issuer.objects.filter(archived=False)
@@ -255,3 +256,8 @@ class Query(object):
 
     def resolve_badge_instances_count(self, info):
         return BadgeInstance.objects.count()
+
+    def resolve_badge_classes_count(self, info):
+        return BadgeClass.objects.count()
+
+
