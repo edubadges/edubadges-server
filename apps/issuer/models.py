@@ -339,6 +339,8 @@ class Issuer(EntityUserProvisionmentMixin,
         json.update(OrderedDict(
             type='Issuer',
             name=self.name,
+            name_english=self.name_english,
+            name_dutch=self.name_dutch,
             url=self.url,
             email=self.email,
             description_english=self.description_english,
@@ -398,8 +400,9 @@ class Issuer(EntityUserProvisionmentMixin,
                 raise ValueError('issuer is not assigned to a faculty')
             if not self.faculty.institution:
                 raise ValueError('issuer is not assigned to an institution')
-            # TODO - can we add language specifics here?
             json['faculty'] = {'name': self.faculty.name,
+                               'name_english': self.faculty.name_english,
+                               'name_dutch': self.faculty.name_dutch,
                                'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
 
         # pass through imported json
