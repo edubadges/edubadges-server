@@ -335,14 +335,17 @@ class Issuer(EntityUserProvisionmentMixin,
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
-        # TODO - can we add language specifics here?
+        # For spec compliance we also need the non-language properties
         json.update(OrderedDict(
             type='Issuer',
             name=self.name,
             name_english=self.name_english,
             name_dutch=self.name_dutch,
             url=self.url,
+            url_english=self.url_english,
+            url_dutch=self.url_dutch,
             email=self.email,
+            description=self.description,
             description_english=self.description_english,
             description_dutch=self.description_dutch,
         ))
@@ -354,6 +357,10 @@ class Issuer(EntityUserProvisionmentMixin,
         if self.image:
             image_url = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
             json['image'] = image_url
+            if self.image_english:
+                json['image_english'] = f"{image_url}?lang=en"
+            if self.image_dutch:
+                json['image_dutch'] = f"{image_url}?lang=nl"
             if self.original_json:
                 image_info = self.get_original_json().get('image', None)
                 if isinstance(image_info, dict):
