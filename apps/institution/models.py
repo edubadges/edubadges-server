@@ -197,7 +197,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
         json = OrderedDict()
 
         image_url = OriginSetting.HTTP + reverse('institution_image', kwargs={'entity_id': self.entity_id})
-
+        # For spec compliance we also need the non-language properties
         json.update(OrderedDict(
             type='Institution',
             name=self.name,
@@ -208,8 +208,11 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
             description_english=self.description_english,
             description_dutch=self.description_dutch,
             image=image_url,
-
         ))
+        if self.image_english:
+            json['image_english'] = f"{image_url}?lang=en"
+        if self.image_dutch:
+            json['image_dutch'] = f"{image_url}?lang=nl"
         return json
 
 

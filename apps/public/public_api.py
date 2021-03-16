@@ -201,6 +201,12 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         image_prop = getattr(current_object, self.prop)
         if not bool(image_prop):
             return Response(status=status.HTTP_404_NOT_FOUND)
+        lang = request.query_params.get("lang")
+        if lang:
+            if lang == "en" and hasattr(current_object, self.prop_en):
+                image_prop = getattr(current_object, self.prop_en)
+            if lang == "nl" and hasattr(current_object, self.prop_nl):
+                image_prop = getattr(current_object, self.prop_nl)
 
         image_type = request.query_params.get('type', 'original')
         if image_type not in ['original', 'png']:
@@ -286,6 +292,8 @@ class InstitutionJson(JSONComponentView):
 class InstitutionImage(ImagePropertyDetailView):
     model = Institution
     prop = 'image'
+    prop_en = 'image_english'
+    prop_nl = 'image_dutch'
 
     def log(self, obj):
         logger.event(badgrlog.InstitutionImageRetrievedEvent(obj, self.request))
@@ -355,6 +363,8 @@ class IssuerBadgesJson(JSONComponentView):
 class IssuerImage(ImagePropertyDetailView):
     model = Issuer
     prop = 'image'
+    prop_en = 'image_english'
+    prop_nl = 'image_dutch'
 
     def log(self, obj):
         logger.event(badgrlog.IssuerImageRetrievedEvent(obj, self.request))
