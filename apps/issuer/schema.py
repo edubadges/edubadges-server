@@ -1,5 +1,6 @@
 import graphene
-from graphene_django.types import DjangoObjectType
+from graphene.relay import ConnectionField
+from graphene_django.types import DjangoObjectType, Connection
 
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
@@ -148,6 +149,12 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         return self.cached_evidence()
 
 
+class BadgeInstanceConnection(Connection):
+
+    class Meta:
+        node = BadgeInstanceType
+
+
 class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
                      UserProvisionmentResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                      DefaultLanguageResolverMixin, DjangoObjectType):
@@ -165,11 +172,15 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     enrollments = graphene.List(StudentsEnrolledType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(BadgeInstanceType)
+    assertions_paginated = ConnectionField(BadgeInstanceConnection)
     expiration_period = graphene.Int()
     assertions_count = graphene.Int()
     is_private = graphene.Boolean()
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
+
+    def resolve_assertions_paginated(self, info, **kwargs):
+        return self.assertions
 
     def resolve_terms(self, info, **kwargs):
         return self._get_terms()
