@@ -271,6 +271,20 @@ class Issuer(EntityUserProvisionmentMixin,
     def cached_badgeclasses(self):
         return list(self.badgeclasses.filter(archived=False))
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_assertions(self):
+        r = []
+        for bc in self.cached_badgeclasses():
+            r += bc.cached_assertions()
+        return r
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_pending_enrollments(self):
+        r = []
+        for bc in self.cached_badgeclasses():
+            r += bc.cached_pending_enrollments()
+        return r
+
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
 

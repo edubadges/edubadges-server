@@ -347,6 +347,13 @@ class Faculty(EntityUserProvisionmentMixin,
         return list(self.issuer_set.filter(archived=False))
 
     @cachemodel.cached_method(auto_publish=True)
+    def cached_pending_enrollments(self):
+        r = []
+        for issuer in self.cached_issuers():
+            r += issuer.cached_pending_enrollments()
+        return r
+
+    @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         r = []
         for issuer in self.cached_issuers():

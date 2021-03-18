@@ -17,6 +17,8 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
                   'content_type_id')
 
     issuers = graphene.List(IssuerType)
+    issuer_count = graphene.Int()
+    pending_enrollment_count = graphene.Int()
     public_issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
     name = graphene.String()
@@ -27,6 +29,12 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
 
     def resolve_issuers(self, info):
         return self.get_issuers(info.context.user, ['may_read'])
+
+    def resolve_issuer_count(self, info):
+        return self.get_issuers(info.context.user, ['may_read']).__len__()
+
+    def resolve_pending_enrollment_count(self, info):
+        return self.cached_pending_enrollments().__len__()
 
     def resolve_public_issuers(self, info):
         return self.cached_issuers()

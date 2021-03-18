@@ -73,7 +73,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     class Meta:
         model = Issuer
         fields = ('entity_id',
-                  'badgeclasses', 'faculty', 'badgeclasses_count',
+                  'badgeclasses', 'faculty',
                   'name_english', 'name_dutch',
                   'image_dutch', 'image_english',
                   'url_english', 'url_dutch',
@@ -82,7 +82,9 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
 
     staff = graphene.List(IssuerStaffType)
     public_badgeclasses = graphene.List(badge_class_type)
-    badgeclasses_count = graphene.Int()
+    assertion_count = graphene.Int()
+    badgeclass_count = graphene.Int()
+    pending_enrollment_count = graphene.Int()
     extensions = graphene.List(IssuerExtensionType)
     public_url = graphene.String()
     name = graphene.String()
@@ -108,14 +110,23 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     def resolve_description(self, info):
         return self.description
 
+    def resolve_assertion_count(self, info):
+        return self.cached_assertions().__len__()
+
     def resolve_badgeclasses(self, info):
         return self.get_badgeclasses(info.context.user, ['may_read'])
+
+    def resolve_badgeclass_count(self, info):
+        return self.get_badgeclasses(info.context.user, ['may_read']).__len__()
 
     def resolve_public_badgeclasses(self, info):
         return [bc for bc in self.cached_badgeclasses() if not bc.is_private]
 
     def resolve_badgeclasses_count(self, info):
         return self.badgeclasses_count
+
+    def resolve_pending_enrollment_count(self, info):
+        return self.cached_pending_enrollments().__len__()
 
 
 def badge_user_type():
