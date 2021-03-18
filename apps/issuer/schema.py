@@ -173,14 +173,13 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     pending_enrollments = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(BadgeInstanceType)
     assertions_paginated = ConnectionField(BadgeInstanceConnection)
+    assertion_count = graphene.Int()
+    pending_enrollment_count = graphene.Int()
     expiration_period = graphene.Int()
     assertions_count = graphene.Int()
     is_private = graphene.Boolean()
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
-
-    def resolve_assertions_paginated(self, info, **kwargs):
-        return self.assertions
 
     def resolve_terms(self, info, **kwargs):
         return self._get_terms()
@@ -200,8 +199,20 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         return self.cached_pending_enrollments()
 
     @resolver_blocker_for_students
+    def resolve_pending_enrollment_count(self, info, **kwargs):
+        return self.cached_pending_enrollments().__len__()
+
+    @resolver_blocker_for_students
     def resolve_badge_assertions(self, info, **kwargs):
         return self.assertions
+
+    @resolver_blocker_for_students
+    def resolve_assertions_paginated(self, info, **kwargs):
+        return self.assertions
+
+    @resolver_blocker_for_students
+    def resolve_assertion_count(self, info, **kwargs):
+        return self.assertions.__len__()
 
     def resolve_expiration_period(self, info, **kwargs):
         if self.expiration_period:
