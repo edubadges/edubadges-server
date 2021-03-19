@@ -3,7 +3,7 @@ Django==2.2.14
 semver==2.6.0
 pytz==2017.2
 # PIL support
-Pillow==7.1.0
+Pillow==8.1.1
 python-dateutil==2.6.1
 
 # reporting
