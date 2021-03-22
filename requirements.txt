@@ -31,7 +31,7 @@ django-object-actions==2.0.0
 
 python-memcached==1.59
 
-djangorestframework==3.9.1
+djangorestframework==3.11.2
 
 # Django Allauth
 django-allauth==0.37.1
