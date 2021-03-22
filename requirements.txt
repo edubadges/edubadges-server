@@ -1,9 +1,9 @@
 # Django stuff
-Django==2.2.14
+Django==2.2.18
 semver==2.6.0
 pytz==2017.2
 # PIL support
-Pillow==7.1.0
+Pillow==8.1.1
 python-dateutil==2.6.1
 
 # reporting
@@ -31,7 +31,7 @@ django-object-actions==2.0.0
 
 python-memcached==1.59
 
-djangorestframework==3.9.1
+djangorestframework==3.11.2
 
 # Django Allauth
 django-allauth==0.37.1
