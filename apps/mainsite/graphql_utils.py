@@ -11,11 +11,11 @@ from staff.schema import PermissionType
 
 def resolver_blocker_for_students(f):
     """Decorator to block students from using graphql resolver functions"""
-    def wrapper(*args):
+    def wrapper(*args, **kwargs):
         info = args[1]
         if info.context.user.is_student:
             raise GraphQLException('Student may not retrieve {} of {}'.format(info.field_name, info.parent_type))
-        return f(*args)
+        return f(*args, **kwargs)
     return wrapper
 
 
