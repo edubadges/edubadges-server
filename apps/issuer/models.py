@@ -141,7 +141,7 @@ class Issuer(EntityUserProvisionmentMixin,
     old_json = JSONField()
     objects = IssuerManager()
     cached = cachemodel.CacheModelManager()
-    faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    faculty = models.ForeignKey('institution.Faculty', on_delete=models.CASCADE, blank=False, null=False)
 
     @property
     def description(self):
