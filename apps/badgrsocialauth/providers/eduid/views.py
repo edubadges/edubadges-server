@@ -70,6 +70,7 @@ def login(request):
         lti_roles = lti_data['lti_roles']
     state = json.dumps([referer, badgr_app_pk, lti_context_id, lti_user_id, lti_roles])
 
+    # TODO add  eduid.nl/eppn to the scope
     params = {
         "state": state,
         "client_id": current_app.client_id,
@@ -123,6 +124,7 @@ def callback(request):
 
     token_json = response.json()
     id_token = token_json['id_token']
+    access_token = token_json['access_token']
     payload = jwt.get_unverified_claims(id_token)
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
@@ -130,6 +132,7 @@ def callback(request):
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
 
     keyword_arguments = {'id_token': id_token,
+                         'access_token': access_token,
                          'provider': "eduid",
                          "eduperson_scoped_affiliation": payload.get('eduperson_scoped_affiliation', []),
                          'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
@@ -196,6 +199,7 @@ def after_terms_agreement(request, **kwargs):
 
     if "acr" in payload and payload["acr"] == "https://eduid.nl/trust/validate-names":
         request.user.validated_name = f"{payload['given_name']} {payload['family_name']}"
+        # TODO use the access_token to call the eduID API and retrieve the EPPN
         request.user.save()
         logger.info(f"Stored validated name {payload['given_name']} {payload['family_name']}")
 
