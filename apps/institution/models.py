@@ -31,6 +31,8 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     image_dutch = models.FileField(upload_to='uploads/institution', blank=True, null=True)
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
     brin = models.CharField(max_length=254, blank=True, null=True, default=None)
+    direct_awarding_enabled = models.BooleanField(default=False)
+
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
     GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
     GRONDSLAG_WETTELIJKE_VERPLICHTING = 'wettelijke_verplichting'

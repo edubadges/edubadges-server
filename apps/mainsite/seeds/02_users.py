@@ -43,6 +43,7 @@ for ins in institutions:
                                                        image_english="uploads/institution/surf.png",
                                                        image_dutch="uploads/institution/surf.png",
                                                        grading_table="https://url.to.gradingtable/gradingtable.html",
+                                                       direct_awarding_enabled=True,
                                                        brin="000-7777-11111")
     add_terms_institution(institution)
 
