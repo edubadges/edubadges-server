@@ -154,10 +154,12 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         if self.entity:
             self.entity.remove_cached_data(['cached_userprovisionments'])
 
-    def save(self, *args, **kwargs):
+    def save(self, send_email=False, *args, **kwargs):
         self._run_validations()
         self._remove_cache()
-        return super(UserProvisionment, self).save(*args, **kwargs)
+        super(UserProvisionment, self).save(*args, **kwargs)
+        if send_email:
+            self.send_email()
 
     def delete(self, *args, **kwargs):
         self._remove_cache()
