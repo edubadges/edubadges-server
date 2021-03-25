@@ -48,7 +48,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
                                      created_by=self.created_by,
                                      acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
                                      recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-                                     send_email=False)
+                                     send_email=False,
+                                     award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD)
 
     def reject(self):
         self.acceptance = self.ACCEPTANCE_REJECTED

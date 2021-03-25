@@ -152,7 +152,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         fields = ('entity_id', 'badgeclass', 'identifier', 'image', 'updated_at',
                   'recipient_identifier', 'recipient_type', 'revoked', 'issued_on',
                   'revocation_reason', 'expires_at', 'acceptance', 'created_at',
-                  'public')
+                  'public', 'award_type')
 
     def resolve_validation(self, info, **kwargs):
         return self.validate()
@@ -193,8 +193,6 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     is_private = graphene.Boolean()
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
-
-
 
     def resolve_terms(self, info, **kwargs):
         return self._get_terms()
