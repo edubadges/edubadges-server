@@ -697,7 +697,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
         return self.badgeclassextension_set
 
     def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, send_email=True,
-              enforce_validated_name=True, include_evidence=True, notify_recipient=True, **kwargs):
+              enforce_validated_name=True, include_evidence=True, **kwargs):
         if not recipient.validated_name and enforce_validated_name:
             raise serializers.ValidationError('You need a validated_name from an Institution to issue badges.')
         assertion = BadgeInstance.objects.create(
@@ -706,10 +706,9 @@ class BadgeClass(EntityUserProvisionmentMixin,
             user=recipient, extensions=extensions,
             **kwargs
         )
-        if notify_recipient:
-            message = EmailMessageMaker.create_earned_badge_mail(assertion)
-            if send_email:
-                recipient.email_user(subject='Congratulations, you earned an edubadge!', html_message=message)
+        message = EmailMessageMaker.create_earned_badge_mail(assertion)
+        if send_email:
+            recipient.email_user(subject='Congratulations, you earned an edubadge!', html_message=message)
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):

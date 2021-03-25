@@ -143,6 +143,22 @@ def open_mail_in_browser(html):
 class EmailMessageMaker:
 
     @staticmethod
+    def _create_example_image(badgeclass):
+        background = Image.open(badgeclass.image.path).convert("RGBA")
+        overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
+        if overlay.width != background.width:
+            width_ratio = background.width/overlay.width
+            new_background_height = background.height*width_ratio
+            new_background_size = (overlay.width, new_background_height)
+            background.thumbnail((new_background_size), Image.ANTIALIAS)
+        position = (0, background.height//4)
+        background.paste(overlay, position, overlay)
+        buffered = BytesIO()
+        background.save(buffered, format="PNG")
+        encoded_string = base64.b64encode(buffered.getvalue()).decode()
+        return 'data:image/png;base64,{}'.format(encoded_string)
+
+    @staticmethod
     def create_enrollment_denied_email(enrollment):
         template = 'email/enrollment_denied.html'
         email_vars = {'public_badge_url': enrollment.badge_class.public_url,
@@ -200,23 +216,28 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
+    def create_direct_award_student_mail(direct_award):
+        badgeclass = direct_award.badgeclass
+        template = 'email/earned_direct_award.html'
+        badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
+        email_vars = {
+            'badgeclass_image': badgeclass_image,
+            'issuer_image': badgeclass.issuer.image_url(),
+            'issuer_name': badgeclass.issuer.name,
+            'faculty_name': badgeclass.issuer.faculty.name,
+            'ui_url': settings.UI_URL,
+            'badgeclass_description': badgeclass.description,
+            'badgeclass_name': badgeclass.name,
+        }
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_earned_badge_mail(assertion):
         badgeclass = assertion.badgeclass
         template = 'email/earned_badge.html'
-        background = Image.open(badgeclass.image.path).convert("RGBA")
-        overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
-        if overlay.width != background.width:
-            width_ratio = background.width/overlay.width
-            new_background_height = background.height*width_ratio
-            new_background_size = (overlay.width, new_background_height)
-            background.thumbnail((new_background_size), Image.ANTIALIAS)
-        position = (0, background.height//4)
-        background.paste(overlay, position, overlay)
-        buffered = BytesIO()
-        background.save(buffered, format="PNG")
-        encoded_string = base64.b64encode(buffered.getvalue()).decode()
+        badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
         email_vars = {
-            'badgeclass_image': 'data:image/png;base64,{}'.format(encoded_string),
+            'badgeclass_image': badgeclass_image,
             'issuer_image': badgeclass.issuer.image_url(),
             'issuer_name': badgeclass.issuer.name,
             'faculty_name': badgeclass.issuer.faculty.name,

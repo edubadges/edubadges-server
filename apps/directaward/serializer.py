@@ -17,7 +17,9 @@ class DirectAwardSerializer(serializers.Serializer):
     def create(self, validated_data):
         user_permissions = validated_data['badgeclass'].get_permissions(validated_data['created_by'])
         if user_permissions['may_create']:
-            return DirectAward.objects.create(**validated_data)
+            direct_award = DirectAward.objects.create(**validated_data)
+            direct_award.notify_recipient()
+            return direct_award
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
 
