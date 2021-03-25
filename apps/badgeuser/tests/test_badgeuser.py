@@ -456,7 +456,24 @@ class BadgeuserGraphqlTest(BadgrTestCase):
                 'contentType {id}' \
                 '}}}'
         response = self.graphene_post(new_teacher, query)
-        self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
+       self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
+
+    def test_current_student(self):
+        teacher1 = self.setup_teacher(authenticate=False)
+        student = self.setup_student(authenticate=True,
+                                     affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        student.add_affiliations([{'eppn': 'some_eppn', 'schac_home': 'some_home'}])
+        self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass, eppn='some_eppn')
+        query = 'query foo {currentUser {' \
+                'entityId ' \
+                'directAwards {' \
+                    'entityId ' \
+                '}}}'
+        response = self.graphene_post(student, query)
+        self.assertTrue(bool(response['data']['currentUser']['directAwards'][0]['entityId']))
 
     def test_userprovisionment_exposed_in_entities(self):
         teacher1 = self.setup_teacher(authenticate=True)

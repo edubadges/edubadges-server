@@ -2,11 +2,12 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
+from directaward.schema import DirectAwardType
 from institution.schema import InstitutionType
+from lti_edu.schema import StudentsEnrolledType
+from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
 from mainsite.exceptions import GraphQLException
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
-from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
-from lti_edu.schema import StudentsEnrolledType
 
 
 class TermsUrlType(DjangoObjectType):
@@ -43,6 +44,7 @@ class BadgeUserType(DjangoObjectType):
         model = BadgeUser
         fields = ('first_name', 'last_name', 'email', 'date_joined', 'entity_id', 'userprovisionments', 'validated_name')
 
+    direct_awards = graphene.List(DirectAwardType)
     institution = graphene.Field(InstitutionType)
     institution_staff = graphene.Field(InstitutionStaffType)
     faculty_staffs = graphene.List(FacultyStaffType)
@@ -63,6 +65,10 @@ class BadgeUserType(DjangoObjectType):
 
     def resolve_badgeclass_staffs(self, info):
         return self.cached_badgeclass_staffs()
+
+    @resolver_blocker_only_for_current_user
+    def resolve_direct_awards(self, info):
+        return self.direct_awards
 
     @resolver_blocker_only_for_current_user
     def resolve_userprovisionments(self, info):

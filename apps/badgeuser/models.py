@@ -21,6 +21,7 @@ from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
+from directaward.models import DirectAward
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
@@ -595,6 +596,10 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     @property
     def eppns(self):
         return [aff.eppn for aff in self.cached_affiliations()]
+
+    @property
+    def direct_awards(self):
+        return DirectAward.objects.filter(eppn__in=self.eppns)
 
     def match_provisionments(self):
         """Used to match provisions on initial login"""
