@@ -598,6 +598,10 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         return [aff.eppn for aff in self.cached_affiliations()]
 
     @property
+    def schac_homes(self):
+        return [aff.schac_home for aff in self.cached_affiliations()]
+
+    @property
     def direct_awards(self):
         return DirectAward.objects.filter(eppn__in=self.eppns)
 

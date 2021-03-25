@@ -40,13 +40,15 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
     def award(self, recipient):
         """Accept the direct award and make an assertion out of it"""
         from issuer.models import BadgeInstance
-        if self.eppn in recipient.eppns:
-            return self.badgeclass.issue(recipient=recipient,
-                                         created_by=self.created_by,
-                                         acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
-                                         recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-                                         send_email=False)
-        raise BadgrValidationError('Cannot award, eppn does not match')
+        if self.eppn not in recipient.eppns:
+            raise BadgrValidationError('Cannot award, eppn does not match')
+        if self.badgeclass.institution.identifier in recipient.schac_homes:
+            raise BadgrValidationError('Cannot award, you are not a member of the institution of the badgeclass')
+        return self.badgeclass.issue(recipient=recipient,
+                                     created_by=self.created_by,
+                                     acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
+                                     recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
+                                     send_email=False)
 
     def reject(self):
         self.acceptance = self.ACCEPTANCE_REJECTED
