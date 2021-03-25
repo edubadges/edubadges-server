@@ -18,7 +18,8 @@ class DirectAwardTest(BadgrTestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_accept_direct_award(self):
-        teacher1 = self.setup_teacher(authenticate=False)
+        institution = self.setup_institution(identifier='some_home')
+        teacher1 = self.setup_teacher(authenticate=False, institution=institution)
         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
@@ -37,6 +38,29 @@ class DirectAwardTest(BadgrTestCase):
                                     json.dumps({'accept': False}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 200)
+
+    def test_accept_direct_award_failures(self):
+        institution = self.setup_institution(identifier='right_home')
+        teacher1 = self.setup_teacher(authenticate=False, institution=institution)
+        outside_teacher = self.setup_teacher(authenticate=False)
+        # self.setup_staff_membership(teacher1, teacher1.institution, may_create=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        student = self.setup_student(authenticate=True, affiliated_institutions=[teacher1.institution])
+        student.add_affiliations([{'eppn': 'wrong_eppn', 'schac_home': 'right_home'}])
+        # eppn mismatch
+        direct_award = self.setup_direct_award(badgeclass, eppn='right_eppn')
+        response = self.client.post('/directaward/accept/{}'.format(direct_award.entity_id),
+                                    json.dumps({'accept': True}),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+        outside_student = self.setup_student(authenticate=True, affiliated_institutions=[outside_teacher.institution])
+        outside_student.add_affiliations([{'eppn': 'right_eppn', 'schac_home': 'wrong_home'}])
+        response = self.client.post('/directaward/accept/{}'.format(direct_award.entity_id),
+                                    json.dumps({'accept': True}),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 400)
 
     def test_update_and_delete_direct_award(self):
         teacher1 = self.setup_teacher(authenticate=True)
