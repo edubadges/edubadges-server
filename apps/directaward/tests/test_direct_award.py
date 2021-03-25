@@ -23,14 +23,19 @@ class DirectAwardTest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
         badgeclass = self.setup_badgeclass(issuer=issuer)
+        badgeclass2 = self.setup_badgeclass(issuer=issuer)
         student = self.setup_student(authenticate=True,
                                      affiliated_institutions=[teacher1.institution])
         direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass, recipient=student)
-        post_data = {'accept': True}
         response = self.client.post('/directaward/accept/{}'.format(direct_award.entity_id),
-                                    json.dumps(post_data),
+                                    json.dumps({'accept': True}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 201)
+        direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass2, recipient=student)
+        response = self.client.post('/directaward/accept/{}'.format(direct_award.entity_id),
+                                    json.dumps({'accept': False}),
+                                    content_type='application/json')
+        self.assertEqual(response.status_code, 200)
 
     def test_update_and_delete_direct_award(self):
         teacher1 = self.setup_teacher(authenticate=True)
