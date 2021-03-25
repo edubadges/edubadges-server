@@ -6,6 +6,7 @@ from django.utils.html import strip_tags
 
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
+from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BaseAuditedModel, EmailBlacklist
 from mainsite.utils import open_mail_in_browser, send_mail, EmailMessageMaker
 
@@ -13,7 +14,6 @@ from mainsite.utils import open_mail_in_browser, send_mail, EmailMessageMaker
 class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel):
 
     recipient_email = models.EmailField()
-    recipient = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.CASCADE)
     eppn = models.CharField(max_length=254)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     ACCEPTANCE_UNACCEPTED = 'Unaccepted'
@@ -38,13 +38,15 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
         self.validate_unique()
         return super(DirectAward, self).save(*args, **kwargs)
 
-    def award(self):
+    def award(self, recipient):
         """Accept the direct award and make an assertion out of it"""
-        return self.badgeclass.issue(recipient=self.recipient,
-                                     created_by=self.created_by,
-                                     acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
-                                     recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-                                     send_email=False)
+        if self.eppn in recipient.eppns:
+            return self.badgeclass.issue(recipient=recipient,
+                                         created_by=self.created_by,
+                                         acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
+                                         recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
+                                         send_email=False)
+        raise BadgrValidationError('Cannot award, eppn does not match')
 
     def reject(self):
         self.acceptance = self.ACCEPTANCE_REJECTED

@@ -52,7 +52,7 @@ class DirectAwardAccept(BaseEntityDetailView):
         if not self.has_object_permissions(request, directaward):
             return Response(status=status.HTTP_404_NOT_FOUND)
         if request.data.get('accept', False):
-            assertion = directaward.award()
+            assertion = directaward.award(recipient=request.user)
             directaward.delete()
             return Response({'entity_id': assertion.entity_id}, status=status.HTTP_201_CREATED)
         directaward.reject()

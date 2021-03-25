@@ -4,7 +4,7 @@ from mainsite.tests import BadgrTestCase
 
 class DirectAwardTest(BadgrTestCase):
 
-    def test_create_single_direct_award(self):
+    def test_create_direct_award(self):
         teacher1 = self.setup_teacher(authenticate=True,)
         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
@@ -26,12 +26,13 @@ class DirectAwardTest(BadgrTestCase):
         badgeclass2 = self.setup_badgeclass(issuer=issuer)
         student = self.setup_student(authenticate=True,
                                      affiliated_institutions=[teacher1.institution])
-        direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass, recipient=student)
+        student.add_affiliations([{'eppn': 'some_eppn', 'schac_home': 'some_home'}])
+        direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass, eppn='some_eppn')
         response = self.client.post('/directaward/accept/{}'.format(direct_award.entity_id),
                                     json.dumps({'accept': True}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 201)
-        direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass2, recipient=student)
+        direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass2, eppn='some_eppn')
         response = self.client.post('/directaward/accept/{}'.format(direct_award.entity_id),
                                     json.dumps({'accept': False}),
                                     content_type='application/json')
@@ -44,7 +45,7 @@ class DirectAwardTest(BadgrTestCase):
         issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         student = self.setup_student(affiliated_institutions=[teacher1.institution])
-        direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass, recipient=student)
+        direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass)
         post_data = {'recipient_email': 'other@email.com'}
         response = self.client.put('/directaward/edit/{}'.format(direct_award.entity_id), json.dumps(post_data),
                                     content_type='application/json')

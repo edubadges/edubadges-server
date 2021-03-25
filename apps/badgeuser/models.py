@@ -372,6 +372,10 @@ class UserCachedObjectGetterMixin(object):
     def cached_colleagues(self):
         return list(BadgeUser.objects.filter(institution=self.institution))
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_affiliations(self):
+        return list(StudentAffiliation.objects.filter(user=self))
+
 
 class UserPermissionsMixin(object):
     """
@@ -579,6 +583,18 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
             return "%s %s" % (self.first_name, self.last_name)
         else:
             return ''
+
+    def add_affiliations(self, affiliations):
+        """
+        param: affiliations: list of dicts [{'eppn': <eppn>m 'schac_home': <schac_home>}]
+        """
+        for affiliation in affiliations:
+            StudentAffiliation.objects.get_or_create(user=self, **affiliation)
+        self.remove_cached_data(['cached_affiliations'])
+
+    @property
+    def eppns(self):
+        return [aff.eppn for aff in self.cached_affiliations()]
 
     def match_provisionments(self):
         """Used to match provisions on initial login"""
@@ -861,3 +877,9 @@ class TermsAgreement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheMode
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE)
     agreed = models.BooleanField(default=True)
     agreed_version = models.PositiveIntegerField(null=True)
+
+
+class StudentAffiliation(models.Model):
+    user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
+    schac_home = models.CharField(max_length=254)
+    eppn = models.CharField(max_length=254)
