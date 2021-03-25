@@ -65,6 +65,9 @@ urlpatterns = [
     # # include Institution endpoints
     url(r'^institution/', include('institution.api_urls')),
 
+    # # include direct award endpoints
+    url(r'^directaward/', include('directaward.api_urls')),
+
     url(r'^lti_issuer/', include('lti_edu.lti_urls')),
 
     # include theming endpoints
