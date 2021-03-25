@@ -23,6 +23,7 @@ from jsonfield import JSONField
 from openbadges_bakery import bake
 from rest_framework import serializers
 
+from directaward.models import DirectAward
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
@@ -540,6 +541,10 @@ class BadgeClass(EntityUserProvisionmentMixin,
     @cachemodel.cached_method(auto_publish=True)
     def cached_assertions(self):
         return list(self.badgeinstances.all())
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_direct_awards(self):
+        return list(DirectAward.objects.filter(badgeclass=self))
 
     @property
     def assertions(self):

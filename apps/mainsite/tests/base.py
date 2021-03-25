@@ -132,16 +132,12 @@ class SetupHelper(object):
             kwargs['recipient_email'] = string_randomiser('some@amail.com', prefix=True)
         if not kwargs.get('eppn', False):
             kwargs['eppn'] = string_randomiser('eppn')
-        return DirectAward.objects.create(badgeclass=badgeclass, **kwargs)
+        direct_award = DirectAward.objects.create(badgeclass=badgeclass, **kwargs)
+        badgeclass.remove_cached_data(['cached_direct_awards'])
+        return direct_award
+
 
     def enroll_user(self, recipient, badgeclass):
-        assertion_post_data = {"email": "test@example.com",
-                               "badge_class": badgeclass.entity_id,
-                               "recipients": [{'selected': True,
-                                               'recipient_name': 'Piet Jonker',
-                                               'recipient_type': 'id',
-                                               'recipient_identifier': recipient.get_recipient_identifier()
-                                               }]}
         return StudentsEnrolled.objects.create(user=recipient,
                                         badge_class_id=badgeclass.pk,
                                         date_consent_given=timezone.now())

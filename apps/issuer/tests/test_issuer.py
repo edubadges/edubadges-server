@@ -434,10 +434,12 @@ class IssuerSchemaTest(BadgrTestCase):
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(teacher1, faculty=faculty)
-        self.setup_badgeclass(issuer)
-        query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId termsUrl {url excerpt language}}}}'
+        badgeclass = self.setup_badgeclass(issuer)
+        self.setup_direct_award(badgeclass)
+        query = 'query foo {badgeClasses {entityId contentTypeId directAwards {entityId badgeclass {entityId} } terms {entityId termsUrl {url excerpt language}}}}'
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['badgeClasses'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['badgeClasses'][0]['entityId']))
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['directAwards']))
         self.assertTrue(bool(response['data']['badgeClasses'][0]['terms']['termsUrl'][0]['language']))
         self.assertEqual(len(response['data']['badgeClasses'][0]['terms']['termsUrl']), 4)

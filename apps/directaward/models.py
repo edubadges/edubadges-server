@@ -5,7 +5,6 @@ from django.db import models, IntegrityError
 from django.utils.html import strip_tags
 
 from entity.models import BaseVersionedEntity
-from issuer.models import BadgeInstance
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BaseAuditedModel, EmailBlacklist
 from mainsite.utils import open_mail_in_browser, send_mail, EmailMessageMaker
@@ -40,6 +39,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
 
     def award(self, recipient):
         """Accept the direct award and make an assertion out of it"""
+        from issuer.models import BadgeInstance
         if self.eppn in recipient.eppns:
             return self.badgeclass.issue(recipient=recipient,
                                          created_by=self.created_by,
