@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
-from directaward.serializer import DirectAwardSerializer
+from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
 from directaward.models import DirectAward
 from directaward.permissions import IsDirectAwardOwner
 from mainsite.exceptions import BadgrValidationError
@@ -33,6 +33,13 @@ class DirectAwardList(VersionedObjectMixin, BaseEntityListView):
         new_instance = serializer.save(created_by=request.user)
         self.log_create(new_instance)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
+    v1_serializer_class = DirectAwardBundleSerializer
+    http_method_names = ['post']
+    permission_map = {'POST': 'may_award'}
 
 
 class DirectAwardDetail(BaseEntityDetailView):

@@ -225,7 +225,7 @@ class EmailMessageMaker:
             'issuer_image': badgeclass.issuer.image_url(),
             'issuer_name': badgeclass.issuer.name,
             'faculty_name': badgeclass.issuer.faculty.name,
-            'ui_url': settings.UI_URL,
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
         }
@@ -248,12 +248,12 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
 
-def send_mail(subject, message, recipient_list, html_message=None):
+def send_mail(subject, message, recipient_list=None, html_message=None, bcc=None):
     if settings.LOCAL_DEVELOPMENT_MODE:
         open_mail_in_browser(html_message)
     if html_message:
         html_with_inline_css = transform(html_message)
-        msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=None, to=recipient_list)
+        msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=None, to=recipient_list, bcc=bcc)
         msg.content_subtype = "html"
         msg.send()
     else:
