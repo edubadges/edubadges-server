@@ -15,15 +15,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
     recipient_email = models.EmailField()
     eppn = models.CharField(max_length=254)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
-    ACCEPTANCE_UNACCEPTED = 'Unaccepted'
-    ACCEPTANCE_ACCEPTED = 'Accepted'
-    ACCEPTANCE_REJECTED = 'Rejected'
-    ACCEPTANCE_CHOICES = (
-        (ACCEPTANCE_UNACCEPTED, 'Unaccepted'),
-        (ACCEPTANCE_ACCEPTED, 'Accepted'),
-        (ACCEPTANCE_REJECTED, 'Rejected'),
-    )
-    acceptance = models.CharField(max_length=254, choices=ACCEPTANCE_CHOICES, default=ACCEPTANCE_UNACCEPTED)
+
 
     def validate_unique(self, exclude=None):
         if self.__class__.objects \
@@ -50,10 +42,6 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
                                      recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
                                      send_email=False,
                                      award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD)
-
-    def reject(self):
-        self.acceptance = self.ACCEPTANCE_REJECTED
-        self.save()
 
     def get_permissions(self, user):
         """

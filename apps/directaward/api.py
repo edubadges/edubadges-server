@@ -5,6 +5,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
 from directaward.serializer import DirectAwardSerializer
 from directaward.models import DirectAward
 from directaward.permissions import IsDirectAwardOwner
+from mainsite.exceptions import BadgrValidationError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 
@@ -55,5 +56,7 @@ class DirectAwardAccept(BaseEntityDetailView):
             assertion = directaward.award(recipient=request.user)
             directaward.delete()
             return Response({'entity_id': assertion.entity_id}, status=status.HTTP_201_CREATED)
-        directaward.reject()
-        return Response({'rejected': True}, status=status.HTTP_200_OK)
+        elif not request.data.get('accept', True):
+            directaward.delete()  # reject it
+            return Response({'rejected': True}, status=status.HTTP_200_OK)
+        raise BadgrValidationError('Neither accepted or rejected the direct award')
