@@ -2,7 +2,6 @@ import graphene
 from graphene.relay import ConnectionField
 from graphene_django.types import DjangoObjectType, Connection
 
-from directaward.models import DirectAward
 from directaward.schema import DirectAwardType
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
@@ -244,8 +243,6 @@ class Query(object):
     badge_classes = graphene.List(BadgeClassType)
     public_badge_classes = graphene.List(BadgeClassType)
     badge_instances = graphene.List(BadgeInstanceType)
-    direct_awards = graphene.List(DirectAwardType)
-    direct_award = graphene.Field(DirectAwardType, id=graphene.String())
     issuer = graphene.Field(IssuerType, id=graphene.String())
     public_issuer = graphene.Field(IssuerType, id=graphene.String())
     badge_class = graphene.Field(BadgeClassType, id=graphene.String())
@@ -294,16 +291,6 @@ class Query(object):
 
     def resolve_badge_instances(self, info, **kwargs):
         return list(info.context.user.cached_badgeinstances())
-
-    def resolve_direct_awards(self, info, **kwargs):
-        return list(info.context.user.direct_awards)
-
-    def resolve_direct_award(self, info, **kwargs):
-        id = kwargs.get('id')
-        if id is not None:
-            da = DirectAward.objects.get(entity_id=id)
-            if da.eppn in info.context.user.eppns:
-                return da
 
     def resolve_badge_instances_count(self, info):
         return BadgeInstance.objects.count()
