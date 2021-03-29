@@ -200,6 +200,7 @@ def after_terms_agreement(request, **kwargs):
     if "acr" in payload and payload["acr"] == "https://eduid.nl/trust/validate-names":
         request.user.validated_name = f"{payload['given_name']} {payload['family_name']}"
         # TODO use the access_token to call the eduID API and retrieve the EPPN
+        # request.user.add_affiliations([{'eppn': 'some_eppn', 'schac_home': 'some_home'}])
         request.user.save()
         logger.info(f"Stored validated name {payload['given_name']} {payload['family_name']}")
 

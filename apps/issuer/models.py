@@ -852,7 +852,7 @@ class BadgeInstance(BaseAuditedModel,
         (AWARD_TYPE_REQUESTED, 'requested'),
         (AWARD_TYPE_DIRECT_AWARD, 'direct_award'),
     )
-    award_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=AWARD_TYPE_REQUESTED,
+    award_type = models.CharField(max_length=255, choices=AWARD_TYPE_CHOICES, default=AWARD_TYPE_REQUESTED,
                                   blank=False, null=False)
 
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
