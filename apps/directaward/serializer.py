@@ -17,7 +17,7 @@ class DirectAwardSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         user_permissions = validated_data['badgeclass'].get_permissions(validated_data['created_by'])
-        if user_permissions['may_create']:
+        if user_permissions['may_award']:
             direct_award = DirectAward.objects.create(**validated_data)
             direct_award.notify_recipient()
             return direct_award
@@ -37,11 +37,12 @@ class DirectAwardBundleSerializer(serializers.Serializer):
 
     badgeclass = BadgeClassSlugRelatedField(slug_field='entity_id', required=False)
     direct_awards = DirectAwardSerializer(many=True, write_only=True)
+    entity_id = serializers.CharField(read_only=True)
 
     def create(self, validated_data):
         badgeclass = validated_data['badgeclass']
         user_permissions = badgeclass.get_permissions(validated_data['created_by'])
-        if user_permissions['may_create']:
+        if user_permissions['may_award']:
             successfull_direct_awards = []
             try:
                 with transaction.atomic():

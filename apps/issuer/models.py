@@ -855,6 +855,8 @@ class BadgeInstance(BaseAuditedModel,
     award_type = models.CharField(max_length=255, choices=AWARD_TYPE_CHOICES, default=AWARD_TYPE_REQUESTED,
                                   blank=False, null=False)
 
+    direct_award_bundle = models.ForeignKey('directaward.DirectAwardBundle', blank=True, null=True, on_delete=models.PROTECT)
+
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
 
     image = models.FileField(upload_to='uploads/badges', blank=True, null=True, db_index=True)

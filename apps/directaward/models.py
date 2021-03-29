@@ -41,7 +41,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
                                      acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
                                      recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
                                      send_email=False,
-                                     award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD)
+                                     award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD,
+                                     direct_award_bundle=self.bundle)
 
     def get_permissions(self, user):
         """
