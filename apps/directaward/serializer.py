@@ -15,15 +15,6 @@ class DirectAwardSerializer(serializers.Serializer):
     eppn = serializers.CharField(required=False)
     recipient_email = serializers.EmailField(required=False)
 
-    def create(self, validated_data):
-        user_permissions = validated_data['badgeclass'].get_permissions(validated_data['created_by'])
-        if user_permissions['may_award']:
-            direct_award = DirectAward.objects.create(**validated_data)
-            direct_award.notify_recipient()
-            return direct_award
-        else:
-            raise BadgrValidationError("You don't have the necessary permissions", 100)
-
     def update(self, instance, validated_data):
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         instance.save()
@@ -38,9 +29,11 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     badgeclass = BadgeClassSlugRelatedField(slug_field='entity_id', required=False)
     direct_awards = DirectAwardSerializer(many=True, write_only=True)
     entity_id = serializers.CharField(read_only=True)
+    batch_mode = serializers.BooleanField(write_only=True)
 
     def create(self, validated_data):
         badgeclass = validated_data['badgeclass']
+        batch_mode = validated_data['batch_mode']
         user_permissions = badgeclass.get_permissions(validated_data['created_by'])
         if user_permissions['may_award']:
             successfull_direct_awards = []

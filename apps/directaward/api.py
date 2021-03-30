@@ -9,31 +9,6 @@ from mainsite.exceptions import BadgrValidationError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 
-from entity.utils import validate_errors
-
-
-class DirectAwardList(VersionedObjectMixin, BaseEntityListView):
-    """
-    POST to create a new Direct Award
-    """
-    permission_classes = (AuthenticatedWithVerifiedEmail,)   # permissioned in serializer
-    v1_serializer_class = DirectAwardSerializer
-    http_method_names = ['post']
-    permission_map = {'POST': 'may_award'}
-
-    def post(self, request, **kwargs):
-        """
-        POST a new entity to be owned by the authenticated user
-        """
-        context = self.get_context_data(**kwargs)
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(many=True, data=request.data, context=context)
-        validate_errors(serializer)
-
-        new_instance = serializer.save(created_by=request.user)
-        self.log_create(new_instance)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
