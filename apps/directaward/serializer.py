@@ -1,6 +1,7 @@
 from django.db import IntegrityError, transaction
 from rest_framework import serializers
 
+from badgeuser.serializers import BadgeUserIdentifierField
 from directaward.models import DirectAward, DirectAwardBundle
 from issuer.serializers import BadgeClassSlugRelatedField
 from mainsite.exceptions import BadgrValidationError
@@ -34,16 +35,16 @@ class DirectAwardBundleSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         badgeclass = validated_data['badgeclass']
-        batch_mode = validated_data['batch_mode']
-        notify_recipients = validated_data['notify_recipients']
+        batch_mode = validated_data.pop('batch_mode')
+        notify_recipients = validated_data.pop('notify_recipients')
+        direct_awards = validated_data.pop('direct_awards')
         user_permissions = badgeclass.get_permissions(validated_data['created_by'])
         if user_permissions['may_award']:
             successfull_direct_awards = []
             try:
                 with transaction.atomic():
-                    direct_award_bundle = DirectAwardBundle.objects.create(badgeclass=badgeclass,
-                                                                           initial_total=validated_data['direct_awards'].__len__())
-                    for direct_award in validated_data['direct_awards']:
+                    direct_award_bundle = DirectAwardBundle.objects.create(initial_total=direct_awards.__len__(), **validated_data)
+                    for direct_award in direct_awards:
                         successfull_direct_awards.append(
                             DirectAward.objects.create(bundle=direct_award_bundle,
                                                        badgeclass=badgeclass,
@@ -53,5 +54,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 raise BadgrValidationError("A direct award already exists with this eppn for this badgeclass", 999)
             if notify_recipients:
                 direct_award_bundle.notify_recipients()
+            if batch_mode:
+                direct_award_bundle.notify_awarder()
             return direct_award_bundle
         raise BadgrValidationError("You don't have the necessary permissions", 100)

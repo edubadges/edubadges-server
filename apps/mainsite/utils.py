@@ -247,6 +247,22 @@ class EmailMessageMaker:
         }
         return render_to_string(template, email_vars)
 
+    @staticmethod
+    def create_direct_award_bundle_mail(direct_award_bundle):
+        badgeclass = direct_award_bundle.badgeclass
+        template = 'email/teacher_direct_award_bundle_notification.html'
+        badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
+        email_vars = {
+            'badgeclass_image': badgeclass_image,
+            'issuer_image': badgeclass.issuer.image_url(),
+            'issuer_name': badgeclass.issuer.name,
+            'faculty_name': badgeclass.issuer.faculty.name,
+            'direct_award_bundle_url': direct_award_bundle.url,
+            'badgeclass_description': badgeclass.description,
+            'badgeclass_name': badgeclass.name,
+        }
+        return render_to_string(template, email_vars)
+
 
 def send_mail(subject, message, recipient_list=None, html_message=None, bcc=None):
     if settings.LOCAL_DEVELOPMENT_MODE:

@@ -1,4 +1,5 @@
 import cachemodel
+import urllib
 
 from django.conf import settings
 from django.db import models, IntegrityError
@@ -78,6 +79,11 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity,  cachemodel.Cache
     def direct_award_count(self):
         return DirectAward.objects.filter(bundle=self).count()
 
+    @property
+    def url(self):
+        return urllib.parse.urljoin(settings.UI_URL,
+                                    'badgeclass/{}/award-bundles'.format(self.badgeclass.entity_id))
+
     @cachemodel.cached_method()
     def cached_direct_awards(self):
         return list(DirectAward.objects.filter(bundle=self))
@@ -91,4 +97,10 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity,  cachemodel.Cache
         plain_text = strip_tags(html_message)
         send_mail(subject='Congratulations, you earned an edubadge!',
                   message=plain_text, html_message=html_message, bcc=self.recipient_emails)
+
+    def notify_awarder(self):
+        html_message = EmailMessageMaker.create_direct_award_bundle_mail(self)
+        plain_text = strip_tags(html_message)
+        send_mail(subject='You have awarded Edubadges!',
+                  message=plain_text, html_message=html_message, recipient_list=[self.created_by.email])
 
