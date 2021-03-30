@@ -456,7 +456,7 @@ class BadgeuserGraphqlTest(BadgrTestCase):
                 'contentType {id}' \
                 '}}}'
         response = self.graphene_post(new_teacher, query)
-       self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
+        self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
 
     def test_current_student(self):
         teacher1 = self.setup_teacher(authenticate=False)

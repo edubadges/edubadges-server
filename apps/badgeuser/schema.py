@@ -3,7 +3,6 @@ from graphene_django.types import DjangoObjectType
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.schema import DirectAwardType
-from institution.schema import InstitutionType
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
 from mainsite.exceptions import GraphQLException
@@ -22,7 +21,7 @@ class TermsType(DjangoObjectType):
         model = Terms
         fields = ('entity_id', 'terms_type', 'version', 'institution')
 
-    institution = graphene.Field(InstitutionType)
+    institution = graphene.Field('institution.schema.InstitutionType')
     terms_url = graphene.List(TermsUrlType)
 
     def resolve_terms_url(self, info):
@@ -45,7 +44,7 @@ class BadgeUserType(DjangoObjectType):
         fields = ('first_name', 'last_name', 'email', 'date_joined', 'entity_id', 'userprovisionments', 'validated_name')
 
     direct_awards = graphene.List(DirectAwardType)
-    institution = graphene.Field(InstitutionType)
+    institution = graphene.Field('institution.schema.InstitutionType')
     institution_staff = graphene.Field(InstitutionStaffType)
     faculty_staffs = graphene.List(FacultyStaffType)
     issuer_staffs = graphene.List(IssuerStaffType)
