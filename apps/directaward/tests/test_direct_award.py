@@ -15,6 +15,7 @@ class DirectAwardTest(BadgrTestCase):
         badgeclass = self.setup_badgeclass(issuer=issuer)
         post_data = {'badgeclass': badgeclass.entity_id,
                      'batch_mode': True,
+                     'notify_recipients': True,
                      'direct_awards': [{'recipient_email': 'some@email.com', 'eppn': 'some_eppn'},
                                        {'recipient_email': 'some@email2.com', 'eppn': 'some_eppn2'}]}
         response = self.client.post('/directaward/create', json.dumps(post_data),
@@ -45,6 +46,7 @@ class DirectAwardTest(BadgrTestCase):
         badgeclass = self.setup_badgeclass(issuer=issuer)
         post_data = {'badgeclass': badgeclass.entity_id,
                      'batch_mode': True,
+                     'notify_recipients': True,
                      'direct_awards': [{'recipient_email': 'some@email.com', 'eppn': 'some_eppn'},
                                        {'recipient_email': 'some@email2.com', 'eppn': 'some_eppn2'}, ]}
         response = self.client.post('/directaward/create', json.dumps(post_data),

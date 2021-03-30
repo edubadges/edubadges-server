@@ -30,10 +30,12 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     direct_awards = DirectAwardSerializer(many=True, write_only=True)
     entity_id = serializers.CharField(read_only=True)
     batch_mode = serializers.BooleanField(write_only=True)
+    notify_recipients = serializers.BooleanField(write_only=True)
 
     def create(self, validated_data):
         badgeclass = validated_data['badgeclass']
         batch_mode = validated_data['batch_mode']
+        notify_recipients = validated_data['notify_recipients']
         user_permissions = badgeclass.get_permissions(validated_data['created_by'])
         if user_permissions['may_award']:
             successfull_direct_awards = []
@@ -49,6 +51,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                         )
             except IntegrityError:
                 raise BadgrValidationError("A direct award already exists with this eppn for this badgeclass", 999)
-            direct_award_bundle.notify_recipients()
+            if notify_recipients:
+                direct_award_bundle.notify_recipients()
             return direct_award_bundle
         raise BadgrValidationError("You don't have the necessary permissions", 100)
