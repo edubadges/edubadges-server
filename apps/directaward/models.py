@@ -69,6 +69,14 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity,  cachemodel.Cache
     initial_total = models.IntegerField()
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
 
+    @property
+    def assertion_count(self):
+        from issuer.models import BadgeInstance
+        return BadgeInstance.objects.filter(direct_award_bundle=self).count()
+
+    @property
+    def direct_award_count(self):
+        return DirectAward.objects.filter(bundle=self).count()
 
     @cachemodel.cached_method()
     def cached_direct_awards(self):

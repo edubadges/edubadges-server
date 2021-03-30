@@ -135,3 +135,23 @@ class DirectAwardTest(BadgrTestCase):
         response = self.client.delete('/directaward/edit/{}'.format(direct_award.entity_id),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 204)
+
+
+class DirectAwardSchemaTest(BadgrTestCase):
+
+    def test_direct_award_bundle_resolvers(self):
+        institution = self.setup_institution()
+        teacher1 = self.setup_teacher(authenticate=True, institution=institution)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        direct_awards = [self.setup_direct_award(badgeclass) for i in range(4)]
+        direct_award_bundle = self.setup_direct_award_bundle(badgeclass=badgeclass, direct_awards=direct_awards)
+        self.setup_assertion(recipient=self.setup_student(), created_by=teacher1, badgeclass=badgeclass, direct_award_bundle=direct_award_bundle)
+        query = 'query foo {badgeClasses {entityId directAwards {entityId} directAwardBundles {entityId initialTotal assertionCount directAwardCount directAwards {entityId} }}}'
+        response = self.graphene_post(teacher1, query)
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['directAwardBundles']))
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['directAwardBundles'][0]['assertionCount']))
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['directAwardBundles'][0]['directAwardCount']))
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['directAwardBundles'][0]['initialTotal']))

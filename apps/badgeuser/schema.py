@@ -66,6 +66,10 @@ class BadgeUserType(DjangoObjectType):
         return self.cached_badgeclass_staffs()
 
     @resolver_blocker_only_for_current_user
+    def resolve_direct_award_bundles(self, info):
+        return self.direct_award_bundles
+
+    @resolver_blocker_only_for_current_user
     def resolve_direct_awards(self, info):
         return self.direct_awards
 

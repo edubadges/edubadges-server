@@ -1,5 +1,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
+
+
 from directaward.models import DirectAward, DirectAwardBundle
 
 
@@ -14,8 +16,11 @@ class DirectAwardBundleType(DjangoObjectType):
 
     class Meta:
         model = DirectAwardBundle
-        fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at')
+        fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at',
+                  'assertion_count', 'direct_award_count', 'initial_total')
 
+    assertion_count = graphene.Int()
+    direct_award_count = graphene.Int()
     direct_awards = graphene.List(DirectAwardType)
 
     def resolve_direct_awards(self, info, **kwargs):

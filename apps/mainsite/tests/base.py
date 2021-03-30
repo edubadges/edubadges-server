@@ -11,7 +11,7 @@ from rest_framework.test import APITransactionTestCase
 
 from allauth.socialaccount.models import SocialAccount
 from badgeuser.models import BadgeUser, Terms, TermsUrl
-from directaward.models import DirectAward
+from directaward.models import DirectAward, DirectAwardBundle
 from django.utils import timezone
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass
@@ -126,6 +126,16 @@ class SetupHelper(object):
         affiliations = ['affiliate@'+institution.identifier for institution in affiliated_institutions]
         self.add_eduid_socialaccount(user, affiliations=affiliations)
         return user
+
+    def setup_direct_award_bundle(self, badgeclass, direct_awards, **kwargs):
+        dab = DirectAwardBundle.objects.create(badgeclass=badgeclass,
+                                                initial_total=len(direct_awards),
+                                                **kwargs)
+        for direct_award in direct_awards:
+            direct_award.bundle = dab
+            direct_award.save()
+        badgeclass.remove_cached_data(['cached_direct_award_bundles'])
+        return dab
 
     def setup_direct_award(self, badgeclass, **kwargs):
         if not kwargs.get('recipient_email', False):
