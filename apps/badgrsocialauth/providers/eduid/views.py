@@ -70,15 +70,14 @@ def login(request):
         lti_roles = lti_data['lti_roles']
     state = json.dumps([referer, badgr_app_pk, lti_context_id, lti_user_id, lti_roles])
 
-    # TODO add  eduid.nl/eppn to the scope
     params = {
         "state": state,
         "client_id": current_app.client_id,
         "response_type": "code",
-        "scope": "openid",
+        "scope": "openid eduid.nl/eppn",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
         "claims": "{\"id_token\":{\"preferred_username\":null,\"given_name\":null,\"family_name\":null,\"email\":null,"
-                  "\"eduid\":null, \"eduperson_scoped_affiliation\":null, \"preferred_username\":null}}"
+                  "\"eduid\":null, \"eduperson_scoped_affiliation\":null, \"preferred_username\":null, \"uids\":null}}"
     }
     validate_name = request.GET.get("validateName")
     if validate_name and validate_name.lower() == "true":
@@ -113,8 +112,7 @@ def callback(request):
         "client_secret": current_app.secret,
     }
     headers = {'Content-Type': "application/x-www-form-urlencoded",
-               'Cache-Control': "no-cache"
-               }
+               'Cache-Control': "no-cache"}
     response = requests.post("{}/token".format(settings.EDUID_PROVIDER_URL), data=urllib.parse.urlencode(payload),
                              headers=headers)
     if response.status_code != 200:
@@ -203,7 +201,7 @@ def after_terms_agreement(request, **kwargs):
 
         access_token = kwargs.get('access_token', None)
         headers = {"Accept": "application/json, application/json;charset=UTF-8",
-                   "Authorization": f"Bearer: {access_token}"}
+                   "Authorization": f"Bearer {access_token}"}
         response = requests.get(f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/eppn",
                                 headers=headers)
         if response.status_code != 200:
