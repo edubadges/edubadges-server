@@ -127,7 +127,7 @@ class SetupHelper(object):
         self.add_eduid_socialaccount(user, affiliations=affiliations)
         return user
 
-    def setup_direct_award_bundle(self, badgeclass, direct_awards, **kwargs):
+    def setup_direct_award_bundle(self, badgeclass, direct_awards=[], **kwargs):
         dab = DirectAwardBundle.objects.create(badgeclass=badgeclass,
                                                 initial_total=len(direct_awards),
                                                 **kwargs)
@@ -142,10 +142,14 @@ class SetupHelper(object):
             kwargs['recipient_email'] = string_randomiser('some@amail.com', prefix=True)
         if not kwargs.get('eppn', False):
             kwargs['eppn'] = string_randomiser('eppn')
+        if not kwargs.get('bundle', False):
+            kwargs['bundle'] = DirectAwardBundle.objects.create(badgeclass=badgeclass, initial_total=1)
+        else:
+            kwargs['bundle'].initial_total += 1
+            kwargs['bundle'].save()
         direct_award = DirectAward.objects.create(badgeclass=badgeclass, **kwargs)
         badgeclass.remove_cached_data(['cached_direct_awards'])
         return direct_award
-
 
     def enroll_user(self, recipient, badgeclass):
         return StudentsEnrolled.objects.create(user=recipient,

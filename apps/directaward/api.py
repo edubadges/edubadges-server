@@ -24,6 +24,20 @@ class DirectAwardDetail(BaseEntityDetailView):
     http_method_names = ['put', 'delete']
     permission_map = {'PUT': 'may_award', 'DELETE': 'may_award'}
 
+    def delete(self, request, **kwargs):
+        """
+        DELETE a single DirectAward by identifier
+        """
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        obj.bundle.initial_total -= 1
+        if obj.bundle.initial_total == 0:
+            obj.bundle.delete()
+        obj.bundle.save()
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class DirectAwardAccept(BaseEntityDetailView):
     model = DirectAward  # used by .get_object()
