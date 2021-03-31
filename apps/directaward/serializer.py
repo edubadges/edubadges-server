@@ -56,5 +56,8 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 direct_award_bundle.notify_recipients()
             if batch_mode:
                 direct_award_bundle.notify_awarder()
+
+            direct_award_bundle.badgeclass.remove_cached_data(['cached_direct_awards'])
+
             return direct_award_bundle
         raise BadgrValidationError("You don't have the necessary permissions", 100)
