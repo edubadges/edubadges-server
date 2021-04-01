@@ -5,7 +5,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
 from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
 from directaward.models import DirectAward
 from directaward.permissions import IsDirectAwardOwner
-from mainsite.exceptions import BadgrValidationError
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 
@@ -31,9 +31,13 @@ class DirectAwardDetail(BaseEntityDetailView):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        obj.status = DirectAward.STATUS_REVOKED
-        obj.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        revocation_reason = request.data.get('revocation_reason', None)
+        if not revocation_reason:
+            raise BadgrValidationFieldError('revocation_reason', "This field is required", 999)
+
+        obj.revoke(revocation_reason)
+        return Response(status=status.HTTP_200_OK)
 
 
 class DirectAwardAccept(BaseEntityDetailView):

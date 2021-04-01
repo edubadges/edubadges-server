@@ -98,8 +98,9 @@ class DirectAwardTest(BadgrTestCase):
         self.assertEqual(direct_award.__class__.objects.get(pk=direct_award.pk).recipient_email,
                          'other@email.com')
         response = self.client.delete('/directaward/edit/{}'.format(direct_award.entity_id),
+                                      json.dumps({'revocation_reason': 'revocation_reason'}),
                                       content_type='application/json')
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
 
 
 class DirectAwardSchemaTest(BadgrTestCase):

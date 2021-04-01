@@ -26,6 +26,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
         (STATUS_REJECTED, 'Rejected'),
     )
     status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED)
+    revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
         if self.__class__.objects \
@@ -38,6 +39,15 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
     def save(self, *args, **kwargs):
         self.validate_unique()
         return super(DirectAward, self).save(*args, **kwargs)
+
+    def revoke(self, revocation_reason):
+        if self.status == DirectAward.STATUS_REVOKED:
+            raise BadgrValidationError("Assertion is already revoked", 999)
+        if not revocation_reason:
+            raise BadgrValidationError("revocation_reason is required", 999)
+        self.status = DirectAward.STATUS_REVOKED
+        self.revocation_reason = revocation_reason
+        self.save()
 
     def award(self, recipient):
         """Accept the direct award and make an assertion out of it"""
