@@ -248,6 +248,7 @@ class Query(object):
     badge_classes = graphene.List(BadgeClassType)
     public_badge_classes = graphene.List(BadgeClassType)
     badge_instances = graphene.List(BadgeInstanceType)
+    revoked_badge_instances = graphene.List(BadgeInstanceType)
     issuer = graphene.Field(IssuerType, id=graphene.String())
     public_issuer = graphene.Field(IssuerType, id=graphene.String())
     badge_class = graphene.Field(BadgeClassType, id=graphene.String())
@@ -295,7 +296,10 @@ class Query(object):
                 return bc
 
     def resolve_badge_instances(self, info, **kwargs):
-        return list(info.context.user.cached_badgeinstances())
+        return list(filter(lambda bi: bi.revoked == False, info.context.user.cached_badgeinstances()))
+
+    def resolve_revoked_badge_instances(self, info, **kwargs):
+        return list(filter(lambda bi: bi.revoked == True, info.context.user.cached_badgeinstances()))
 
     def resolve_badge_instances_count(self, info):
         return BadgeInstance.objects.count()
