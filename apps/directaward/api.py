@@ -31,11 +31,8 @@ class DirectAwardDetail(BaseEntityDetailView):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        obj.bundle.initial_total -= 1
-        if obj.bundle.initial_total == 0:
-            obj.bundle.delete()
-        obj.bundle.save()
-        obj.delete()
+        obj.status = DirectAward.STATUS_REVOKED
+        obj.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -53,6 +50,7 @@ class DirectAwardAccept(BaseEntityDetailView):
             directaward.delete()
             return Response({'entity_id': assertion.entity_id}, status=status.HTTP_201_CREATED)
         elif not request.data.get('accept', True):
-            directaward.delete()  # reject it
+            directaward.status = DirectAward.STATUS_REJECTED  # reject it
+            directaward.save()
             return Response({'rejected': True}, status=status.HTTP_200_OK)
         raise BadgrValidationError('Neither accepted or rejected the direct award')

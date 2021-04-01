@@ -17,6 +17,15 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
     eppn = models.CharField(max_length=254)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     bundle = models.ForeignKey('directaward.DirectAwardBundle', null=True, on_delete=models.CASCADE)
+    STATUS_UNACCEPTED = 'Unaccepted'
+    STATUS_REVOKED = 'Revoked'
+    STATUS_REJECTED = 'Rejected'
+    STATUS_CHOICES = (
+        (STATUS_UNACCEPTED, 'Unaccepted'),
+        (STATUS_REVOKED, 'Revoked'),
+        (STATUS_REJECTED, 'Rejected'),
+    )
+    status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED)
 
     def validate_unique(self, exclude=None):
         if self.__class__.objects \

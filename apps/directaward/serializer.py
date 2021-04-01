@@ -1,7 +1,6 @@
 from django.db import IntegrityError, transaction
 from rest_framework import serializers
 
-from badgeuser.serializers import BadgeUserIdentifierField
 from directaward.models import DirectAward, DirectAwardBundle
 from issuer.serializers import BadgeClassSlugRelatedField
 from mainsite.exceptions import BadgrValidationError
@@ -15,6 +14,7 @@ class DirectAwardSerializer(serializers.Serializer):
     badgeclass = BadgeClassSlugRelatedField(slug_field='entity_id', required=False)
     eppn = serializers.CharField(required=False)
     recipient_email = serializers.EmailField(required=False)
+    status = serializers.CharField(required=False)
 
     def update(self, instance, validated_data):
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
