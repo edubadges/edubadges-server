@@ -599,6 +599,8 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     @property
     def schac_homes(self):
+        if self.is_teacher:
+            return [self.institution.identifier]
         return [aff.schac_home for aff in self.cached_affiliations()]
 
     @property
@@ -672,22 +674,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     @property
     def all_recipient_identifiers(self):
         return [self.get_recipient_identifier()]
-
-    def get_eduperson_scoped_affiliations(self):
-        social_account = self.get_social_account()
-        return social_account.extra_data.get('eduperson_scoped_affiliation', [])
-
-    def get_all_associated_institutions_identifiers(self):
-        '''returns self.institution and all institutions in the social account '''
-        if self.is_teacher:
-            return [self.institution.identifier]
-        else:
-            affiliations = []
-            for affiliation in self.get_eduperson_scoped_affiliations():
-                domain = affiliation.split("@", 1)[-1]
-                parts = domain.split(".")[-2:]
-                affiliations.append(".".join(parts[-2:]))
-            return affiliations
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
