@@ -49,12 +49,14 @@ class DirectAwardAccept(BaseEntityDetailView):
         directaward = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, directaward):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        if request.data.get('accept', False):
+        if request.data.get('accept', False):  # has accepted it
+            if not directaward.badgeclass.terms_accepted(request.user):
+                raise BadgrValidationError("Cannot accept direct award, must accept badgeclass terms first", 999)
             assertion = directaward.award(recipient=request.user)
             directaward.delete()
             return Response({'entity_id': assertion.entity_id}, status=status.HTTP_201_CREATED)
-        elif not request.data.get('accept', True):
+        elif not request.data.get('accept', True):  # has rejected it
             directaward.status = DirectAward.STATUS_REJECTED  # reject it
             directaward.save()
             return Response({'rejected': True}, status=status.HTTP_200_OK)
-        raise BadgrValidationError('Neither accepted or rejected the direct award')
+        raise BadgrValidationError('Neither accepted or rejected the direct award', 999)

@@ -59,7 +59,17 @@ class DirectAwardTest(BadgrTestCase):
         response = self.client.post('/directaward/accept/{}'.format(direct_award_bundle.directaward_set.all()[0].entity_id),
                                     json.dumps({'accept': True}),
                                     content_type='application/json')
+        self.assertEqual(response.status_code, 400)  # terms not accepted
+
+        terms = badgeclass._get_terms()
+        accept_terms_body = [{'terms_entity_id': terms.entity_id, 'accepted': True}]
+        self.client.post("/user/terms/accept", json.dumps(accept_terms_body), content_type='application/json')
+
+        response = self.client.post('/directaward/accept/{}'.format(direct_award_bundle.directaward_set.all()[0].entity_id),
+                                    json.dumps({'accept': True}),
+                                    content_type='application/json')
         self.assertEqual(response.status_code, 201)
+
         self.assertEqual(BadgeInstance.objects.get(entity_id=response.data['entity_id']).direct_award_bundle,direct_award_bundle)
 
     def test_accept_direct_award_failures(self):
