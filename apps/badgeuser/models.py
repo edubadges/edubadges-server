@@ -585,6 +585,13 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         else:
             return ''
 
+    def clear_affiliations(self):
+        """Removes all affiliations"""
+        affiliations = StudentAffiliation.objects.filter(user=self)
+        for affiliation in affiliations:
+            affiliation.delete()
+        self.remove_cached_data(['cached_affiliations'])
+
     def add_affiliations(self, affiliations):
         """
         param: affiliations: list of dicts [{'eppn': <eppn>m 'schac_home': <schac_home>}]
