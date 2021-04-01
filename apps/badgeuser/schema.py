@@ -52,6 +52,7 @@ class BadgeUserType(DjangoObjectType):
     userprovisionments = graphene.List(UserProvisionmentType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
     terms_agreements = graphene.List(TermsAgreementType)
+    schac_homes = graphene.List(graphene.String)
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()
@@ -72,6 +73,10 @@ class BadgeUserType(DjangoObjectType):
     @resolver_blocker_only_for_current_user
     def resolve_direct_awards(self, info):
         return self.direct_awards
+
+    @resolver_blocker_only_for_current_user
+    def resolve_schac_homes(self, info):
+        return self.schac_homes
 
     @resolver_blocker_only_for_current_user
     def resolve_userprovisionments(self, info):
