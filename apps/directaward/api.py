@@ -5,7 +5,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
 from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
 from directaward.models import DirectAward
 from directaward.permissions import IsDirectAwardOwner
-from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 
@@ -17,27 +17,36 @@ class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
     permission_map = {'POST': 'may_award'}
 
 
+class DirectAwardRevoke(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
+    http_method_names = ['post']
+    permission_map = {'POST': 'may_award'}
+
+    def post(self, request, **kwargs):
+        """
+        Revoke direct awards
+        """
+        revocation_reason = request.data.get('revocation_reason', None)
+        direct_awards = request.data.get('direct_awards', None)
+        if not revocation_reason:
+            raise BadgrValidationFieldError('revocation_reason', "This field is required", 999)
+        if not direct_awards:
+            raise BadgrValidationFieldError('direct_awards', "This field is required", 999)
+        for direct_award in direct_awards:
+            direct_award = DirectAward.objects.get(entity_id=direct_award['entity_id'])
+            if direct_award.get_permissions(request.user)['may_award']:
+                direct_award.revoke(revocation_reason)
+            else:
+                raise BadgrApiException400("You do not have permission", 100)
+        return Response(status=status.HTTP_200_OK)
+
+
 class DirectAwardDetail(BaseEntityDetailView):
     model = DirectAward
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = DirectAwardSerializer
-    http_method_names = ['put', 'delete']
-    permission_map = {'PUT': 'may_award', 'DELETE': 'may_award'}
-
-    def delete(self, request, **kwargs):
-        """
-        DELETE a single DirectAward by identifier
-        """
-        obj = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, obj):
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        revocation_reason = request.data.get('revocation_reason', None)
-        if not revocation_reason:
-            raise BadgrValidationFieldError('revocation_reason', "This field is required", 999)
-
-        obj.revoke(revocation_reason)
-        return Response(status=status.HTTP_200_OK)
+    http_method_names = ['put']
+    permission_map = {'PUT': 'may_award'}
 
 
 class DirectAwardAccept(BaseEntityDetailView):

@@ -9,7 +9,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from issuer.permissions import AwardedAssertionsBlock
 from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
-from mainsite.exceptions import BadgrApiException400
+from mainsite.exceptions import BadgrApiException400, BadgrValidationFieldError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from signing import tsob
 from signing.models import AssertionTimeStamp
@@ -174,29 +174,25 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class BadgeInstanceDetail(BaseEntityDetailView):
+class BadgeInstanceRevoke(BaseEntityDetailView):
     """
     Endpoint for revoking a badge (DELETE)
     """
-    model = BadgeInstance
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    v1_serializer_class = BadgeInstanceSerializer
-    http_method_names = ['delete']
-    permission_map = {'DELETE': 'may_award'}
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ['post']
+    permission_map = {'POST': 'may_award'}
 
-    def delete(self, request, **kwargs):
-        # verify the user has permission to the assertion
-        try:
-            assertion = self.get_object(request, **kwargs)
-        except Http404 as e:
-            raise BadgrApiException400('You do not have permission. Check your assigned role in the Issuer', 601)
-        if not self.has_object_permissions(request, assertion):
-            raise BadgrApiException400('You do not have permission. Check your assigned role in the Issuer', 601)
+    def post(self, request, **kwargs):
         revocation_reason = request.data.get('revocation_reason', None)
         if not revocation_reason:
-            raise ValidationError({'revocation_reason': "This field is required"})
-
-        assertion.revoke(revocation_reason)
-
-        # logger.event(badgrlog.BadgeAssertionRevokedEvent(current_assertion, request.user))
+            raise BadgrValidationFieldError('revocation_reason', "This field is required", 999)
+        assertions = request.data.get('assertions', None)
+        if not assertions:
+            raise BadgrValidationFieldError('assertions', "This field is required", 999)
+        for assertion in assertions:
+            badgeinstance = BadgeInstance.objects.get(entity_id=assertion['entity_id'])
+            if badgeinstance.get_permissions(request.user)['may_award']:
+                badgeinstance.revoke(revocation_reason)
+            else:
+                raise BadgrApiException400("You do not have permission", 100)
         return Response(status=HTTP_200_OK)

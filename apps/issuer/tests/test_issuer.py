@@ -15,6 +15,20 @@ from mainsite.tests import BadgrTestCase
 
 class IssuerAPITest(BadgrTestCase):
 
+    def test_assertion_revoking(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        post_data = {'revocation_reason': 'revocation_reason',
+                     'assertions': [{'entity_id': assertion.entity_id}]}
+        response = self.client.post('/issuer/revoke-assertions',
+                                    json.dumps(post_data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
     def test_create_issuer(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True)

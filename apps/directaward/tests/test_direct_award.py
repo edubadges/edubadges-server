@@ -94,7 +94,7 @@ class DirectAwardTest(BadgrTestCase):
                                     content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
-    def test_update_and_delete_direct_award(self):
+    def test_update_and_revoke_direct_award(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
@@ -107,8 +107,9 @@ class DirectAwardTest(BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(direct_award.__class__.objects.get(pk=direct_award.pk).recipient_email,
                          'other@email.com')
-        response = self.client.delete('/directaward/edit/{}'.format(direct_award.entity_id),
-                                      json.dumps({'revocation_reason': 'revocation_reason'}),
+        response = self.client.post('/directaward/revoke-direct-awards',
+                                      json.dumps({'revocation_reason': 'revocation_reason',
+                                                  'direct_awards': [{'entity_id': direct_award.entity_id}]}),
                                       content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
