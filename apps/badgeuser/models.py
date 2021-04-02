@@ -612,7 +612,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     @property
     def direct_awards(self):
-        return DirectAward.objects.filter(eppn__in=self.eppns)
+        return DirectAward.objects.filter(eppn__in=self.eppns, status='Unaccepted')
 
     def match_provisionments(self):
         """Used to match provisions on initial login"""
