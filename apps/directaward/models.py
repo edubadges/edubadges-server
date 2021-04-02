@@ -101,7 +101,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity,  cachemodel.Cache
     @property
     def url(self):
         return urllib.parse.urljoin(settings.UI_URL,
-                                    'badgeclass/{}/award-bundles'.format(self.badgeclass.entity_id))
+                                    'badgeclass/{}/direct-awards-bundles'.format(self.badgeclass.entity_id))
 
     @cachemodel.cached_method()
     def cached_direct_awards(self):
