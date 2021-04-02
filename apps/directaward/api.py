@@ -38,7 +38,7 @@ class DirectAwardRevoke(BaseEntityDetailView):
                 direct_award.revoke(revocation_reason)
             else:
                 raise BadgrApiException400("You do not have permission", 100)
-        return Response(status=status.HTTP_200_OK)
+        return Response({"result":"ok"}, status=status.HTTP_200_OK)
 
 
 class DirectAwardDetail(BaseEntityDetailView):

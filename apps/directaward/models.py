@@ -42,7 +42,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
 
     def revoke(self, revocation_reason):
         if self.status == DirectAward.STATUS_REVOKED:
-            raise BadgrValidationError("Assertion is already revoked", 999)
+            raise BadgrValidationError("DirectAward is already revoked", 999)
         if not revocation_reason:
             raise BadgrValidationError("revocation_reason is required", 999)
         self.status = DirectAward.STATUS_REVOKED
