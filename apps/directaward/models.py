@@ -30,10 +30,10 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
 
     def validate_unique(self, exclude=None):
         if self.__class__.objects \
-                .filter(eppn=self.eppn, badgeclass=self.badgeclass) \
+                .filter(eppn=self.eppn, badgeclass=self.badgeclass, status='Unaccepted') \
                 .exclude(pk=self.pk) \
                 .exists():
-            raise IntegrityError("DirectAward with this eppn already exists in the same badgeclass.")
+            raise IntegrityError("DirectAward with this eppn and status Unaccepted already exists in the same badgeclass.")
         return super(DirectAward, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
