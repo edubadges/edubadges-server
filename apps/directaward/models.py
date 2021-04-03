@@ -1,6 +1,6 @@
-import cachemodel
 import urllib
 
+import cachemodel
 from django.conf import settings
 from django.db import models, IntegrityError
 from django.utils.html import strip_tags
@@ -11,8 +11,7 @@ from mainsite.models import BaseAuditedModel, EmailBlacklist
 from mainsite.utils import open_mail_in_browser, send_mail, EmailMessageMaker
 
 
-class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel):
-
+class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     recipient_email = models.EmailField()
     eppn = models.CharField(max_length=254)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
@@ -33,7 +32,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
                 .filter(eppn=self.eppn, badgeclass=self.badgeclass, status='Unaccepted') \
                 .exclude(pk=self.pk) \
                 .exists():
-            raise IntegrityError("DirectAward with this eppn and status Unaccepted already exists in the same badgeclass.")
+            raise IntegrityError(
+                "DirectAward with this eppn and status Unaccepted already exists in the same badgeclass.")
         return super(DirectAward, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
@@ -84,8 +84,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel)
                       message=plain_text, html_message=html_message, recipient_list=[self.recipient_email])
 
 
-class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity,  cachemodel.CacheModel):
-
+class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     initial_total = models.IntegerField()
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
 
@@ -122,4 +121,3 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity,  cachemodel.Cache
         plain_text = strip_tags(html_message)
         send_mail(subject='You have awarded Edubadges!',
                   message=plain_text, html_message=html_message, recipient_list=[self.created_by.email])
-

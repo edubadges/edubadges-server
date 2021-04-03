@@ -1,10 +1,10 @@
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
 
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
-from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
 from directaward.models import DirectAward
 from directaward.permissions import IsDirectAwardOwner
+from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
+from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
@@ -42,7 +42,7 @@ class DirectAwardRevoke(BaseEntityDetailView):
                     cache_cleared = True
             else:
                 raise BadgrApiException400("You do not have permission", 100)
-        return Response({"result":"ok"}, status=status.HTTP_200_OK)
+        return Response({"result": "ok"}, status=status.HTTP_200_OK)
 
 
 class DirectAwardDetail(BaseEntityDetailView):

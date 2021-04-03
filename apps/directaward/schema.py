@@ -1,19 +1,16 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
-
 from directaward.models import DirectAward, DirectAwardBundle
 
 
 class DirectAwardType(DjangoObjectType):
-
     class Meta:
         model = DirectAward
         fields = ('entity_id', 'eppn', 'status', 'recipient_email', 'badgeclass', 'created_at', 'updated_at')
 
 
 class DirectAwardBundleType(DjangoObjectType):
-
     class Meta:
         model = DirectAwardBundle
         fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at',
