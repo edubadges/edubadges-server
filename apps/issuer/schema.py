@@ -251,7 +251,7 @@ class Query(object):
     revoked_badge_instances = graphene.List(BadgeInstanceType)
     issuer = graphene.Field(IssuerType, id=graphene.String())
     public_issuer = graphene.Field(IssuerType, id=graphene.String())
-    badge_class = graphene.Field(BadgeClassType, id=graphene.String())
+    badge_class = graphene.Field(BadgeClassType, id=graphene.String(), days=graphene.Int())
     badge_instance = graphene.Field(BadgeInstanceType, id=graphene.String())
     badge_instances_count = graphene.Int()
     badge_classes_count = graphene.Int()

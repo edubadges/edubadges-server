@@ -95,7 +95,11 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
 
     @property
     def direct_award_count(self):
-        return DirectAward.objects.filter(bundle=self).count()
+        return DirectAward.objects.filter(bundle=self, status='Unaccepted').count()
+
+    @property
+    def direct_award_rejected_count(self):
+        return DirectAward.objects.filter(bundle=self, status='Rejected').count()
 
     @property
     def url(self):
