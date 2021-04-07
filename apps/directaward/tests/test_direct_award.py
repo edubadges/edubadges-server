@@ -3,6 +3,7 @@ from mainsite.tests import BadgrTestCase
 
 from directaward.models import DirectAward, DirectAwardBundle
 from issuer.models import BadgeInstance
+from lti_edu.models import StudentsEnrolled
 
 
 class DirectAwardTest(BadgrTestCase):
@@ -55,12 +56,12 @@ class DirectAwardTest(BadgrTestCase):
         student = self.setup_student(authenticate=True,
                                      affiliated_institutions=[teacher1.institution])
         student.add_affiliations([{'eppn': 'some_eppn', 'schac_home': 'some_home'}])
+        enrollment = self.enroll_user(student, badgeclass)  # add enrollment, this one should be removed after accepting direct award
         direct_award_bundle = DirectAwardBundle.objects.get(entity_id=response.data['entity_id'])
         response = self.client.post('/directaward/accept/{}'.format(direct_award_bundle.directaward_set.all()[0].entity_id),
                                     json.dumps({'accept': True}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 400)  # terms not accepted
-
         terms = badgeclass._get_terms()
         accept_terms_body = [{'terms_entity_id': terms.entity_id, 'accepted': True}]
         self.client.post("/user/terms/accept", json.dumps(accept_terms_body), content_type='application/json')
@@ -69,8 +70,9 @@ class DirectAwardTest(BadgrTestCase):
                                     json.dumps({'accept': True}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 201)
-
-        self.assertEqual(BadgeInstance.objects.get(entity_id=response.data['entity_id']).direct_award_bundle,direct_award_bundle)
+        self.assertEqual(BadgeInstance.objects.get(entity_id=response.data['entity_id']).direct_award_bundle, direct_award_bundle)
+        # test that enrollment was removed
+        self.assertFalse(StudentsEnrolled.objects.filter(pk=enrollment.pk).exists())
 
     def test_accept_direct_award_failures(self):
         institution = self.setup_institution(identifier='right_home')

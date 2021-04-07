@@ -459,4 +459,6 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment.badge_instance = assertion
         enrollment.save()
         enrollment.user.remove_cached_data(['cached_pending_enrollments'])
+        # delete the pending direct awards for this badgeclass and this user
+        badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns).delete()
         return assertion

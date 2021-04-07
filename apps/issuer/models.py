@@ -547,6 +547,10 @@ class BadgeClass(EntityUserProvisionmentMixin,
         return list(DirectAward.objects.filter(badgeclass=self))
 
     @cachemodel.cached_method(auto_publish=True)
+    def cached_pending_direct_awards(self):
+        return DirectAward.objects.filter(badgeclass=self, status=DirectAward.STATUS_UNACCEPTED)
+
+    @cachemodel.cached_method(auto_publish=True)
     def cached_direct_award_bundles(self):
         return list(DirectAwardBundle.objects.filter(badgeclass=self))
 

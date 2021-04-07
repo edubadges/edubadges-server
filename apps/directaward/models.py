@@ -56,13 +56,17 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
             raise BadgrValidationError('Cannot award, eppn does not match', 999)
         if self.badgeclass.institution.identifier not in recipient.schac_homes:
             raise BadgrValidationError('Cannot award, you are not a member of the institution of the badgeclass', 999)
-        return self.badgeclass.issue(recipient=recipient,
+        assertion = self.badgeclass.issue(recipient=recipient,
                                      created_by=self.created_by,
                                      acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
                                      recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
                                      send_email=False,
                                      award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD,
                                      direct_award_bundle=self.bundle)
+        # delete any pending enrollments for this badgeclass and user
+        recipient.cached_pending_enrollments().filter(badge_class=self.badgeclass).delete()
+        recipient.remove_cached_data(['cached_pending_enrollments'])
+        return assertion
 
     def get_permissions(self, user):
         """

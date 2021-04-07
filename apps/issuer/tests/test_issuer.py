@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
 
+from directaward.models import DirectAward
 from institution.models import Institution
 from issuer.models import Issuer
 from issuer.testfiles.helper import issuer_json, badgeclass_json
@@ -201,6 +202,7 @@ class IssuerAPITest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
+        direct_award = self.setup_direct_award(badgeclass=badgeclass, eppn=student.eppns[0])  # setup direct award, to check if it will be removed after awarding
         self.setup_staff_membership(teacher1, teacher1.institution, may_award=True, may_read=True)
         enroll_body = {"badgeclass_slug": badgeclass.entity_id}
         terms = badgeclass._get_terms()
@@ -240,6 +242,7 @@ class IssuerAPITest(BadgrTestCase):
         self.assertEqual(assertion.narrative, 'Some assertion narrative')
         self.assertEqual(len(badgeclass.cached_assertions()), 1)  # test cache update
         self.assertEqual(award_response.status_code, 201)
+        self.assertFalse(DirectAward.objects.filter(pk=direct_award.pk).exists())
 
     def test_enrollment_denial(self):
         teacher1 = self.setup_teacher(authenticate=True)
