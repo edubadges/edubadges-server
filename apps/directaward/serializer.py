@@ -53,10 +53,10 @@ class DirectAwardBundleSerializer(serializers.Serializer):
             except IntegrityError:
                 raise BadgrValidationError("A direct award already exists with this eppn for this badgeclass", 999)
             if notify_recipients:
-                direct_award_bundle.notify_recipients()
+                for da in successfull_direct_awards:
+                    da.notify_recipient()
             if batch_mode:
                 direct_award_bundle.notify_awarder()
-
             direct_award_bundle.badgeclass.remove_cached_data(['cached_direct_awards'])
             direct_award_bundle.badgeclass.remove_cached_data(['cached_direct_award_bundles'])
 
