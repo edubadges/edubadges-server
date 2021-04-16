@@ -44,19 +44,13 @@ badgr_admin = BadgrAdminSite(name='badgradmin')
 
 class BadgrAppAdmin(ModelAdmin):
     fieldsets = (
-        ('Meta', {'fields': ('is_active', ),
-                  'classes': ('collapse',)}),
         (None, {
-            'fields': ('name', 'cors', 'oauth_authorization_redirect', 'use_auth_code_exchange', 'oauth_application'),
+            'fields': ('name', 'is_demo_environment'),
         }),
-        ('signup', {
-            'fields': ('signup_redirect', 'email_confirmation_redirect', 'forgot_password_redirect', 'ui_login_redirect', 'ui_signup_success_redirect', 'ui_connect_success_redirect')
-        }),
-        ('public', {
-            'fields': ('public_pages_redirect',)
-        })
     )
-    list_display = ('name', 'cors',)
+    list_display = ('name', 'is_demo_environment',)
+    list_display_links = ('name', 'is_demo_environment',)
+
 badgr_admin.register(BadgrApp, BadgrAppAdmin)
 
 
