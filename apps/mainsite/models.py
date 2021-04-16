@@ -96,7 +96,7 @@ class BadgrAppManager(Manager):
 
 
 class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheModel):
-    name = models.CharField(max_length=254)
+    name = models.CharField(max_length=254, null=True, blank=True)
     cors = models.CharField(max_length=254, unique=True)
     email_confirmation_redirect = models.URLField()
     signup_redirect = models.URLField()
