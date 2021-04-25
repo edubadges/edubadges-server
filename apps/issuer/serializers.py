@@ -25,7 +25,7 @@ from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError,
 from mainsite.models import BadgrApp
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, OriginalJsonSerializerMixin, BaseSlugRelatedField
-from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg
+from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
 from mainsite.validators import BadgeExtensionValidator
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
@@ -100,6 +100,9 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
         img_name, img_ext = os.path.splitext(image.name)
         image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
         image = resize_image(image)
+        app = BadgrApp.objects.get_current(self.context.get('request', None))
+        if app.is_demo_environment:
+            image = add_watermark(image)
         if verify_svg(image):
             image = scrub_svg_image(image)
         return image
@@ -235,6 +238,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             img_name, img_ext = os.path.splitext(image.name)
             image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
             image = resize_image(image)
+            app = BadgrApp.objects.get_current(self.context.get('request', None))
+            if app.is_demo_environment:
+                image = add_watermark(image)
             if verify_svg(image):
                 image = scrub_svg_image(image)
         return image
