@@ -324,7 +324,7 @@ def add_watermark(uploaded_image):
     img = Image.open(uploaded_image).convert('RGB')
     watermark = Image.new('RGBA', img.size, (0, 0, 0, 0))
     preferred_width = int(math.sqrt(int(math.pow(img.size[0], 2)) + int(math.pow(img.size[1], 2))))
-    font_size = int(preferred_width / len(text))
+    font_size = int(preferred_width / (len(text) + 1))
     n_font = ImageFont.truetype(font, font_size)
     n_width, n_height = n_font.getsize(text)
     draw = ImageDraw.Draw(watermark, 'RGBA')
