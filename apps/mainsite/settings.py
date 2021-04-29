@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     # OAuth 2 provider
     'oauth2_provider',
 
+    'directaward',
     'entity',
     'ims',
     'institution',
@@ -183,6 +184,7 @@ SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://oidc.test.surfconext.nl/oidc')
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
+EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
@@ -377,7 +379,8 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
     'ALLOWED_VERSIONS': ['v1', 'v2'],
-    'EXCEPTION_HANDLER': 'entity.views.exception_handler'
+    'EXCEPTION_HANDLER': 'entity.views.exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
 
 ##

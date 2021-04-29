@@ -96,7 +96,7 @@ class BadgrAppManager(Manager):
 
 
 class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheModel):
-    name = models.CharField(max_length=254)
+    name = models.CharField(max_length=254, null=True, blank=True)
     cors = models.CharField(max_length=254, unique=True)
     email_confirmation_redirect = models.URLField()
     signup_redirect = models.URLField()
@@ -107,6 +107,7 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheMod
     public_pages_redirect = models.URLField(null=True)
     oauth_authorization_redirect = models.URLField(null=True)
     use_auth_code_exchange = models.BooleanField(default=False)
+    is_demo_environment = models.BooleanField(default=False, blank=True, null=True)
     oauth_application = models.ForeignKey("oauth2_provider.Application", on_delete=models.PROTECT, null=True, blank=True)
 
     objects = BadgrAppManager()

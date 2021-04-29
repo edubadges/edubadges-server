@@ -458,6 +458,23 @@ class BadgeuserGraphqlTest(BadgrTestCase):
         response = self.graphene_post(new_teacher, query)
         self.assertTrue(bool(response['data']['currentUser']['userprovisionments'][0]['contentType']['id']))
 
+    def test_current_student(self):
+        teacher1 = self.setup_teacher(authenticate=False)
+        student = self.setup_student(authenticate=True,
+                                     affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        student.add_affiliations([{'eppn': 'some_eppn', 'schac_home': 'some_home'}])
+        self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass, eppn='some_eppn')
+        query = 'query foo {currentUser {' \
+                'entityId ' \
+                'directAwards {' \
+                    'entityId ' \
+                '}}}'
+        response = self.graphene_post(student, query)
+        self.assertTrue(bool(response['data']['currentUser']['directAwards'][0]['entityId']))
+
     def test_userprovisionment_exposed_in_entities(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
@@ -509,20 +526,15 @@ class BadgeuserGraphqlTest(BadgrTestCase):
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['badgeClasses'][0]['userprovisionments'][0]['entityId']))
 
-    def test_get_all_associated_institutions_identifiers(self):
+    def test_get_user_schac_homes(self):
         user = self.setup_user("john", "doe")
         affiliations = [
-            "jdoe@fontys.nl",
-            "fontys.nl",
-            "jdoe@stafff.fontys.nl",
-            "jdoe123@student.fontys.nl",
-            "jdoe12@gueststudent.fontys.nl",
-            "jdoe12@guest.student.subdomain.fontys.nl",
-            "jdoe@faculteit-geesteswetenschappen.fontys.nl"
+            {'schac_home': "fontys.nl", 'eppn': "jdoe@fontys.nl"},
+            {'schac_home': "fontys.nl", 'eppn': "jdoe@stafff.fontys.nl"}
         ]
-        self.add_eduid_socialaccount(user, affiliations=affiliations)
-        schac_homes = user.get_all_associated_institutions_identifiers()
-        self.assertListEqual(schac_homes, list(map(lambda _: "fontys.nl", affiliations)))
+        user.add_affiliations(affiliations=affiliations)
+        schac_homes = user.schac_homes
+        self.assertListEqual(schac_homes, [aff['schac_home'] for aff in affiliations])
 
     def test_termagreements_graphene_exposure(self):
         teacher1 = self.setup_teacher(authenticate=True)

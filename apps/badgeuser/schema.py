@@ -2,11 +2,11 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
-from institution.schema import InstitutionType
+from directaward.schema import DirectAwardType
+from lti_edu.schema import StudentsEnrolledType
+from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
 from mainsite.exceptions import GraphQLException
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
-from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
-from lti_edu.schema import StudentsEnrolledType
 
 
 class TermsUrlType(DjangoObjectType):
@@ -21,7 +21,7 @@ class TermsType(DjangoObjectType):
         model = Terms
         fields = ('entity_id', 'terms_type', 'version', 'institution')
 
-    institution = graphene.Field(InstitutionType)
+    institution = graphene.Field('institution.schema.InstitutionType')
     terms_url = graphene.List(TermsUrlType)
 
     def resolve_terms_url(self, info):
@@ -43,7 +43,8 @@ class BadgeUserType(DjangoObjectType):
         model = BadgeUser
         fields = ('first_name', 'last_name', 'email', 'date_joined', 'entity_id', 'userprovisionments', 'validated_name')
 
-    institution = graphene.Field(InstitutionType)
+    direct_awards = graphene.List(DirectAwardType)
+    institution = graphene.Field('institution.schema.InstitutionType')
     institution_staff = graphene.Field(InstitutionStaffType)
     faculty_staffs = graphene.List(FacultyStaffType)
     issuer_staffs = graphene.List(IssuerStaffType)
@@ -51,6 +52,7 @@ class BadgeUserType(DjangoObjectType):
     userprovisionments = graphene.List(UserProvisionmentType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
     terms_agreements = graphene.List(TermsAgreementType)
+    schac_homes = graphene.List(graphene.String)
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()
@@ -63,6 +65,18 @@ class BadgeUserType(DjangoObjectType):
 
     def resolve_badgeclass_staffs(self, info):
         return self.cached_badgeclass_staffs()
+
+    @resolver_blocker_only_for_current_user
+    def resolve_direct_award_bundles(self, info):
+        return self.direct_award_bundles
+
+    @resolver_blocker_only_for_current_user
+    def resolve_direct_awards(self, info):
+        return self.direct_awards
+
+    @resolver_blocker_only_for_current_user
+    def resolve_schac_homes(self, info):
+        return self.schac_homes
 
     @resolver_blocker_only_for_current_user
     def resolve_userprovisionments(self, info):

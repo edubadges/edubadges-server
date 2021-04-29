@@ -13,7 +13,7 @@ from staff.permissions import HasObjectPermission
 class PublicCheckInstitutionsValidity(APIView):
     """
     Endpoint used to check if the institution is represented in the db
-    POST to check, expects a shac_home string
+    POST to check, expects a schac_home string
     """
     permission_classes = (permissions.AllowAny,)
     http_method_names = ['post']

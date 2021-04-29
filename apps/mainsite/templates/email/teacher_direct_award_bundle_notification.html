@@ -1,0 +1,138 @@
+{% extends 'email/base.html' %}
+{% block style %}
+<style>
+    .main{
+        text-align:center;
+        font-family: "Proxima Nova", sans-serif;
+        line-height: 18px;
+        font-size: 14px;
+        color: #353535;
+    }
+    .head{
+        width: 600px;
+        height: 100px;
+        margin: auto;
+    }
+    .title{
+        color: grey;
+        font-size:33px;
+        line-height: 50px;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    .message_container{
+        width: 280px;
+        margin: auto;
+        margin-top: 40px;
+        overflow: auto;
+    }
+    .text_header{
+        font-size: 14px;
+        line-height: 30px;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+    .button {
+        font-family: "Proxima Nova", sans-serif;
+        border-radius: 5px;
+        color: white;
+        background-color: #772583;
+        text-decoration: none;
+        display: inline-block;
+        cursor:pointer;
+        font-size: 16px;
+        font-weight: bold;
+        width: 100%;
+        margin-top: 30px;
+        margin: 15px 0;
+        padding: 14px 0px;
+    }
+
+    .example_container{
+        box-shadow: 1px 3px #b9b9b9;
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 10px;
+        border-color: #b9b9b9;
+        overflow: auto;
+    }
+    .issuer_image{
+        display: inline-block;
+        height: 50px;
+        width: 50px;
+        float: left;
+        margin: 15px 0px 0px 10px;
+    }
+    .badgeclass_image{
+        width: available;
+    }
+    .issuer_container {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+    .issuer_description{
+        text-align: left;
+        padding: 10px 0px 10px 10px;
+        float: left;
+    }
+    .issuer_description p {
+        margin: 0px;
+    }
+    .issuer_description p:nth-of-type(1){
+        color: #772583;
+        font-weight: bold;
+    }
+    .issuer_description p:nth-of-type(3){
+        color: grey;
+    }
+    .badge_name {
+        font-size: 23px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    .footer {
+        margin-bottom: 25px;
+    }
+    .footer a:link, .footer a:visited  {
+        color: grey;
+    }
+    .footer a:hover, .footer a:active {
+        color: #772583;
+    }
+</style>
+{% endblock %}
+
+{% block title %}
+<title>You have awarded Edubadges!</title>
+{% endblock %}
+
+{% block content %}
+
+<div><p>For the English version, see below.</p></div>
+
+<p class="title">Je hebt edubadges uitgereikt!</p>
+<div class="message_container">
+    <p class="text">Een totaal van {{direct_award_count}} uitreikingen zijn aangemaakt.
+        Nadat de studenten deze accepteren worden ze omgezet naar geldige Edubadges. </p>
+    <p class="text text_header">Over deze edubadge</p>
+    <p class="text">{{badgeclass_name}}</p>
+    <p class="text">{{badgeclass_description}}</p>
+
+    <p class="text text_header">Bekijk het overzicht van de uitreikingen</p>
+    <a class="button" target="_blank" rel="noopener noreferrer" href="{{direct_award_bundle_url}}">
+        Bekijk de uitreikingen</a>
+</div>
+<p class="title">You've awarded edubadges!</p>
+<div class="message_container">
+    <p class="text">A total of {{direct_award_count}} awards have been created.
+        After the students accept the award this will be turned into a valid Edubadge. </p>
+
+    <p class="text text_header">About this edubadge</p>
+    <p class="text">{{badgeclass_name}}</p>
+    <p class="text">{{badgeclass_description}}</p>
+
+    <p class="text text_header">View the status of the awards</p>
+    <a class="button" target="_blank" rel="noopener noreferrer" href="{{direct_award_bundle_url}}">
+        View the status of the awards</a>
+</div>
+{% endblock %}

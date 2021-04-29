@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
 
+from directaward.models import DirectAward
 from institution.models import Institution
 from issuer.models import Issuer
 from issuer.testfiles.helper import issuer_json, badgeclass_json
@@ -14,6 +15,20 @@ from mainsite.tests import BadgrTestCase
 
 
 class IssuerAPITest(BadgrTestCase):
+
+    def test_assertion_revoking(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
+        student = self.setup_student(affiliated_institutions=[teacher1.institution])
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        post_data = {'revocation_reason': 'revocation_reason',
+                     'assertions': [{'entity_id': assertion.entity_id}]}
+        response = self.client.post('/issuer/revoke-assertions',
+                                    json.dumps(post_data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
 
     def test_create_issuer(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -187,6 +202,7 @@ class IssuerAPITest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
+        direct_award = self.setup_direct_award(badgeclass=badgeclass, eppn=student.eppns[0])  # setup direct award, to check if it will be removed after awarding
         self.setup_staff_membership(teacher1, teacher1.institution, may_award=True, may_read=True)
         enroll_body = {"badgeclass_slug": badgeclass.entity_id}
         terms = badgeclass._get_terms()
@@ -226,6 +242,7 @@ class IssuerAPITest(BadgrTestCase):
         self.assertEqual(assertion.narrative, 'Some assertion narrative')
         self.assertEqual(len(badgeclass.cached_assertions()), 1)  # test cache update
         self.assertEqual(award_response.status_code, 201)
+        self.assertFalse(DirectAward.objects.filter(pk=direct_award.pk).exists())
 
     def test_enrollment_denial(self):
         teacher1 = self.setup_teacher(authenticate=True)
@@ -434,10 +451,12 @@ class IssuerSchemaTest(BadgrTestCase):
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(teacher1, faculty=faculty)
-        self.setup_badgeclass(issuer)
-        query = 'query foo {badgeClasses {entityId contentTypeId terms {entityId termsUrl {url excerpt language}}}}'
+        badgeclass = self.setup_badgeclass(issuer)
+        self.setup_direct_award(badgeclass)
+        query = 'query foo {badgeClasses {entityId contentTypeId directAwards {entityId badgeclass {entityId} } terms {entityId termsUrl {url excerpt language}}}}'
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response['data']['badgeClasses'][0]['contentTypeId']))
         self.assertTrue(bool(response['data']['badgeClasses'][0]['entityId']))
+        self.assertTrue(bool(response['data']['badgeClasses'][0]['directAwards']))
         self.assertTrue(bool(response['data']['badgeClasses'][0]['terms']['termsUrl'][0]['language']))
         self.assertEqual(len(response['data']['badgeClasses'][0]['terms']['termsUrl']), 4)

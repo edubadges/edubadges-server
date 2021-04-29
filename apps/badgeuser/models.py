@@ -21,6 +21,7 @@ from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
 
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
+from directaward.models import DirectAward
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
@@ -372,6 +373,10 @@ class UserCachedObjectGetterMixin(object):
     def cached_colleagues(self):
         return list(BadgeUser.objects.filter(institution=self.institution))
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_affiliations(self):
+        return list(StudentAffiliation.objects.filter(user=self))
+
 
 class UserPermissionsMixin(object):
     """
@@ -580,6 +585,35 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         else:
             return ''
 
+    def clear_affiliations(self):
+        """Removes all affiliations"""
+        affiliations = StudentAffiliation.objects.filter(user=self)
+        for affiliation in affiliations:
+            affiliation.delete()
+        self.remove_cached_data(['cached_affiliations'])
+
+    def add_affiliations(self, affiliations):
+        """
+        param: affiliations: list of dicts [{'eppn': <eppn>m 'schac_home': <schac_home>}]
+        """
+        for affiliation in affiliations:
+            StudentAffiliation.objects.get_or_create(user=self, **affiliation)
+        self.remove_cached_data(['cached_affiliations'])
+
+    @property
+    def eppns(self):
+        return [aff.eppn for aff in self.cached_affiliations()]
+
+    @property
+    def schac_homes(self):
+        if self.is_teacher:
+            return [self.institution.identifier]
+        return [aff.schac_home for aff in self.cached_affiliations()]
+
+    @property
+    def direct_awards(self):
+        return DirectAward.objects.filter(eppn__in=self.eppns, status='Unaccepted')
+
     def match_provisionments(self):
         """Used to match provisions on initial login"""
         provisions = UserProvisionment.objects.filter(email=self.email, for_teacher=self.is_teacher)
@@ -647,22 +681,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     @property
     def all_recipient_identifiers(self):
         return [self.get_recipient_identifier()]
-
-    def get_eduperson_scoped_affiliations(self):
-        social_account = self.get_social_account()
-        return social_account.extra_data.get('eduperson_scoped_affiliation', [])
-
-    def get_all_associated_institutions_identifiers(self):
-        '''returns self.institution and all institutions in the social account '''
-        if self.is_teacher:
-            return [self.institution.identifier]
-        else:
-            affiliations = []
-            for affiliation in self.get_eduperson_scoped_affiliations():
-                domain = affiliation.split("@", 1)[-1]
-                parts = domain.split(".")[-2:]
-                affiliations.append(".".join(parts[-2:]))
-            return affiliations
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
@@ -861,3 +879,9 @@ class TermsAgreement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheMode
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE)
     agreed = models.BooleanField(default=True)
     agreed_version = models.PositiveIntegerField(null=True)
+
+
+class StudentAffiliation(models.Model):
+    user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
+    schac_home = models.CharField(max_length=254)
+    eppn = models.CharField(max_length=254)

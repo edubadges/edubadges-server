@@ -64,9 +64,10 @@ def run_seeds():
         try:
             __import__("mainsite.seeds." + seed)
             print("\033[92mdone!\033[0m")
-        except:
+        except Exception as e:
             print("\033[91mFAILED!\033[0m")
-            traceback.print_exc()
+            print(traceback.format_exc())
+            print(e)
             break
 
 

@@ -4,7 +4,7 @@ semver==2.6.0
 pytz==2017.2
 # PIL support
 Pillow==8.1.1
-python-dateutil==2.6.1
+python-dateutil==2.8.1
 
 # reporting
 pandas==1.1.5
@@ -18,7 +18,7 @@ python-resize-image==1.1.19
 
 # CSky
 # django-cachemodel==2.1.7  # python3 incompatible
--e git://github.com/concentricsky/django-cachemodel.git@0f3081a2427c525f243119426432abd6484dc837#egg=cachemodel
+-e git://github.com/concentricsky/django-cachemodel.git@0f3081a2427c525f243119426432abd6484dc837#egg=django-cachemodel
 # django-basic-models==3.0.4 # python3 incompatible
 -e git://github.com/concentricsky/django-basic-models.git@50ae1448e61ee14941f502ec6d470a4799da001e#egg=django-basic-models
 
@@ -80,7 +80,7 @@ django-celery-results==1.0.1
 python-json-logger==0.1.2
 
 # SSL Support
-cffi==1.11.5
+cffi==1.14.5
 cryptography==3.3.2
 enum34==1.1.6
 idna==2.5

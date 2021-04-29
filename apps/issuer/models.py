@@ -23,6 +23,7 @@ from jsonfield import JSONField
 from openbadges_bakery import bake
 from rest_framework import serializers
 
+from directaward.models import DirectAward, DirectAwardBundle
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
@@ -141,7 +142,7 @@ class Issuer(EntityUserProvisionmentMixin,
     old_json = JSONField()
     objects = IssuerManager()
     cached = cachemodel.CacheModelManager()
-    faculty = models.ForeignKey('institution.Faculty', on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    faculty = models.ForeignKey('institution.Faculty', on_delete=models.CASCADE, blank=False, null=False)
 
     @property
     def description(self):
@@ -271,6 +272,20 @@ class Issuer(EntityUserProvisionmentMixin,
     def cached_badgeclasses(self):
         return list(self.badgeclasses.filter(archived=False))
 
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_assertions(self):
+        r = []
+        for bc in self.cached_badgeclasses():
+            r += bc.cached_assertions()
+        return r
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_pending_enrollments(self):
+        r = []
+        for bc in self.cached_badgeclasses():
+            r += bc.cached_pending_enrollments()
+        return r
+
     def get_absolute_url(self):
         return reverse('issuer_json', kwargs={'entity_id': self.entity_id})
 
@@ -335,11 +350,17 @@ class Issuer(EntityUserProvisionmentMixin,
         obi_version, context_iri = get_obi_context(obi_version)
 
         json = OrderedDict({'@context': context_iri})
+        # For spec compliance we also need the non-language properties
         json.update(OrderedDict(
             type='Issuer',
             name=self.name,
+            name_english=self.name_english,
+            name_dutch=self.name_dutch,
             url=self.url,
+            url_english=self.url_english,
+            url_dutch=self.url_dutch,
             email=self.email,
+            description=self.description,
             description_english=self.description_english,
             description_dutch=self.description_dutch,
         ))
@@ -351,6 +372,10 @@ class Issuer(EntityUserProvisionmentMixin,
         if self.image:
             image_url = OriginSetting.HTTP + reverse('issuer_image', kwargs={'entity_id': self.entity_id})
             json['image'] = image_url
+            if self.image_english:
+                json['image_english'] = f"{image_url}?lang=en"
+            if self.image_dutch:
+                json['image_dutch'] = f"{image_url}?lang=nl"
             if self.original_json:
                 image_info = self.get_original_json().get('image', None)
                 if isinstance(image_info, dict):
@@ -398,6 +423,8 @@ class Issuer(EntityUserProvisionmentMixin,
             if not self.faculty.institution:
                 raise ValueError('issuer is not assigned to an institution')
             json['faculty'] = {'name': self.faculty.name,
+                               'name_english': self.faculty.name_english,
+                               'name_dutch': self.faculty.name_dutch,
                                'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
 
         # pass through imported json
@@ -514,6 +541,18 @@ class BadgeClass(EntityUserProvisionmentMixin,
     @cachemodel.cached_method(auto_publish=True)
     def cached_assertions(self):
         return list(self.badgeinstances.all())
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_direct_awards(self):
+        return list(DirectAward.objects.filter(badgeclass=self))
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_pending_direct_awards(self):
+        return DirectAward.objects.filter(badgeclass=self, status=DirectAward.STATUS_UNACCEPTED)
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_direct_award_bundles(self):
+        return list(DirectAwardBundle.objects.filter(badgeclass=self))
 
     @property
     def assertions(self):
@@ -812,10 +851,21 @@ class BadgeInstance(BaseAuditedModel,
         (RECIPIENT_TYPE_URL, 'url'),
         (RECIPIENT_TYPE_EDUID, 'id'),
     )
-
-    recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
     recipient_type = models.CharField(max_length=255, choices=RECIPIENT_TYPE_CHOICES, default=RECIPIENT_TYPE_EDUID,
                                       blank=False, null=False)
+
+    AWARD_TYPE_REQUESTED = 'requested'
+    AWARD_TYPE_DIRECT_AWARD = 'direct_award'
+    AWARD_TYPE_CHOICES = (
+        (AWARD_TYPE_REQUESTED, 'requested'),
+        (AWARD_TYPE_DIRECT_AWARD, 'direct_award'),
+    )
+    award_type = models.CharField(max_length=255, choices=AWARD_TYPE_CHOICES, default=AWARD_TYPE_REQUESTED,
+                                  blank=False, null=False)
+
+    direct_award_bundle = models.ForeignKey('directaward.DirectAwardBundle', blank=True, null=True, on_delete=models.PROTECT)
+
+    recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
 
     image = models.FileField(upload_to='uploads/badges', blank=True, null=True, db_index=True)
 

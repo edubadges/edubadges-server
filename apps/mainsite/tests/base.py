@@ -10,7 +10,8 @@ from rest_framework.test import APITransactionTestCase
 
 
 from allauth.socialaccount.models import SocialAccount
-from badgeuser.models import BadgeUser, Terms, TermsUrl
+from badgeuser.models import BadgeUser, Terms, TermsUrl, StudentAffiliation
+from directaward.models import DirectAward, DirectAwardBundle
 from django.utils import timezone
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass
@@ -26,9 +27,13 @@ class GrapheneMockContext(object):
     def __init__(self, user):
         self.user = user
 
-def name_randomiser(name):
+
+def string_randomiser(name, prefix=False):
     s = ''.join(random.choices(string.ascii_lowercase, k=10))
-    return name + '_' + s
+    if not prefix:
+        return name + '_' + s
+    else:
+        return s + '_' + name
 
 
 class SetupHelper(object):
@@ -46,20 +51,19 @@ class SetupHelper(object):
     def get_test_image_path_too_large(self):
         return os.path.join(self.get_testfiles_path(),'too_large_test_image.png')
 
-
-    def add_eduid_socialaccount(self, user, affiliations):
+    def add_eduid_socialaccount(self, user):
         random_eduid = "urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{}c14-b952-4d7e-85fd-{}ac5c6f18".format(random.randint(1, 99999), random.randint(1, 9999))
         extra_data = {"family_name": user.last_name,
                       "sub": random_eduid,
                       "email": user.email,
                       "name": user.get_full_name(),
-                      "given_name": user.first_name,
-                      'eduperson_scoped_affiliation': affiliations}
+                      "given_name": user.first_name}
         socialaccount = SocialAccount(extra_data=extra_data,
                                       uid=random_eduid,
                                       provider='edu_id',
                                       user=user)
         socialaccount.save()
+        user.remove_cached_data(['cached_affiliations'])
 
     def _add_surfconext_socialaccount(self, user):
         random_surfconext_id = str(uuid.uuid4())
@@ -106,9 +110,9 @@ class SetupHelper(object):
 
     def setup_teacher(self, first_name='', last_name='', authenticate=False, institution=None, email=None):
         if not first_name:
-            first_name = name_randomiser('FirstName')
+            first_name = string_randomiser('FirstName')
         if not last_name:
-            last_name = name_randomiser('LastName')
+            last_name = string_randomiser('LastName')
         user = self.setup_user(first_name, last_name, authenticate, institution=institution, email=email)
         self._add_surfconext_socialaccount(user)
         user.is_teacher = True
@@ -116,21 +120,39 @@ class SetupHelper(object):
         return user
 
     def setup_student(self, first_name='', last_name='', authenticate=False, affiliated_institutions=[]):
-        first_name = name_randomiser('student_first_name') if not first_name else first_name
-        last_name = name_randomiser('student_last_name') if not last_name else last_name
+        first_name = string_randomiser('student_first_name') if not first_name else first_name
+        last_name = string_randomiser('student_last_name') if not last_name else last_name
         user = self.setup_user(first_name, last_name, authenticate, institution=None)
-        affiliations = ['affiliate@'+institution.identifier for institution in affiliated_institutions]
-        self.add_eduid_socialaccount(user, affiliations=affiliations)
+        self.add_eduid_socialaccount(user)
+        affiliations = [{'schac_home': inst.identifier, 'eppn': string_randomiser('eppn')} for inst in affiliated_institutions]
+        user.add_affiliations(affiliations)
         return user
 
+    def setup_direct_award_bundle(self, badgeclass, direct_awards=[], **kwargs):
+        dab = DirectAwardBundle.objects.create(badgeclass=badgeclass,
+                                                initial_total=len(direct_awards),
+                                                **kwargs)
+        for direct_award in direct_awards:
+            direct_award.bundle = dab
+            direct_award.save()
+        badgeclass.remove_cached_data(['cached_direct_award_bundles'])
+        return dab
+
+    def setup_direct_award(self, badgeclass, **kwargs):
+        if not kwargs.get('recipient_email', False):
+            kwargs['recipient_email'] = string_randomiser('some@amail.com', prefix=True)
+        if not kwargs.get('eppn', False):
+            kwargs['eppn'] = string_randomiser('eppn')
+        if not kwargs.get('bundle', False):
+            kwargs['bundle'] = DirectAwardBundle.objects.create(badgeclass=badgeclass, initial_total=1)
+        else:
+            kwargs['bundle'].initial_total += 1
+            kwargs['bundle'].save()
+        direct_award = DirectAward.objects.create(badgeclass=badgeclass, **kwargs)
+        badgeclass.remove_cached_data(['cached_direct_awards'])
+        return direct_award
+
     def enroll_user(self, recipient, badgeclass):
-        assertion_post_data = {"email": "test@example.com",
-                               "badge_class": badgeclass.entity_id,
-                               "recipients": [{'selected': True,
-                                               'recipient_name': 'Piet Jonker',
-                                               'recipient_type': 'id',
-                                               'recipient_identifier': recipient.get_recipient_identifier()
-                                               }]}
         return StudentsEnrolled.objects.create(user=recipient,
                                         badge_class_id=badgeclass.pk,
                                         date_consent_given=timezone.now())
@@ -190,7 +212,7 @@ class SetupHelper(object):
 
     def setup_institution(self, **kwargs):
         if not kwargs.get('name_english', False):
-            kwargs['name_english'] = name_randomiser('Test Institution')
+            kwargs['name_english'] = string_randomiser('Test Institution')
         if not kwargs.get('identifier', False):
             kwargs['identifier'] = kwargs['name_english']
         institution = Institution.objects.create(**kwargs)
@@ -201,14 +223,14 @@ class SetupHelper(object):
         if not kwargs.get('institution', False):
             kwargs['institution'] = self.setup_institution()
         if not kwargs.get('name_english', False) and not kwargs.get('name_dutch', False):
-            kwargs['name_english'] = name_randomiser('Test Faculty')
+            kwargs['name_english'] = string_randomiser('Test Faculty')
         return Faculty.objects.create(**kwargs)
 
     def setup_issuer(self, created_by, **kwargs):
         if not kwargs.get('faculty', False):
             kwargs['faculty'] = self.setup_faculty(institution=created_by.institution)
         if not kwargs.get('name_english', False):
-            kwargs['name_english'] = name_randomiser('Test Issuer'),
+            kwargs['name_english'] = string_randomiser('Test Issuer'),
         image_english = resize_image(open(self.get_test_image_path(), 'r'))
         return Issuer.objects.create(description_english='description',
                                      description_dutch='description',

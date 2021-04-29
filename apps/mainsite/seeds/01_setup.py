@@ -26,7 +26,8 @@ main_badgr_app, _ = BadgrApp.objects.get_or_create(
     ui_connect_success_redirect="{}/profile/".format(settings.UI_URL),
     public_pages_redirect="{}/public/".format(settings.UI_URL),
     oauth_authorization_redirect="{}/oauth/".format(settings.UI_URL),
-    use_auth_code_exchange=0
+    use_auth_code_exchange=0,
+    is_demo_environment=False
 )
 
 # Site

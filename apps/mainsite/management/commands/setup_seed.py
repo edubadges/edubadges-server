@@ -23,9 +23,10 @@ class Command(BaseCommand):
             try:
                 __import__("mainsite.seeds.01_setup")
                 print("\033[92mdone!\033[0m")
-            except:
+            except Exception as e:
                 print("\033[91mFAILED!\033[0m")
-                traceback.print_exc()
+                print(traceback.format_exc())
+                print(e)
         else:
             print("Skipping setup seeds... ", end="")
 

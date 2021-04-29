@@ -104,6 +104,7 @@ class UserProvisionmentAdmin(ModelAdmin):
         obj.for_teacher = True
         obj.type = obj.TYPE_FIRST_ADMIN_INVITATION
         obj.save()
+        obj.send_email()
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(UserProvisionmentAdmin, self).get_form(request, obj, **kwargs)

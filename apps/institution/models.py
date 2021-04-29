@@ -31,6 +31,8 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     image_dutch = models.FileField(upload_to='uploads/institution', blank=True, null=True)
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
     brin = models.CharField(max_length=254, blank=True, null=True, default=None)
+    direct_awarding_enabled = models.BooleanField(default=False)
+
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
     GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
     GRONDSLAG_WETTELIJKE_VERPLICHTING = 'wettelijke_verplichting'
@@ -197,15 +199,22 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
         json = OrderedDict()
 
         image_url = OriginSetting.HTTP + reverse('institution_image', kwargs={'entity_id': self.entity_id})
-
+        # For spec compliance we also need the non-language properties
         json.update(OrderedDict(
             type='Institution',
             name=self.name,
+            name_english=self.name_english,
+            name_dutch=self.name_dutch,
             entityId=self.entity_id,
+            description=self.description,
             description_english=self.description_english,
             description_dutch=self.description_dutch,
-            image=image_url
+            image=image_url,
         ))
+        if self.image_english:
+            json['image_english'] = f"{image_url}?lang=en"
+        if self.image_dutch:
+            json['image_dutch'] = f"{image_url}?lang=nl"
         return json
 
 
@@ -338,6 +347,13 @@ class Faculty(EntityUserProvisionmentMixin,
     @cachemodel.cached_method(auto_publish=True)
     def cached_issuers(self):
         return list(self.issuer_set.filter(archived=False))
+
+    @cachemodel.cached_method(auto_publish=True)
+    def cached_pending_enrollments(self):
+        r = []
+        for issuer in self.cached_issuers():
+            r += issuer.cached_pending_enrollments()
+        return r
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):

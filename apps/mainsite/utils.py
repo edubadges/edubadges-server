@@ -5,28 +5,30 @@ Utility functions and constants that might be used across the project.
 import base64
 import hashlib
 import io
+import math
 import os
+import pathlib
 import re
-import requests
 import tempfile
 import urllib.parse
 import uuid
 import webbrowser
 from io import BytesIO
-from PIL import Image
-from premailer import transform
-from resizeimage.resizeimage import resize_contain
 from xml.etree import cElementTree as ET
 
+import requests
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from django.conf import settings
 from django.contrib.staticfiles import finders
+from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.files.storage import DefaultStorage, default_storage
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core import mail
 from django.template.loader import render_to_string
 from django.urls import get_callable, reverse
 from django.utils.html import format_html
+from premailer import transform
+from resizeimage.resizeimage import resize_contain
 
 slugify_function_path = \
     getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
@@ -58,11 +60,14 @@ class OriginSettingsObject(object):
     def HTTP(self):
         return getattr(settings, 'HTTP_ORIGIN', OriginSettingsObject.DefaultOrigin)
 
+
 OriginSetting = OriginSettingsObject()
 
 """
 Cache Utilities
 """
+
+
 def filter_cache_key(key, key_prefix, version):
     generated_key = ':'.join([key_prefix, str(version), key])
     if len(generated_key) > 250:
@@ -143,6 +148,22 @@ def open_mail_in_browser(html):
 class EmailMessageMaker:
 
     @staticmethod
+    def _create_example_image(badgeclass):
+        background = Image.open(badgeclass.image.path).convert("RGBA")
+        overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
+        if overlay.width != background.width:
+            width_ratio = background.width / overlay.width
+            new_background_height = background.height * width_ratio
+            new_background_size = (overlay.width, new_background_height)
+            background.thumbnail((new_background_size), Image.ANTIALIAS)
+        position = (0, background.height // 4)
+        background.paste(overlay, position, overlay)
+        buffered = BytesIO()
+        background.save(buffered, format="PNG")
+        encoded_string = base64.b64encode(buffered.getvalue()).decode()
+        return 'data:image/png;base64,{}'.format(encoded_string)
+
+    @staticmethod
     def create_enrollment_denied_email(enrollment):
         template = 'email/enrollment_denied.html'
         email_vars = {'public_badge_url': enrollment.badge_class.public_url,
@@ -200,23 +221,28 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
+    def create_direct_award_student_mail(direct_award):
+        badgeclass = direct_award.badgeclass
+        template = 'email/earned_direct_award.html'
+        badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
+        email_vars = {
+            'badgeclass_image': badgeclass_image,
+            'issuer_image': badgeclass.issuer.image_url(),
+            'issuer_name': badgeclass.issuer.name,
+            'faculty_name': badgeclass.issuer.faculty.name,
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
+            'badgeclass_description': badgeclass.description,
+            'badgeclass_name': badgeclass.name,
+        }
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_earned_badge_mail(assertion):
         badgeclass = assertion.badgeclass
         template = 'email/earned_badge.html'
-        background = Image.open(badgeclass.image.path).convert("RGBA")
-        overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
-        if overlay.width != background.width:
-            width_ratio = background.width/overlay.width
-            new_background_height = background.height*width_ratio
-            new_background_size = (overlay.width, new_background_height)
-            background.thumbnail((new_background_size), Image.ANTIALIAS)
-        position = (0, background.height//4)
-        background.paste(overlay, position, overlay)
-        buffered = BytesIO()
-        background.save(buffered, format="PNG")
-        encoded_string = base64.b64encode(buffered.getvalue()).decode()
+        badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
         email_vars = {
-            'badgeclass_image': 'data:image/png;base64,{}'.format(encoded_string),
+            'badgeclass_image': badgeclass_image,
             'issuer_image': badgeclass.issuer.image_url(),
             'issuer_name': badgeclass.issuer.name,
             'faculty_name': badgeclass.issuer.faculty.name,
@@ -226,13 +252,25 @@ class EmailMessageMaker:
         }
         return render_to_string(template, email_vars)
 
+    @staticmethod
+    def create_direct_award_bundle_mail(direct_award_bundle):
+        badgeclass = direct_award_bundle.badgeclass
+        template = 'email/teacher_direct_award_bundle_notification.html'
+        email_vars = {
+            'direct_award_count': direct_award_bundle.direct_award_count,
+            'direct_award_bundle_url': direct_award_bundle.url,
+            'badgeclass_description': badgeclass.description,
+            'badgeclass_name': badgeclass.name,
+        }
+        return render_to_string(template, email_vars)
 
-def send_mail(subject, message, recipient_list, html_message=None):
+
+def send_mail(subject, message, recipient_list=None, html_message=None, bcc=None):
     if settings.LOCAL_DEVELOPMENT_MODE:
         open_mail_in_browser(html_message)
     if html_message:
         html_with_inline_css = transform(html_message)
-        msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=None, to=recipient_list)
+        msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=None, to=recipient_list, bcc=bcc)
         msg.content_subtype = "html"
         msg.send()
     else:
@@ -246,6 +284,7 @@ def admin_list_linkify(field_name, label_param=None):
     field_name is the column name of the foreignkey
     label_param is the param you want to show in the list as label of the referenced object
     """
+
     def _linkify(obj):
         linked_obj = getattr(obj, field_name)
         if linked_obj is None:
@@ -270,11 +309,39 @@ def generate_image_url(image):
             return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(image.name)
 
 
-
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
     pixels = image.size[0] * image.size[1]
     return pixels > max_pixels
 
+
+def add_watermark(uploaded_image):
+    text = "DEMO"
+    angle = 45
+    opacity = 0.85
+    absolute = pathlib.Path().absolute()
+    font = f"{absolute}/apps/mainsite/arial.ttf"
+
+    img = Image.open(uploaded_image).convert('RGB')
+    watermark = Image.new('RGBA', img.size, (0, 0, 0, 0))
+    preferred_width = int(math.sqrt(int(math.pow(img.size[0], 2)) + int(math.pow(img.size[1], 2))))
+    font_size = int(preferred_width / (len(text) + 1))
+    n_font = ImageFont.truetype(font, font_size)
+    n_width, n_height = n_font.getsize(text)
+    draw = ImageDraw.Draw(watermark, 'RGBA')
+    draw.text(((watermark.size[0] - n_width) / 2,
+               (watermark.size[1] - n_height) / 2),
+              text, font=n_font, fill=(220, 12, 12))
+    watermark = watermark.rotate(angle, Image.BICUBIC)
+    alpha = watermark.split()[3]
+    alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
+    watermark.putalpha(alpha)
+
+    new_image = Image.composite(watermark, img, watermark)
+    byte_string = io.BytesIO()
+    new_image.save(byte_string, 'PNG')
+    return InMemoryUploadedFile(byte_string, None,
+                                uploaded_image.name, 'image/png',
+                                byte_string.getvalue().__len__(), None)
 
 
 def resize_image(uploaded_image):
@@ -298,6 +365,7 @@ def resize_image(uploaded_image):
         return InMemoryUploadedFile(byte_string, None,
                                     uploaded_image.name, 'image/png',
                                     byte_string.getvalue().__len__(), None)
+
 
 def scrub_svg_image(uploaded_image):
     MALICIOUS_SVG_TAGS = [

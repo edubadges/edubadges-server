@@ -173,7 +173,7 @@ class TermsAgreementSerializer(serializers.Serializer):
         terms = Terms.objects.get(entity_id=validated_data['terms_entity_id'])
         if terms.institution:
             if not terms.institution.identifier in self.context[
-                'request'].user.get_all_associated_institutions_identifiers():
+                'request'].user.schac_homes:
                 raise BadgrValidationError('You cannot accept terms that are not from your institution', 0)
         if validated_data['accepted']:
             return terms.accept(self.context['request'].user)

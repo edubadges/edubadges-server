@@ -25,7 +25,7 @@ from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError,
 from mainsite.models import BadgrApp
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.serializers import StripTagsCharField, MarkdownCharField, OriginalJsonSerializerMixin, BaseSlugRelatedField
-from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg
+from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
 from mainsite.validators import BadgeExtensionValidator
 from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
@@ -100,6 +100,9 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
         img_name, img_ext = os.path.splitext(image.name)
         image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
         image = resize_image(image)
+        app = BadgrApp.objects.get_current(self.context.get('request', None))
+        if app.is_demo_environment:
+            image = add_watermark(image)
         if verify_svg(image):
             image = scrub_svg_image(image)
         return image
@@ -126,9 +129,9 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
             raise BadgrValidationError("You don't have the necessary permissions", 100)
 
     def update(self, instance, validated_data):
-        if instance.assertions and instance.name_english != validated_data["name_english"]:
+        if instance.assertions and instance.name_english and instance.name_english != validated_data["name_english"]:
             raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
-        if instance.assertions and instance.name_dutch != validated_data["name_dutch"]:
+        if instance.assertions and instance.name_dutch and instance.name_dutch != validated_data["name_dutch"]:
             raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         self.save_extensions(validated_data, instance)
@@ -235,6 +238,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             img_name, img_ext = os.path.splitext(image.name)
             image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
             image = resize_image(image)
+            app = BadgrApp.objects.get_current(self.context.get('request', None))
+            if app.is_demo_environment:
+                image = add_watermark(image)
             if verify_svg(image):
                 image = scrub_svg_image(image)
         return image
@@ -338,7 +344,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
 class EvidenceItemSerializer(serializers.Serializer):
     evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
     narrative = MarkdownCharField(required=False, allow_blank=True)
-    name = serializers.CharField(max_length=255, required=False)
+    name = serializers.CharField(max_length=255, required=False, allow_null=True, allow_blank=True)
     description = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
 
     def validate(self, attrs):
@@ -459,4 +465,6 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment.badge_instance = assertion
         enrollment.save()
         enrollment.user.remove_cached_data(['cached_pending_enrollments'])
+        # delete the pending direct awards for this badgeclass and this user
+        badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns).delete()
         return assertion

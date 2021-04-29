@@ -73,6 +73,7 @@ def create_badge_class(name, issuer):
         issuer=issuer,
         description=badge_class_description,
         formal=True,
+        criteria_text="A lot",
         old_json="{}",
         image="uploads/badges/eduid.png",
     )
