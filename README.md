@@ -77,8 +77,8 @@ LDFLAGS=-L/usr/local/opt/openssl/lib pip install mysqlclient
 ```
 
 ### Customize local settings to your environment
-* `cp apps/mainsite/settings_local.py.example apps/mainsite/settings_local.py`
-* Edit the settings_local.py file and insert local credentials for DATABASES and email, then run the following from within the `edubadges-server` directory:
+* `cp env_vars.sh.example env_vars.sh`
+* Edit the env_vars.sh file and insert local credentials for DATABASES and email, then run the following from within the `edubadges-server` directory after sourcing the env_vars.sh:
 
 ### Migrate databases, build front-end components
 * `./manage.py migrate` - set up database tables
