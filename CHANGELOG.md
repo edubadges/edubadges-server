@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2021-05-03
+- Added multi-language support for images
+- Added badgeclass counter in catalog
+- Updated Django, Pillow
+- Issuer must be part of a faculty
+- Added direct_awarding_enabled to institution
+- Added direct_award graphene endpoints
+- Fixed provisionment email institution admin not sent
+- Added fetching EPPN from eduID
+- Added endpoints for revoking assertions and direct awards in bulk
+- Multi langual Name change is allowed if the name is empty
+- Added is_demo field to badgr_app
+- Name is not required in evidence
+- Fixed issues with special characters in names
+
 ## [3.0.0] - 2021-03-15
 - Added multilanguage fields for Institution, Issuer Group & Issuer
 - Added public endpoints for catalog
