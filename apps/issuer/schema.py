@@ -85,6 +85,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     public_badgeclasses = graphene.List(badge_class_type)
     assertion_count = graphene.Int()
     badgeclass_count = graphene.Int()
+    badgeclasses_count = graphene.Int()
     pending_enrollment_count = graphene.Int()
     extensions = graphene.List(IssuerExtensionType)
     public_url = graphene.String()
