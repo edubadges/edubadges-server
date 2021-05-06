@@ -321,7 +321,7 @@ def add_watermark(uploaded_image):
     absolute = pathlib.Path().absolute()
     font = f"{absolute}/apps/mainsite/arial.ttf"
 
-    img = Image.open(uploaded_image).convert('RGB')
+    img = Image.open(uploaded_image)
     watermark = Image.new('RGBA', img.size, (0, 0, 0, 0))
     preferred_width = int(math.sqrt(int(math.pow(img.size[0], 2)) + int(math.pow(img.size[1], 2))))
     font_size = int(preferred_width / (len(text) + 1))
