@@ -32,6 +32,11 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     grading_table = models.CharField(max_length=254, blank=True, null=True, default=None)
     brin = models.CharField(max_length=254, blank=True, null=True, default=None)
     direct_awarding_enabled = models.BooleanField(default=False)
+    award_allowed_institutions = models.ManyToManyField('self', blank=True, symmetrical=False,
+                                                        help_text='Allow awards to this institutions')
+    award_allow_all_institutions = models.BooleanField(default=False, null=True, blank=True,
+                                                       help_text='Allow awards to all institutions')
+
 
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
     GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
