@@ -34,8 +34,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     direct_awarding_enabled = models.BooleanField(default=False)
     award_allowed_institutions = models.ManyToManyField('self', blank=True, symmetrical=False,
                                                         help_text='Allow awards to this institutions')
-    award_allow_all_institutions = models.BooleanField(default=False, null=True, blank=True,
-                                                       help_text='Allow awards to all institutions')
+    award_allow_all_institutions = models.BooleanField(default=False, help_text='Allow awards to all institutions')
 
 
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
@@ -200,7 +199,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
         except InstitutionStaff.DoesNotExist:
             return InstitutionStaff.objects.create(user=user, institution=self, **permissions)
 
-    def get_json(self, obi_version):
+    def get_json(self, obi_version, expand_awards=False):
         json = OrderedDict()
 
         image_url = OriginSetting.HTTP + reverse('institution_image', kwargs={'entity_id': self.entity_id})
@@ -220,6 +219,9 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
             json['image_english'] = f"{image_url}?lang=en"
         if self.image_dutch:
             json['image_dutch'] = f"{image_url}?lang=nl"
+        if expand_awards:
+            json['award_allow_all_institutions'] = self.award_allow_all_institutions
+            json['award_allowed_institutions'] = [inst.name for inst in self.award_allowed_institutions.all()]
         return json
 
 

@@ -386,7 +386,9 @@ class BadgeClassJson(JSONComponentView):
         obi_version = self._get_request_obi_version(request)
 
         if 'issuer' in expands:
-            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version, expand_institution=True)
+            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version,
+                                                                        expand_institution=True,
+                                                                        expand_awards='awards' in expands)
 
         return json
 

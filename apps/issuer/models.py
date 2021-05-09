@@ -340,7 +340,7 @@ class Issuer(EntityUserProvisionmentMixin,
         return tsob.create_new_private_key(password, symmetric_key, self)
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False,
-                 public_key_issuer=None, expand_public_key=False, expand_institution=False):
+                 public_key_issuer=None, expand_public_key=False, expand_institution=False, expand_awards=False):
         if signed and not public_key_issuer:
             raise ValueError(
                 'Cannot return signed issuer json without knowing which public key address is going to be used.')
@@ -425,7 +425,8 @@ class Issuer(EntityUserProvisionmentMixin,
             json['faculty'] = {'name': self.faculty.name,
                                'name_english': self.faculty.name_english,
                                'name_dutch': self.faculty.name_dutch,
-                               'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
+                               'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION,
+                                                                                expand_awards=expand_awards)}
 
         # pass through imported json
         if include_extra:
