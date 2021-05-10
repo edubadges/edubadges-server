@@ -281,7 +281,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             extension.save()
 
     def update(self, instance, validated_data):
-        if instance.assertions:
+        if instance.assertions and len([ass for ass in instance.assertions if not ass.revoked]) > 0:
             raise BadgrValidationError(
                 error_code=999,
                 error_message="Cannot change any value, assertions have already been issued")

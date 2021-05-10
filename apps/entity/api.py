@@ -1,15 +1,14 @@
 # encoding: utf-8
-import badgrlog
-
 from django.db.models import ProtectedError
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
+import badgrlog
 from entity.utils import validate_errors
-from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from issuer.permissions import NoUnrevokedAssertionsPermission
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 
 
@@ -87,7 +86,6 @@ class BaseEntityListView(BaseEntityView):
 
 
 class VersionedObjectMixin(object):
-
 
     def has_object_permissions(self, request, obj):
         for permission in self.get_permissions():
