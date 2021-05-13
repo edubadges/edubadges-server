@@ -50,7 +50,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         model = Institution
         fields = ('entity_id', 'identifier', 'name_english', 'name_dutch', 'staff', 'created_at', 'description_english',
                   'description_dutch', 'institution_type', 'image_english', 'image_dutch', 'grading_table', 'brin',
-                  'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language',
+                  'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language', 'id',
                   'direct_awarding_enabled', 'award_allow_all_institutions')
 
     faculties = graphene.List(FacultyType)

@@ -480,13 +480,15 @@ class BadgeClass(EntityUserProvisionmentMixin,
     description = models.TextField(blank=True, null=True, default=None)
     criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     criteria_text = models.TextField(blank=True, null=True)
-    formal = models.BooleanField()
+    formal = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False)
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = cachemodel.CacheModelManager()
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.BadgeClassStaff")
     expiration_period = models.DurationField(null=True)
+    award_allowed_institutions = models.ManyToManyField('institution.Institution', blank=True,
+                                                        help_text='Allow awards to this institutions')
 
     class Meta:
         verbose_name_plural = "Badge classes"
