@@ -295,9 +295,10 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                 error_message="Cannot change any value, assertions have already been issued")
         self.save_extensions(validated_data, instance)
         for key, value in validated_data.items():
-            setattr(instance, key, value)
+            if key is not 'award_allowed_institutions':
+                setattr(instance, key, value)
+        instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         try:
-            instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
             instance.save()
         except IntegrityError:
             raise BadgrValidationFieldError('name',
