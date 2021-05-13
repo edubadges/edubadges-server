@@ -1,6 +1,12 @@
-import uuid
+from django.conf import settings
 
-from allauth.socialaccount.models import SocialAccount
+from badgeuser.models import BadgeUser
+from issuer.models import BadgeClass, BadgeInstance
+from lti_edu.models import StudentsEnrolled
+from mainsite.models import BadgrApp
+from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY, \
+    BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_GROUP_DYNAMICS, BADGE_CLASS_PSYCHOMETRICS, AWARDED_STUDENT_EMAIL, \
+    REVOKED_STUDENT_EMAIL
 from django.conf import settings
 
 from badgeuser.models import BadgeUser
@@ -16,8 +22,6 @@ badgr_app = BadgrApp.objects.get(id=1)
 
 
 def create_badge_instance(user, badge_class, revoked, acceptance="Unaccepted"):
-    social_account = SocialAccount.objects.get(user=user)
-
     badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
                       recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID, acceptance=acceptance, revoked=revoked,
                       send_email=False)
