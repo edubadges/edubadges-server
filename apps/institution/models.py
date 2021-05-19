@@ -17,7 +17,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                   ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
     
     def __str__(self):
-        return self.name
+        return self.name or ''
 
     DUTCH_NAME = "instelling"
 
@@ -230,7 +230,7 @@ class Faculty(EntityUserProvisionmentMixin,
               PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
 
     def __str__(self):
-        return self.name
+        return self.name or ''
 
     def __unicode__(self):
         return '{}'.format(self.name)

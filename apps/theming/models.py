@@ -53,7 +53,7 @@ class Theme(models.Model):
                                                         )
 
     def __str__(self):
-        return self.service_name
+        return self.service_name or ''
 
     def __init__(self, *args, **kwargs):
         super(Theme, self).__init__(*args, **kwargs)
