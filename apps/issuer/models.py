@@ -568,6 +568,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     def _get_terms(self):
         terms = self.institution.cached_terms()
+        if not terms:
+            raise ValueError(f"Institution {self.institution.identifier} has no terms. This is required.")
         if self.formal:
             return [term for term in terms if term.terms_type == term.__class__.TYPE_FORMAL_BADGE][0]
         return [term for term in terms if term.terms_type == term.__class__.TYPE_INFORMAL_BADGE][0]
