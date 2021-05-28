@@ -340,7 +340,7 @@ class Issuer(EntityUserProvisionmentMixin,
         return tsob.create_new_private_key(password, symmetric_key, self)
 
     def get_json(self, obi_version=CURRENT_OBI_VERSION, include_extra=True, use_canonical_id=False, signed=False,
-                 public_key_issuer=None, expand_public_key=False, expand_institution=False):
+                 public_key_issuer=None, expand_public_key=False, expand_institution=False, expand_awards=False):
         if signed and not public_key_issuer:
             raise ValueError(
                 'Cannot return signed issuer json without knowing which public key address is going to be used.')
@@ -425,7 +425,8 @@ class Issuer(EntityUserProvisionmentMixin,
             json['faculty'] = {'name': self.faculty.name,
                                'name_english': self.faculty.name_english,
                                'name_dutch': self.faculty.name_dutch,
-                               'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION)}
+                               'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION,
+                                                                                expand_awards=expand_awards)}
 
         # pass through imported json
         if include_extra:
@@ -479,13 +480,15 @@ class BadgeClass(EntityUserProvisionmentMixin,
     description = models.TextField(blank=True, null=True, default=None)
     criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     criteria_text = models.TextField(blank=True, null=True)
-    formal = models.BooleanField()
+    formal = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False)
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = cachemodel.CacheModelManager()
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.BadgeClassStaff")
     expiration_period = models.DurationField(null=True)
+    award_allowed_institutions = models.ManyToManyField('institution.Institution', blank=True,
+                                                        help_text='Allow awards to this institutions')
 
     class Meta:
         verbose_name_plural = "Badge classes"
@@ -565,6 +568,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     def _get_terms(self):
         terms = self.institution.cached_terms()
+        if not terms:
+            raise ValueError(f"Institution {self.institution.identifier} has no terms. This is required.")
         if self.formal:
             return [term for term in terms if term.terms_type == term.__class__.TYPE_FORMAL_BADGE][0]
         return [term for term in terms if term.terms_type == term.__class__.TYPE_INFORMAL_BADGE][0]

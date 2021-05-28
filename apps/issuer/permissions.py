@@ -6,14 +6,17 @@ from rest_framework import permissions
 logger = logging.getLogger('Badgr.Debug')
 SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
+
 class AwardedAssertionsBlock(permissions.BasePermission):
-    """Object can't have any assertions"""
+    """Object can't have any assertions that are not revoked"""
+
     def has_object_permission(self, request, view, obj):
-        return not obj.assertions
+        return not obj.assertions or len([ass for ass in obj.assertions if not ass.revoked]) == 0
 
 
 class NoUnrevokedAssertionsPermission(permissions.BasePermission):
     """Object must have no unrevoked assertions"""
+
     def has_object_permission(self, request, view, obj):
         if not obj.assertions:
             return True
@@ -28,14 +31,15 @@ class RecipientIdentifiersMatch(permissions.BasePermission):
     ---
     model: BadgeInstance
     """
+
     def has_object_permission(self, request, view, obj):
         recipient_identifier = getattr(obj, 'recipient_identifier', None)
         verified_emails = [email.email for email in request.user.verified_emails]
-        result =  recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers+verified_emails
+        result = recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers + verified_emails
         if not result:
             logger.error('permission denied at VerifiedEmailMatchesRecipientIdentifier')
         return result
-    
+
 
 class BadgrOAuthTokenHasScope(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -51,9 +55,9 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
                 default_auth_scopes = set(['rw:profile', 'rw:issuer', 'rw:backpack'])
                 if len(set(valid_scopes) & default_auth_scopes) > 0:
                     return True
-            
-            logger.error({'valid_scopes':valid_scopes,
-                          'is_authenticated': request.user.is_authenticated,})
+
+            logger.error({'valid_scopes': valid_scopes,
+                          'is_authenticated': request.user.is_authenticated, })
             return False
 
         # Do not apply scope if using a non-oauth tokens
@@ -64,7 +68,6 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
         # we want to check if ANY of valid_scopes are present in the token
         matching_scopes = set(valid_scopes) & set(token.scope.split())
         return not token.is_expired() and len(matching_scopes) > 0
-
 
     @classmethod
     def valid_scopes_for_view(cls, view, method=None):

@@ -13,7 +13,8 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
                   ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
         model = Faculty
-        fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english', 'description_dutch',
+        fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english',
+                  'description_dutch',
                   'content_type_id')
 
     issuers = graphene.List(IssuerType)
@@ -49,14 +50,15 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         model = Institution
         fields = ('entity_id', 'identifier', 'name_english', 'name_dutch', 'staff', 'created_at', 'description_english',
                   'description_dutch', 'institution_type', 'image_english', 'image_dutch', 'grading_table', 'brin',
-                  'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language',
-                  'direct_awarding_enabled')
+                  'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language', 'id',
+                  'direct_awarding_enabled', 'award_allow_all_institutions')
 
     faculties = graphene.List(FacultyType)
     public_faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
     image = graphene.String()
     name = graphene.String()
+    award_allowed_institutions = graphene.List(graphene.String)
 
     def resolve_image_english(self, info):
         return generate_image_url(self.image_english)
@@ -75,6 +77,10 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
 
     def resolve_public_faculties(self, info):
         return self.cached_faculties()
+
+    def resolve_award_allowed_institutions(self, info):
+        institutions = Institution.objects.all() if self.award_allow_all_institutions else self.award_allowed_institutions.all()
+        return [institution.identifier for institution in institutions]
 
 
 class Query(object):

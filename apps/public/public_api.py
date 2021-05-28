@@ -312,7 +312,8 @@ class IssuerJson(JSONComponentView):
         obi_version = self._get_request_obi_version(request)
 
         if 'institution' in expands:
-            json['faculty'] = {'name': self.current_object.faculty.name, 'institution': self.current_object.faculty.institution.get_json(obi_version=obi_version)}
+            json['faculty'] = {'name': self.current_object.faculty.name,
+                               'institution': self.current_object.faculty.institution.get_json(obi_version=obi_version)}
 
         return json
 
@@ -384,9 +385,15 @@ class BadgeClassJson(JSONComponentView):
         expands = request.GET.getlist('expand', [])
         json = super(BadgeClassJson, self).get_json(request)
         obi_version = self._get_request_obi_version(request)
+        expand_awards = 'awards' in expands
 
+        if expand_awards:
+            json['award_allowed_institutions'] = [inst.name for inst in self.current_object.award_allowed_institutions.all()]
+            json['formal'] = self.current_object.formal
         if 'issuer' in expands:
-            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version, expand_institution=True)
+            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version,
+                                                                        expand_institution=True,
+                                                                        expand_awards=expand_awards)
 
         return json
 

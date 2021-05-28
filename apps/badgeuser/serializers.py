@@ -171,10 +171,14 @@ class TermsAgreementSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         terms = Terms.objects.get(entity_id=validated_data['terms_entity_id'])
-        if terms.institution:
-            if not terms.institution.identifier in self.context[
-                'request'].user.schac_homes:
-                raise BadgrValidationError('You cannot accept terms that are not from your institution', 0)
+        institution = terms.institution
+        if institution:
+            identifiers = [inst.identifier for inst in institution.award_allowed_institutions.all()] + [
+                institution.identifier]
+            schac_homes = self.context['request'].user.schac_homes
+            allowed = any(identifier in schac_homes for identifier in identifiers) or institution.award_allow_all_institutions
+            if not allowed:
+                raise BadgrValidationError('You cannot accept terms that are not allowed by your institution', 0)
         if validated_data['accepted']:
             return terms.accept(self.context['request'].user)
 

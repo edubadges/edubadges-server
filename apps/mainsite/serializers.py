@@ -1,9 +1,7 @@
 import json
-from collections import OrderedDict
 
 from django.utils.html import strip_tags
 from rest_framework import serializers
-from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import SlugRelatedField
 

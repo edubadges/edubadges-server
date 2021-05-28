@@ -85,6 +85,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     public_badgeclasses = graphene.List(badge_class_type)
     assertion_count = graphene.Int()
     badgeclass_count = graphene.Int()
+    badgeclasses_count = graphene.Int()
     pending_enrollment_count = graphene.Int()
     extensions = graphene.List(IssuerExtensionType)
     public_url = graphene.String()
@@ -193,6 +194,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     is_private = graphene.Boolean()
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
+    award_allowed_institutions = graphene.List(graphene.String)
 
     def resolve_terms(self, info, **kwargs):
         return self._get_terms()
@@ -241,6 +243,9 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
 
     def resolve_assertions_count(self, info):
         return self.assertions_count
+
+    def resolve_award_allowed_institutions(self, info):
+        return [institution.identifier for institution in self.award_allowed_institutions.all()]
 
 
 class Query(object):

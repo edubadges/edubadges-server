@@ -61,7 +61,9 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
 
     @transaction.atomic
     def create(self, **kwargs):
-        obj = self.model(**kwargs)
+        new_kwargs = {key: value for (key, value) in kwargs.items() if key is not 'award_allowed_institutions'}
+        obj = self.model(**new_kwargs)
+        obj.award_allowed_institutions.set(kwargs.get('award_allowed_institutions', []))
         obj.save()
         return obj
 

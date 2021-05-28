@@ -1,30 +1,31 @@
+import datetime
 import json
 import os
 import uuid
-import datetime
 from collections import OrderedDict
 from itertools import chain
 
 from django.apps import apps
-from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator, EmailValidator
+from django.conf import settings
+from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
-from django.conf import settings
 from django.utils.html import strip_tags
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
+from rest_framework.serializers import PrimaryKeyRelatedField
 
 from badgeuser.serializers import BadgeUserIdentifierField
+from institution.models import Institution
 from institution.serializers import FacultySlugRelatedField
-from institution.models import Faculty
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
-from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
-from mainsite.models import BadgrApp
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.mixins import InternalValueErrorOverrideMixin
-from mainsite.serializers import StripTagsCharField, MarkdownCharField, OriginalJsonSerializerMixin, BaseSlugRelatedField
+from mainsite.models import BadgrApp
+from mainsite.serializers import StripTagsCharField, MarkdownCharField, OriginalJsonSerializerMixin, \
+    BaseSlugRelatedField
 from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
 from mainsite.validators import BadgeExtensionValidator
 from . import utils
@@ -130,9 +131,11 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
 
     def update(self, instance, validated_data):
         if instance.assertions and instance.name_english and instance.name_english != validated_data["name_english"]:
-            raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
+            raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity",
+                                       214)
         if instance.assertions and instance.name_dutch and instance.name_dutch != validated_data["name_dutch"]:
-            raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity", 214)
+            raise BadgrValidationError("Cannot change the name, assertions have already been issued within this entity",
+                                       214)
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
         self.save_extensions(validated_data, instance)
         if not instance.badgrapp_id:
@@ -218,6 +221,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
     expiration_period = PeriodField(required=False)
+    award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
 
     class Meta:
         apispec_definition = ('BadgeClass', {})
@@ -264,12 +268,16 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         return strip_tags(description)
 
     def validate_extensions(self, extensions):
+        is_formal = False
         if extensions:
-            for ext in extensions.values():
+            for ext_name, ext in extensions.items():
                 if "@context" in ext and not ext['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
                     raise BadgrValidationError(
                         error_code=999,
                         error_message=f"extensions @context invalid {ext['@context']}")
+                if ext_name.endswith('ECTSExtension') or ext_name.endswith('StudyLoadExtension'):
+                    is_formal = True
+        self.formal = is_formal
         return extensions
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
@@ -281,13 +289,15 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             extension.save()
 
     def update(self, instance, validated_data):
-        if instance.assertions:
+        if instance.assertions and len([ass for ass in instance.assertions if not ass.revoked]) > 0:
             raise BadgrValidationError(
                 error_code=999,
                 error_message="Cannot change any value, assertions have already been issued")
         self.save_extensions(validated_data, instance)
         for key, value in validated_data.items():
-            setattr(instance, key, value)
+            if key is not 'award_allowed_institutions':
+                setattr(instance, key, value)
+        instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         try:
             instance.save()
         except IntegrityError:
@@ -300,9 +310,10 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         alignment_max = 8
         if alignments.__len__() >= alignment_max:
             raise BadgrValidationFieldError('alignments',
-                                            "There are too many Related educational framework objects, the maximum is {}.".format(str(alignment_max),
-                                            922)
-            )
+                                            "There are too many Related educational framework objects, the maximum is {}.".format(
+                                                str(alignment_max),
+                                                922)
+                                            )
         return alignments
 
     def to_internal_value_error_override(self, data):
@@ -310,16 +321,18 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
         if not data.get('criteria_text', False) and not data.get('criteria_url', False):
-            e = OrderedDict([('criteria_text', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)]),
-                             ('criteria_url', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)])])
+            e = OrderedDict(
+                [('criteria_text', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)]),
+                 ('criteria_url', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if data.get('criteria_url', False):
             if not utils.is_probable_url(data.get('criteria_url')):
                 e = OrderedDict([('criteria_url', [ErrorDetail('Must be a proper url.', code=902)])])
                 errors = OrderedDict(chain(errors.items(), e.items()))
         if data.get('name') == settings.EDUID_BADGE_CLASS_NAME:
-            e = OrderedDict([('name', [ErrorDetail(f"{settings.EDUID_BADGE_CLASS_NAME} is a reserved name for badgeclasses",
-                                                   code=907)])])
+            e = OrderedDict(
+                [('name', [ErrorDetail(f"{settings.EDUID_BADGE_CLASS_NAME} is a reserved name for badgeclasses",
+                                       code=907)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
@@ -327,9 +340,13 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         user_permissions = validated_data['issuer'].get_permissions(validated_data['created_by'])
         if user_permissions['may_create']:
             if validated_data['formal'] and not validated_data['issuer'].faculty.institution.grondslag_formeel:
-                raise BadgrValidationError("Cannot create a formal badgeclass for an institution without the judicial basis for formal badges", 215)
+                raise BadgrValidationError(
+                    "Cannot create a formal badgeclass for an institution without the judicial basis for formal badges",
+                    215)
             if not validated_data['formal'] and not validated_data['issuer'].faculty.institution.grondslag_informeel:
-                raise BadgrValidationError("Cannot create an informal badgeclass for an institution without the judicial basis for informal badges", 216)
+                raise BadgrValidationError(
+                    "Cannot create an informal badgeclass for an institution without the judicial basis for informal badges",
+                    216)
             try:
                 new_badgeclass = BadgeClass.objects.create(**validated_data)
             except IntegrityError:
@@ -433,7 +450,8 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_entity_id'))
         expires_at = None
         if badgeclass.expiration_period:
-            expires_at = datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0) + badgeclass.expiration_period
+            expires_at = datetime.datetime.now().replace(microsecond=0, second=0, minute=0,
+                                                         hour=0) + badgeclass.expiration_period
         if enrollment.badge_instance:
             raise BadgrValidationError("Can't award enrollment, it has already been awarded", 213)
         if self.context['request'].data.get('issue_signed', False):

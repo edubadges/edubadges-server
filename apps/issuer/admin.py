@@ -103,6 +103,9 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         (None, {
             'fields': ('issuer', 'image', 'name', 'description', 'archived')
         }),
+        ('Permissions',{
+            'fields': ('award_allowed_institutions',)
+        }),
         ('Criteria', {
             'fields': ('criteria_url', 'criteria_text',)
         }),

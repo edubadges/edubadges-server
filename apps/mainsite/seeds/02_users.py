@@ -115,7 +115,7 @@ institution_admins = [
         "first_name": "Joseph",
         "last_name": "Wheeler",
         "institution_name": "university-example.org",
-        "uid": "4b8c7b23bb0c99c85b5a0cbe63a826f45e147787",
+        "uid": "bf847baedbe7045394ea38de3c994f0332f2dfcb",
     },
     # staff2
     {

@@ -1,10 +1,11 @@
-from django.db import IntegrityError
-from rest_framework import serializers
 from collections import OrderedDict
 from itertools import chain
-from rest_framework.exceptions import ErrorDetail
 
-from badgeuser.serializers import TermsSerializer
+from django.db import IntegrityError
+from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail
+from rest_framework.serializers import PrimaryKeyRelatedField
+
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
 from mainsite.mixins import InternalValueErrorOverrideMixin
@@ -30,6 +31,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
     name_english = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
     name_dutch = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
     grading_table = serializers.URLField(max_length=254, required=False, allow_null=True, allow_blank=True)
+    award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
 
     class Meta:
         model = Institution
@@ -44,6 +46,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
         instance.grading_table = validated_data.get('grading_table')
         instance.name_english = validated_data.get('name_english')
         instance.name_dutch = validated_data.get('name_dutch')
+        instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         instance.save()
         return instance
 
