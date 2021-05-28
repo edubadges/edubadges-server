@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2021-05-31
+- Better error message if there are no terms.
+- UID has changed.
+- Added safe checks to str method.
+- Badgeclass drives allowed institution.
+- Added allowed institutions to badgeclass.
+- Allow awarding and approval of badges of other institutions.
+- Revoked assertions do not account for in edit permission.
+- Added award other institutions columns.
+- Allowed inistitutions to award badges to.
+- Added a new demo environment setting to test and experience the edubadges platform.
+- Fix the transparancy of composite images in watermark badgeclass image.
+
+
 ## [3.1.0] - 2021-05-03
 - Added multi-language support for images
 - Added badgeclass counter in catalog
