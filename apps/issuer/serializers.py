@@ -211,6 +211,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     image = ValidImageField(required=True)
     formal = serializers.BooleanField(required=True)
     is_private = serializers.BooleanField(required=False, default=False)
+    narrative_required = serializers.BooleanField(required=False, default=False)
+    evidence_required = serializers.BooleanField(required=False, default=False)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
@@ -389,6 +391,8 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         return obj.get_recipient_name()
 
     def validate(self, data):
+        badgeclass = self.context['request'].data.get('badgeclass')
+        # TODO validation if narrative and evidence are there is required
         if data.get('email') and not data.get('recipient_identifier'):
             data['recipient_identifier'] = data.get('email')
 

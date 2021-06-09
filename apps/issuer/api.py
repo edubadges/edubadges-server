@@ -158,7 +158,7 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
             return Response(status=HTTP_404_NOT_FOUND)
         request.data['badgeclass'] = badgeclass
         try:
-            create_notification = request.data.get('create_notification', False)
+            request.data.get('create_notification', False)
         except AttributeError:
             return Response(status=HTTP_400_BAD_REQUEST)
 
