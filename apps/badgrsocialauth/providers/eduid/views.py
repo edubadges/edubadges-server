@@ -199,21 +199,21 @@ def after_terms_agreement(request, **kwargs):
         request.user.validated_name = f"{payload['given_name']} {payload['family_name']}"
         logger.info(f"Stored validated name {payload['given_name']} {payload['family_name']}")
 
-        access_token = kwargs.get('access_token', None)
-        headers = {"Accept": "application/json, application/json;charset=UTF-8",
-                   "Authorization": f"Bearer {access_token}"}
-        response = requests.get(f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/eppn",
-                                headers=headers)
-        if response.status_code != 200:
-            error = f"Server error: eduID eppn endpoint error ({response.status_code})"
-            logger.debug(error)
-            return render_authentication_error(request, EduIDProvider.id, error=error)
-        eppn_json = response.json()
-        request.user.clear_affiliations()
-        for info in eppn_json:
-            request.user.add_affiliations([{'eppn': info["eppn"], 'schac_home': info["schac_home_organization"]}])
-            logger.info(f"Stored affiliations {info['eppn']} {info['schac_home_organization']}")
-        request.user.save()
+    access_token = kwargs.get('access_token', None)
+    headers = {"Accept": "application/json, application/json;charset=UTF-8",
+               "Authorization": f"Bearer {access_token}"}
+    response = requests.get(f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/eppn",
+                            headers=headers)
+    if response.status_code != 200:
+        error = f"Server error: eduID eppn endpoint error ({response.status_code})"
+        logger.debug(error)
+        return render_authentication_error(request, EduIDProvider.id, error=error)
+    eppn_json = response.json()
+    request.user.clear_affiliations()
+    for info in eppn_json:
+        request.user.add_affiliations([{'eppn': info["eppn"], 'schac_home': info["schac_home_organization"]}])
+        logger.info(f"Stored affiliations {info['eppn']} {info['schac_home_organization']}")
+    request.user.save()
 
     # create lti_connection
     if lti_data is not None and 'lti_user_id' in lti_data:
