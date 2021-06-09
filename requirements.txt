@@ -1,5 +1,5 @@
 # Django stuff
-Django==2.2.21
+Django==2.2.22
 semver==2.6.0
 pytz==2017.2
 # PIL support
