@@ -392,7 +392,10 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
 
     def validate(self, data):
         badgeclass = self.context['request'].data.get('badgeclass')
-        # TODO validation if narrative and evidence are there is required
+        if badgeclass.narrative_required and not data.get('narrative'):
+            raise BadgrValidationError(error_code=999, error_message="Narrative is required")
+        if badgeclass.evidence_required and not data.get("evidence_items"):
+            raise BadgrValidationError(error_code=999, error_message="Eviidence is required")
         if data.get('email') and not data.get('recipient_identifier'):
             data['recipient_identifier'] = data.get('email')
 
