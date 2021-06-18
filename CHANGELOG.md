@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added an option to the badgeclass to make Narrative and Evicence mandatory.
 - Expose new badgeclass attributes in graphql.
 - Always retrieve EPPN and Schac homes.
-- Updated dependencies Django and Pillow,
+- Updated dependencies Django and Pillow.
 
 ## [4.0.0] - 2021-05-31
 - Better error message if there are no terms.
