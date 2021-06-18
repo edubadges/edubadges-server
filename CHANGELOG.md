@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2021-06-21
+- Added an option to the badgeclass to make Narrative and Evicence mandatory.
+- Expose new badgeclass attributes in graphql.
+- Always retrieve EPPN and Schac homes.
+- Updated dependencies Django and Pillow,
+
 ## [4.0.0] - 2021-05-31
 - Better error message if there are no terms.
 - UID has changed.
