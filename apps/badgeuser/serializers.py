@@ -177,7 +177,7 @@ class TermsAgreementSerializer(serializers.Serializer):
                 institution.identifier]
             schac_homes = self.context['request'].user.schac_homes
             allowed = any(identifier in schac_homes for identifier in identifiers) or institution.award_allow_all_institutions
-            if not allowed:
+            if not allowed and terms.terms_type != 'informal_badge':
                 raise BadgrValidationError('You cannot accept terms that are not allowed by your institution', 0)
         if validated_data['accepted']:
             return terms.accept(self.context['request'].user)

@@ -62,7 +62,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
         if self.badgeclass.formal:
             allowed = institution.identifier in schac_homes
         else:
-            allowed = any(identifier in schac_homes for identifier in identifiers)
+            allowed = any(identifier in schac_homes for identifier in identifiers) or recipient.validated_name
         if not allowed:
             raise BadgrValidationError('Cannot award, you are not a member of the institution of the badgeclass', 999)
         assertion = self.badgeclass.issue(recipient=recipient,
