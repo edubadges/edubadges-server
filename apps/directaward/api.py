@@ -32,7 +32,7 @@ class DirectAwardRevoke(BaseEntityDetailView):
             raise BadgrValidationFieldError('revocation_reason', "This field is required", 999)
         if not direct_awards:
             raise BadgrValidationFieldError('direct_awards', "This field is required", 999)
-        cache_cleared = False;
+        cache_cleared = False
         for direct_award in direct_awards:
             direct_award = DirectAward.objects.get(entity_id=direct_award['entity_id'])
             if direct_award.get_permissions(request.user)['may_award']:

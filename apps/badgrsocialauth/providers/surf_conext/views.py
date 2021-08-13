@@ -169,10 +169,11 @@ def callback(request):
                 request.user.is_teacher = True
                 request.user.invited = True
                 try:
-                    provisionment = request.user.match_provisionments().get()  # get the initial provisioning for the first login, there can only be one
+                    provisionments = request.user.match_provisionments()
                     request.user.save()
-                    provisionment.match_user(request.user)
-                    provisionment.perform_provisioning()
+                    for provisionment in provisionments:
+                        provisionment.match_user(request.user)
+                        provisionment.perform_provisioning()
                 except (UserProvisionment.DoesNotExist, BadgrValidationError):  # there is no provisionment
                     extra_context = {}
                     if institution and institution.cached_staff():
