@@ -636,7 +636,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     @cachemodel.cached_method(auto_publish=True)
     def cached_pending_enrollments(self):
         from lti_edu.models import StudentsEnrolled
-        return StudentsEnrolled.objects.filter(badge_class=self, badge_instance=None, denied=False)
+        return StudentsEnrolled.objects.filter(badge_class=self, badge_instance=None)
 
     @property
     def assertions_count(self):
