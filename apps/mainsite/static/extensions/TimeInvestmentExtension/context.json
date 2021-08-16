@@ -1,0 +1,13 @@
+{
+  "@context": {
+    "obi": "https://w3id.org/openbadges#",
+    "extensions": "https://w3id.org/openbadges/extensions#",
+    "StudyLoad": "extensions:TimeInvestment"
+  },
+  "obi:validation": [
+    {
+      "obi:validatesType": "extensions:TimeInvestmentExtension",
+      "obi:validationSchema": "http://localhost:8000/static/extensions/TimeInvestmentExtension/schema.json"
+    }
+  ]
+}
