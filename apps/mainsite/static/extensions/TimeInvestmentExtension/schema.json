@@ -4,7 +4,7 @@
   "description": "An extension that allows you to add the time investment, expressed in hours needed to earn that badgeclass object.",
   "type": "object",
   "properties": {
-    "StudyLoad": {
+    "TimeInvestment": {
       "type": "number"
     }
   },

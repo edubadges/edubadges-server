@@ -2,7 +2,7 @@
   "@context": {
     "obi": "https://w3id.org/openbadges#",
     "extensions": "https://w3id.org/openbadges/extensions#",
-    "StudyLoad": "extensions:TimeInvestment"
+    "TimeInvestment": "extensions:TimeInvestment"
   },
   "obi:validation": [
     {
