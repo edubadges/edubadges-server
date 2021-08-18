@@ -38,7 +38,9 @@ class DirectAwardRevoke(BaseEntityDetailView):
             if direct_award.get_permissions(request.user)['may_award']:
                 direct_award.revoke(revocation_reason)
                 if not cache_cleared:
+                    direct_award.bundle.remove_cached_data(['cached_direct_awards'])
                     direct_award.badgeclass.remove_cached_data(['cached_direct_awards'])
+                    direct_award.badgeclass.remove_cached_data(['cached_direct_award_bundles'])
                     cache_cleared = True
             else:
                 raise BadgrApiException400("You do not have permission", 100)

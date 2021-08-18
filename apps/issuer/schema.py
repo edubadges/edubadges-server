@@ -185,6 +185,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
+    pending_enrollments_including_denied = graphene.List(StudentsEnrolledType)
     badge_assertions = graphene.List(BadgeInstanceType)
     assertions_paginated = ConnectionField(BadgeInstanceConnection)
     assertion_count = graphene.Int()
@@ -220,6 +221,9 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     @resolver_blocker_for_students
     def resolve_pending_enrollments(self, info, **kwargs):
         return self.cached_pending_enrollments()
+
+    def resolve_pending_enrollments_including_denied(self, info, **kwargs):
+        return self.cached_pending_enrollments_including_denied()
 
     @resolver_blocker_for_students
     def resolve_pending_enrollment_count(self, info, **kwargs):
