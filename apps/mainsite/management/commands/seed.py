@@ -20,8 +20,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if settings.ALLOW_SEEDS:
-            if options['clean']:
-                clear_data()
+            # if options['clean']:
+            clear_data()
             run_seeds()
             if options['add_assertions']:
                 nr_of_assertions = options['add_assertions']
