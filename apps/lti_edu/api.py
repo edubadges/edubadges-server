@@ -1,15 +1,17 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
+
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeClass
 from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
-from lti_edu.serializers import StudentsEnrolledSerializerWithRelations, BadgeClassLtiContextSerializer, BadgeClassLtiContextStudentSerializer
+from lti_edu.serializers import StudentsEnrolledSerializerWithRelations, BadgeClassLtiContextSerializer, \
+    BadgeClassLtiContextStudentSerializer
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import EmailMessageMaker
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
 from staff.permissions import HasObjectPermission
 
 
@@ -18,7 +20,7 @@ class StudentEnrollmentList(BaseEntityListView):
     GET a list of enrollments for a student
     DELETE for a student to delete your own enrollment
     """
-    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
     model = StudentsEnrolled
     serializer_class = StudentsEnrolledSerializerWithRelations
     http_method_names = ['get', 'delete']
@@ -50,7 +52,7 @@ class StudentsEnrolledList(BaseEntityListView):
     """
     POST: for a student to enroll himself
     """
-    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
     model = StudentsEnrolled
     http_method_names = ['post']
 
@@ -77,6 +79,7 @@ class EnrollmentDetail(BaseEntityDetailView):
     PUT: update enrollment
     """
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    permission_map = {'PUT': 'may_award'}
     model = StudentsEnrolled
     http_method_names = ['put']
 
@@ -91,8 +94,12 @@ class EnrollmentDetail(BaseEntityDetailView):
         enrollment.denied = True
         enrollment.save()
         html_message = EmailMessageMaker.create_enrollment_denied_email(enrollment)
-        subject = 'Your request for the badgeclass {} has been denied by the issuer.'.format(enrollment.badge_class.name)
+        subject = 'Your request for the badgeclass {} has been denied by the issuer.'.format(
+            enrollment.badge_class.name)
         enrollment.user.email_user(subject=subject, html_message=html_message)
+        # Clear cache for the enrollments of this badgeclass
+        enrollment.badge_class.remove_cached_data(['cached_pending_enrollments'])
+        enrollment.badge_class.remove_cached_data(['cached_pending_enrollments_including_denied'])
         return Response(data='Succesfully denied enrollment', status=HTTP_200_OK)
 
 
@@ -102,7 +109,6 @@ class BadgeClassLtiContextListView(BaseEntityListView):
     serializer_class = BadgeClassLtiContextSerializer
 
     def get_objects(self, request, **kwargs):
-
         if 'lti_context_id' in kwargs:
             lti_context_id = kwargs['lti_context_id']
             badgeclasses_per_context_id = BadgeClassLtiContext.objects.filter(context_id=lti_context_id).all()
@@ -116,7 +122,6 @@ class BadgeClassLtiContextStudentListView(BaseEntityListView):
     serializer_class = BadgeClassLtiContextStudentSerializer
 
     def get_objects(self, request, **kwargs):
-
         if 'lti_context_id' in kwargs:
             lti_context_id = kwargs['lti_context_id']
             badgeclasses_per_context_id = BadgeClassLtiContext.objects.filter(context_id=lti_context_id).all()
@@ -130,7 +135,6 @@ class BadgeClassLtiContextDetailView(BaseEntityDetailView):
     serializer_class = BadgeClassLtiContextSerializer
 
     def post(self, request, **kwargs):
-
         context_id = request.data['contextId']
         badge_class = BadgeClass.objects.get(entity_id=request.data['badgeClassEntityId'])
         BadgeClassLtiContext.objects.get_or_create(context_id=context_id, badge_class=badge_class)
@@ -148,7 +152,7 @@ class BadgeClassLtiContextDetailView(BaseEntityDetailView):
 class CurrentContextView(BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
 
-    def get(self, request,**kwargs):
+    def get(self, request, **kwargs):
         response = {'loggedin': True,
                     'lticontext': None}
         if not request.user.is_authenticated:
@@ -159,7 +163,5 @@ class CurrentContextView(BaseEntityDetailView):
                 response['lticontext'] = user_current_context_id.context_id
             except Exception as e:
                 pass
-
-
 
         return JsonResponse(response)

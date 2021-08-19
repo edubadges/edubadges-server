@@ -170,7 +170,10 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
         new_instances = serializer.save(created_by=request.user)
         for new_instance in new_instances:
             self.log_create(new_instance)
-
+        # Clear cache for the enrollments of this badgeclass
+        badgeclass.remove_cached_data(['cached_pending_enrollments'])
+        badgeclass.remove_cached_data(['cached_pending_enrollments_including_denied'])
+        badgeclass.remove_cached_data(['cached_assertions'])
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
