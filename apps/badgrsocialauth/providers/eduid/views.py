@@ -231,6 +231,13 @@ def after_terms_agreement(request, **kwargs):
     request.session['lti_roles'] = lti_roles
 
     if not social_account:
+        # This fails if there is already an User account with that email, so we need to delete the old one
+        try:
+            user = BadgeUser.objects.filter(is_teacher=False, email=payload['email']).exclude(id=login.user.id).first()
+            if user:
+                user.delete()
+        except BadgeUser.DoesNotExist:
+            pass
         # Create an eduIDBadge
         create_edu_id_badge_instance(login)
 
