@@ -115,6 +115,10 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         return DirectAward.objects.filter(bundle=self, status='Rejected').count()
 
     @property
+    def direct_award_revoked_count(self):
+        return DirectAward.objects.filter(bundle=self, status='Revoked').count()
+
+    @property
     def url(self):
         return urllib.parse.urljoin(settings.UI_URL,
                                     'badgeclass/{}/direct-awards-bundles'.format(self.badgeclass.entity_id))

@@ -237,6 +237,22 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
+    def create_direct_award_expired_student_mail(direct_award):
+        badgeclass = direct_award.badgeclass
+        template = 'email/expired_direct_award.html'
+        badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
+        email_vars = {
+            'badgeclass_image': badgeclass_image,
+            'issuer_image': badgeclass.issuer.image_url(),
+            'issuer_name': badgeclass.issuer.name,
+            'faculty_name': badgeclass.issuer.faculty.name,
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
+            'badgeclass_description': badgeclass.description,
+            'badgeclass_name': badgeclass.name,
+        }
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_earned_badge_mail(assertion):
         badgeclass = assertion.badgeclass
         template = 'email/earned_badge.html'

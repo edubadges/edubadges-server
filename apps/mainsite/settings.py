@@ -300,6 +300,11 @@ LOGGING = {
             'handlers': ['badgr_debug'],
             'level': 'INFO',
             'propagate': True,
+        },
+        'apscheduler': {
+            'handlers': ['badgr_debug'],
+            'level': 'DEBUG',
+            'propagate': True,
         }
     },
     'formatters': {

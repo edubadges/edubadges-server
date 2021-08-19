@@ -1,7 +1,6 @@
 # Created by wiggins@concentricsky.com on 8/24/15.
 
 
-
 import os
 
 from celery import Celery
@@ -12,4 +11,3 @@ app = Celery('mainsite')
 
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-
