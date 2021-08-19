@@ -26,7 +26,7 @@ def expired_direct_awards(settings):
 
 def start_scheduling(settings):
     scheduler = BackgroundScheduler()
-    options = {"trigger": "interval", "kwargs": {"settings": settings},
+    options = {"trigger": "cron", "kwargs": {"settings": settings},
                "misfire_grace_time": 60 * 60 * 12, "coalesce": True}
 
     scheduler.add_job(func=expired_direct_awards, hour=0, **options)
