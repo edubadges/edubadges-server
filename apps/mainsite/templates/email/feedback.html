@@ -1,0 +1,18 @@
+{% extends 'email/base.html' %}
+
+{% block title %}
+<title>Feedback</title>
+{% endblock %}
+
+{% block content %}
+
+
+<p>Hi,</p>
+<p>User {{ current_user.name }} has provided the following feedback for environment {{ environment }} at {{ date }}:</p>
+
+<div>
+  <p>{{ message }}</p>
+</div>
+<p>Follow-up questions can be send to {{ current_user.email }}</p>
+
+{% endblock %}

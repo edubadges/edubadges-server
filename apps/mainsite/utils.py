@@ -13,6 +13,7 @@ import tempfile
 import urllib.parse
 import uuid
 import webbrowser
+from datetime import datetime
 from io import BytesIO
 from xml.etree import cElementTree as ET
 
@@ -277,6 +278,17 @@ class EmailMessageMaker:
             'direct_award_bundle_url': direct_award_bundle.url,
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
+        }
+        return render_to_string(template, email_vars)
+
+    @staticmethod
+    def create_feedback_mail(current_user, message):
+        template = 'email/feedback.html'
+        email_vars = {
+            'current_user': current_user,
+            'date': datetime.now(),
+            'environment': settings.DOMAIN,
+            'message': message
         }
         return render_to_string(template, email_vars)
 

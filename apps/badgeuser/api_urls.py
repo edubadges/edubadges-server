@@ -1,10 +1,11 @@
 from badgeuser.api import BadgeUserDetail, UserCreateProvisionment, AcceptProvisionmentDetail, \
     UserProvisionmentDetail, AcceptTermsView, PublicTermsView
-from badgeuser.api_v1 import BadgeUserEmailList, BadgeUserEmailDetail
+from badgeuser.api_v1 import BadgeUserEmailList, BadgeUserEmailDetail, FeedbackView
 from django.conf.urls import url
 
 urlpatterns = [
     url(r'^profile$', BadgeUserDetail.as_view(), name='v1_api_user_profile'),
+    url(r'^feedback$', FeedbackView.as_view(), name='v1_api_user_feedback'),
     url(r'^emails$', BadgeUserEmailList.as_view(), name='v1_api_user_emails'),
     url(r'^emails/(?P<id>[^/]+)$', BadgeUserEmailDetail.as_view(), name='v1_api_user_email_detail'),
     url(r'^provision/create$', UserCreateProvisionment.as_view(), name='user_provision_list'),

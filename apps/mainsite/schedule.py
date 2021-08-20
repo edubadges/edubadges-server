@@ -15,13 +15,10 @@ def expired_direct_awards(settings):
     for direct_award in direct_awards:
         html_message = EmailMessageMaker.create_direct_award_expired_student_mail(direct_award)
         direct_award.delete()
-        if settings.LOCAL_DEVELOPMENT_MODE:
-            from mainsite.utils import open_mail_in_browser
-            open_mail_in_browser(html_message)
-            from lxml.etree import strip_tags
-            plain_text = strip_tags(html_message)
-            send_mail(subject='You edubadge has expired',
-                      message=plain_text, html_message=html_message, recipient_list=[direct_award.recipient_email])
+        from lxml.etree import strip_tags
+        plain_text = strip_tags(html_message)
+        send_mail(subject='You edubadge has expired',
+                  message=plain_text, html_message=html_message, recipient_list=[direct_award.recipient_email])
 
 
 def start_scheduling(settings):

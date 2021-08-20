@@ -86,8 +86,6 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
 
     def notify_recipient(self):
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
-        if settings.LOCAL_DEVELOPMENT_MODE:
-            open_mail_in_browser(html_message)
         try:
             EmailBlacklist.objects.get(email=self.recipient_email)
         except EmailBlacklist.DoesNotExist:

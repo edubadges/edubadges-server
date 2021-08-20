@@ -3,12 +3,15 @@
 
 import datetime
 
-from badgeuser.models import CachedEmailAddress
-from badgeuser.serializers import EmailSerializer
+from django.conf import settings
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from badgeuser.models import CachedEmailAddress
+from badgeuser.serializers import EmailSerializer
 from mainsite.exceptions import BadgrApiException400
+from mainsite.utils import EmailMessageMaker, send_mail
 
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
@@ -49,6 +52,7 @@ class BadgeUserEmailView(APIView):
             return None
         else:
             return email_address
+
 
 class BadgeUserEmailDetail(BadgeUserEmailView):
     model = CachedEmailAddress
@@ -106,15 +110,28 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                 email_address.set_last_verification_sent_time(datetime.datetime.now())
             else:
                 remaining_time_obj = RATE_LIMIT_DELTA - (datetime.datetime.now() - last_request_time)
-                remaining_min = (remaining_time_obj.seconds//60)%60
-                remaining_sec = remaining_time_obj.seconds%60
+                remaining_min = (remaining_time_obj.seconds // 60) % 60
+                remaining_sec = remaining_time_obj.seconds % 60
                 remaining_time_rep = "{} minutes and {} seconds".format(remaining_min, remaining_sec)
 
                 return Response("Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
-                 status=status.HTTP_429_TOO_MANY_REQUESTS)
+                                status=status.HTTP_429_TOO_MANY_REQUESTS)
         else:
             raise BadgrApiException400("Can't make unverified email address the primary email address", 105)
 
         serializer = EmailSerializer(email_address, context={'request': request})
         serialized = serializer.data
         return Response(serialized, status=status.HTTP_200_OK)
+
+
+class FeedbackView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, **kwargs):
+        message = request.data['message']
+        html_message = EmailMessageMaker.create_feedback_mail(request.user, message)
+        send_mail(subject='Feedback',
+                  message=message,
+                  html_message=html_message,
+                  recipient_list=[settings.REPORT_RECEIVER_EMAIL])
+        return Response({}, status=status.HTTP_201_CREATED)
