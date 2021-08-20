@@ -255,6 +255,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
 class Query(object):
     issuers = graphene.List(IssuerType)
     badge_classes = graphene.List(BadgeClassType)
+    badge_classes_to_award = graphene.List(BadgeClassType)
     public_badge_classes = graphene.List(BadgeClassType)
     badge_instances = graphene.List(BadgeInstanceType)
     revoked_badge_instances = graphene.List(BadgeInstanceType)
@@ -285,6 +286,10 @@ class Query(object):
     def resolve_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.filter(archived=False)
                 if bc.has_permissions(info.context.user, ['may_read'])]
+
+    def resolve_badge_classes_to_award(self, info, **kwargs):
+        return [bc for bc in BadgeClass.objects.filter(archived=False)
+                if bc.has_permissions(info.context.user, ['may_award'])]
 
     def resolve_public_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.filter(archived=False, is_private=False)]

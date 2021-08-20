@@ -68,6 +68,9 @@ class StudentsEnrolledList(BaseEntityListView):
                 user=request.user,
                 date_consent_given=timezone.now()
             )
+            # Clear cache for the enrollments of this badgeclass
+            badge_class.remove_cached_data(['cached_pending_enrollments'])
+            badge_class.remove_cached_data(['cached_pending_enrollments_including_denied'])
             message = EmailMessageMaker.create_student_badge_request_email(request.user, badge_class)
             request.user.email_user(subject='You have successfully requested an edubadge', html_message=message)
             return Response(data={'status': 'enrolled', 'entity_id': enrollment.entity_id}, status=201)
