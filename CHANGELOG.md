@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2021-08-30
+- Added feedback option.
+- Overview of all open requested edubadges. 
+- Bugfic: multiple emails from same provider are allowed.
+- Use cron for scheduling.
+- Delete expired direct_awards.
+- Clear cache after denied enrollment.
+- Migration for formal non-MBO StudyLoad extensions.
+- New extension TimeInvestment.
+- Show denied enrollments.
+- Bugfix for multiple invites.
+- Send emails async for direct awards.
+- Non-formal badges can be awarded to users with validated name.
+
 ## [4.2.0] - 2021-07-19
 - Updated dependency Django
 
