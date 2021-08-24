@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'theming',
     'signing',
     'staff',
+    'insights',
 
     # api docs
     # 'apispec_drf',

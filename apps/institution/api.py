@@ -1,11 +1,10 @@
-from rest_framework import permissions, status
+from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView, BaseArchiveView
 from institution.models import Faculty, Institution
-from institution.permissions import TeachPermission
 from institution.serializers import FacultySerializer, InstitutionSerializer
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
@@ -70,11 +69,3 @@ class FacultyList(VersionedObjectMixin, BaseEntityListView):
 
     def post(self, request, **kwargs):
         return super(FacultyList, self).post(request, **kwargs)
-
-
-class InsightsView(APIView):
-    permission_classes = (TeachPermission,)
-
-    def post(self, request, **kwargs):
-        c = request.user.institution.objects.badgruser_set.count()
-        return Response({}, status=status.HTTP_200_OK)

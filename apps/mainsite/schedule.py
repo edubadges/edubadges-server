@@ -5,6 +5,12 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
+def insights(settings):
+    from badgeuser.models import BadgeUser
+    from issuer.models import BadgeInstance
+    from directaward.models import DirectAward
+
+
 def expired_direct_awards(settings):
     from directaward.models import DirectAward
     from mainsite.utils import EmailMessageMaker

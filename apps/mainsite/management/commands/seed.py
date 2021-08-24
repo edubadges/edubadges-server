@@ -1,11 +1,11 @@
 import traceback
 from os import listdir, environ
 from os.path import dirname, basename, isfile, join
-
+from django.utils import timezone
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
-
+from random import randrange
 from badgeuser.models import BadgeUser
 from mainsite.tests.base import SetupHelper
 from mainsite.seeds.constants import INSTITUTION_UNIVERSITY_EXAMPLE_ORG
@@ -106,4 +106,5 @@ def run_scaled_seed(scale):
         assertion = BadgeInstance.objects.create(
             badgeclass=badgeclass, recipient_identifier=recipient.get_recipient_identifier(),
             created_by=issuing_teacher,
+            created_at=timezone.now().replace(month=randrange(12) + 1),
             user=recipient)
