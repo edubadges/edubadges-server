@@ -69,11 +69,13 @@ class DirectAwardAccept(BaseEntityDetailView):
                 raise BadgrValidationError("Cannot accept direct award, must accept badgeclass terms first", 999)
             assertion = directaward.award(recipient=request.user)
             directaward.badgeclass.remove_cached_data(['cached_direct_awards'])
+            directaward.bundle.remove_cached_data(['cached_direct_awards'])
             directaward.delete()
             return Response({'entity_id': assertion.entity_id}, status=status.HTTP_201_CREATED)
         elif not request.data.get('accept', True):  # has rejected it
             directaward.status = DirectAward.STATUS_REJECTED  # reject it
             directaward.save()
             directaward.badgeclass.remove_cached_data(['cached_direct_awards'])
+            directaward.bundle.remove_cached_data(['cached_direct_awards'])
             return Response({'rejected': True}, status=status.HTTP_200_OK)
         raise BadgrValidationError('Neither accepted or rejected the direct award', 999)
