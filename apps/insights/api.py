@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 from badgeuser.models import BadgeUser
 from directaward.models import DirectAward
 from insights.permissions import TeachPermission
-from issuer.models import BadgeInstance
+from institution.models import Faculty
+from issuer.models import BadgeInstance, Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
 
 
@@ -66,12 +67,13 @@ class InsightsView(APIView):
                     f"badge_class__issuer__faculty__{name_lang}") \
             .order_by('week')
 
-        users_count = BadgeUser.objects.filter(is_teacher=True, institution=institution).count()
-
         res = {
             'assertions': list(assertions_query_set.all()),
             'direct_awards': list(direct_awards_query_set.all()),
             'enrollments': list(enrollments_query_set.all()),
-            'users_count': users_count
+            'users_count': BadgeUser.objects.filter(is_teacher=True, institution=institution).count(),
+            'faculties_count': Faculty.objects.filter(institution=institution).count(),
+            'issuers_count': Issuer.objects.filter(faculty__institution=institution).count(),
+            'badge_class_count': BadgeClass.objects.filter(issuer__faculty__institution=institution).count()
         }
         return Response(res, status=status.HTTP_200_OK)
