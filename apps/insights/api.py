@@ -6,7 +6,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.db.models import Q
 from badgeuser.models import BadgeUser
 from directaward.models import DirectAward
 from insights.permissions import TeachPermission
@@ -57,6 +57,7 @@ class InsightsView(APIView):
 
         enrollments_query_set = StudentsEnrolled.objects \
             .filter(badge_class__issuer__faculty__institution=institution) \
+            .filter(Q(badge_instance_id__isnull=True) | Q(denied=True)) \
             .filter(date_created__gte=start_of_year) \
             .filter(date_created__lt=end_of_year) \
             .annotate(week=TruncWeek('date_created')).values('week') \
