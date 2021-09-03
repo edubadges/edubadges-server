@@ -7,4 +7,4 @@ class TeachPermission(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user and request.user.is_teacher
+        return request.user and hasattr(request.user, 'is_teacher') and request.user.is_teacher
