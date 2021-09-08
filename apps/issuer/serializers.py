@@ -160,27 +160,21 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions
         before the instance is saved (i.e. the save() method is called)"""
         errors = OrderedDict()
-        institution = self.context['request'].user.institution
-        if institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
-            if not data.get('name_dutch', False):
-                e = OrderedDict([('name_dutch', [ErrorDetail('Dutch name is required', code=912)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
-            if not data.get('description_dutch', False):
-                e = OrderedDict([('description_dutch', [ErrorDetail('Dutch description is required', code=913)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
-            if not data.get('url_dutch', False):
-                e = OrderedDict([('url_dutch', [ErrorDetail('Dutch url is required', code=915)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
-        if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
-            if not data.get('name_english', False):
-                e = OrderedDict([('name_english', [ErrorDetail('English name is required', code=924)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
-            if not data.get('description_english', False):
-                e = OrderedDict([('description_english', [ErrorDetail('English description is required', code=925)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
-            if not data.get('url_english', False):
-                e = OrderedDict([('url_english', [ErrorDetail('English url is required', code=923)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('name_dutch', False) and not data.get('name_english', False):
+            e = OrderedDict([('name_dutch', [ErrorDetail('Dutch or English name is required', code=912)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+            e = OrderedDict([('name_english', [ErrorDetail('English or Dutch name is required', code=924)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('description_dutch', False) and not data.get('description_english', False):
+            e = OrderedDict([('description_dutch', [ErrorDetail('Dutch or English description is required', code=913)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+            e = OrderedDict([('description_english', [ErrorDetail('English or Dutch description is required', code=925)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if not data.get('url_dutch', False) and not data.get('url_english', False):
+            e = OrderedDict([('url_dutch', [ErrorDetail('Dutch or English url is required', code=915)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+            e = OrderedDict([('url_english', [ErrorDetail('English or Dutch url is required', code=923)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
