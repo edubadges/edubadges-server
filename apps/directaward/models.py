@@ -8,7 +8,7 @@ from django.utils.html import strip_tags
 from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BaseAuditedModel, EmailBlacklist
-from mainsite.utils import open_mail_in_browser, send_mail, EmailMessageMaker
+from mainsite.utils import send_mail, EmailMessageMaker
 
 
 class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
@@ -16,6 +16,13 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     eppn = models.CharField(max_length=254)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     bundle = models.ForeignKey('directaward.DirectAwardBundle', null=True, on_delete=models.CASCADE)
+
+    # To create BadgeInstanceEvidence after claim from student
+    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
+    narrative = models.TextField(blank=True, null=True, default=None)
+    name = models.CharField(max_length=255, blank=True, null=True, default=None)
+    description = models.TextField(blank=True, null=True, default=None)
+
     STATUS_UNACCEPTED = 'Unaccepted'
     STATUS_REVOKED = 'Revoked'
     STATUS_REJECTED = 'Rejected'
@@ -65,13 +72,23 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
             allowed = any(identifier in schac_homes for identifier in identifiers) or recipient.validated_name
         if not allowed:
             raise BadgrValidationError('Cannot award, you are not a member of the institution of the badgeclass', 999)
+        evidence = None
+        if self.evidence_url or self.narrative:
+            evidence = [{
+                'evidence_url': self.evidence_url,
+                'narrative': self.narrative,
+                'description': self.description,
+                'name': self.name
+            }]
         assertion = self.badgeclass.issue(recipient=recipient,
-                                     created_by=self.created_by,
-                                     acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
-                                     recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-                                     send_email=False,
-                                     award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD,
-                                     direct_award_bundle=self.bundle)
+                                          created_by=self.created_by,
+                                          acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
+                                          recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
+                                          send_email=False,
+                                          award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD,
+                                          direct_award_bundle=self.bundle,
+                                          evidence=evidence,
+                                          include_evidence=evidence is not None)
         # delete any pending enrollments for this badgeclass and user
         recipient.cached_pending_enrollments().filter(badge_class=self.badgeclass).delete()
         recipient.remove_cached_data(['cached_pending_enrollments'])

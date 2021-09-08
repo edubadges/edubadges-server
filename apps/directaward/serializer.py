@@ -1,6 +1,8 @@
+import threading
+
 from django.db import IntegrityError, transaction
 from rest_framework import serializers
-import threading
+
 from directaward.models import DirectAward, DirectAwardBundle
 from issuer.serializers import BadgeClassSlugRelatedField
 from mainsite.exceptions import BadgrValidationError
@@ -14,6 +16,10 @@ class DirectAwardSerializer(serializers.Serializer):
     eppn = serializers.CharField(required=False)
     recipient_email = serializers.EmailField(required=False)
     status = serializers.CharField(required=False)
+    evidence_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
+    narrative = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    name = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     def update(self, instance, validated_data):
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
@@ -53,6 +59,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 def send_mail(awards):
                     for da in awards:
                         da.notify_recipient()
+
                 thread = threading.Thread(target=send_mail, args=(successfull_direct_awards,))
                 thread.start()
             if batch_mode:

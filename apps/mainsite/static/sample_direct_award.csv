@@ -1,2 +1,5 @@
-john@example.org,123456789@example.org
-mary@shachome.org,eppn@shachome.org
+Recipient mailadres;Recipient EPPN;Narrative (optional);Evidence URL (optional);Evidence NAME (optional);Evidence Description (optional)
+john@example.org;123456789@example.org;Lorum ipsum dolor set amet.;https://evicence.url/;Thesis of John;Description of the evidence
+andrew@example.org;andrew@example.org;;https://evicence.url/;;
+mary@shachome.org;eppn@shachome.org;;;;
+peter@shachome.org;peter@shachome.org
