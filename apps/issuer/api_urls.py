@@ -2,7 +2,8 @@ from django.conf.urls import url
 
 from issuer.api import (IssuerDetail, BadgeClassDetail, BatchAwardEnrollments,
                         TimestampedBadgeInstanceList, BatchSignAssertions, BadgeClassList, IssuerList,
-                        IssuerDeleteView, BadgeClassDeleteView, BadgeInstanceRevoke)
+                        IssuerDeleteView, BadgeClassDeleteView, BadgeInstanceRevoke, BadgeInstanceCollectionDetail,
+                        BadgeInstanceCollectionDetailList)
 
 urlpatterns = [
     url(r'^create$', IssuerList.as_view(), name='issuer_list'),
@@ -21,4 +22,8 @@ urlpatterns = [
         BatchSignAssertions.as_view(), name='batch_sign'),
     url(r'^timestamped-assertions$',
         TimestampedBadgeInstanceList.as_view(), name='timestamped_badgeinstances'),
+    url(r'^collections/create$', BadgeInstanceCollectionDetailList.as_view(), name='badge_collection_create'),
+    url(r'^collections/edit/(?P<entity_id>[^/]+)$', BadgeInstanceCollectionDetail.as_view(), name='badge_collection_edit'),
+    url(r'^collections/delete/(?P<entity_id>[^/]+)$', BadgeInstanceCollectionDetail.as_view(), name='badge_collection_delete'),
+
 ]

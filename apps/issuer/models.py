@@ -875,7 +875,8 @@ class BadgeInstance(BaseAuditedModel,
     award_type = models.CharField(max_length=255, choices=AWARD_TYPE_CHOICES, default=AWARD_TYPE_REQUESTED,
                                   blank=False, null=False)
 
-    direct_award_bundle = models.ForeignKey('directaward.DirectAwardBundle', blank=True, null=True, on_delete=models.PROTECT)
+    direct_award_bundle = models.ForeignKey('directaward.DirectAwardBundle', blank=True, null=True,
+                                            on_delete=models.PROTECT)
 
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
 
@@ -1419,3 +1420,19 @@ class BadgeInstanceExtension(BaseOpenBadgeExtension):
     def delete(self, *args, **kwargs):
         super(BadgeInstanceExtension, self).delete(*args, **kwargs)
         self.badgeinstance.publish()
+
+
+class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+    name = models.CharField(max_length=255, blank=True, null=True, default=None)
+    description = models.TextField(blank=True, null=True, default=None)
+    user = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.CASCADE)
+    public = models.BooleanField(default=False)
+    badge_instances = models.ManyToManyField('issuer.BadgeInstance', blank=True)
+
+    def validate_unique(self, exclude=None):
+        if self.__class__.objects \
+                .filter(name=self.name, user=self.request.user) \
+                .exclude(pk=self.pk) \
+                .exists():
+            raise IntegrityError("BadgeInstanceCollection with this name already exists for this user.")
+        return super(BadgeInstanceCollection, self).validate_unique(exclude=exclude)

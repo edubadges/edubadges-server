@@ -1,20 +1,17 @@
 import atexit
 import logging
 from datetime import datetime, timedelta
-
+from django.db import connections
 from apscheduler.schedulers.background import BackgroundScheduler
-
-
-def insights(settings):
-    from badgeuser.models import BadgeUser
-    from issuer.models import BadgeInstance
-    from directaward.models import DirectAward
 
 
 def expired_direct_awards(settings):
     from directaward.models import DirectAward
     from mainsite.utils import EmailMessageMaker
     from mainsite.utils import send_mail
+
+    # Prevent MySQLdb._exceptions.OperationalError: (2006, 'MySQL server has gone away')
+    connections.close_all()
 
     half_year_ago = datetime.utcnow() - timedelta(days=6 * 30)
     direct_awards = DirectAward.objects.filter(created_at__lt=half_year_ago, status='Unaccepted').all()
@@ -32,7 +29,7 @@ def start_scheduling(settings):
     options = {"trigger": "cron", "kwargs": {"settings": settings},
                "misfire_grace_time": 60 * 60 * 12, "coalesce": True}
 
-    scheduler.add_job(func=expired_direct_awards, hour=0, **options)
+    scheduler.add_job(func=expired_direct_awards, hour=9, **options)
     scheduler.start()
 
     logger = logging.getLogger('Badgr.Debug')
