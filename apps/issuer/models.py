@@ -1430,9 +1430,12 @@ class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, cachemodel.
     badge_instances = models.ManyToManyField('issuer.BadgeInstance', blank=True)
 
     def validate_unique(self, exclude=None):
-        if self.__class__.objects \
-                .filter(name=self.name, user=self.request.user) \
-                .exclude(pk=self.pk) \
-                .exists():
-            raise IntegrityError("BadgeInstanceCollection with this name already exists for this user.")
+        if self.__class__.objects.filter(name=self.name, user=self.user).exclude(pk=self.pk).exists():
+            raise BadgrValidationFieldError('name',
+                                            "BadgeInstanceCollection with this name already exists for this user.",
+                                            911)
         return super(BadgeInstanceCollection, self).validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        return super(BadgeInstanceCollection, self).save(*args, **kwargs)
