@@ -204,13 +204,13 @@ class BadgeInstanceRevoke(BaseEntityDetailView):
 
 class BadgeInstanceCollectionDetail(BaseEntityDetailView):
     model = BadgeInstanceCollection
-    serializer_class = BadgeInstanceCollectionSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, )
+    serializer_class = BadgeInstanceCollectionSerializer
     http_method_names = ['delete','put']
 
 
 class BadgeInstanceCollectionDetailList(BaseEntityListView):
     model = BadgeInstanceCollection
     permission_classes = (AuthenticatedWithVerifiedEmail,)   # permissioned in serializer
-    v1_serializer_class = BadgeInstanceCollectionSerializer
+    serializer_class = BadgeInstanceCollectionSerializer
     http_method_names = ['post']
