@@ -601,6 +601,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         param: affiliations: list of dicts [{'eppn': <eppn>m 'schac_home': <schac_home>}]
         """
         for affiliation in affiliations:
+            affiliation['eppn'] = affiliation['eppn'].lower()
             StudentAffiliation.objects.get_or_create(user=self, **affiliation)
         self.remove_cached_data(['cached_affiliations'])
 
