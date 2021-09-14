@@ -43,6 +43,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 direct_award_bundle = DirectAwardBundle.objects.create(initial_total=direct_awards.__len__(),
                                                                        **validated_data)
                 for direct_award in direct_awards:
+                    direct_award['eppn'] = direct_award['eppn'].lower()
                     try:
                         da_created = DirectAward.objects.create(bundle=direct_award_bundle, badgeclass=badgeclass,
                                                                 **direct_award)
