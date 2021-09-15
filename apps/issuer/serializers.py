@@ -492,7 +492,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
 
 
 class BadgeInstanceCollectionSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
+    name = serializers.CharField(max_length=254)
     description = serializers.CharField(max_length=256, required=False, allow_null=True, allow_blank=True)
     public = serializers.BooleanField(required=False, default=False)
     badge_instances = PrimaryKeyRelatedField(many=True, queryset=BadgeInstance.objects.all(), required=False)

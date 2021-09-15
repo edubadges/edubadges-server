@@ -1423,7 +1423,7 @@ class BadgeInstanceExtension(BaseOpenBadgeExtension):
 
 
 class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
-    name = models.CharField(max_length=255, blank=True, null=True, default=None)
+    name = models.CharField(max_length=255, blank=False, null=False, default=None)
     description = models.TextField(blank=True, null=True, default=None)
     user = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.CASCADE)
     public = models.BooleanField(default=False)
@@ -1433,7 +1433,7 @@ class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, cachemodel.
         if self.__class__.objects.filter(name=self.name, user=self.user).exclude(pk=self.pk).exists():
             raise BadgrValidationFieldError('name',
                                             "BadgeInstanceCollection with this name already exists for this user.",
-                                            911)
+                                            936)
         return super(BadgeInstanceCollection, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
