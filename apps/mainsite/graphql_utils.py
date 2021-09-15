@@ -24,9 +24,9 @@ def resolver_blocker_only_for_current_user(f):
     def wrapper(*args):
         instance = args[0]
         info = args[1]
-        if info.context.user is not instance:
-            raise GraphQLException('This call is only for the current user')
-        return f(*args)
+        if info.context.user == instance or (hasattr(instance, 'user') and getattr(instance, 'user') == info.context.user):
+            return f(*args)
+        raise GraphQLException('This call is only for the current user')
     return wrapper
 
 

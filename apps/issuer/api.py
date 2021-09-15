@@ -6,9 +6,10 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, BaseArchiveView
-from issuer.models import Issuer, BadgeClass, BadgeInstance
+from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceCollection
 from issuer.permissions import AwardedAssertionsBlock
-from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer
+from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer, \
+    BadgeInstanceCollectionSerializer
 from mainsite.exceptions import BadgrApiException400, BadgrValidationFieldError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from signing import tsob
@@ -199,3 +200,17 @@ class BadgeInstanceRevoke(BaseEntityDetailView):
             else:
                 raise BadgrApiException400("You do not have permission", 100)
         return Response({"result":"ok"}, status=status.HTTP_200_OK)
+
+
+class BadgeInstanceCollectionDetail(BaseEntityDetailView):
+    model = BadgeInstanceCollection
+    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    serializer_class = BadgeInstanceCollectionSerializer
+    http_method_names = ['delete','put']
+
+
+class BadgeInstanceCollectionDetailList(BaseEntityListView):
+    model = BadgeInstanceCollection
+    permission_classes = (AuthenticatedWithVerifiedEmail,)   # permissioned in serializer
+    serializer_class = BadgeInstanceCollectionSerializer
+    http_method_names = ['post']

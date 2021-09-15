@@ -6,11 +6,11 @@ from directaward.schema import DirectAwardType, DirectAwardBundleType
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
     StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students, \
-    DefaultLanguageResolverMixin
+    DefaultLanguageResolverMixin, resolver_blocker_only_for_current_user
 from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
-    BadgeClassAlignment, BadgeClassTag, BadgeInstanceEvidence
+    BadgeClassAlignment, BadgeClassTag, BadgeInstanceEvidence, BadgeInstanceCollection
 
 
 class ExtensionResolverMixin(object):
@@ -150,7 +150,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
 
     class Meta:
         model = BadgeInstance
-        fields = ('entity_id', 'badgeclass', 'identifier', 'image', 'updated_at',
+        fields = ('id', 'entity_id', 'badgeclass', 'identifier', 'image', 'updated_at',
                   'recipient_identifier', 'recipient_type', 'revoked', 'issued_on',
                   'revocation_reason', 'expires_at', 'acceptance', 'created_at',
                   'public', 'award_type')
@@ -161,6 +161,22 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
     def resolve_evidences(self, info, **kwargs):
         return self.cached_evidence()
 
+
+class BadgeInstanceCollectionType(DjangoObjectType,):
+
+    badge_instances = graphene.List(BadgeInstanceType)
+    public_badge_instances = graphene.List(BadgeInstanceType)
+
+    class Meta:
+        model = BadgeInstanceCollection
+        fields = ('id', 'entity_id', 'name', 'description', 'public', 'updated_at', 'created_at')
+
+    @resolver_blocker_only_for_current_user
+    def resolve_badge_instances(self, info, **kwargs):
+        return list(BadgeInstance.objects.filter(badgeinstancecollection=self))
+
+    def resolve_public_badge_instances(self, info, **kwargs):
+        return list(BadgeInstance.objects.filter(badgeinstancecollection=self, public=True, revoked=False))
 
 class BadgeInstanceConnection(Connection):
     class Meta:
@@ -259,10 +275,12 @@ class Query(object):
     public_badge_classes = graphene.List(BadgeClassType)
     badge_instances = graphene.List(BadgeInstanceType)
     revoked_badge_instances = graphene.List(BadgeInstanceType)
+    badge_instance_collections = graphene.List(BadgeInstanceCollectionType)
     issuer = graphene.Field(IssuerType, id=graphene.String())
     public_issuer = graphene.Field(IssuerType, id=graphene.String())
     badge_class = graphene.Field(BadgeClassType, id=graphene.String(), days=graphene.Int())
     badge_instance = graphene.Field(BadgeInstanceType, id=graphene.String())
+    badge_instance_collection = graphene.Field(BadgeInstanceCollectionType, id=graphene.String())
     badge_instances_count = graphene.Int()
     badge_classes_count = graphene.Int()
 
@@ -309,8 +327,19 @@ class Query(object):
             if bc.user_id == info.context.user.id:
                 return bc
 
+    def resolve_badge_instance_collection(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            bc = BadgeInstanceCollection.objects.get(entity_id=id)
+            # Called anonymous in public collection page
+            if bc.public or bc.user_id == info.context.user.id:
+                return bc
+
+    def resolve_badge_instance_collections(self, info, **kwargs):
+        return BadgeInstanceCollection.objects.filter(user=info.context.user)
+
     def resolve_badge_instances(self, info, **kwargs):
-        return list(filter(lambda bi: bi.revoked == False, info.context.user.cached_badgeinstances()))
+        return info.context.user.cached_badgeinstances()
 
     def resolve_revoked_badge_instances(self, info, **kwargs):
         return list(filter(lambda bi: bi.revoked == True, info.context.user.cached_badgeinstances()))

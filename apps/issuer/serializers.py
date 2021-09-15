@@ -29,7 +29,7 @@ from mainsite.serializers import StripTagsCharField, MarkdownCharField, Original
 from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
 from mainsite.validators import BadgeExtensionValidator
 from . import utils
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceCollection
 
 
 class IssuerSlugRelatedField(BaseSlugRelatedField):
@@ -166,9 +166,11 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
             e = OrderedDict([('name_english', [ErrorDetail('English or Dutch name is required', code=924)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if not data.get('description_dutch', False) and not data.get('description_english', False):
-            e = OrderedDict([('description_dutch', [ErrorDetail('Dutch or English description is required', code=913)])])
+            e = OrderedDict(
+                [('description_dutch', [ErrorDetail('Dutch or English description is required', code=913)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
-            e = OrderedDict([('description_english', [ErrorDetail('English or Dutch description is required', code=925)])])
+            e = OrderedDict(
+                [('description_english', [ErrorDetail('English or Dutch description is required', code=925)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if not data.get('url_dutch', False) and not data.get('url_english', False):
             e = OrderedDict([('url_dutch', [ErrorDetail('Dutch or English url is required', code=915)])])
@@ -487,3 +489,35 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         # delete the pending direct awards for this badgeclass and this user
         badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns).delete()
         return assertion
+
+
+class BadgeInstanceCollectionSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=254)
+    description = serializers.CharField(max_length=256, required=False, allow_null=True, allow_blank=True)
+    public = serializers.BooleanField(required=False, default=False)
+    badge_instances = PrimaryKeyRelatedField(many=True, queryset=BadgeInstance.objects.all(), required=False)
+
+    class Meta:
+        model = BadgeInstanceCollection
+
+    def create(self, validated_data):
+        instance = BadgeInstanceCollection.objects.create(name=validated_data['name'],
+                                                          description=validated_data.get('description'),
+                                                          public=validated_data.get('public', False))
+        instance.user = self.context['request'].user
+        instance.badge_instances.set(validated_data.get('badge_instances', []))
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data if attr != 'badge_instances']
+        instance.save()
+        instance.badge_instances.set(validated_data.get('badge_instances', []))
+        return instance
+
+    def validate_badge_instances(self, badge_instances):
+        user = self.context['request'].user
+        for bc in badge_instances:
+            if bc.user != user:
+                raise IntegrityError("BadgeInstance must be owned by the current user.")
+        return badge_instances
