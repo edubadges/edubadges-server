@@ -3,7 +3,7 @@ from django.http import Http404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
 
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, BaseArchiveView
 from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceCollection
@@ -41,6 +41,25 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
 class BadgeClassDeleteView(BaseArchiveView):
     model = BadgeClass
     v1_serializer_class = BadgeClassSerializer
+
+
+class BadgeClassArchiveView(BaseEntityDetailView):
+    model = BadgeClass
+    v1_serializer_class = BadgeClassSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    http_method_names = ['put']
+
+    def put(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=HTTP_404_NOT_FOUND)
+        if request.data['archive']:
+            obj.archived = False
+            obj.save()
+        else:
+            obj.archived = True
+            obj.save()
+        return Response(status=HTTP_204_NO_CONTENT, data={})
 
 
 class IssuerDeleteView(BaseArchiveView):

@@ -390,6 +390,7 @@ class BadgeClassJson(JSONComponentView):
         if expand_awards:
             json['award_allowed_institutions'] = [inst.name for inst in self.current_object.award_allowed_institutions.all()]
             json['formal'] = self.current_object.formal
+            json['archived'] = self.current_object.archived
         if 'issuer' in expands:
             json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version,
                                                                         expand_institution=True,

@@ -265,12 +265,11 @@ class Issuer(EntityUserProvisionmentMixin,
 
     @property
     def badgeclasses_count(self):
-        return BadgeClass.objects.filter(issuer=self,
-                                         archived=False).count()
+        return BadgeClass.objects.filter(issuer=self).count()
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_badgeclasses(self):
-        return list(self.badgeclasses.filter(archived=False))
+        return list(self.badgeclasses.all())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_assertions(self):
@@ -494,6 +493,10 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     class Meta:
         verbose_name_plural = "Badge classes"
+
+    @property
+    def may_archive(self):
+        return True
 
     def get_report(self):
         total_assertions_formal = 0

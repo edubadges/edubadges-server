@@ -188,7 +188,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
                      DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
         model = BadgeClass
-        fields = ('name', 'entity_id', 'issuer', 'image', 'staff',
+        fields = ('name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
                   'description', 'criteria_url', 'criteria_text', 'is_private',
                   'created_at', 'expiration_period', 'public_url', 'assertions_count',
                   'content_type_id', 'formal', 'evidence_required', 'narrative_required')
@@ -302,7 +302,7 @@ class Query(object):
             return issuer
 
     def resolve_badge_classes(self, info, **kwargs):
-        return [bc for bc in BadgeClass.objects.filter(archived=False)
+        return [bc for bc in BadgeClass.objects.all()
                 if bc.has_permissions(info.context.user, ['may_read'])]
 
     def resolve_badge_classes_to_award(self, info, **kwargs):
@@ -310,12 +310,12 @@ class Query(object):
                 if bc.has_permissions(info.context.user, ['may_award'])]
 
     def resolve_public_badge_classes(self, info, **kwargs):
-        return [bc for bc in BadgeClass.objects.filter(archived=False, is_private=False)]
+        return [bc for bc in BadgeClass.objects.filter(is_private=False)]
 
     def resolve_badge_class(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            bc = BadgeClass.objects.get(entity_id=id, archived=False)
+            bc = BadgeClass.objects.get(entity_id=id)
             # Student's who are logged in need to access this to start the enrollment
             if (hasattr(info.context.user, 'is_student') and info.context.user.is_student) or bc.has_permissions(info.context.user, ['may_read']):
                 return bc

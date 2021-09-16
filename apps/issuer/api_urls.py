@@ -3,7 +3,7 @@ from django.conf.urls import url
 from issuer.api import (IssuerDetail, BadgeClassDetail, BatchAwardEnrollments,
                         TimestampedBadgeInstanceList, BatchSignAssertions, BadgeClassList, IssuerList,
                         IssuerDeleteView, BadgeClassDeleteView, BadgeInstanceRevoke, BadgeInstanceCollectionDetail,
-                        BadgeInstanceCollectionDetailList)
+                        BadgeInstanceCollectionDetailList, BadgeClassArchiveView)
 
 urlpatterns = [
     url(r'^create$', IssuerList.as_view(), name='issuer_list'),
@@ -15,6 +15,8 @@ urlpatterns = [
         BadgeClassDetail.as_view(), name='badgeclass_detail'),
     url(r'^badgeclasses/delete/(?P<entity_id>[^/]+)$',
         BadgeClassDeleteView.as_view(), name='badgeclass_delete'),
+    url(r'^badgeclasses/archive/(?P<entity_id>[^/]+)$',
+        BadgeClassArchiveView.as_view(), name='badgeclass_archive'),
     url(r'^badgeclasses/award-enrollments/(?P<entity_id>[^/]+)$',
         BatchAwardEnrollments.as_view(), name='badgeclass_award_enrollments'),
     url(r'^revoke-assertions$', BadgeInstanceRevoke.as_view(), name='badgeinstance_revoke'),
