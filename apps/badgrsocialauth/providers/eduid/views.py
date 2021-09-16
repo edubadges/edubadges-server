@@ -213,6 +213,9 @@ def after_terms_agreement(request, **kwargs):
     for info in eppn_json:
         request.user.add_affiliations([{'eppn': info["eppn"].lower(), 'schac_home': info["schac_home_organization"]}])
         logger.info(f"Stored affiliations {info['eppn']} {info['schac_home_organization']}")
+    validated_names = [info['validated_name'] for info in eppn_json if 'validated_name' in info]
+    if len(validated_names) > 0:
+        request.user.validated_name = validated_names[0]
     request.user.save()
 
     # create lti_connection
