@@ -191,7 +191,8 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         fields = ('name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
                   'description', 'criteria_url', 'criteria_text', 'is_private',
                   'created_at', 'expiration_period', 'public_url', 'assertions_count',
-                  'content_type_id', 'formal', 'evidence_required', 'narrative_required')
+                  'content_type_id', 'formal', 'evidence_required', 'narrative_required',
+                  'award_non_validated_name_allowed')
 
     direct_awards = graphene.List(DirectAwardType)
     direct_award_bundles = graphene.List(DirectAwardBundleType)

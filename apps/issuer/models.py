@@ -483,6 +483,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     is_private = models.BooleanField(default=False)
     narrative_required = models.BooleanField(default=False)
     evidence_required = models.BooleanField(default=False)
+    award_non_validated_name_allowed = models.BooleanField(default=False)
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = cachemodel.CacheModelManager()
@@ -726,7 +727,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     def issue(self, recipient, created_by=None, allow_uppercase=False, extensions=None, send_email=True,
               enforce_validated_name=True, include_evidence=True, **kwargs):
-        if not recipient.validated_name and enforce_validated_name:
+        if not recipient.validated_name and enforce_validated_name and not self.award_non_validated_name_allowed:
             raise serializers.ValidationError('You need a validated_name from an Institution to issue badges.')
         assertion = BadgeInstance.objects.create(
             badgeclass=self, recipient_identifier=recipient.get_recipient_identifier(), created_by=created_by,

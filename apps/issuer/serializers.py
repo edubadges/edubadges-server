@@ -209,6 +209,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     is_private = serializers.BooleanField(required=False, default=False)
     narrative_required = serializers.BooleanField(required=False, default=False)
     evidence_required = serializers.BooleanField(required=False, default=False)
+    award_non_validated_name_allowed = serializers.BooleanField(required=False, default=False)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)

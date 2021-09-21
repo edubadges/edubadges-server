@@ -430,7 +430,7 @@ class UserPermissionsMixin(object):
             All revoked: May enroll
         """
         social_account = self.get_social_account()
-        if not social_account.user.validated_name:
+        if not social_account.user.validated_name and not badge_class.award_non_validated_name_allowed:
             if raise_exception:
                 raise BadgrApiException400('May not enroll: no validated name', 209)
             return False
