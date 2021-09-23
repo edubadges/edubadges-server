@@ -1,0 +1,27 @@
+{
+  "type": "Assertion",
+  "id": "https://api.eu.badgr.io/public/assertions/10Ou1MgvRRCEXvZufypxeA",
+  "@context": "https://w3id.org/openbadges/v2",
+  "recipient": {
+    "type": "email",
+    "salt": "NC2B33PNgKrxBWsk",
+    "hashed": true,
+    "identity": "sha256$a472131bd624e0bb0a77b233dacdfea35c65d1e31c9aa51e037966d1e690789b"
+  },
+  "badge": "https://api.eu.badgr.io/public/badges/PYVOSHayTriC7-dXALyZbQ",
+  "issuedOn": "2021-09-22T22:00:00Z",
+  "image": {
+    "id": "https://api.eu.badgr.io/public/assertions/10Ou1MgvRRCEXvZufypxeA/image"
+  },
+  "narrative": "Some narrative for example purposes",
+  "expires": "2023-10-10T22:00:00Z",
+  "revoked": false,
+  "extensions:recipientProfile": {
+    "@context": "https://openbadgespec.org/extensions/recipientProfile/context.json",
+    "type": [
+      "Extension",
+      "extensions:RecipientProfile"
+    ],
+    "name": "Okke Harsta"
+  }
+}
