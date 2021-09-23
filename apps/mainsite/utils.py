@@ -4,6 +4,7 @@ Utility functions and constants that might be used across the project.
 
 import base64
 import hashlib
+import cairosvg
 import io
 import math
 import os
@@ -150,7 +151,16 @@ class EmailMessageMaker:
 
     @staticmethod
     def _create_example_image(badgeclass):
-        background = Image.open(badgeclass.image.path).convert("RGBA")
+        path = badgeclass.image.path
+        if path.endswith('.svg'):
+            with open(path, 'rb') as input_svg:
+                svg_buf = io.BytesIO()
+                c = cairosvg.svg2png(file_obj=input_svg)
+                svg_buf.write(c)
+                background = Image.open(svg_buf).convert("RGBA")
+        else:
+            background = Image.open(badgeclass.image.path).convert("RGBA")
+
         overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
         if overlay.width != background.width:
             width_ratio = background.width / overlay.width

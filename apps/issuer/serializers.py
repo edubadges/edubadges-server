@@ -242,10 +242,10 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
             image = resize_image(image)
             app = BadgrApp.objects.get_current(self.context.get('request', None))
-            if app.is_demo_environment:
-                image = add_watermark(image)
             if verify_svg(image):
                 image = scrub_svg_image(image)
+            elif app.is_demo_environment:
+                image = add_watermark(image)
         return image
 
     def validate_criteria_text(self, criteria_text):

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><svg baseProfile="full" height="200" version="1.1" width="300" xmlns="http://www.w3.org/2000/svg" xmlns:openbadges="http://openbadges.org"><openbadges:assertion verify="http://localhost:8000/public/assertions/0SiqaDWfS3CXi2gCg72j_A"><![CDATA[{
+  "@context": "https://w3id.org/openbadges/v2",
+  "type": "Assertion",
+  "id": "http://localhost:8000/public/assertions/0SiqaDWfS3CXi2gCg72j_A",
+  "badge": "http://localhost:8000/public/badges/GFhnhuqSSHyTdJwiJwozwA",
+  "image": "http://localhost:8000/public/assertions/0SiqaDWfS3CXi2gCg72j_A/image",
+  "verification": {
+    "type": "HostedBadge"
+  },
+  "evidence": [],
+  "issuedOn": "2021-09-22T13:39:24.228929+00:00",
+  "updatedAt": "2021-09-22T15:39:24.229315",
+  "recipient": {
+    "hashed": true,
+    "type": "id",
+    "identity": "sha256$29ab2148925fe34809a22cba1e38ed4d4287b6697e5dd92ad8032e57a2ea2604",
+    "salt": "cf683b4419ad45cc9298a67ce4685d1c"
+  },
+  "extensions:LanguageExtension": {
+    "@context": "http://127.0.0.1:8000/static/extensions/LanguageExtension/context.json",
+    "type": [
+      "Extension",
+      "extensions:LanguageExtension"
+    ],
+    "Language": "en_EN"
+  },
+  "extensions:LearningOutcomeExtension": {
+    "@context": "http://127.0.0.1:8000/static/extensions/LearningOutcomeExtension/context.json",
+    "type": [
+      "Extension",
+      "extensions:LearningOutcomeExtension"
+    ],
+    "LearningOutcome": "LOL"
+  }
+}]]></openbadges:assertion>
+
+  <rect fill="red" height="100%" width="100%"/>
+
+  <circle cx="150" cy="100" fill="green" r="80"/>
+
+  <text fill="white" font-size="60" text-anchor="middle" x="150" y="125">SVG</text>
+
+</svg>

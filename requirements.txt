@@ -73,7 +73,7 @@ bleach==3.3.0
 
 # Open Badges related utilities
 openbadges==1.1.0
-openbadges-bakery==1.0.1
+# openbadges-bakery==1.0.1
 
 celery==4.1.1
 django-celery-results==1.0.1
