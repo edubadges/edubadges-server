@@ -102,10 +102,11 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
         image.name = 'issuer_logo_' + str(uuid.uuid4()) + img_ext
         image = resize_image(image)
         app = BadgrApp.objects.get_current(self.context.get('request', None))
-        if app.is_demo_environment:
-            image = add_watermark(image)
-        if verify_svg(image):
+        is_svg = verify_svg(image)
+        if is_svg:
             image = scrub_svg_image(image)
+        if app.is_demo_environment:
+            image = add_watermark(image, is_svg)
         return image
 
     def validate_image_english(self, image_english):
@@ -242,10 +243,11 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
             image = resize_image(image)
             app = BadgrApp.objects.get_current(self.context.get('request', None))
-            if verify_svg(image):
+            is_svg = verify_svg(image)
+            if is_svg:
                 image = scrub_svg_image(image)
-            elif app.is_demo_environment:
-                image = add_watermark(image)
+            if app.is_demo_environment:
+                image = add_watermark(image, is_svg)
         return image
 
     def validate_criteria_text(self, criteria_text):

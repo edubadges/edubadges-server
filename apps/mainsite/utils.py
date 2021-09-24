@@ -352,14 +352,22 @@ def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
     return pixels > max_pixels
 
 
-def add_watermark(uploaded_image):
+def add_watermark(uploaded_image, is_svg):
     text = "DEMO"
     angle = 45
     opacity = 0.85
     absolute = pathlib.Path().absolute()
     font = f"{absolute}/apps/mainsite/arial.ttf"
 
-    img = Image.open(uploaded_image)
+    if is_svg:
+        svg_buf = io.BytesIO()
+        uploaded_image.file.seek(0)
+        c = cairosvg.svg2png(file_obj=uploaded_image)
+        svg_buf.write(c)
+        img = Image.open(svg_buf)
+    else:
+        img = Image.open(uploaded_image)
+
     watermark = Image.new('RGBA', img.size, (0, 0, 0, 0))
     preferred_width = int(math.sqrt(int(math.pow(img.size[0], 2)) + int(math.pow(img.size[1], 2))))
     font_size = int(preferred_width / (len(text) + 1))
@@ -377,8 +385,12 @@ def add_watermark(uploaded_image):
     new_image = Image.composite(watermark, img, watermark)
     byte_string = io.BytesIO()
     new_image.save(byte_string, 'PNG')
+    image_name = uploaded_image.name
+    if is_svg:
+        pattern = re.compile(r"\.svg", re.IGNORECASE)
+        image_name = pattern.sub('.png', image_name)
     return InMemoryUploadedFile(byte_string, None,
-                                uploaded_image.name, 'image/png',
+                                image_name, 'image/png',
                                 byte_string.getvalue().__len__(), None)
 
 
