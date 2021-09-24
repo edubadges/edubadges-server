@@ -4,28 +4,34 @@ import urllib.parse
 import urllib.request
 
 from allauth.account.adapter import get_adapter
-from allauth.socialaccount.models import SocialLogin
 from allauth.account.utils import perform_login
 from allauth.socialaccount import app_settings
+from allauth.socialaccount.models import SocialLogin
 from allauth.socialaccount.providers.base import AuthProcess
-from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app, \
-    get_session_verification_email, set_session_authcode
+from django.contrib.auth import authenticate
 from django.contrib.auth import logout
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.urls import reverse, NoReverseMatch
-from django.views.generic import RedirectView, View
-from mainsite.models import BadgrApp
+from django.views.generic import RedirectView
+from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from badgeuser.models import BadgeUser
-from mainsite.permissions import LocalDevelopModePermissionMixin
+from badgrsocialauth.permissions import IsSuperUser
+from badgrsocialauth.utils import set_url_query_params, set_session_badgr_app, get_session_badgr_app, \
+    get_session_verification_email, set_session_authcode
+from mainsite.models import BadgrApp
+
 
 class BadgrSocialLogin(RedirectView):
     def get(self, request, *args, **kwargs):
         try:
             lti_data = request.session.get('lti_data', None)
             logout(request)
-            #logout_badgr_user(request, request.user)
+            # logout_badgr_user(request, request.user)
             request.session['lti_data'] = lti_data
             return super(BadgrSocialLogin, self).get(request, *args, **kwargs)
         except ValidationError as e:
@@ -93,7 +99,8 @@ class BadgrAccountConnected(RedirectView):
             return set_url_query_params(badgr_app.ui_connect_success_redirect)
 
 
-class ImpersonateUser(LocalDevelopModePermissionMixin, View):
+class ImpersonateUser(APIView):
+    permission_classes = (IsSuperUser,)
 
     def get(self, *args, **kwargs):
         user = BadgeUser.objects.get(pk=kwargs['id'])
@@ -106,7 +113,7 @@ class ImpersonateUser(LocalDevelopModePermissionMixin, View):
             badgr_app = BadgrApp.objects.all().first()
         set_session_badgr_app(self.request, badgr_app)
         ret = perform_login(self.request, sociallogin.user,
-                      email_verification=app_settings.EMAIL_VERIFICATION,
-                      redirect_url=sociallogin.get_redirect_url(self.request),
-                      signal_kwargs={"sociallogin": sociallogin})
-        return ret
+                            email_verification=app_settings.EMAIL_VERIFICATION,
+                            redirect_url=sociallogin.get_redirect_url(self.request),
+                            signal_kwargs={"sociallogin": sociallogin})
+        return Response({"url": ret.url}, status=status.HTTP_200_OK)

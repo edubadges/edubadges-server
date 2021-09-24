@@ -4,7 +4,8 @@ from graphene_django.types import DjangoObjectType
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.schema import DirectAwardType
 from lti_edu.schema import StudentsEnrolledType
-from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, resolver_blocker_for_students
+from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, \
+    resolver_blocker_for_students, resolver_blocker_for_super_user
 from mainsite.exceptions import GraphQLException
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
 
@@ -41,7 +42,8 @@ class BadgeUserType(DjangoObjectType):
 
     class Meta:
         model = BadgeUser
-        fields = ('first_name', 'last_name', 'email', 'date_joined', 'entity_id', 'userprovisionments', 'validated_name')
+        fields = ('id', 'first_name', 'last_name', 'email', 'date_joined', 'entity_id', 'userprovisionments',
+                  'validated_name')
 
     direct_awards = graphene.List(DirectAwardType)
     institution = graphene.Field('institution.schema.InstitutionType')
@@ -94,6 +96,7 @@ class BadgeUserType(DjangoObjectType):
 class Query(object):
     current_user = graphene.Field(BadgeUserType)
     users = graphene.List(BadgeUserType)
+    all_users = graphene.List(BadgeUserType)
     user = graphene.Field(BadgeUserType, id=graphene.String())
 
     def resolve_user(self, info, **kwargs):
@@ -108,3 +111,7 @@ class Query(object):
 
     def resolve_current_user(self, info, **kwargs):
         return info.context.user
+
+    @resolver_blocker_for_super_user
+    def resolve_all_users(self, info, **kwargs):
+        return BadgeUser.objects.filter(is_teacher=True, institution__isnull=False).all()

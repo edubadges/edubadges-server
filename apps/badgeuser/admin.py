@@ -25,7 +25,7 @@ class BadgeUserAdmin(UserAdmin):
     fieldsets = (
         ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
         (None, {'fields': ('email', 'first_name', 'last_name')}),
-        ('Access', {'fields': ('is_active', 'is_staff', 'password')}),
+        ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
         ('Permissions', {'fields': ('groups',)}),
     )
     filter_horizontal = ('groups', 'user_permissions', 'faculty',)

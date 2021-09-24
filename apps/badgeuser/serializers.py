@@ -43,6 +43,7 @@ class BadgeUserProfileSerializer(serializers.Serializer):
     entity_id = serializers.CharField(read_only=True)
     marketing_opt_in = serializers.BooleanField(required=False)
     institution = InstitutionForProfileSerializer(read_only=True, )
+    is_superuser = serializers.BooleanField(required=False)
 
 
 class EmailSerializer(BadgrBaseModelSerializer):
