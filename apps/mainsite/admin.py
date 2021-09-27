@@ -3,6 +3,11 @@ import badgrlog
 from allauth.socialaccount.models import SocialToken, SocialAccount
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
 from django.conf import settings
+from django.contrib import admin
+from django_otp.admin import OTPAdminSite
+from django.contrib.auth.models import User
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
 from django.contrib.admin import AdminSite, ModelAdmin, StackedInline
 from django.utils.module_loading import autodiscover_modules
 from django.utils.translation import ugettext_lazy
@@ -13,11 +18,11 @@ from oauth2_provider.models import get_application_model, get_grant_model, get_a
 badgrlogger = badgrlog.BadgrLogger()
 
 
-class BadgrAdminSite(AdminSite):
+class BadgrAdminSite(OTPAdminSite):
     site_header = ugettext_lazy('Badgr')
     index_title = ugettext_lazy('Staff Dashboard')
     site_title = 'Badgr'
-    login_template = 'admin/superlogin.html' if settings.SUPERUSER_LOGIN_WITH_SURFCONEXT else None
+    # login_template = 'admin/superlogin.html' if settings.SUPERUSER_LOGIN_WITH_SURFCONEXT else None
 
     def autodiscover(self):
         autodiscover_modules('admin', register_to=self)
@@ -34,12 +39,10 @@ class BadgrAdminSite(AdminSite):
         return response
 
 
-badgr_admin = BadgrAdminSite(name='badgradmin')
-
-# patch in our delete_selected that calls obj.delete()
-# FIXME: custom action broken for django 1.10+
-# badgr_admin.disable_action('delete_selected')
-# badgr_admin.add_action(delete_selected)
+badgr_admin = BadgrAdminSite(OTPAdminSite.name)
+# badgr_admin.register(User)
+badgr_admin.register(TOTPDevice, TOTPDeviceAdmin)
+admin.site.__class__ = OTPAdminSite
 
 
 class BadgrAppAdmin(ModelAdmin):

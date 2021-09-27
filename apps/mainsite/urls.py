@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
-
+from django_otp.admin import OTPAdminSite
 from ims.views import base
 from mainsite.admin import badgr_admin
 from mainsite.graphql_view import ExtendedGraphQLView

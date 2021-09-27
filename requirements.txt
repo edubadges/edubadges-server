@@ -127,3 +127,7 @@ aniso8601<=7p
 premailer==3.7.0
 
 APScheduler==3.7.0
+
+# 2FA support
+django-otp==1.1.1
+qrcode==7.3
