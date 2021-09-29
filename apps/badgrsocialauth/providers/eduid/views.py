@@ -74,7 +74,7 @@ def login(request):
         "state": state,
         "client_id": current_app.client_id,
         "response_type": "code",
-        "scope": "openid eduid.nl/eppn",
+        "scope": "openid eduid.nl/links",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
         "claims": "{\"id_token\":{\"preferred_username\":null,\"given_name\":null,\"family_name\":null,\"email\":null,"
                   "\"eduid\":null, \"eduperson_scoped_affiliation\":null, \"preferred_username\":null, \"uids\":null}}"
@@ -202,7 +202,7 @@ def after_terms_agreement(request, **kwargs):
     access_token = kwargs.get('access_token', None)
     headers = {"Accept": "application/json, application/json;charset=UTF-8",
                "Authorization": f"Bearer {access_token}"}
-    response = requests.get(f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/eppn",
+    response = requests.get(f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links",
                             headers=headers)
     if response.status_code != 200:
         error = f"Server error: eduID eppn endpoint error ({response.status_code})"
