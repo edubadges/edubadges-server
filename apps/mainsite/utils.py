@@ -154,10 +154,9 @@ class EmailMessageMaker:
         path = badgeclass.image.path
         if path.endswith('.svg'):
             with open(path, 'rb') as input_svg:
-                svg_buf = io.BytesIO()
-                c = cairosvg.svg2png(file_obj=input_svg)
-                svg_buf.write(c)
-                background = Image.open(svg_buf).convert("RGBA")
+                svg = input_svg.read()
+                encoded = base64.b64encode(svg).decode()
+                return 'data:image/svg+xml;base64,{}'.format(encoded)
         else:
             background = Image.open(badgeclass.image.path).convert("RGBA")
 
