@@ -467,7 +467,8 @@ class BadgeInstanceJson(JSONComponentView):
             json = super(BadgeInstanceJson, self).get_json(
                 request,
                 expand_badgeclass=('badge' in expands),
-                expand_issuer=('badge.issuer' in expands)
+                expand_issuer=('badge.issuer' in expands),
+                expand_user=('badge.user' in expands)
             )
         return json
 

@@ -1118,7 +1118,7 @@ class BadgeInstance(BaseAuditedModel,
     def get_hashed_identity(self):
         return generate_sha256_hashstring(self.recipient_identifier.lower(), self.salt)
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False,
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, expand_badgeclass=False, expand_issuer=False, expand_user=False,
                  include_extra=True, use_canonical_id=False, signed=False, public_key_issuer=None):
 
         if signed:
@@ -1160,6 +1160,8 @@ class BadgeInstance(BaseAuditedModel,
                                                                       expand_public_key=False,
                                                                       public_key_issuer=public_key_issuer,
                                                                       expand_institution=True)
+            if expand_user:
+                json['badge']['user'] = self.user.get_full_name()
 
         if self.revoked:
             return OrderedDict([
