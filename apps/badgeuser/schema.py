@@ -2,11 +2,12 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
+from directaward.models import DirectAwardBundle
 from directaward.schema import DirectAwardType
 from lti_edu.schema import StudentsEnrolledType
+from mainsite.exceptions import GraphQLException
 from mainsite.graphql_utils import UserProvisionmentType, resolver_blocker_only_for_current_user, \
     resolver_blocker_for_students, resolver_blocker_for_super_user
-from mainsite.exceptions import GraphQLException
 from staff.schema import InstitutionStaffType, FacultyStaffType, IssuerStaffType, BadgeClassStaffType
 
 
@@ -17,7 +18,6 @@ class TermsUrlType(DjangoObjectType):
 
 
 class TermsType(DjangoObjectType):
-
     class Meta:
         model = Terms
         fields = ('entity_id', 'terms_type', 'version', 'institution')
@@ -30,7 +30,6 @@ class TermsType(DjangoObjectType):
 
 
 class TermsAgreementType(DjangoObjectType):
-
     class Meta:
         model = TermsAgreement
         fields = ('agreed', 'agreed_version', 'terms', 'updated_at', 'entity_id')
@@ -39,7 +38,6 @@ class TermsAgreementType(DjangoObjectType):
 
 
 class BadgeUserType(DjangoObjectType):
-
     class Meta:
         model = BadgeUser
         fields = ('id', 'first_name', 'last_name', 'email', 'date_joined', 'entity_id', 'userprovisionments',
@@ -55,6 +53,7 @@ class BadgeUserType(DjangoObjectType):
     pending_enrollments = graphene.List(StudentsEnrolledType)
     terms_agreements = graphene.List(TermsAgreementType)
     schac_homes = graphene.List(graphene.String)
+    has_issued_direct_award_bundle = graphene.Boolean()
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()
@@ -91,6 +90,9 @@ class BadgeUserType(DjangoObjectType):
     @resolver_blocker_only_for_current_user
     def resolve_terms_agreements(self, info):
         return info.context.user.cached_terms_agreements()
+
+    def resolve_has_issued_direct_award_bundle(self, info):
+        return DirectAwardBundle.objects.filter(created_by=self).count() != 0
 
 
 class Query(object):

@@ -8,9 +8,10 @@ from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_200_OK, HTTP_404_NOT
 from rest_framework.views import APIView
 
 from badgeuser.models import BadgeUser, UserProvisionment, Terms, TermsAgreement
-from badgeuser.permissions import BadgeUserIsAuthenticatedUser
+from badgeuser.permissions import BadgeUserIsAuthenticatedUser, InstitutionAdmin
 from badgeuser.serializers import BadgeUserProfileSerializer, UserProvisionmentSerializer, \
     UserProvisionmentSerializerForEdit, TermsAgreementSerializer, TermsSerializer
+from directaward.models import DirectAwardBundle
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -164,3 +165,17 @@ class PublicTermsView(APIView):
             return Response(TermsSerializer(many=True).to_representation(data), status=HTTP_200_OK)
         else:
             return Response(status=HTTP_404_NOT_FOUND)
+
+
+class UserDeleteView(BaseEntityDetailView):
+    permission_classes = (InstitutionAdmin,)
+    http_method_names = ['delete']
+    model = BadgeUser
+
+    def delete(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        awards_issued = DirectAwardBundle.objects.filter(created_by=obj).count() > 0
+        if request.user.institution != obj.institution or awards_issued:
+            return Response(status=HTTP_404_NOT_FOUND)
+        obj.delete()
+        return Response(status=HTTP_204_NO_CONTENT)
