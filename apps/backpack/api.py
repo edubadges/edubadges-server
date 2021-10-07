@@ -1,17 +1,18 @@
 # encoding: utf-8
 
 
-from backpack.models import BackpackBadgeShare
-from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
-from entity.api import BaseEntityListView, BaseEntityDetailView
-from issuer.models import BadgeInstance
-from issuer.permissions import RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
-from public.public_api import ImagePropertyDetailView
-from mainsite.exceptions import BadgrApiException400
-from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_302_FOUND, HTTP_204_NO_CONTENT
+
+from backpack.models import BackpackBadgeShare, ImportedAssertion
+from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1, ImportedAssertionSerializer
+from entity.api import BaseEntityListView, BaseEntityDetailView
+from issuer.models import BadgeInstance
+from issuer.permissions import RecipientIdentifiersMatch, BadgrOAuthTokenHasScope
+from mainsite.exceptions import BadgrApiException400
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from public.public_api import ImagePropertyDetailView
 
 
 class BackpackAssertionList(BaseEntityListView):
@@ -94,3 +95,17 @@ class ShareBackpackAssertion(BaseEntityDetailView):
             return Response(status=HTTP_302_FOUND, headers=headers)
         else:
             return Response({'url': share_url})
+
+
+class ImportedAssertionList(BaseEntityListView):
+    model = ImportedAssertion
+    serializer_class = ImportedAssertionSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ('post', 'get')
+
+    def get_objects(self, request, **kwargs):
+        return ImportedAssertion.objects.filter(user=request.user)
+
+    def post(self, request, **kwargs):
+        """Upload a new Assertion to the backpack"""
+        return super(ImportedAssertionList, self).post(request, **kwargs)

@@ -9,5 +9,8 @@ urlpatterns = [
 
     # legacy v1 endpoints
     url(r'^share/badge/(?P<entity_id>[^/]+)$', ShareBackpackAssertion.as_view(), name='v1_api_analytics_share_badge'),
+
+    # imported assertions
+    url(r'^imported/assertions$', BackpackAssertionList.as_view(), name='api_imported_assertions_list'),
 ]
 

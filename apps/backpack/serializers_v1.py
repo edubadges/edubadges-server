@@ -1,17 +1,19 @@
 import datetime
 
-import badgrlog
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.urls import reverse
 from django.utils.dateparse import parse_datetime, parse_date
-from issuer.helpers import BadgeCheckHelper
-from issuer.models import BadgeInstance
-from mainsite.drf_fields import Base64FileField
-from mainsite.serializers import MarkdownCharField
-from mainsite.utils import OriginSetting
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.fields import SkipField
+
+import badgrlog
+from backpack.models import ImportedAssertion
+from issuer.helpers import BadgeCheckHelper
+from issuer.models import BadgeInstance
+from mainsite.drf_fields import Base64FileField, ValidImageField
+from mainsite.serializers import MarkdownCharField
+from mainsite.utils import OriginSetting
 
 logger = badgrlog.BadgrLogger()
 
@@ -42,12 +44,14 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
         representation['json'] = V1BadgeInstanceSerializer(obj, context=self.context).data
         representation['imagePreview'] = {
             "type": "image",
-            "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('badgeclass_image', kwargs={'entity_id': obj.cached_badgeclass.entity_id}))
+            "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('badgeclass_image', kwargs={
+                'entity_id': obj.cached_badgeclass.entity_id}))
         }
         if obj.cached_issuer.image:
             representation['issuerImagePreview'] = {
                 "type": "image",
-                "id": "{}{}?type=png".format(OriginSetting.HTTP, reverse('issuer_image', kwargs={'entity_id': obj.cached_issuer.entity_id}))
+                "id": "{}{}?type=png".format(OriginSetting.HTTP,
+                                             reverse('issuer_image', kwargs={'entity_id': obj.cached_issuer.entity_id}))
             }
 
         if obj.image:
@@ -81,7 +85,8 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
             )
             if not created:
                 if instance.acceptance == BadgeInstance.ACCEPTANCE_ACCEPTED:
-                    raise RestframeworkValidationError([{'name': "DUPLICATE_BADGE", 'description': "You already have this badge in your backpack"}])
+                    raise RestframeworkValidationError(
+                        [{'name': "DUPLICATE_BADGE", 'description': "You already have this badge in your backpack"}])
                 instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
                 instance.save()
             owner.publish()  # update BadgeUser.cached_badgeinstances()
@@ -139,7 +144,6 @@ class BadgePotentiallyEmptyField(serializers.Field):
 
 
 class VerifierBadgeDateTimeField(BadgePotentiallyEmptyField, serializers.Field):
-
     default_error_messages = {
         'not_int_or_str': 'Invalid format. Expected an int or str.',
         'bad_str': 'Invalid format. String is not ISO 8601 or unix timestamp.',
@@ -276,7 +280,7 @@ class V1InstanceSerializer(serializers.Serializer):
     uid = BadgeStringField(required=False)
     recipient = BadgeEmailField()  # TODO: improve for richer types
     badge = V1BadgeClassSerializer()
-    issuedOn = BadgeDateTimeField(required=False) # missing in some translated v0.5.0
+    issuedOn = BadgeDateTimeField(required=False)  # missing in some translated v0.5.0
     expires = BadgeDateTimeField(required=False)
     image = BadgeImageURLField(required=False)
 
@@ -285,6 +289,7 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
     """
     used to serialize a issuer.BadgeInstance like a composition.LocalBadgeInstance
     """
+
     def to_representation(self, instance):
         localbadgeinstance_json = instance.json
         localbadgeinstance_json['uid'] = instance.entity_id
@@ -303,3 +308,21 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
         }
         return super(V1BadgeInstanceSerializer, self).to_representation(localbadgeinstance_json)
 
+
+class ImportedAssertionSerializer(serializers.Serializer):
+    import_url = serializers.URLField(required=False)
+    image = ValidImageField(required=True)
+
+    def validate(self, data):
+        """
+        Ensure only one assertion input field given.
+        """
+        if 'import_url' not in data and 'image' not in data:
+            raise serializers.ValidationError(
+                "URL or image required.")
+
+        return data
+
+    def create(self, validated_data, **kwargs):
+        pass
+        # ImportedAssertion(validated_data).save()
