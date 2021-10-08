@@ -36,10 +36,12 @@ class BackpackBadgeShare(BaseSharedModel):
 class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):
     user = models.ForeignKey('badgeuser.BadgeUser', blank=False, null=False, on_delete=models.CASCADE)
     import_url = models.URLField(max_length=512, null=False, blank=False)
+    verified = models.BooleanField(default=False)
+    code = models.TextField(null=True, blank=True)
 
-    def validate(self):
+    def validate(self, profile_type, recipient_identifier):
         assertion_json = requests.get(self.import_url).json()
-        data = {'profile': {'id': self.entity_id}, 'data': assertion_json}
+        data = {'profile': {profile_type: recipient_identifier}, 'data': assertion_json}
         response = requests.post(json=data,
                                  url=urljoin(settings.VALIDATOR_URL, 'results'),
                                  headers={'Accept': 'application/json'})

@@ -301,6 +301,15 @@ class EmailMessageMaker:
         }
         return render_to_string(template, email_vars)
 
+    @staticmethod
+    def create_email_validation_mail(code, user, badge, issuer):
+        template = 'email/email_validation.html'
+        email_vars = {'code': code,
+                      'user': user,
+                      'badge': badge,
+                      'issuer': issuer}
+        return render_to_string(template, email_vars)
+
 
 def send_mail(subject, message, recipient_list=None, html_message=None, bcc=None):
     if settings.LOCAL_DEVELOPMENT_MODE:

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_302_FOUND, HTTP_204_NO_CONTENT
 
 from backpack.models import BackpackBadgeShare, ImportedAssertion
+from backpack.permissions import IsImportedBadgeOwner
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1, ImportedAssertionSerializer
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeInstance
@@ -104,8 +105,30 @@ class ImportedAssertionList(BaseEntityListView):
     http_method_names = ('post', 'get')
 
     def get_objects(self, request, **kwargs):
-        return ImportedAssertion.objects.filter(user=request.user)
+        return ImportedAssertion.objects.filter(user=request.user, verified=True)
 
     def post(self, request, **kwargs):
         """Upload a new Assertion to the backpack"""
         return super(ImportedAssertionList, self).post(request, **kwargs)
+
+
+class ImportedAssertionDelete(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsImportedBadgeOwner)
+    http_method_names = ['delete']
+    model = ImportedAssertion
+
+
+class ImportedAssertionDetail(BaseEntityDetailView):
+    model = ImportedAssertion
+    serializer_class = ImportedAssertionSerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ('put')
+
+    def put(self, request, **kwargs):
+        """Update verified status if the code is ok"""
+        data = request.data
+        assertion = ImportedAssertion.objects.filter(user=request.user, code=data['code'],
+                                                     entity_id=data['entity_id']).first()
+        assertion.verified = True
+        assertion.save()
+        return Response(data)

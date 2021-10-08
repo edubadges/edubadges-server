@@ -1,0 +1,85 @@
+{% extends 'email/base.html' %}
+{% block style %}
+<style>
+    .main {
+        font-family: "Proxima Nova", sans-serif;
+        line-height: 18px;
+        font-size: 14px;
+        color: #353535;
+    }
+
+    .title {
+        color: grey;
+        font-size: 33px;
+        line-height: 50px;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    .message_container {
+        margin: auto;
+        margin-top: 40px;
+        overflow: auto;
+    }
+
+    .example_container {
+        overflow: auto;
+    }
+
+    .example_container img {
+        box-shadow: 1px 3px #b9b9b9;
+        max-width: 260px;
+        height: auto;
+        border: 1px solid #b9b9b9;
+        border-radius: 10px;
+    }
+    .footer {
+        margin-bottom: 25px;
+    }
+
+    .footer a:link, .footer a:visited {
+        color: grey;
+    }
+
+    .footer a:hover, .footer a:active {
+        color: #772583;
+    }
+
+    div.code {
+        margin: 25px;
+        font-size: 22px;
+    }
+</style>
+{% endblock %}
+
+{% block title %}
+<title>Email validation for imported badge {{badge.name}}</title>
+{% endblock %}
+
+{% block content %}
+
+<div><p>For the English version, see below.</p></div>
+
+<p class="title">Beste {{user.first_name}} {{user.last_name}}</p>
+<div class="message_container">
+  <p>Je kan met onderstaande code de badge <strong>{{badge.name}}</strong> uitgegeven door <strong>{{issuer.name}}</strong> importeren in eduBadges</p>
+  <div class="code">
+    {{code}}
+  </div>
+  <div class="example_container">
+    <img class="badgeclass_image" src={{badge.image}}>
+  </div>
+</div>
+<p class="title">Dear {{user.first_name}} {{user.last_name}}</p>
+<div class="message_container">
+  <p>With the following code you can import badge <strong>{{badge.name}}</strong> issued by <strong>{{issuer.name}}</strong> in eduBadges</p>
+  <div class="code">
+    {{code}}
+  </div>
+  <div class="example_container">
+    <img class="badgeclass_image" src={{badge.image}}>
+  </div>
+</div>
+</div>
+
+{% endblock %}
