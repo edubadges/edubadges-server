@@ -38,6 +38,7 @@ class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):
     import_url = models.URLField(max_length=512, null=False, blank=False)
     verified = models.BooleanField(default=False)
     code = models.TextField(null=True, blank=True)
+    email = models.EmailField(blank=True, null=True)
 
     def validate(self, profile_type, recipient_identifier):
         assertion_json = requests.get(self.import_url).json()

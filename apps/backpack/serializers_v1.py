@@ -357,13 +357,13 @@ class ImportedAssertionSerializer(serializers.Serializer):
             salt = recipient.get('salt', '')
             value = 'sha256$' + hashlib.sha256(email.encode() + salt.encode()).hexdigest()
         else:
-            value = user.email
+            value = email
         if recipient['identity'] == value:
-            return ImportedAssertion.objects.create(user=user, import_url=verify_url, verified=True)
+            return ImportedAssertion.objects.create(user=user, import_url=verify_url, verified=True, email=email)
 
         code = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
         imported_assertion = ImportedAssertion.objects.create(user=user, import_url=verify_url, verified=False,
-                                                              code=code)
+                                                              code=code, email=email)
         badge = requests.get(assertion['badge']).json()
         issuer = requests.get(badge['issuer']).json()
         subject = f'Email validation for Badge {badge["name"]}'
