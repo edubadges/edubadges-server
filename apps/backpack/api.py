@@ -122,7 +122,7 @@ class ImportedAssertionDetail(BaseEntityDetailView):
     model = ImportedAssertion
     serializer_class = ImportedAssertionSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail,)
-    http_method_names = ('put')
+    http_method_names = ('put', 'get')
 
     def put(self, request, **kwargs):
         """Update verified status if the code is ok"""

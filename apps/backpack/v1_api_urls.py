@@ -13,6 +13,7 @@ urlpatterns = [
 
     # imported assertions
     url(r'^imported/assertions$', ImportedAssertionList.as_view(), name='api_imported_assertions_list'),
+    url(r'^imported/assertions/detail/(?P<entity_id>[^/]+)$', ImportedAssertionDetail.as_view(), name='api_imported_assertion_detail'),
     url(r'^imported/assertions/edit/(?P<entity_id>[^/]+)$', ImportedAssertionDetail.as_view(), name='api_imported_assertions_edit'),
     url(r'^imported/assertions/delete/(?P<entity_id>[^/]+)$', ImportedAssertionDelete.as_view(), name='api_imported_assertions_delete'),
 ]
