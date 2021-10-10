@@ -325,6 +325,17 @@ class ImportedAssertionSerializer(serializers.Serializer):
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     verified = serializers.BooleanField(required=False, default=False)
 
+    def to_representation(self, obj):
+        representation = super(ImportedAssertionSerializer, self).to_representation(obj)
+        external_badge = requests.get(representation['import_url']).json()
+        representation['issuedOn'] = external_badge['issuedOn']
+        representation['importedBadge'] = external_badge
+        external_badge_class = requests.get(external_badge['badge']).json()
+        representation['badgeclass'] = external_badge_class
+        external_issuer = requests.get(external_badge_class['issuer']).json()
+        representation['badgeclass']['issuer'] = external_issuer
+        return representation
+
     def validate(self, data):
         """
         Ensure only one assertion input field given.
