@@ -369,7 +369,9 @@ class ImportedAssertionSerializer(serializers.Serializer):
             value = 'sha256$' + hashlib.sha256(email.encode() + salt.encode()).hexdigest()
         else:
             value = email
-        if recipient['identity'] == value:
+        if recipient['identity'] != value:
+            raise serializers.ValidationError('email mismatch', 409)
+        if email == user.email:
             return ImportedAssertion.objects.create(user=user, import_url=verify_url, verified=True, email=email)
 
         code = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
