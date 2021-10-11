@@ -3,7 +3,7 @@ import hashlib
 import json
 import random
 import string
-
+from django.conf import settings
 import requests
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.urls import reverse
@@ -357,6 +357,11 @@ class ImportedAssertionSerializer(serializers.Serializer):
             else:
                 data = json.loads(assertion)
                 verify_url = data['id']
+        valid_domain_name = False
+        for url in settings.WHITELIST_IMPORTED_BADGES.split(','):
+            valid_domain_name = verify_url.startswith(url.strip())
+        if not valid_domain_name:
+            raise serializers.ValidationError(f'Invalid URL {verify_url}. Allowed are {settings.WHITELIST_IMPORTED_BADGES}')
         assertion = requests.get(verify_url).json()
         # make sure the email address matches
         recipient = assertion['recipient']

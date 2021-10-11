@@ -1,7 +1,6 @@
 # encoding: utf-8
 
-
-from rest_framework import permissions
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_302_FOUND, HTTP_204_NO_CONTENT
 
@@ -132,3 +131,16 @@ class ImportedAssertionDetail(BaseEntityDetailView):
         assertion.verified = True
         assertion.save()
         return Response(data)
+
+
+class ImportedAssertionValidate(BaseEntityDetailView):
+    """
+    Endpoint for validating an imported badge (GET)
+    """
+    model = ImportedAssertion
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ['get']
+
+    def get(self, request, **kwargs):
+        assertion = self.get_object(request, **kwargs)
+        return Response(assertion.validate('email', assertion.email), status=status.HTTP_200_OK)
