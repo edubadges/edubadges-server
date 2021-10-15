@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2021-10-18
+- Validate imported badge.
+- Added import external open badge functionality.
+- New endpoint to delete users by institution admins.
+- Do not convert SVG to images for watermark.
+- Use the new endpoint in eduID for EPPN's.
+- Upgraded graphene django as incompatible with OTP django-object dependency.
+- Added 2FA to admin site.
+- Allow impersonation by super users.
+- Award non-formal edubadge with no validated name.
+- Include archived status in catalog.
+- If there are validated names, use them.
+- Bugfix case-sensitive EPPN rel 5.0.1.
+- Added collection functionality to backpack.
+- Added evidence information to direct_awards.
+- Either Dutch or English attribute is required.
+- Added offline exporting JS.
+- Bugfix for AnonymousUser does not have is_student.
+- Do not fetch accepted enrolments.
+- Use database counts for the insights module.
+- Updated dependency Pillow.
+
 ## [5.0.0] - 2021-08-30
 - Added feedback option.
 - Overview of all open requested edubadges. 
