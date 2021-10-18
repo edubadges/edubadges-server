@@ -104,7 +104,7 @@ class Query(object):
             return institution
 
     def resolve_public_institutions(self, info, **kwargs):
-        return Institution.objects.all()
+        return Institution.objects.filter(public_institution=True).all()
 
     def resolve_faculties(self, info, **kwargs):
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['may_read'])]

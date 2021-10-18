@@ -35,6 +35,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     award_allowed_institutions = models.ManyToManyField('self', blank=True, symmetrical=False,
                                                         help_text='Allow awards to this institutions')
     award_allow_all_institutions = models.BooleanField(default=False, help_text='Allow awards to all institutions')
+    public_institution = models.BooleanField(default=True, help_text='Set to false to exclude from the catalog')
 
 
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
