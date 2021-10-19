@@ -63,7 +63,7 @@ simplejson==3.6.4
 # JSON-LD
 PyLD==0.7.1
 rfc3987==1.3.4
-pypng==0.0.18
+pypng==0.0.21
 jsonfield==2.0.2
 
 # markdown support
