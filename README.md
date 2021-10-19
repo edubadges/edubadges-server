@@ -38,7 +38,6 @@ Prerequisites:
 #### Optional extras:
 
 * memcached
-* amqp broker (e.g. RabbitMQ)
 
 #### System-specific requirements:
 * OS X: [XCode Command line tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/)
