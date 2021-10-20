@@ -74,6 +74,9 @@ if on a mac mysqlclient does not build, try:
 ```
 LDFLAGS=-L/usr/local/opt/openssl/lib pip install mysqlclient
 ```
+### Run / debug IDE
+You'll need to add the environment variables from env_vars.sh.example to a run configuration
+
 
 ### Customize local settings to your environment
 * `cp env_vars.sh.example env_vars.sh`

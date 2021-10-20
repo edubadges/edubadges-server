@@ -188,7 +188,7 @@ SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://oidc.test.surfconext.nl/oidc')
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
-EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
+# EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
 EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
