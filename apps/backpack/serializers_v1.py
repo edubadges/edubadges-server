@@ -359,7 +359,7 @@ class ImportedAssertionSerializer(serializers.Serializer):
                 verify_url = data['id']
         valid_domain_name = False
         for url in settings.WHITELIST_IMPORTED_BADGES.split(','):
-            valid_domain_name = verify_url.startswith(url.strip())
+            valid_domain_name = valid_domain_name or verify_url.startswith(url.strip())
         if not valid_domain_name:
             raise serializers.ValidationError(f'Invalid URL {verify_url}. Allowed are {settings.WHITELIST_IMPORTED_BADGES}')
         assertion = requests.get(verify_url).json()
