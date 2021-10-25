@@ -16,6 +16,7 @@ from rest_framework.fields import SkipField
 
 import badgrlog
 from backpack.models import ImportedAssertion
+from badgeuser.models import ImportBadgeAllowedUrl
 from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance
 from mainsite.drf_fields import Base64FileField, ValidImageField
@@ -358,10 +359,11 @@ class ImportedAssertionSerializer(serializers.Serializer):
                 data = json.loads(assertion)
                 verify_url = data['id']
         valid_domain_name = False
-        for url in settings.WHITELIST_IMPORTED_BADGES.split(','):
-            valid_domain_name = valid_domain_name or verify_url.startswith(url.strip())
+        allowed_urls = [allowed_url.url for allowed_url in ImportBadgeAllowedUrl.objects.all()]
+        for allowed_url in allowed_urls:
+            valid_domain_name = valid_domain_name or verify_url.startswith(allowed_url.strip())
         if not valid_domain_name:
-            raise serializers.ValidationError(f'Invalid URL {verify_url}. Allowed are {settings.WHITELIST_IMPORTED_BADGES}')
+            raise serializers.ValidationError(f'Invalid URL {verify_url}. Allowed are {allowed_urls}')
         assertion = requests.get(verify_url).json()
         # make sure the email address matches
         recipient = assertion['recipient']

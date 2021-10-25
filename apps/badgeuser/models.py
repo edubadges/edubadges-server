@@ -892,3 +892,7 @@ class StudentAffiliation(models.Model):
     user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     schac_home = models.CharField(max_length=254)
     eppn = models.CharField(max_length=254)
+
+
+class ImportBadgeAllowedUrl(models.Model):
+    url = models.URLField()

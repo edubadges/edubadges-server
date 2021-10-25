@@ -77,6 +77,11 @@ LDFLAGS=-L/usr/local/opt/openssl/lib pip install mysqlclient
 ### Run / debug IDE
 You'll need to add the environment variables from env_vars.sh.example to a run configuration
 
+### Generate a TOTP for first login with super user
+If you login to http://localhost:8000/staff/superuser then you'll have to provide a TOTP token. Generate one with:
+```
+./manage.py addstatictoken superuser
+```
 
 ### Customize local settings to your environment
 * `cp env_vars.sh.example env_vars.sh`
