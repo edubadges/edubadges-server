@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 
     # OAuth 2 provider
     'oauth2_provider',
-
+    # eduBadges apps
     'directaward',
     'entity',
     'ims',
@@ -65,23 +65,21 @@ INSTALLED_APPS = [
     'signing',
     'staff',
     'insights',
-
-    # api docs
-    # 'apispec_drf',
-
+    'lti13',
     # deprecated
     'composition',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'lti13.middleware.SameSiteMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'oauth2_provider.middleware.OAuth2TokenMiddleware',
+    # 'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'badgeuser.middleware.InactiveUserMiddleware',
     'mainsite.middleware.ExceptionHandlerMiddleware',
     'mainsite.middleware.RequestResponseLoggerMiddleware',

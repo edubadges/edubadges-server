@@ -69,8 +69,11 @@ urlpatterns = [
     # include direct award endpoints
     url(r'^directaward/', include('directaward.api_urls')),
 
-    # include direct award endpoints
+    # include insights endpoints
     url(r'^insights/', include('insights.api_urls')),
+
+    # include lti13 endpoints
+    url(r'^lti/', include('lti13.urls')),
 
     url(r'^lti_issuer/', include('lti_edu.lti_urls')),
 

@@ -28,3 +28,18 @@ docker exec -it <container name> /bin/bash
 ngrok http --region=eu --hostname=okke.harsta.eu.ngrok.io 9001
 student1
 secret123
+
+-----
+./script/docker_dev_setup.sh
+-----
+docker-compose down
+docker-machine stop dinghy
+
+-----
+canvas
+course navigation - deeplink
+nounce validation
+
+The developer key must be set to PUBLIC in order to retrieve email, given_name, family_name
+
+
