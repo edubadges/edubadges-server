@@ -64,6 +64,11 @@ DROP DATABASE IF EXISTS badgr;
 CREATE DATABASE badgr CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 ```
 
+### Install timezones
+```
+mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql
+```
+
 ### Install requirements
 *from within edubadges-server directory*
 

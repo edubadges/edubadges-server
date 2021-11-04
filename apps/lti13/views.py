@@ -20,7 +20,6 @@ class ExtendedDjangoMessageLaunch(DjangoMessageLaunch):
         Probably it is bug on "https://lti-ri.imsglobal.org":
         site passes invalid "nonce" value during deep links launch.
         Because of this in case of iss == http://imsglobal.org just skip nonce validation.
-
         """
         iss = self.get_iss()
         deep_link_launch = self.is_deep_link_launch()
@@ -53,6 +52,7 @@ def login(request):
     oidc_login = DjangoOIDCLogin(request, tool_conf, launch_data_storage=launch_data_storage)
     target_link_uri = get_launch_url(request)
     oidc_redirect = oidc_login.enable_check_cookies().redirect(target_link_uri)
+    request.session["lti_context"] = True
     return oidc_redirect
 
 
@@ -62,6 +62,7 @@ def launch(request):
     launch_data_storage = get_launch_data_storage()
     message_launch = ExtendedDjangoMessageLaunch(request, tool_conf, launch_data_storage=launch_data_storage)
     message_launch_data = message_launch.get_launch_data()
+    lti_context = request.session.get("lti_context")
 
     # request, 'game.html', {
     #     'page_title': PAGE_TITLE,

@@ -74,7 +74,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'lti13.middleware.SameSiteMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'oauth2_provider.middleware.OAuth2TokenMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',

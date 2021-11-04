@@ -26,6 +26,7 @@ docker ps
 docker exec -it <container name> /bin/bash
 
 ngrok http --region=eu --hostname=okke.harsta.eu.ngrok.io 9001
+ngrok http --region=eu --hostname=okke.harsta.eu.ngrok.io 8000
 student1
 secret123
 
