@@ -1,9 +1,10 @@
 import io
 import os
 import re
+from urllib.parse import urljoin
 
-import badgrlog
 import cairosvg
+import requests
 from PIL import Image
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
@@ -11,19 +12,22 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
 from django.urls import resolve, reverse, Resolver404, NoReverseMatch
 from django.views.generic import RedirectView
-from entity.api import VersionedObjectMixin, BaseEntityDetailView
-from mainsite.exceptions import BadgrApiException400
-from mainsite.models import BadgrApp
-from mainsite.utils import OriginSetting
 from rest_framework import status, permissions
+from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.exceptions import ValidationError
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from signing.models import PublicKeyIssuer
 
+import badgrlog
+from entity.api import VersionedObjectMixin, BaseEntityDetailView
 from institution.models import Institution
 from issuer import utils
 from issuer.models import Issuer, BadgeClass, BadgeInstance
+from mainsite.exceptions import BadgrApiException400
+from mainsite.models import BadgrApp
+from mainsite.utils import OriginSetting
+from signing.models import PublicKeyIssuer
 
 logger = badgrlog.BadgrLogger()
 
@@ -170,7 +174,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         ret = '{redirect}{path}{query}'.format(
             redirect=redirect,
             path=stripped_path,
-            query='?'+query_string if query_string else '')
+            query='?' + query_string if query_string else '')
         return ret
 
     @staticmethod
@@ -234,10 +238,10 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         storage = DefaultStorage()
 
         def _fit_to_height(img, ar, height=400):
-            img.thumbnail((height,height))
-            new_size = (int(ar[0]*height), int(ar[1]*height))
+            img.thumbnail((height, height))
+            new_size = (int(ar[0] * height), int(ar[1] * height))
             new_img = Image.new("RGBA", new_size)
-            new_img.paste(img, ((new_size[0] - height)/2, (new_size[1] - height)/2))
+            new_img.paste(img, ((new_size[0] - height) / 2, (new_size[1] - height) / 2))
             new_img.show()
             return new_img
 
@@ -344,7 +348,8 @@ class IssuerPublicKeyJson(IssuerJson):
             return render_to_response(self.template_name, context=self.get_context_data())
 
         pubkey_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get('public_key_id'))
-        issuer_json = self.get_json(request=request, signed=True, public_key_issuer=pubkey_issuer, expand_public_key=False)
+        issuer_json = self.get_json(request=request, signed=True, public_key_issuer=pubkey_issuer,
+                                    expand_public_key=False)
         return Response(issuer_json)
 
 
@@ -356,7 +361,7 @@ class IssuerBadgesJson(JSONComponentView):
         logger.event(badgrlog.IssuerBadgesRetrievedEvent(obj, self.request))
 
     def get_json(self, request):
-        obi_version=self._get_request_obi_version(request)
+        obi_version = self._get_request_obi_version(request)
 
         return [b.get_json(obi_version=obi_version) for b in self.current_object.cached_badgeclasses()]
 
@@ -388,7 +393,8 @@ class BadgeClassJson(JSONComponentView):
         expand_awards = 'awards' in expands
 
         if expand_awards:
-            json['award_allowed_institutions'] = [inst.name for inst in self.current_object.award_allowed_institutions.all()]
+            json['award_allowed_institutions'] = [inst.name for inst in
+                                                  self.current_object.award_allowed_institutions.all()]
             json['formal'] = self.current_object.formal
             json['archived'] = self.current_object.archived
             json['awardNonValidatedNameAllowed'] = self.current_object.award_non_validated_name_allowed
@@ -539,3 +545,12 @@ class AssertionRecipientName(APIView):
             if identity == instance.get_hashed_identity():
                 return Response({'name': instance.get_recipient_name()})
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class ValidatorVersion(APIView):
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ('get',)
+
+    def get(self, request, *args, **kwargs):
+        response = requests.get(headers={'Accept': 'application/json'}, url=urljoin(settings.VALIDATOR_URL, 'git.info'))
+        return Response(response.json(), status=status.HTTP_200_OK)
