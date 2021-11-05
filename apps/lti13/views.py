@@ -64,15 +64,18 @@ def launch(request):
     message_launch_data = message_launch.get_launch_data()
     lti_context = request.session.get("lti_context")
 
-    # request, 'game.html', {
-    #     'page_title': PAGE_TITLE,
-    #     'is_deep_link_launch': message_launch.is_deep_link_launch(),
-    #     'launch_data': message_launch.get_launch_data(),
-    #     'launch_id': message_launch.get_launch_id(),
-    #     'curr_user_name': message_launch_data.get('name', ''),
-    #     'curr_diff': difficulty
-    # })
-    #
+    if not message_launch.has_nrps():
+        return HttpResponseForbidden("Don't have names and roles!")
+
+    if not message_launch.has_ags():
+        return HttpResponseForbidden("Don't have grades!")
+
+    ags = message_launch.get_ags()
+    nrps = message_launch.get_nrps()
+
+    members = nrps.get_members()
+    line_items = ags.get_lineitems()
+    grades = [ags.get_grades(line_item) for line_item in line_items]
 
     return redirect(settings.UI_URL)
 

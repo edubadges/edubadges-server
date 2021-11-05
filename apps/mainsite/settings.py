@@ -12,6 +12,10 @@ def legacy_boolean_parsing(env_key, default_value):
 
 env_settings()
 
+SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
+SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 ##
 #
 #  Important Stuff
