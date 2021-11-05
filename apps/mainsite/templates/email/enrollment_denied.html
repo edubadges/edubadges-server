@@ -16,11 +16,19 @@
         <hr>
         <p>{{recipient_name}},</p>
         <p>Jouw verzoek voor de badge {{badgeclass_name}} is door de issuer geweigerd.</p>
+        {% if deny_reason|length > 1 %}
+            <p>De reden voor de weigering:</p>
+            <p>{{deny_reason}}</p>
+        {% endif %}
         <p>Met vriendelijke groet,</p>
         <p>Team Edubadges</p>
         <hr>
         <p>{{recipient_name}},</p>
         <p>Your request for the badge {{badgeclass_name}} has been denied by the issuer.</p>
+        {% if deny_reason|length > 1 %}
+            <p>The reason for the denial:</p>
+            <p>{{deny_reason}}</p>
+        {% endif %}
         <p>Kind regards,</p>
         <p>Team Edubadges</p>
     </div>
