@@ -95,6 +95,7 @@ class EnrollmentDetail(BaseEntityDetailView):
         if enrollment.badge_instance:
             raise BadgrApiException400("Awarded enrollments cannot be denied", 212)
         enrollment.denied = True
+        enrollment.deny_reason = request.data['denyReason']
         enrollment.save()
         html_message = EmailMessageMaker.create_enrollment_denied_email(enrollment)
         subject = 'Your request for the badgeclass {} has been denied by the issuer.'.format(
