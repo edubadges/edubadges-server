@@ -170,6 +170,8 @@ def callback(request):
                 request.user.invited = True
                 try:
                     provisionments = request.user.match_provisionments()
+                    if not provisionments:
+                        raise UserProvisionment.DoesNotExist()
                     request.user.save()
                     for provisionment in provisionments:
                         provisionment.match_user(request.user)
