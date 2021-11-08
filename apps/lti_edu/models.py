@@ -100,7 +100,7 @@ class StudentsEnrolled(BaseVersionedEntity, models.Model):
     badge_instance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE, null=True)
     date_awarded = models.DateTimeField(default=None, blank=True, null=True)
     denied = models.BooleanField(default=False)
-    deny_reason = models.CharField(unique=True, max_length=255, blank=True, null=True)
+    deny_reason = models.CharField(max_length=255, blank=True, null=True)
     badge_class_lti_context = models.ForeignKey(BadgeClassLtiContext, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
