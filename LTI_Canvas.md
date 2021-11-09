@@ -1,3 +1,5 @@
+
+
 export DOCKER_HOST=tcp://192.168.99.100:2376
 export DOCKER_CERT_PATH=/Users/okkeharsta/.docker/machine/machines/dinghy
 export DOCKER_TLS_VERIFY=1
@@ -24,6 +26,7 @@ https://timonweb.com/django/https-django-development-server-ssl-certificate/
 
 docker ps
 docker exec -it <container name> /bin/bash
+docker logs --follow <container ID>
 
 ngrok http --region=eu --hostname=okke.harsta.eu.ngrok.io 9001
 ngrok http --region=eu --hostname=okke.harsta.eu.ngrok.io 8000
