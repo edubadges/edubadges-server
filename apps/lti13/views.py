@@ -79,14 +79,10 @@ def launch(request):
     if not institution:
         return redirect(f"{settings.UI_URL}/lti?status=invalid_institution")
 
-    user = request.user
-    if not user.is_anonymous and isinstance(user, BadgeUser) and user.is_teacher:
-        return redirect(f"{settings.UI_URL}/lti?status=user_logged_in&launch_id={launch_id}")
-
     try:
-        user = BadgeUser.objects.get(email=email, is_teacher=True)
+        user = BadgeUser.objects.get(email=email, is_teacher=True, institution=institution)
     except BadgeUser.DoesNotExist:
-        args = {"status": "unknown_user"}
+        args = {"status": "failure"}
         admins = list(filter(lambda u: u.may_administrate_users, institution.staff))
         if len(admins) > 0:
             args["admin_email"] = admins[0].user.email
@@ -102,7 +98,7 @@ def launch(request):
                         redirect_url=social_login.get_redirect_url(request),
                         signal_kwargs={"sociallogin": social_login})
     auth_token = parse_qs(urlparse(ret.url).query)['authToken'][0]
-    args = {"status": "known_user", "launch_id": launch_id, "auth_token": auth_token}
+    args = {"status": "success", "launch_id": launch_id, "auth_token": auth_token}
     return redirect(f"{settings.UI_URL}/lti?{urllib.parse.urlencode(args)}")
 
 
@@ -114,7 +110,7 @@ def get_jwks(request):
 def get_lti_context(request, launch_id):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-    message_launch = ExtendedDjangoMessageLaunch.from_cache(launch_id, request, tool_conf,
+    message_launch = DjangoMessageLaunch.from_cache(launch_id, request, tool_conf,
                                                             launch_data_storage=launch_data_storage)
     launch_data = message_launch.get_launch_data()
     return JsonResponse(launch_data, safe=False)
@@ -124,7 +120,7 @@ def get_grades(request):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
     lti_context = request.session.get('lti_context')
-    message_launch = ExtendedDjangoMessageLaunch.from_cache(lti_context.get('launch_id'), request, tool_conf,
+    message_launch = DjangoMessageLaunch.from_cache(lti_context.get('launch_id'), request, tool_conf,
                                                             launch_data_storage=launch_data_storage)
     ags = message_launch.get_ags()
     nrps = message_launch.get_nrps()
