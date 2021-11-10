@@ -66,7 +66,8 @@ def login(request):
 def launch(request):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-    message_launch = DjangoMessageLaunch(request, tool_conf, launch_data_storage=launch_data_storage)
+    message_launch = DjangoMessageLaunch(request, tool_conf, launch_data_storage=launch_data_storage,
+                                         deployment_validation=False)
     message_launch_data = message_launch.get_launch_data()
     # Get the mandatory data from the launch data
     email = message_launch_data['email']
