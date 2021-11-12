@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+## [5.2.0] - 2021-11-15
+- New submodule commits.
+- Bugfix for non-unique deny reason enrolllment.
+- Check provisionments.
+- Added deny_reason to enrollment.
+- Proxy call to validator git info.
+- Added backpack user count to insights.
+- Use connect domain for SURF default.
+- Maintain whitelisted url's from Django admin view.
+- Imported badges unique for users.
+- Fix for multiple whitelisted domains.
+- Force build.
+- Added public_institution to hide institutions from catalog.
+
 ## [5.1.0] - 2021-10-18
 - Validate imported badge.
 - Added import external open badge functionality.
