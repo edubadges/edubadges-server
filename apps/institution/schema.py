@@ -1,6 +1,7 @@
 import graphene
 from graphene_django.types import DjangoObjectType
 
+from issuer.models import Issuer
 from issuer.schema import IssuerType
 from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, \
     ImageResolverMixin, PermissionsResolverMixin, DefaultLanguageResolverMixin
@@ -89,10 +90,16 @@ class Query(object):
     institutions = graphene.List(InstitutionType)
     public_institutions = graphene.List(InstitutionType)
     faculties = graphene.List(FacultyType)
+    issuers = graphene.List(IssuerType)
     faculty = graphene.Field(FacultyType, id=graphene.String())
 
     def resolve_current_institution(self, info, **kwargs):
         return info.context.user.institution
+
+
+    def resolve_issuers(self, info, **kwargs):
+        user = info.context.user
+        return [iss for iss in Issuer.objects.filter(faculty__institution=user.institution) if iss.has_permissions(user, ['may_update'])]
 
     def resolve_institutions(self, info, **kwargs):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['may_read'])]
@@ -104,7 +111,7 @@ class Query(object):
             return institution
 
     def resolve_public_institutions(self, info, **kwargs):
-        return Institution.objects.all()
+        return Institution.objects.filter(public_institution=True).all()
 
     def resolve_faculties(self, info, **kwargs):
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['may_read'])]

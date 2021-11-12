@@ -178,7 +178,8 @@ class EmailMessageMaker:
         template = 'email/enrollment_denied.html'
         email_vars = {'public_badge_url': enrollment.badge_class.public_url,
                       'badgeclass_name': enrollment.badge_class.name,
-                      'recipient_name': enrollment.user.full_name}
+                      'recipient_name': enrollment.user.full_name,
+                      'deny_reason': enrollment.deny_reason}
         return render_to_string(template, email_vars)
 
     @staticmethod

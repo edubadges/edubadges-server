@@ -186,9 +186,9 @@ ACCOUNT_SALT = os.environ['ACCOUNT_SALT']
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
-SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://oidc.test.surfconext.nl/oidc')
+SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://connect.test.surfconext.nl/oidc')
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
-EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
+# EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
 EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
@@ -560,7 +560,6 @@ LOCAL_DEVELOPMENT_MODE = legacy_boolean_parsing('LOCAL_DEVELOPMENT_MODE', '0')
 SUPERUSER_LOGIN_WITH_SURFCONEXT = legacy_boolean_parsing('SUPERUSER_LOGIN_WITH_SURFCONEXT', '0')
 
 VALIDATOR_URL = os.environ.get('VALIDATOR_URL', 'http://localhost:5000')
-WHITELIST_IMPORTED_BADGES = os.environ.get('WHITELIST_IMPORTED_BADGES', 'https://api.eu.badgr.io')
 EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://127.0.0.1:8000/static')
 
 

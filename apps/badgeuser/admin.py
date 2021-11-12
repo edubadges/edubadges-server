@@ -6,7 +6,8 @@ from django.forms import ModelForm
 from mainsite.admin import badgr_admin
 from mainsite.utils import admin_list_linkify
 from staff.models import PermissionedRelationshipBase
-from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl
+from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl, \
+    ImportBadgeAllowedUrl
 
 
 class EmailAddressInline(TabularInline):
@@ -17,7 +18,8 @@ class EmailAddressInline(TabularInline):
 
 
 class BadgeUserAdmin(UserAdmin):
-    readonly_fields = ('email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id')
+    readonly_fields = (
+        'email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id')
     list_display = ('last_name', 'first_name', 'email', 'is_active', 'is_staff', 'date_joined',
                     admin_list_linkify('institution', 'name'))
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
@@ -87,7 +89,6 @@ badgr_admin.register(TermsUrl, TermsUrlAdmin)
 
 
 class UserProvisionmentCreateForm(ModelForm):
-
     class Meta:
         model = UserProvisionment
         fields = ('email', 'object_id', 'content_type')
@@ -117,3 +118,10 @@ class UserProvisionmentAdmin(ModelAdmin):
 
 
 badgr_admin.register(UserProvisionment, UserProvisionmentAdmin)
+
+
+class ImportBadgeAllowedUrlAdmin(ModelAdmin):
+    list_display = ('url',)
+
+
+badgr_admin.register(ImportBadgeAllowedUrl, ImportBadgeAllowedUrlAdmin)

@@ -300,6 +300,10 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                 setattr(instance, key, value)
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         try:
+            badge_class = BadgeClass.objects.get(id=instance.id)
+            if badge_class.issuer.id != validated_data['issuer'].id:
+                badge_class.issuer.faculty.remove_cached_data(['cached_badgeclasses'])
+                badge_class.issuer.remove_cached_data(['cached_badgeclasses'])
             instance.save()
         except IntegrityError:
             raise BadgrValidationFieldError('name',

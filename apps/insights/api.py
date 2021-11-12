@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, StudentAffiliation
 from directaward.models import DirectAward
 from insights.permissions import TeachPermission
 from institution.models import Faculty
@@ -75,6 +75,7 @@ class InsightsView(APIView):
             'users_count': BadgeUser.objects.filter(is_teacher=True, institution=institution).count(),
             'faculties_count': Faculty.objects.filter(institution=institution).count(),
             'issuers_count': Issuer.objects.filter(faculty__institution=institution).count(),
-            'badge_class_count': BadgeClass.objects.filter(issuer__faculty__institution=institution).count()
+            'badge_class_count': BadgeClass.objects.filter(issuer__faculty__institution=institution).count(),
+            'backpack_count': StudentAffiliation.objects.filter(schac_home=institution.identifier).count()
         }
         return Response(res, status=status.HTTP_200_OK)

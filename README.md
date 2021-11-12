@@ -38,7 +38,6 @@ Prerequisites:
 #### Optional extras:
 
 * memcached
-* amqp broker (e.g. RabbitMQ)
 
 #### System-specific requirements:
 * OS X: [XCode Command line tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/)
@@ -74,6 +73,14 @@ CREATE DATABASE badgr CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 if on a mac mysqlclient does not build, try:
 ```
 LDFLAGS=-L/usr/local/opt/openssl/lib pip install mysqlclient
+```
+### Run / debug IDE
+You'll need to add the environment variables from env_vars.sh.example to a run configuration
+
+### Generate a TOTP for first login with super user
+If you login to http://localhost:8000/staff/superuser then you'll have to provide a TOTP token. Generate one with:
+```
+./manage.py addstatictoken superuser
 ```
 
 ### Customize local settings to your environment
