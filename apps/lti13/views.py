@@ -112,7 +112,7 @@ def get_lti_context(request, launch_id):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
     message_launch = DjangoMessageLaunch.from_cache(launch_id, request, tool_conf,
-                                                            launch_data_storage=launch_data_storage)
+                                                    launch_data_storage=launch_data_storage)
     launch_data = message_launch.get_launch_data()
     return JsonResponse(launch_data, safe=False)
 
@@ -122,11 +122,19 @@ def get_grades(request):
     launch_data_storage = get_launch_data_storage()
     lti_context = request.session.get('lti_context')
     message_launch = DjangoMessageLaunch.from_cache(lti_context.get('launch_id'), request, tool_conf,
-                                                            launch_data_storage=launch_data_storage)
+                                                    launch_data_storage=launch_data_storage)
     ags = message_launch.get_ags()
-    nrps = message_launch.get_nrps()
-
-    # members = nrps.get_members()
     line_items = ags.get_lineitems()
     grades = [ags.get_grades(line_item) for line_item in line_items]
     return JsonResponse(grades, safe=False)
+
+
+def get_members(request):
+    tool_conf = get_tool_conf()
+    launch_data_storage = get_launch_data_storage()
+    lti_context = request.session.get('lti_context')
+    message_launch = DjangoMessageLaunch.from_cache(lti_context.get('launch_id'), request, tool_conf,
+                                                    launch_data_storage=launch_data_storage)
+    nrps = message_launch.get_nrps()
+    members = nrps.get_members()
+    return JsonResponse(members, safe=False)
