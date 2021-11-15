@@ -11,31 +11,17 @@ from allauth.socialaccount.helpers import render_authentication_error, complete_
 from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, get_object_or_404
-from django.utils import timezone
+from django.shortcuts import redirect
 from jose import jwt
 
 from badgeuser.models import BadgeUser
 from badgrsocialauth.utils import set_session_badgr_app, get_social_account, update_user_params
-from ims.models import LTITenant
 from issuer.models import BadgeClass, BadgeInstance
-from lti_edu.models import StudentsEnrolled, LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
 
 logger = logging.getLogger('Badgr.Debug')
 from allauth.account.adapter import get_adapter as get_account_adapter
-
-
-def enroll_student(user, edu_id, badgeclass_slug):
-    badge_class = get_object_or_404(BadgeClass, entity_id=badgeclass_slug)
-    # consent given when enrolling
-    if user.may_enroll(badge_class):
-        # consent given when enrolling
-        StudentsEnrolled.objects.create(badge_class=badge_class,
-                                        user=user,
-                                        date_consent_given=timezone.now())
-    return 'enrolled'
 
 
 def encode(username, password):  # client_id, secret
@@ -60,15 +46,7 @@ def login(request):
     except:
         badgr_app_pk = settings.BADGR_APP_ID
 
-    lti_data = request.session.get('lti_data', None)
-    lti_context_id = ''
-    lti_user_id = ''
-    lti_roles = ''
-    if lti_data is not None:
-        lti_context_id = lti_data['lti_context_id']
-        lti_user_id = lti_data['lti_user_id']
-        lti_roles = lti_data['lti_roles']
-    state = json.dumps([referer, badgr_app_pk, lti_context_id, lti_user_id, lti_roles])
+    state = json.dumps([referer, badgr_app_pk])
 
     params = {
         "state": state,
@@ -96,8 +74,7 @@ def callback(request):
     current_app = SocialApp.objects.get_current(provider='edu_id')
     # extract state of redirect
     state = json.loads(request.GET.get('state'))
-    referer, badgr_app_pk, lti_context_id, lti_user_id, lti_roles = state
-    lti_data = request.session.get('lti_data', None)
+    referer, badgr_app_pk = state
     code = request.GET.get('code', None)  # access codes to access user info endpoint
     if code is None:  # check if code is given
         error = 'Server error: No userToken found in callback'
@@ -133,7 +110,7 @@ def callback(request):
                          'access_token': access_token,
                          'provider': "eduid",
                          "eduperson_scoped_affiliation": payload.get('eduperson_scoped_affiliation', []),
-                         'state': json.dumps([str(badgr_app_pk), 'edu_id', lti_context_id, lti_user_id, lti_roles] + [
+                         'state': json.dumps([str(badgr_app_pk), 'edu_id'] + [
                              json.loads(referer)]),
                          'role': 'student'}
 
@@ -151,8 +128,7 @@ def after_terms_agreement(request, **kwargs):
     '''
     this is the second part of the callback, after consent has been given, or is user already exists
     '''
-    badgr_app_pk, login_type, lti_context_id, lti_user_id, lti_roles, referer = json.loads(kwargs['state'])
-    lti_data = request.session.get('lti_data', None)
+    badgr_app_pk, login_type, referer = json.loads(kwargs['state'])
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
@@ -217,21 +193,6 @@ def after_terms_agreement(request, **kwargs):
     if len(validated_names) > 0:
         request.user.validated_name = validated_names[0]
     request.user.save()
-
-    # create lti_connection
-    if lti_data is not None and 'lti_user_id' in lti_data:
-        if not request.user.is_anonymous:
-            tenant = LTITenant.objects.get(client_key=lti_data['lti_tenant'])
-            badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=lti_data['lti_user_id'],
-                                                                             badge_user=request.user,
-                                                                             lti_tennant=tenant,
-                                                                             staff=False
-                                                                             )
-            user_current_context_id, _ = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
-            user_current_context_id.context_id = lti_data['lti_context_id']
-            user_current_context_id.save()
-    request.session['lti_user_id'] = lti_user_id
-    request.session['lti_roles'] = lti_roles
 
     if not social_account:
         # This fails if there is already an User account with that email, so we need to delete the old one

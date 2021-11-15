@@ -1,10 +1,9 @@
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
-from django.views.decorators.csrf import csrf_exempt
 from django.urls import path
-from django_otp.admin import OTPAdminSite
-from ims.views import base
+from django.views.decorators.csrf import csrf_exempt
+
 from mainsite.admin import badgr_admin
 from mainsite.graphql_view import ExtendedGraphQLView
 from mainsite.schedule import start_scheduling
@@ -29,7 +28,8 @@ urlpatterns = [
     url(r'^robots\.txt$', RedirectView.as_view(url='%srobots.txt' % settings.STATIC_URL, permanent=True)),
 
     # legacy logo url redirect
-    url(r'^static/images/header-logo-120.png$', RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
+    url(r'^static/images/header-logo-120.png$',
+        RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
 
     # Home
     url(r'^$', RedirectView.as_view(url='/docs/', permanent=True)),
@@ -37,13 +37,15 @@ urlpatterns = [
     # Admin URLs
     url(r'^staff/sidewide-actions$', SitewideActionFormView.as_view(), name='badgr_admin_sitewide_actions'),
     url(r'^staff/', badgr_admin.urls),
-    url(r'^staff/superlogin', badgr_admin.login, name='badgr_admin_super_login'),  # legacy superlogin is now a duplicate of /staff/login
+    url(r'^staff/superlogin', badgr_admin.login, name='badgr_admin_super_login'),
+    # legacy superlogin is now a duplicate of /staff/login
 
     # Service health endpoint
     url(r'^health', include('health.urls')),
 
     # unversioned public endpoints
-    url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe, name='unsubscribe'),
+    url(r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)', email_unsubscribe,
+        name='unsubscribe'),
 
     url(r'^public/', include('public.public_api_urls')),
 
@@ -75,8 +77,6 @@ urlpatterns = [
     # include lti13 endpoints
     url(r'^lti/', include('lti13.urls')),
 
-    url(r'^lti_issuer/', include('lti_edu.lti_urls')),
-
     # include theming endpoints
     url(r'', include('theming.api_urls')),
 
@@ -88,74 +88,60 @@ urlpatterns = [
 
 ]
 
-urlpatterns += [
-    url(
-        r'^lti_app/(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
-        base.lti_config,
-        name='lti-config'
-    ),
-    url(r'^lti_app/(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
-]
-
-urlpatterns += [
-    url(
-        r'^lti_app/(?P<app_slug>[A-Za-z0-9\-]+)/config/(?P<tenant_slug>[A-Za-z0-9\-]+)\.xml$',
-        base.lti_config,
-        name='lti-config'
-    ),
-    url(r'^lti_app/(?P<slug>[A-Za-z0-9\-]+)/?$', base.lti_launch)
-]
-
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, 'DEBUG_ERRORS', False):
     urlpatterns = [
-        url(r'^error/404/$', error404, name='404'),
-        url(r'^error/500/$', error500, name='500'),
-    ] + urlpatterns
+                      url(r'^error/404/$', error404, name='404'),
+                      url(r'^error/500/$', error500, name='500'),
+                  ] + urlpatterns
 
 # If DEBUG_MEDIA is set, have django serve anything in MEDIA_ROOT at MEDIA_URL
 if getattr(settings, 'DEBUG_MEDIA', True):
     from django.views.static import serve as static_serve
+
     media_url = getattr(settings, 'HTTP_ORIGIN_MEDIA', '/media/').lstrip('/')
     urlpatterns = [
-        url(r'^media/(?P<path>.*)$', static_serve, {
-            'document_root': settings.MEDIA_ROOT
-        }),
-    ] + urlpatterns
+                      url(r'^media/(?P<path>.*)$', static_serve, {
+                          'document_root': settings.MEDIA_ROOT
+                      }),
+                  ] + urlpatterns
 
 # If DEBUG_STATIC is set, have django serve up static files even if DEBUG=False
 if getattr(settings, 'DEBUG_STATIC', True):
     from django.contrib.staticfiles.views import serve as staticfiles_serve
+
     static_url = getattr(settings, 'STATIC_URL', '/static/')
     static_url = static_url.replace(getattr(settings, 'HTTP_ORIGIN_MEDIA', 'http://localhost:8000'), '')
     static_url = static_url.lstrip('/')
     urlpatterns = [
-        url(r'^%s(?P<path>.*)' % (static_url,), staticfiles_serve, kwargs={
-            'insecure': True,
-        })
-    ] + urlpatterns
+                      url(r'^%s(?P<path>.*)' % (static_url,), staticfiles_serve, kwargs={
+                          'insecure': True,
+                      })
+                  ] + urlpatterns
 
 # Serve pattern library view only in debug mode or if explicitly declared
 if getattr(settings, 'DEBUG', True) or getattr(settings, 'SERVE_PATTERN_LIBRARY', False):
     urlpatterns = [
-       url(r'^component-library$', TemplateView.as_view(template_name='component-library.html'), name='component-library')
-    ] + urlpatterns
+                      url(r'^component-library$', TemplateView.as_view(template_name='component-library.html'),
+                          name='component-library')
+                  ] + urlpatterns
 
 # serve django debug toolbar if present
 if settings.DEBUG and apps.is_installed('debug_toolbar'):
     try:
         import debug_toolbar
+
         urlpatterns = urlpatterns + [
             url(r'^__debug__/', include(debug_toolbar.urls)),
         ]
     except ImportError:
         pass
 
-
 # protected assertion media files
 urlpatterns.insert(0,
-    url(r'^media/(?P<path>.*)$', serve_protected_document, {'document_root': settings.MEDIA_ROOT}, name='serve_protected_document'),
-)
+                   url(r'^media/(?P<path>.*)$', serve_protected_document, {'document_root': settings.MEDIA_ROOT},
+                       name='serve_protected_document'),
+                   )
 
 handler404 = error404
 handler500 = error500

@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.response import Response
@@ -6,9 +5,8 @@ from rest_framework.status import HTTP_200_OK
 
 from entity.api import BaseEntityListView, BaseEntityDetailView
 from issuer.models import BadgeClass
-from lti_edu.models import StudentsEnrolled, BadgeClassLtiContext, UserCurrentContextId
-from lti_edu.serializers import StudentsEnrolledSerializerWithRelations, BadgeClassLtiContextSerializer, \
-    BadgeClassLtiContextStudentSerializer
+from lti_edu.models import StudentsEnrolled
+from lti_edu.serializers import StudentsEnrolledSerializerWithRelations
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import EmailMessageMaker
@@ -105,67 +103,3 @@ class EnrollmentDetail(BaseEntityDetailView):
         enrollment.badge_class.remove_cached_data(['cached_pending_enrollments'])
         enrollment.badge_class.remove_cached_data(['cached_pending_enrollments_including_denied'])
         return Response(data='Succesfully denied enrollment', status=HTTP_200_OK)
-
-
-class BadgeClassLtiContextListView(BaseEntityListView):
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
-    model = BadgeClassLtiContext
-    serializer_class = BadgeClassLtiContextSerializer
-
-    def get_objects(self, request, **kwargs):
-        if 'lti_context_id' in kwargs:
-            lti_context_id = kwargs['lti_context_id']
-            badgeclasses_per_context_id = BadgeClassLtiContext.objects.filter(context_id=lti_context_id).all()
-            return badgeclasses_per_context_id
-        return []
-
-
-class BadgeClassLtiContextStudentListView(BaseEntityListView):
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
-    model = BadgeClassLtiContext
-    serializer_class = BadgeClassLtiContextStudentSerializer
-
-    def get_objects(self, request, **kwargs):
-        if 'lti_context_id' in kwargs:
-            lti_context_id = kwargs['lti_context_id']
-            badgeclasses_per_context_id = BadgeClassLtiContext.objects.filter(context_id=lti_context_id).all()
-            return badgeclasses_per_context_id
-        return []
-
-
-class BadgeClassLtiContextDetailView(BaseEntityDetailView):
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
-    model = BadgeClassLtiContext
-    serializer_class = BadgeClassLtiContextSerializer
-
-    def post(self, request, **kwargs):
-        context_id = request.data['contextId']
-        badge_class = BadgeClass.objects.get(entity_id=request.data['badgeClassEntityId'])
-        BadgeClassLtiContext.objects.get_or_create(context_id=context_id, badge_class=badge_class)
-        message = 'Succesfully added badgeclass'
-        return Response(data=message, status=HTTP_200_OK)
-
-    def delete(self, request, **kwargs):
-        context_id = request.data['contextId']
-        badge_class = BadgeClass.objects.get(entity_id=request.data['badgeClassEntityId'])
-        BadgeClassLtiContext.objects.get(context_id=context_id, badge_class=badge_class).delete()
-        message = 'Succesfully deleted badgeclass'
-        return Response(data=message, status=HTTP_200_OK)
-
-
-class CurrentContextView(BaseEntityDetailView):
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
-
-    def get(self, request, **kwargs):
-        response = {'loggedin': True,
-                    'lticontext': None}
-        if not request.user.is_authenticated:
-            response['loggedin'] = False
-        else:
-            try:
-                user_current_context_id = UserCurrentContextId.objects.get(badge_user=request.user)
-                response['lticontext'] = user_current_context_id.context_id
-            except Exception as e:
-                pass
-
-        return JsonResponse(response)

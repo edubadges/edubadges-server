@@ -11,7 +11,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('ims', '0002_ltiapp_ltitenant'),
         ('lti_edu', '0006_studentsenrolled_denied'),
     ]
 
@@ -22,7 +21,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('lti_user_id', models.CharField(max_length=512)),
                 ('badge_user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('lti_tennant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='ims.LTITenant')),
             ],
         ),
     ]

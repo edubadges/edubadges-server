@@ -60,7 +60,6 @@ INSTALLED_APPS = [
     # eduBadges apps
     'directaward',
     'entity',
-    'ims',
     'institution',
     'issuer',
     'backpack',

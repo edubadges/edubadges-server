@@ -17,31 +17,20 @@ from django.views.decorators.csrf import csrf_exempt
 from jose import jwt
 
 from badgeuser.models import UserProvisionment
-from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, get_social_account, \
-    AuthErrorCode
-from ims.models import LTITenant
+from badgrsocialauth.utils import set_session_badgr_app, get_session_authcode, get_verified_user, AuthErrorCode
 from institution.models import Institution
-from lti_edu.models import LtiBadgeUserTennant, UserCurrentContextId
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 
 logger = logging.getLogger('Badgr.Debug')
 
+
 def login(request):
     """
     Redirect to login page of SURFconext openID, this is "Where are you from" page
     :return: HTTP redirect to WAYF
     """
-    lti_data = request.session.get('lti_data', None)
-    lti_context_id = ''
-    lti_user_id = ''
-    lti_roles = ''
-    if lti_data is not None:
-        lti_context_id = lti_data['lti_context_id']
-        lti_user_id = lti_data['lti_user_id']
-        lti_roles = lti_data['lti_roles']
-
     _current_app = SocialApp.objects.get_current(provider='surf_conext')
 
     # state contains the data required for the redirect after the login via SURFconext,
@@ -56,9 +45,6 @@ def login(request):
     state = json.dumps([request.GET.get('process', 'login'),
                         get_session_authcode(request),
                         badgr_app_pk,
-                        lti_context_id,
-                        lti_user_id,
-                        lti_roles,
                         referer])
 
     params = {
@@ -99,7 +85,7 @@ def callback(request):
     if request.user.is_authenticated:
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
 
-    process, auth_token, badgr_app_pk, lti_data, lti_user_id, lti_roles, referer = json.loads(request.GET.get('state'))
+    process, auth_token, badgr_app_pk, referer = json.loads(request.GET.get('state'))
 
     code = request.GET.get('code', None)
     if code is None:
@@ -152,7 +138,7 @@ def callback(request):
     if process == 'connect' and request.user.is_anonymous and auth_token:
         request.user = get_verified_user(auth_token=auth_token)
     ret = complete_social_login(request, login)
-    new_url = ret.url+'&role=teacher'
+    new_url = ret.url + '&role=teacher'
     ret = HttpResponseRedirect(new_url)
 
     if not request.user.is_anonymous:  # the social login succeeded
@@ -198,20 +184,6 @@ def callback(request):
 
     request.user.accept_general_terms()
 
-    lti_data = request.session.get('lti_data', None)
-    if lti_data is not None and 'lti_user_id' in lti_data:
-        if not request.user.is_anonymous:
-            tenant = LTITenant.objects.get(client_key=lti_data['lti_tenant'])
-            badgeuser_tennant, _ = LtiBadgeUserTennant.objects.get_or_create(lti_user_id=lti_data['lti_user_id'],
-                                                                             badge_user=request.user,
-                                                                             lti_tennant=tenant,
-                                                                             staff=True)
-            user_current_context_id, _ = UserCurrentContextId.objects.get_or_create(badge_user=request.user)
-            user_current_context_id.context_id = lti_data['lti_context_id']
-            user_current_context_id.save()
-
-    request.session['lti_user_id'] = lti_user_id
-    request.session['lti_roles'] = lti_roles
     # override the response with a redirect to staff dashboard if the login came from there
     if referer == 'staff':
         return HttpResponseRedirect(reverse('admin:index'))
