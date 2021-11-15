@@ -18,6 +18,7 @@ from pylti1p3.tool_config import ToolConfJsonFile
 from badgeuser.models import BadgeUser
 from badgrsocialauth.utils import set_session_badgr_app
 from institution.models import Institution
+from lti13.config import DjangoDbToolConf
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
 
@@ -34,11 +35,11 @@ class DjangoNoSessionCacheDataStorage(CacheDataStorage):
         return None
 
 
-# TODO - Change this with DJango Database tool config
 def get_tool_conf():
-    lti_config_path = os.path.join(TOP_DIR, 'apps', 'lti13', 'config', 'lms.json')
-    tool_conf = ToolConfJsonFile(lti_config_path)
-    return tool_conf
+    return DjangoDbToolConf()
+    # lti_config_path = os.path.join(TOP_DIR, 'apps', 'lti13', 'config', 'lms.json')
+    # tool_conf = ToolConfJsonFile(lti_config_path)
+    # return tool_conf
 
 
 def get_launch_data_storage():
