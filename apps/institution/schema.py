@@ -96,10 +96,10 @@ class Query(object):
     def resolve_current_institution(self, info, **kwargs):
         return info.context.user.institution
 
-
     def resolve_issuers(self, info, **kwargs):
         user = info.context.user
-        return [iss for iss in Issuer.objects.filter(faculty__institution=user.institution) if iss.has_permissions(user, ['may_update'])]
+        return [iss for iss in Issuer.objects.filter(faculty__institution=user.institution) if
+                iss.has_permissions(user, ['may_update'])]
 
     def resolve_institutions(self, info, **kwargs):
         return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['may_read'])]

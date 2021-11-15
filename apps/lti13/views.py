@@ -84,9 +84,11 @@ def launch(request):
         user = BadgeUser.objects.get(email=email, is_teacher=True, institution=institution)
     except BadgeUser.DoesNotExist:
         args = {"status": "failure"}
-        admins = list(filter(lambda u: u.may_administrate_users, institution.staff))
-        if len(admins) > 0:
-            args["admin_email"] = admins[0].user.email
+        if institution.cached_staff():
+            cached_staff = institution.cached_staff()
+            admins = list(filter(lambda u: u.may_administrate_users, cached_staff))
+            if len(admins) > 0:
+                args["admin_email"] = admins[0].user.email
         return redirect(f"{settings.UI_URL}/lti?{urllib.parse.urlencode(args)}")
 
     social_account = user.get_social_account()
