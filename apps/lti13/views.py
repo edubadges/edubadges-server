@@ -1,4 +1,3 @@
-import os
 import urllib.parse
 from urllib.parse import parse_qs
 from urllib.parse import urlparse
@@ -13,13 +12,12 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 from pylti1p3.contrib.django import DjangoOIDCLogin, DjangoMessageLaunch
 from pylti1p3.launch_data_storage.cache import CacheDataStorage
-from pylti1p3.tool_config import ToolConfJsonFile
+from pylti1p3.lineitem import LineItem
 
 from badgeuser.models import BadgeUser
 from badgrsocialauth.utils import set_session_badgr_app
 from institution.models import Institution
 from lti13.config import DjangoDbToolConf
-from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
 
 
@@ -120,23 +118,21 @@ def get_lti_context(request, launch_id):
     return JsonResponse(launch_data, safe=False)
 
 
-def get_grades(request):
+def get_grades(request, launch_id):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-    lti_context = request.session.get('lti_context')
-    message_launch = DjangoMessageLaunch.from_cache(lti_context.get('launch_id'), request, tool_conf,
+    message_launch = DjangoMessageLaunch.from_cache(launch_id, request, tool_conf,
                                                     launch_data_storage=launch_data_storage)
     ags = message_launch.get_ags()
     line_items = ags.get_lineitems()
-    grades = [ags.get_grades(line_item) for line_item in line_items]
+    grades = [ags.get_grades(LineItem(line_item)) for line_item in line_items]
     return JsonResponse(grades, safe=False)
 
 
-def get_members(request):
+def get_members(request, launch_id):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-    lti_context = request.session.get('lti_context')
-    message_launch = DjangoMessageLaunch.from_cache(lti_context.get('launch_id'), request, tool_conf,
+    message_launch = DjangoMessageLaunch.from_cache(launch_id, request, tool_conf,
                                                     launch_data_storage=launch_data_storage)
     nrps = message_launch.get_nrps()
     members = nrps.get_members()
