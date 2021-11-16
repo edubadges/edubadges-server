@@ -8,6 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from pylti1p3.registration import Registration
 
 from institution.models import Institution
+from issuer.models import BadgeClass
+from mainsite.models import BaseAuditedModel
 
 
 class LtiToolKey(models.Model):
@@ -100,3 +102,11 @@ class LtiTool(models.Model):
         unique_together = [
             ['issuer', 'client_id'],
         ]
+
+
+class LtiCourse(BaseAuditedModel):
+    identifier = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, null=False, blank=False)
+    label = models.CharField(max_length=255, null=False, blank=False)
+    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.PROTECT,
+                                   related_name='badgeinstances')

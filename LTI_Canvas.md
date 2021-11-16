@@ -33,6 +33,8 @@ ngrok http --region=eu --hostname=okke.harsta.eu.ngrok.io 8000
 student1
 secret123
 
+oharsta+student@zilverline.com
+oharsta+teacher@zilverline.com
 -----
 ./script/docker_dev_setup.sh
 -----

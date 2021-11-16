@@ -126,7 +126,7 @@ def get_grades(request, launch_id):
     ags = message_launch.get_ags()
     line_items = ags.get_lineitems()
     grades = [ags.get_grades(LineItem(line_item)) for line_item in line_items]
-    return JsonResponse(grades, safe=False)
+    return JsonResponse({"line_items": line_items, "grades": grades}, safe=False)
 
 
 def get_members(request, launch_id):

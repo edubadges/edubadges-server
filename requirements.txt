@@ -111,7 +111,7 @@ django_mock_queries==2.1.5
 
 # lti consumer
 # TODO - need to remove IMS code and obsolueted LTI code
-lti==0.9.2
+# lti==0.9.2
 
 # PyLTI1p3==1.9.1
 git+https://github.com/edubadges/pylti1.3@master#egg=PyLTI1p3
