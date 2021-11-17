@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from pylti1p3.registration import Registration
 
+from entity.models import BaseVersionedEntity
 from institution.models import Institution
 from issuer.models import BadgeClass
 from mainsite.models import BaseAuditedModel
@@ -104,7 +105,7 @@ class LtiTool(models.Model):
         ]
 
 
-class LtiCourse(BaseAuditedModel):
+class LtiCourse(BaseAuditedModel, BaseVersionedEntity):
     identifier = models.CharField(max_length=255)
     title = models.CharField(max_length=255, null=False, blank=False)
     label = models.CharField(max_length=255, null=False, blank=False)
