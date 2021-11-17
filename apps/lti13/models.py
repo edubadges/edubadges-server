@@ -108,5 +108,5 @@ class LtiCourse(BaseAuditedModel):
     identifier = models.CharField(max_length=255)
     title = models.CharField(max_length=255, null=False, blank=False)
     label = models.CharField(max_length=255, null=False, blank=False)
-    badgeclass = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.PROTECT,
-                                   related_name='badgeinstances')
+    badgeclass = models.OneToOneField(BadgeClass, blank=False, null=False, on_delete=models.CASCADE,
+                                      related_name='lti_course')
