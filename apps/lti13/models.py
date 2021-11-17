@@ -41,6 +41,7 @@ class LtiToolKey(models.Model):
 
 class LtiTool(models.Model):
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True, default=None)
     is_active = models.BooleanField(default=True)
     issuer = models.CharField(max_length=255,
                               help_text=_("This will usually look something like 'http://example.com'. "
@@ -99,6 +100,9 @@ class LtiTool(models.Model):
         }
         return data
 
+    def __str__(self):
+        return '<LtiTool id=%d, title=%s>' % (self.id, self.title)
+
     class Meta(object):
         unique_together = [
             ['issuer', 'client_id'],
@@ -111,3 +115,5 @@ class LtiCourse(BaseAuditedModel, BaseVersionedEntity):
     label = models.CharField(max_length=255, null=False, blank=False)
     badgeclass = models.OneToOneField(BadgeClass, blank=False, null=False, on_delete=models.CASCADE,
                                       related_name='lti_course')
+    tool = models.ForeignKey(LtiTool, blank=False, null=False, on_delete=models.CASCADE,
+                              related_name='courses')

@@ -73,7 +73,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                  DjangoObjectType):
     class Meta:
         model = Issuer
-        fields = ('entity_id',
+        fields = ('entity_id', 'archived',
                   'badgeclasses', 'faculty',
                   'name_english', 'name_dutch',
                   'image_dutch', 'image_english',
@@ -177,6 +177,7 @@ class BadgeInstanceCollectionType(DjangoObjectType,):
 
     def resolve_public_badge_instances(self, info, **kwargs):
         return list(BadgeInstance.objects.filter(badgeinstancecollection=self, public=True, revoked=False))
+
 
 class BadgeInstanceConnection(Connection):
     class Meta:
