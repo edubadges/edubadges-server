@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import PrimaryKeyRelatedField
 
 from issuer.models import BadgeClass
-from .models import LtiCourse
+from .models import LtiCourse, LtiTool
 
 
 class LtiCourseSerializer(serializers.Serializer):
@@ -11,6 +11,7 @@ class LtiCourseSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255, required=False)
     label = serializers.CharField(max_length=255, required=True)
     badgeclass = PrimaryKeyRelatedField(many=False, queryset=BadgeClass.objects.all(), required=True)
+    tool = PrimaryKeyRelatedField(many=False, queryset=LtiTool.objects.all(), required=True)
 
     class Meta:
         model = LtiCourse

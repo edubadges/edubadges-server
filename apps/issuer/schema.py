@@ -189,7 +189,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
                      DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
         model = BadgeClass
-        fields = ('name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
+        fields = ('id', 'name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
                   'description', 'criteria_url', 'criteria_text', 'is_private',
                   'created_at', 'expiration_period', 'public_url', 'assertions_count',
                   'content_type_id', 'formal', 'evidence_required', 'narrative_required',
