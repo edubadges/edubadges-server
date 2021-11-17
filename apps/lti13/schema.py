@@ -13,7 +13,7 @@ class LtiToolType(DjangoObjectType):
 class LtiCourseType(DjangoObjectType):
     class Meta:
         model = LtiCourse
-        fields = ('entity_id', 'created_at', 'identifier', 'title', 'tool')
+        fields = ('entity_id', 'created_at', 'identifier', 'title', 'label','tool')
 
     tool = graphene.Field(LtiToolType)
 
