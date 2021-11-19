@@ -101,7 +101,7 @@ def launch(request):
                         signal_kwargs={"sociallogin": social_login})
     auth_token = parse_qs(urlparse(ret.url).query)['authToken'][0]
     args = {"status": "success", "launch_id": launch_id, "auth_token": auth_token}
-    return redirect(f"{settings.UI_URL}/lti?{urllib.parse.urlencode(args)}")
+    return redirect(f"{settings.UI_URL}/launch/lti?{urllib.parse.urlencode(args)}")
 
 
 def get_jwks(request):
