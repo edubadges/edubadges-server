@@ -3,6 +3,8 @@ import hashlib
 import json
 import random
 import string
+from json import JSONDecodeError
+
 from django.conf import settings
 import requests
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -23,7 +25,7 @@ from mainsite.drf_fields import Base64FileField, ValidImageField
 from mainsite.serializers import MarkdownCharField, StripTagsCharField
 from mainsite.utils import OriginSetting
 from mainsite.utils import send_mail, EmailMessageMaker
-
+from jose import jwt, jws
 logger = badgrlog.BadgrLogger()
 
 
@@ -356,8 +358,18 @@ class ImportedAssertionSerializer(serializers.Serializer):
             if image_file.name.endswith('svg'):
                 verify_url = assertion.decode()
             else:
-                data = json.loads(assertion)
-                verify_url = data['id']
+                try:
+                    data = json.loads(assertion)
+                    verify_url = data['id']
+                except JSONDecodeError:
+                    headers = jwt.get_unverified_header(assertion)
+                    payload = jwt.get_unverified_claims(assertion)
+                    verification_url = payload.get('verification').get('url')
+                    key = requests.get(verification_url).text
+                    # This will raise JWSSignatureError if not valid
+                    jws.verify(assertion, key, headers.get('alg'))
+                    verify_url = payload['id']
+
         valid_domain_name = False
         allowed_urls = [allowed_url.url for allowed_url in ImportBadgeAllowedUrl.objects.all()]
         for allowed_url in allowed_urls:

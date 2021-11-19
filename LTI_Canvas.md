@@ -48,4 +48,7 @@ nounce validation
 
 The developer key must be set to PUBLIC in order to retrieve email, given_name, family_name
 
+cd /var/docker/proxy-edubadges/canvas4edubadges
+./go.sh
+docker exec -it $(docker ps -aqf "name=canvas4edubadges_app_1") bash -c "> log/parallel-runtime-rspec.log; > log/production.log"
 
