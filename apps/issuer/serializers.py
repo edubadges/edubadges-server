@@ -290,13 +290,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             extension.save()
 
     def update(self, instance, validated_data):
-        if instance.assertions and len([ass for ass in instance.assertions if not ass.revoked]) > 0:
-            raise BadgrValidationError(
-                error_code=999,
-                error_message="Cannot change any value, assertions have already been issued")
-        self.save_extensions(validated_data, instance)
+        has_unrevoked_assertions = instance.assertions and len([ass for ass in instance.assertions if not ass.revoked]) > 0
+        if not has_unrevoked_assertions:
+            self.save_extensions(validated_data, instance)
+        allowed_keys = ['narrative_required', 'evidence_required', 'award_non_validated_name_allowed', 'alignment_items', 'expiration_period']
         for key, value in validated_data.items():
-            if key is not 'award_allowed_institutions':
+            if key is not 'award_allowed_institutions' and (not has_unrevoked_assertions or key in allowed_keys):
                 setattr(instance, key, value)
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         try:

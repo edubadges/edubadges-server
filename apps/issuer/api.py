@@ -1,13 +1,11 @@
-import badgrlog
-from django.http import Http404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
 
+import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, BaseArchiveView
 from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceCollection
-from issuer.permissions import AwardedAssertionsBlock
 from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer, \
     BadgeInstanceCollectionSerializer
 from mainsite.exceptions import BadgrApiException400, BadgrValidationFieldError
@@ -69,7 +67,7 @@ class IssuerDeleteView(BaseArchiveView):
 
 class BadgeClassDetail(BaseEntityDetailView):
     model = BadgeClass
-    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, AwardedAssertionsBlock)
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeClassSerializer
     http_method_names = ['put']
 
