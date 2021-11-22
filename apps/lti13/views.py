@@ -6,6 +6,7 @@ from allauth.account.utils import perform_login
 from allauth.socialaccount import app_settings
 from allauth.socialaccount.models import SocialLogin
 from django.conf import settings
+from django.contrib.auth import logout
 from django.core.cache import caches  # type: ignore
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -54,7 +55,7 @@ def get_launch_url(request):
 def login(request):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-
+    logout(request)
     oidc_login = DjangoOIDCLogin(request, tool_conf, launch_data_storage=launch_data_storage)
     target_link_uri = get_launch_url(request)
     oidc_redirect = oidc_login.enable_check_cookies().redirect(target_link_uri)
