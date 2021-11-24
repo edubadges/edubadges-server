@@ -7,7 +7,7 @@
 {% block content %}
 <div class="mail_container">
     <div class="mail_subcontainer">
-        <p class="mail_title">Your request for the badge {{badgeclass_name}} has been denied by the issuer.</p>
+        <p class="mail_title">Your request for the edubadge {{badgeclass_name}} has been denied by the issuer.</p>
         <p class="mail_subtitle">Click the button to view the badge class in edubadges.</p>
         <a class="button blue-button" href="{{public_badge_url}}">View the public badge class.</a>
     </div>
@@ -15,7 +15,7 @@
         <p>For the English version, see below.</p>
         <hr>
         <p>{{recipient_name}},</p>
-        <p>Jouw verzoek voor de badge {{badgeclass_name}} is door de issuer geweigerd.</p>
+        <p>Jouw aanvraag voor de edubadge {{badgeclass_name}} is geweigerd door de uitgever.</p>
         {% if deny_reason|length > 1 %}
             <p>De reden voor de weigering:</p>
             <p>{{deny_reason}}</p>
@@ -24,7 +24,7 @@
         <p>Team Edubadges</p>
         <hr>
         <p>{{recipient_name}},</p>
-        <p>Your request for the badge {{badgeclass_name}} has been denied by the issuer.</p>
+        <p>Your request for the edubadge {{badgeclass_name}} has been denied by the issuer.</p>
         {% if deny_reason|length > 1 %}
             <p>The reason for the denial:</p>
             <p>{{deny_reason}}</p>
