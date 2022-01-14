@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 NB: The date 
 
-## [5.4.0] - 2022-1-17
+## [5.4.0] - 2022-01-17
 - Bump Django from 2.2.24 to 2.2.26
 - Bump pillow from 8.3.2 to 9.0.0
 
