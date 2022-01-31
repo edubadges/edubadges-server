@@ -35,6 +35,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     direct_awards = DirectAwardSerializer(many=True, write_only=True)
     entity_id = serializers.CharField(read_only=True)
     batch_mode = serializers.BooleanField(write_only=True)
+    lti_import = serializers.BooleanField(write_only=True)
     notify_recipients = serializers.BooleanField(write_only=True)
 
     def create(self, validated_data):
