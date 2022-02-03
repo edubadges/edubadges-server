@@ -248,6 +248,7 @@ class Faculty(EntityUserProvisionmentMixin,
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
+    on_behalf_of = models.BooleanField(default=False)
 
     @property
     def name(self):

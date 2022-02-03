@@ -424,6 +424,7 @@ class Issuer(EntityUserProvisionmentMixin,
             json['faculty'] = {'name': self.faculty.name,
                                'name_english': self.faculty.name_english,
                                'name_dutch': self.faculty.name_dutch,
+                               'on_behalf_of': self.faculty.on_behalf_of,
                                'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION,
                                                                                 expand_awards=expand_awards)}
 
@@ -1156,7 +1157,8 @@ class BadgeInstance(BaseAuditedModel,
                 json['badge']['id'] = self.cached_badgeclass.get_url_with_public_key(public_key_issuer)
             if expand_issuer:
                 json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version,
-                                                                      include_extra=include_extra, signed=signed,
+                                                                      include_extra=include_extra,
+                                                                      signed=signed,
                                                                       expand_public_key=False,
                                                                       public_key_issuer=public_key_issuer,
                                                                       expand_institution=True)
