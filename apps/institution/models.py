@@ -37,6 +37,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     award_allow_all_institutions = models.BooleanField(default=False, help_text='Allow awards to all institutions')
     public_institution = models.BooleanField(default=True, help_text='Set to false to exclude from the catalog')
 
+    lti_enabled = models.BooleanField(default=False, help_text='Set to true to enable LTI for this institution')
 
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
     GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
@@ -222,6 +223,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
             json['image_dutch'] = f"{image_url}?lang=nl"
         if expand_awards:
             json['award_allow_all_institutions'] = self.award_allow_all_institutions
+            json['lti_enabled'] = self.lti_enabled
             json['award_allowed_institutions'] = [inst.name for inst in self.award_allowed_institutions.all()]
         return json
 
@@ -246,6 +248,7 @@ class Faculty(EntityUserProvisionmentMixin,
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
+    on_behalf_of = models.BooleanField(default=False)
 
     @property
     def name(self):

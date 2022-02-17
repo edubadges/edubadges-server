@@ -89,7 +89,7 @@ def launch(request):
             admins = list(filter(lambda u: u.may_administrate_users, cached_staff))
             if len(admins) > 0:
                 args["admin_email"] = admins[0].user.email
-        return redirect(f"{settings.UI_URL}/lti?{urllib.parse.urlencode(args)}")
+        return redirect(f"{settings.UI_URL}/launch/lti?{urllib.parse.urlencode(args)}")
 
     social_account = user.get_social_account()
     social_login = SocialLogin(account=social_account, email_addresses=[email for email in user.email_items])

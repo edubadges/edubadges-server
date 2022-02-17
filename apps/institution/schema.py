@@ -15,8 +15,7 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
     class Meta:
         model = Faculty
         fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english',
-                  'description_dutch',
-                  'content_type_id')
+                  'description_dutch', 'content_type_id', 'on_behalf_of')
 
     issuers = graphene.List(IssuerType)
     issuer_count = graphene.Int()
@@ -52,7 +51,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         fields = ('entity_id', 'identifier', 'name_english', 'name_dutch', 'staff', 'created_at', 'description_english',
                   'description_dutch', 'institution_type', 'image_english', 'image_dutch', 'grading_table', 'brin',
                   'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language', 'id',
-                  'direct_awarding_enabled', 'award_allow_all_institutions')
+                  'direct_awarding_enabled', 'award_allow_all_institutions', 'lti_enabled')
 
     faculties = graphene.List(FacultyType)
     public_faculties = graphene.List(FacultyType)

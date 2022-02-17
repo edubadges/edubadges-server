@@ -115,6 +115,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
 class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     initial_total = models.IntegerField()
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
+    lti_import = models.BooleanField(default=False)
 
     @property
     def assertion_count(self):
