@@ -108,7 +108,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
         except EmailBlacklist.DoesNotExist:
             # Allow sending, as this email is not blacklisted.
             plain_text = strip_tags(html_message)
-            send_mail(subject='Congratulations, you earned an edubadge!',
+            send_mail(subject='Je hebt een edubadge verdiend! You earned an edubadge!',
                       message=plain_text, html_message=html_message, recipient_list=[self.recipient_email])
 
 
@@ -150,7 +150,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
     def notify_recipients(self):
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
-        send_mail(subject='Congratulations, you earned an edubadge!',
+        send_mail(subject='Je hebt een edubadge verdiend! You earned an edubadge!',
                   message=plain_text, html_message=html_message, bcc=self.recipient_emails)
 
     def notify_awarder(self):
