@@ -249,6 +249,8 @@ class Faculty(EntityUserProvisionmentMixin,
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
     on_behalf_of = models.BooleanField(default=False)
+    on_behalf_of_url = models.CharField(max_length=512, blank=True, null=True, default=None)
+    on_behalf_of_display_name = models.CharField(max_length=512, blank=True, null=True, default=None)
 
     @property
     def name(self):

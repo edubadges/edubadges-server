@@ -425,6 +425,8 @@ class Issuer(EntityUserProvisionmentMixin,
                                'name_english': self.faculty.name_english,
                                'name_dutch': self.faculty.name_dutch,
                                'on_behalf_of': self.faculty.on_behalf_of,
+                               'on_behalf_of_url': self.faculty.on_behalf_of_url,
+                               'on_behalf_of_display_name': self.faculty.on_behalf_of_display_name,
                                'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION,
                                                                                 expand_awards=expand_awards)}
 

@@ -84,6 +84,8 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
     description_dutch = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     on_behalf_of = serializers.BooleanField(default=False, required=False)
+    on_behalf_of_url = serializers.URLField(max_length=512, required=False, allow_null=True, allow_blank=True)
+    on_behalf_of_display_name = serializers.CharField(max_length=512, required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = Faculty
