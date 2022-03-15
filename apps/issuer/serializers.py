@@ -210,6 +210,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     is_private = serializers.BooleanField(required=False, default=False)
     narrative_required = serializers.BooleanField(required=False, default=False)
     evidence_required = serializers.BooleanField(required=False, default=False)
+    narrative_student_required = serializers.BooleanField(required=False, default=False)
+    evidence_student_required = serializers.BooleanField(required=False, default=False)
     award_non_validated_name_allowed = serializers.BooleanField(required=False, default=False)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
@@ -397,7 +399,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         if badgeclass.narrative_required and not data.get('narrative'):
             raise BadgrValidationError(error_code=999, error_message="Narrative is required")
         if badgeclass.evidence_required and not data.get("evidence_items"):
-            raise BadgrValidationError(error_code=999, error_message="Eviidence is required")
+            raise BadgrValidationError(error_code=999, error_message="Evidence is required")
         if data.get('email') and not data.get('recipient_identifier'):
             data['recipient_identifier'] = data.get('email')
 

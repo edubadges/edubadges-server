@@ -486,6 +486,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
     is_private = models.BooleanField(default=False)
     narrative_required = models.BooleanField(default=False)
     evidence_required = models.BooleanField(default=False)
+    narrative_student_required = models.BooleanField(default=False)
+    evidence_student_required = models.BooleanField(default=False)
     award_non_validated_name_allowed = models.BooleanField(default=False)
     old_json = JSONField()
     objects = BadgeClassManager()

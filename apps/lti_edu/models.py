@@ -20,6 +20,8 @@ class StudentsEnrolled(BaseVersionedEntity, models.Model):
     date_awarded = models.DateTimeField(default=None, blank=True, null=True)
     denied = models.BooleanField(default=False)
     deny_reason = models.CharField(max_length=255, blank=True, null=True)
+    evidence_url = models.CharField(max_length=512, blank=True, null=True, default=None)
+    narrative = models.TextField(blank=True, null=True, default=None)
 
     def __str__(self):
         return self.email
