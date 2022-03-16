@@ -64,6 +64,8 @@ class StudentsEnrolledList(BaseEntityListView):
             enrollment = StudentsEnrolled.objects.create(
                 badge_class_id=badge_class.pk,
                 user=request.user,
+                narrative=request.data.get("narrative"),
+                evidence_url=request.data.get("evidence_url"),
                 date_consent_given=timezone.now()
             )
             # Clear cache for the enrollments of this badgeclass
