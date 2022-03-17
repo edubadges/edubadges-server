@@ -9,10 +9,10 @@ from rest_framework.views import APIView
 from django.db.models import Q
 from badgeuser.models import BadgeUser, StudentAffiliation
 from directaward.models import DirectAward
-from insights.permissions import TeachPermission
 from institution.models import Faculty
 from issuer.models import BadgeInstance, Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
+from mainsite.permissions import TeachPermission
 
 
 class InsightsView(APIView):

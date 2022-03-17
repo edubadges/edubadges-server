@@ -1,9 +1,10 @@
 import badgrlog
 
 from entity.api import BaseEntityListView, BaseEntityDetailView
-from insights.permissions import TeachPermission
+
 from lti13.models import LtiCourse
 from lti13.serializers import LtiCourseSerializer
+from mainsite.permissions import TeachPermission
 
 logger = badgrlog.BadgrLogger()
 

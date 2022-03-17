@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'staff',
     'insights',
     'lti13',
+    'notifications',
     # deprecated
     'composition',
 ]

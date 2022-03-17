@@ -77,6 +77,9 @@ urlpatterns = [
     # include lti13 endpoints
     url(r'^lti/', include('lti13.urls')),
 
+    # include notifications endpoints
+    url(r'^notifications/', include('notifications.api_urls')),
+
     # include theming endpoints
     url(r'', include('theming.api_urls')),
 
