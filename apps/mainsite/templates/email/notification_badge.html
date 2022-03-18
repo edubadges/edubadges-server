@@ -25,8 +25,7 @@
             <p>De motivatie URL van de aanvrager:</p>
             <p><a href="{{enrollment_evidence_description}}">{{enrollment_evidence_description}}</a></p>
         {% endif %}
-        <p>Je ontvangt deze mail, omdat je in je edubadge notificatie instellingen hebt aangegeven een mail te ontvangen
-        wanneer er een nieuwe aanvraag wordt gedaan voor deze badge. Je kan dit wijzigen in <a href="{{ui_url_notifications}}">edubadges</a></p>
+        <p>Je ontvangt deze mail, omdat je dit in edubadges hebt ingesteld. Je kan dit wijzigen in <a href="{{ui_url_notifications}}">edubadges</a></p>
         <p>Met vriendelijke groet,</p>
         <p>Team Edubadges</p>
         <hr>
@@ -35,7 +34,7 @@
         <p>You can approve or reject this edubadge in edubadges.</p>
         {% if enrollment_evidence_description|length > 0 %}
             <p>The motivation of the user:</p>
-            <p>{{enrollment_evidence_description}}</p>
+            <p><em>{{enrollment_evidence_description}}</em></p>
         {% endif %}
         {% if enrollment_evidence_url|length > 0 %}
             <p>The motivation URL of the user:</p>
