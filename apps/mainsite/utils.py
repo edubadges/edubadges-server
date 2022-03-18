@@ -253,7 +253,7 @@ class EmailMessageMaker:
         email_vars = {
             'user_email': student.email,
             'ui_url': urllib.parse.urljoin(settings.UI_URL, f"badgeclass/{badge_class.entity_id}/enrollments"),
-            'ui_url_notifications': urllib.parse.urljoin(settings.UI_URL, f"badgeclass/{badge_class.entity_id}/enrollments"),
+            'ui_url_notifications': urllib.parse.urljoin(settings.UI_URL, 'notifications'),
             'badgeclass_name': badge_class.name,
             'enrollment_evidence_description': created_enrollment.narrative,
             'enrollment_evidence_url': created_enrollment.evidence_url
