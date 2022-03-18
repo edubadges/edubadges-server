@@ -1,0 +1,49 @@
+{% extends 'email/base.html' %}
+
+{% block title %}
+<title>A edubadge has been requested</title>
+{% endblock %}
+
+{% block content %}
+<div class="mail_container">
+    <div class="mail_subcontainer">
+        <p class="mail_title">Edubadge has been requested.</p>
+        <p class="mail_subtitle">Click the button to view it in edubadges.</p>
+        <a class="button blue-button" href="{{ui_url}}">View the requested badge</a>
+    </div>
+    <div class="mail_subcontainer middle">
+        <p>For the English version, see below.</p>
+        <hr>
+        <p>Hoi <strong>{{user_name}}</strong>,</p>
+        <p>De edubadge <strong>{{badgeclass_name}}</strong> is aangevraagd door {{user_email}}.</p>
+        <p>Je kan in edubadges deze accepteren of weigeren.</p>
+        {% if enrollment_evidence_description|length > 0 %}
+            <p>De motivatie van de aanvrager:</p>
+            <p><em>{{enrollment_evidence_description}}</em></p>
+        {% endif %}
+        {% if enrollment_evidence_url|length > 0 %}
+            <p>De motivatie URL van de aanvrager:</p>
+            <p><a href="{{enrollment_evidence_description}}">{{enrollment_evidence_description}}</a></p>
+        {% endif %}
+        <p>Je ontvangt deze mail, omdat je in je edubadge notificatie instellingen hebt aangegeven een mail te ontvangen
+        wanneer er een nieuwe aanvraag wordt gedaan voor deze badge. Je kan dit wijzigen in <a href="ui_url_notifications">edubadges</a></p>
+        <p>Met vriendelijke groet,</p>
+        <p>Team Edubadges</p>
+        <hr>
+        <p>Hi <strong>{{user_name}}</strong>,</p>
+        <p>The edubadge <strong>{{badge_name}}</strong> has been requested by {{user_email}}.</p>
+        <p>You can approve or reject this edubadge in edubadges.</p>
+        {% if enrollment_evidence_description|length > 0 %}
+            <p>The motivation of the user:</p>
+            <p>{{enrollment_evidence_description}}</p>
+        {% endif %}
+        {% if enrollment_evidence_url|length > 0 %}
+            <p>The motivation URL of the user:</p>
+            <p><a href="{{enrollment_evidence_url}}">{{enrollment_evidence_url}}</a></p>
+        {% endif %}
+        <p>You are receiving this mail, because you have configured this in edubadges. You can change this in <a href="ui_url_notifications">edubadges</a></p>
+        <p>Regards,</p>
+        <p>Team Edubadges</p>
+    </div>
+</div>
+{% endblock %}

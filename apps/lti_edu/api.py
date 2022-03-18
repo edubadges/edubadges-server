@@ -1,5 +1,8 @@
+import threading
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from lxml.etree import strip_tags
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
@@ -9,7 +12,8 @@ from lti_edu.models import StudentsEnrolled
 from lti_edu.serializers import StudentsEnrolledSerializerWithRelations
 from mainsite.exceptions import BadgrApiException400, BadgrValidationError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from mainsite.utils import EmailMessageMaker
+from mainsite.utils import EmailMessageMaker, send_mail
+from notifications.models import BadgeClassUserNotification
 from staff.permissions import HasObjectPermission
 
 
@@ -73,6 +77,24 @@ class StudentsEnrolledList(BaseEntityListView):
             badge_class.remove_cached_data(['cached_pending_enrollments_including_denied'])
             message = EmailMessageMaker.create_student_badge_request_email(request.user, badge_class)
             request.user.email_user(subject='You have successfully requested an edubadge', html_message=message)
+
+            # Send notifications to all users who have indicated they want to get notified
+            def send_notifications(badge_class, created_enrollment):
+                user_notifications = BadgeClassUserNotification.objects.filter(badgeclass=badge_class).all()
+                for user_notification in user_notifications:
+                    perms = badge_class.get_permissions(user_notification.user)
+                    if perms['may_sign']:
+                        html_message = EmailMessageMaker.create_enrolment_notification_mail(badge_class,
+                                                                                            request.user,
+                                                                                            created_enrollment)
+                        send_mail(subject='Een edubadge is aangevraagd! An edubadge is requested!',
+                                  message=None, html_message=html_message,
+                                  recipient_list=[user_notification.user.email])
+                    else:
+                        user_notification.delete()
+
+            thread = threading.Thread(target=send_notifications, args=(badge_class, enrollment))
+            thread.start()
             return Response(data={'status': 'enrolled', 'entity_id': enrollment.entity_id}, status=201)
         raise BadgrApiException400('Cannot enroll', 209)
 

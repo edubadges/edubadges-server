@@ -248,6 +248,20 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
+    def create_enrolment_notification_mail(badge_class, student, created_enrollment):
+        template = 'email/notification_badge.html'
+        email_vars = {
+            'user_email': student.email,
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, f"badgeclass/{badge_class.entity_id}/enrollments"),
+            'ui_url_notifications': urllib.parse.urljoin(settings.UI_URL, f"badgeclass/{badge_class.entity_id}/enrollments"),
+            'badgeclass_name': badge_class.name,
+            'enrollment_evidence_description': created_enrollment.narrative,
+            'enrollment_evidence_url': created_enrollment.evidence_url
+        }
+        return render_to_string(template, email_vars)
+
+
+    @staticmethod
     def create_direct_award_expired_student_mail(direct_award):
         badgeclass = direct_award.badgeclass
         template = 'email/expired_direct_award.html'
