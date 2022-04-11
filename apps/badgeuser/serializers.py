@@ -176,6 +176,8 @@ class TermsAgreementSerializer(serializers.Serializer):
         if institution:
             identifiers = [inst.identifier for inst in institution.award_allowed_institutions.all()] + [
                 institution.identifier]
+            if institution.alternative_identifier:
+                identifiers.append(institution.alternative_identifier)
             schac_homes = self.context['request'].user.schac_homes
             allowed = any(identifier in schac_homes for identifier in identifiers) or institution.award_allow_all_institutions
             if not allowed and terms.terms_type != 'informal_badge':
