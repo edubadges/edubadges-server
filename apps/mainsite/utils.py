@@ -183,6 +183,16 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
+    def create_assertion_revoked_email(badge_instance):
+        template = 'email/assertion_revoked.html'
+        email_vars = {'public_badge_url': badge_instance.badgeclass.public_url,
+                      'badgeclass_name': badge_instance.badgeclass.name,
+                      'recipient_name': badge_instance.user.full_name,
+                      'ui_url': urllib.parse.urljoin(settings.UI_URL, 'archived'),
+                      'revocation_reason': badge_instance.revocation_reason}
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_staff_rights_changed_email(staff_membership):
         template = 'email/staff_rights_changed.html'
         email_vars = {'recipient_name': staff_membership.user.full_name,

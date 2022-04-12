@@ -29,7 +29,7 @@ from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManag
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.mixins import ImageUrlGetterMixin, DefaultLanguageMixin
 from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
-from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker
+from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker, send_mail
 from signing import tsob
 from signing.models import AssertionTimeStamp, PublicKeyIssuer
 from signing.models import PublicKey
@@ -1104,6 +1104,13 @@ class BadgeInstance(BaseAuditedModel,
         self.revocation_reason = revocation_reason
         self.image.delete()
         self.save()
+
+        html_message = EmailMessageMaker.create_assertion_revoked_email(self)
+        send_mail(subject='eduBadge has been revoked',
+                  message=None,
+                  html_message=html_message,
+                  recipient_list=[self.user.email])
+
 
         # remove BadgeObjectiveAwards from badgebook if needed
         if apps.is_installed('badgebook'):
