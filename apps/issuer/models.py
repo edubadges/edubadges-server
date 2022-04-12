@@ -490,6 +490,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
     evidence_student_required = models.BooleanField(default=False)
     award_non_validated_name_allowed = models.BooleanField(default=False)
     is_micro_credentials = models.BooleanField(default=False)
+    direct_awarding_disabled = models.BooleanField(default=False)
+
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = cachemodel.CacheModelManager()
