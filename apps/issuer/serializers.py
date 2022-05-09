@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
 from rest_framework import serializers
-from rest_framework.exceptions import ErrorDetail
+from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.serializers import PrimaryKeyRelatedField
 
 from badgeuser.serializers import BadgeUserIdentifierField
@@ -191,13 +191,19 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
 
 class AlignmentItemSerializer(serializers.Serializer):
     target_name = StripTagsCharField()
-    target_url = serializers.URLField()
+    target_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
     target_description = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     target_framework = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     target_code = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         apispec_definition = ('BadgeClassAlignment', {})
+
+    def validate_target_url(self, target_url):
+        if not self.root.initial_data.get('isMicroCredentials', True):
+            if not target_url or len(target_url.strip()) == 0:
+                raise ValidationError(detail="This field may not be blank.", code='blank')
+        return target_url
 
 
 class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,

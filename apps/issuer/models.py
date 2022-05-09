@@ -1361,7 +1361,7 @@ class BadgeInstanceBakedImage(cachemodel.CacheModel):
 class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     target_name = models.TextField()
-    target_url = models.CharField(max_length=2083)
+    target_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
     target_description = models.TextField(blank=True, null=True, default=None)
     target_framework = models.TextField(blank=True, null=True, default=None)
     target_code = models.TextField(blank=True, null=True, default=None)
