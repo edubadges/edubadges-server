@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [6.2.0] - 2022-05-16
+- Added extra edubadge type filter option in badgeclass overview screen.
+- Hide description in related educational framework behind a read more.
+- Added more languages of instruction options.
+- Related educational framework URL is optional for pilot microcredential badgeclasses.
+- Studyload is between 3-30 ECTS for pilot microcredential badgeclasses.
+- Bump django from 2.2.26 to 2.2.28 .
+- Changed and migrated default languages for institution.
+- Ability to disable direct awards for badge classes.
+- Send mail if a badge_instance is revoked.
+- Serialize is_micro_credentials into database.
+- Added option badge class is_micro_credentials.
+- Added alternative identifier for institutions.
+
 ## [6.1.0] - 2022-03-21
 - Small improvement to notifications mail.
 - Use the tight URL in notifications.
