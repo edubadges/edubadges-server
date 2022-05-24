@@ -74,6 +74,9 @@ urlpatterns = [
     # include insights endpoints
     url(r'^insights/', include('insights.api_urls')),
 
+    # include badge_connect endpoints
+    url(r'^badge_connect/', include('badge_connect.api_urls')),
+
     # include lti13 endpoints
     url(r'^lti/', include('lti13.urls')),
 

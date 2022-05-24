@@ -59,6 +59,8 @@ INSTALLED_APPS = [
     'oauth2_provider',
     # eduBadges apps
     'directaward',
+    'endorsement',
+    'badge_connect',
     'entity',
     'institution',
     'issuer',
@@ -541,6 +543,9 @@ DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
 ALLOW_SEEDS = legacy_boolean_parsing('ALLOW_SEEDS', '0')
 EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
 EDU_ID_CLIENT = os.environ.get('EDU_ID_CLIENT', "edubadges")
+
+OIDC_RS_ENTITY_ID = os.environ.get('OIDC_RS_ENTITY_ID', 'edubadges')
+OIDC_RS_SECRET = os.environ['OIDC_RS_SECRET']
 
 SURF_CONEXT_SECRET = os.environ.get('SURF_CONEXT_SECRET', 'secret')
 SURF_CONEXT_CLIENT = os.environ.get('SURF_CONEXT_CLIENT', "test.edubadges.nl")
