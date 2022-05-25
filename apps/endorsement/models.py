@@ -3,7 +3,7 @@ from django.db import models
 
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeClass
-from mainsite.exceptions import BadgrValidationFieldError
+from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationError
 from mainsite.models import BaseAuditedModel
 
 
@@ -41,3 +41,10 @@ class Endorsement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     def save(self, *args, **kwargs):
         self.validate_unique()
         return super(Endorsement, self).save(*args, **kwargs)
+
+    def get_permissions(self, user):
+        """
+        Function that equates permission for this DirectAward to that of the BadgeClass it belongs to.
+        Used in HasObjectPermission
+        """
+        return self.endorsee.get_permissions(user)

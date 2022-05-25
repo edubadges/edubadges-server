@@ -3,6 +3,7 @@ from graphene.relay import ConnectionField
 from graphene_django.types import DjangoObjectType, Connection
 
 from directaward.schema import DirectAwardType, DirectAwardBundleType
+from endorsement.schema import EndorsementType
 from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
     StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students, \
@@ -215,6 +216,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
     award_allowed_institutions = graphene.List(graphene.String)
+    endorsements = graphene.List(EndorsementType)
 
     def resolve_terms(self, info, **kwargs):
         return self._get_terms()
@@ -224,6 +226,9 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
 
     def resolve_alignments(self, info, **kwargs):
         return self.cached_alignments()
+
+    def resolve_endorsements(self, info, **kwargs):
+        return self.cached_endorsements()
 
     @resolver_blocker_for_students
     def resolve_direct_awards(self, info, **kwargs):

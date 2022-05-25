@@ -402,8 +402,51 @@ class BadgeClassJson(JSONComponentView):
             json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version,
                                                                         expand_institution=True,
                                                                         expand_awards=expand_awards)
+        if 'endorsements' in expands:
+            json['endorsements'] = []
+            for endorsement in self.current_object.cached_endorsements():
+                endorsement = self._endorsement_to_json(endorsement)
+                json['endorsements'].append(endorsement)
 
         return json
+
+    @staticmethod
+    def _image_urls(obj, name, container):
+        image_url = OriginSetting.HTTP + reverse(f"{name}_image", kwargs={'entity_id': obj.entity_id})
+        if hasattr(obj, 'image'):
+            container['image'] = image_url
+        if hasattr(obj, 'image_english') and obj.image_english:
+            container['imageEnglish'] = f"{image_url}?lang=en"
+        if hasattr(obj, 'imageDutch') and obj.image_dutch:
+            container['image_dutch'] = f"{image_url}?lang=nl"
+
+    @staticmethod
+    def _endorsement_to_json(endorsement):
+        endorser = endorsement.endorser
+        issuer = endorser.cached_issuer
+        faculty = issuer.faculty
+        institution = faculty.institution
+        to_json = {'claim': endorsement.claim,
+                   'description': endorsement.description,
+                   'status': endorsement.status,
+                   'endorser': {'name': endorser.name, 'description': endorser.description,
+                                'issuer': {'nameDutch': issuer.name_dutch, 'nameEnglish': issuer.name_english,
+                                           'entityId': issuer.entity_id,
+                                           'faculty': {'nameDutch': faculty.name_dutch,
+                                                       'nameEnglish': faculty.name_english,
+                                                       'entityId': faculty.entity_id,
+                                                       'institution': {
+                                                           'nameDutch': institution.name_dutch,
+                                                           'nameEnglish': institution.name_english,
+                                                           'entityId': institution.entity_id
+                                                       }
+                                                       }
+                                           }
+                                },
+                   }
+        BadgeClassJson._image_urls(institution, 'institution', to_json['endorser']['issuer']['faculty']['institution'])
+        BadgeClassJson._image_urls(endorser, 'badgeclass', to_json['endorser'])
+        return to_json
 
     def get_context_data(self, **kwargs):
         image_url = "{}{}?type=png".format(

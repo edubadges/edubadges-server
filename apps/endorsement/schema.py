@@ -8,7 +8,7 @@ class EndorsementType(DjangoObjectType):
     class Meta:
         model = Endorsement
         fields = (
-            'entity_id', 'endorser', 'endorsee', 'claim', 'description' 'status', 'revocation_reason', 'created_at',
+            'entity_id', 'endorser', 'endorsee', 'claim', 'description', 'status', 'revocation_reason', 'created_at',
             'updated_at')
 
 
