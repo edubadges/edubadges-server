@@ -564,8 +564,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
         return list(self.endorsements.all())
 
     @cachemodel.cached_method(auto_publish=True)
-    def cached_endorsees(self):
-        return list(self.endorsees.all())
+    def cached_endorsed(self):
+        return list(self.endorsed.all())
 
     @cachemodel.cached_method(auto_publish=True)
     def cached_direct_awards(self):

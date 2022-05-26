@@ -18,10 +18,7 @@ class EndorsementSerializer(serializers.Serializer):
     def create(self, validated_data):
         endorsement = Endorsement(**validated_data)
         endorsement.save()
+        endorsement.endorsee.remove_cached_data(['cached_endorsements'])
+        endorsement.endorser.remove_cached_data(['cached_endorsed'])
         # endorsement.send_email()
         return endorsement
-
-    def update(self, instance, validated_data):
-        [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
-        instance.save()
-        return instance

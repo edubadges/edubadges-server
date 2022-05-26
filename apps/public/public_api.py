@@ -384,7 +384,8 @@ class BadgeClassJson(JSONComponentView):
         logger.event(badgrlog.BadgeClassRetrievedEvent(obj, self.request))
 
     def get_json(self, request):
-        if self.current_object.is_private:
+        badge_class = self.current_object
+        if badge_class.is_private:
             raise Http404
 
         expands = request.GET.getlist('expand', [])
@@ -394,20 +395,17 @@ class BadgeClassJson(JSONComponentView):
 
         if expand_awards:
             json['award_allowed_institutions'] = [inst.name for inst in
-                                                  self.current_object.award_allowed_institutions.all()]
-            json['formal'] = self.current_object.formal
-            json['archived'] = self.current_object.archived
-            json['awardNonValidatedNameAllowed'] = self.current_object.award_non_validated_name_allowed
+                                                  badge_class.award_allowed_institutions.all()]
+            json['formal'] = badge_class.formal
+            json['archived'] = badge_class.archived
+            json['awardNonValidatedNameAllowed'] = badge_class.award_non_validated_name_allowed
         if 'issuer' in expands:
-            json['issuer'] = self.current_object.cached_issuer.get_json(obi_version=obi_version,
-                                                                        expand_institution=True,
-                                                                        expand_awards=expand_awards)
+            json['issuer'] = badge_class.cached_issuer.get_json(obi_version=obi_version,
+                                                                   expand_institution=True,
+                                                                   expand_awards=expand_awards)
         if 'endorsements' in expands:
-            json['endorsements'] = []
-            for endorsement in self.current_object.cached_endorsements():
-                endorsement = self._endorsement_to_json(endorsement)
-                json['endorsements'].append(endorsement)
-
+            json['endorsements'] = [self._endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
+            json['endorsed'] = [endorsement.endorsee.entity_id for endorsement in badge_class.cached_endorsed()]
         return json
 
     @staticmethod

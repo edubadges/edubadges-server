@@ -4,6 +4,7 @@ from endorsement.models import Endorsement
 from endorsement.serializer import EndorsementSerializer
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.utils import EmailMessageMaker
 
 
 class EndorsementList(VersionedObjectMixin, BaseEntityListView):
@@ -25,7 +26,13 @@ class EndorsementDetail(BaseEntityDetailView):
         if status == Endorsement.STATUS_REVOKED:
             revocation_reason = request.data['revocation_reason']
             endorsement.revocation_reason = revocation_reason
+        elif status == Endorsement.STATUS_ACCEPTED:
+            print("TODO send mail")
+            # EmailMessageMaker.create_endorsement_requested_mail()
+        elif status == Endorsement.STATUS_REJECTED:
+            print("TODO send mail")
+            # EmailMessageMaker.create_endorsement_rejected_mail()
         endorsement.save()
-        endorsement.endorsee.remove_cached_data(['cached_endorsees'])
-        endorsement.endorser.remove_cached_data(['cached_endorsements'])
+        endorsement.endorsee.remove_cached_data(['cached_endorsements'])
+        endorsement.endorser.remove_cached_data(['cached_endorsed'])
         return Response({"result": "ok"}, status=status.HTTP_200_OK)

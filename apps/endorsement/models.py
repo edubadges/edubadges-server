@@ -10,10 +10,10 @@ from mainsite.models import BaseAuditedModel
 class Endorsement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     # The source badge class representing the endorser
     endorser = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE,
-                                 related_name='endorsements')
+                                 related_name='endorsed')
     # The badge class that is enriched with the actual endorsement
     endorsee = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE,
-                                 related_name='endorsees')
+                                 related_name='endorsements')
     claim = models.TextField(blank=True, null=True, default=None)
     description = models.TextField(blank=True, null=True, default=None)
 

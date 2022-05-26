@@ -217,6 +217,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     terms = graphene.Field(terms_type())
     award_allowed_institutions = graphene.List(graphene.String)
     endorsements = graphene.List(EndorsementType)
+    endorsed = graphene.List(EndorsementType)
 
     def resolve_terms(self, info, **kwargs):
         return self._get_terms()
@@ -229,6 +230,9 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
 
     def resolve_endorsements(self, info, **kwargs):
         return self.cached_endorsements()
+
+    def resolve_endorsed(self, info, **kwargs):
+        return self.cached_endorsed()
 
     @resolver_blocker_for_students
     def resolve_direct_awards(self, info, **kwargs):

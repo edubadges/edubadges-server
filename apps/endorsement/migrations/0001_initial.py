@@ -27,8 +27,8 @@ class Migration(migrations.Migration):
                 ('status', models.CharField(choices=[('Unaccepted', 'Unaccepted'), ('Accepted', 'Unaccepted'), ('Revoked', 'Revoked'), ('Rejected', 'Rejected')], default='Unaccepted', max_length=254)),
                 ('revocation_reason', models.CharField(blank=True, default=None, max_length=512, null=True)),
                 ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
-                ('endorsee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='endorsees', to='issuer.BadgeClass')),
-                ('endorser', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='endorsements', to='issuer.BadgeClass')),
+                ('endorsee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='endorsements', to='issuer.BadgeClass')),
+                ('endorser', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='endorsed', to='issuer.BadgeClass')),
                 ('updated_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL)),
             ],
             options={
