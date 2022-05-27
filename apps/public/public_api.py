@@ -404,7 +404,7 @@ class BadgeClassJson(JSONComponentView):
                                                                    expand_institution=True,
                                                                    expand_awards=expand_awards)
         if 'endorsements' in expands:
-            json['endorsements'] = [self._endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
+            json['endorsements'] = [self.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
             json['endorsed'] = [endorsement.endorsee.entity_id for endorsement in badge_class.cached_endorsed()]
         return json
 
@@ -419,7 +419,7 @@ class BadgeClassJson(JSONComponentView):
             container['image_dutch'] = f"{image_url}?lang=nl"
 
     @staticmethod
-    def _endorsement_to_json(endorsement):
+    def endorsement_to_json(endorsement):
         endorser = endorsement.endorser
         issuer = endorser.cached_issuer
         faculty = issuer.faculty

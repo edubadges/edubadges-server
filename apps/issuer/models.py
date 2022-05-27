@@ -1042,15 +1042,16 @@ class BadgeInstance(BaseAuditedModel,
                                 content=ContentFile(new_image.read()),
                                 save=False)
 
-            try:
-                from badgeuser.models import CachedEmailAddress
-                email_address = self.get_email_address()
-                existing_email = CachedEmailAddress.cached.get_student_email(email_address)
-                if email_address != existing_email.email and \
-                        email_address not in [e.email for e in existing_email.cached_variants()]:
-                    existing_email.add_variant(email_address)
-            except CachedEmailAddress.DoesNotExist:
-                pass
+            # TODO can this be permanently removed
+            # try:
+            #     from badgeuser.models import CachedEmailAddress
+            #     email_address = self.get_email_address()
+            #     existing_email = CachedEmailAddress.cached.get_student_email(email_address)
+            #     if email_address != existing_email.email and \
+            #             email_address not in [e.email for e in existing_email.cached_variants()]:
+            #         existing_email.add_variant(email_address)
+            # except CachedEmailAddress.DoesNotExist:
+            #     pass
 
         if self.revoked is False:
             self.revocation_reason = None
@@ -1159,11 +1160,12 @@ class BadgeInstance(BaseAuditedModel,
             ('type', 'Assertion'),
         ])
 
+        badge_class = self.cached_badgeclass
         if signed:
             json['id'] = self.identifier
         else:
             json['id'] = add_obi_version_ifneeded(self.jsonld_id, obi_version)
-            json['badge'] = add_obi_version_ifneeded(self.cached_badgeclass.jsonld_id, obi_version)
+            json['badge'] = add_obi_version_ifneeded(badge_class.jsonld_id, obi_version)
 
         image_url = OriginSetting.HTTP + reverse('badgeinstance_image', kwargs={'entity_id': self.entity_id})
         json['image'] = image_url
@@ -1174,9 +1176,9 @@ class BadgeInstance(BaseAuditedModel,
                 json['image']['id'] = image_url
 
         if expand_badgeclass:
-            json['badge'] = self.cached_badgeclass.get_json(obi_version=obi_version, include_extra=include_extra)
+            json['badge'] = badge_class.get_json(obi_version=obi_version, include_extra=include_extra)
             if signed:
-                json['badge']['id'] = self.cached_badgeclass.get_url_with_public_key(public_key_issuer)
+                json['badge']['id'] = badge_class.get_url_with_public_key(public_key_issuer)
             if expand_issuer:
                 json['badge']['issuer'] = self.cached_issuer.get_json(obi_version=obi_version,
                                                                       include_extra=include_extra,
@@ -1186,6 +1188,8 @@ class BadgeInstance(BaseAuditedModel,
                                                                       expand_institution=True)
             if expand_user:
                 json['badge']['user'] = self.user.get_full_name()
+                from public.public_api import BadgeClassJson
+                json['badge']['endorsements'] = [BadgeClassJson.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
 
         if self.revoked:
             return OrderedDict([
