@@ -11,7 +11,6 @@ class EndorsementList(VersionedObjectMixin, BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     serializer_class = EndorsementSerializer
     http_method_names = ['post']
-    permission_map = {'POST': 'may_award'}
 
 
 class EndorsementDetail(BaseEntityDetailView):
