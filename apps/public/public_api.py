@@ -401,8 +401,8 @@ class BadgeClassJson(JSONComponentView):
             json['awardNonValidatedNameAllowed'] = badge_class.award_non_validated_name_allowed
         if 'issuer' in expands:
             json['issuer'] = badge_class.cached_issuer.get_json(obi_version=obi_version,
-                                                                   expand_institution=True,
-                                                                   expand_awards=expand_awards)
+                                                                expand_institution=True,
+                                                                expand_awards=expand_awards)
         if 'endorsements' in expands:
             json['endorsements'] = [self.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
             json['endorsed'] = [endorsement.endorsee.entity_id for endorsement in badge_class.cached_endorsed()]
@@ -428,10 +428,14 @@ class BadgeClassJson(JSONComponentView):
                    'description': endorsement.description,
                    'status': endorsement.status,
                    'endorser': {'name': endorser.name, 'description': endorser.description,
+                                'entityId': endorser.entity_id,
                                 'issuer': {'nameDutch': issuer.name_dutch, 'nameEnglish': issuer.name_english,
                                            'entityId': issuer.entity_id,
                                            'faculty': {'nameDutch': faculty.name_dutch,
                                                        'nameEnglish': faculty.name_english,
+                                                       'onBehalfOf': faculty.on_behalf_of,
+                                                       'onBehalfOfUrl': faculty.on_behalf_of_url,
+                                                       'onBehalfOfDisplayName': faculty.on_behalf_of_display_name,
                                                        'entityId': faculty.entity_id,
                                                        'institution': {
                                                            'nameDutch': institution.name_dutch,
@@ -442,6 +446,7 @@ class BadgeClassJson(JSONComponentView):
                                            }
                                 },
                    }
+        BadgeClassJson._image_urls(issuer, 'issuer', to_json['endorser']['issuer'])
         BadgeClassJson._image_urls(institution, 'institution', to_json['endorser']['issuer']['faculty']['institution'])
         BadgeClassJson._image_urls(endorser, 'badgeclass', to_json['endorser'])
         return to_json
