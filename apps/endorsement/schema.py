@@ -9,7 +9,7 @@ class EndorsementType(DjangoObjectType):
         model = Endorsement
         fields = (
             'entity_id', 'endorser', 'endorsee', 'claim', 'description', 'status', 'revocation_reason',
-            'rejection_reason', 'created_at', 'updated_at')
+            'rejection_reason', 'created_at', 'updated_at', 'created_by')
 
 
 class Query(object):

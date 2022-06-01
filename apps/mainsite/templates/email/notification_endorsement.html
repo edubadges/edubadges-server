@@ -1,0 +1,42 @@
+{% extends 'email/base.html' %}
+
+{% block title %}
+<title>A badge endorsement has been requested</title>
+{% endblock %}
+
+{% block content %}
+<div class="mail_container">
+    <div class="mail_subcontainer">
+        <p class="mail_title">Badge endorsement has been requested.</p>
+        <p class="mail_subtitle">Click the button to view it in edubadges.</p>
+        <a class="button blue-button" href="{{ui_url}}">View the requested endorsement</a>
+    </div>
+    <div class="mail_subcontainer middle">
+        <p>For the English version, see below.</p>
+        <hr>
+        <p>Hoi <strong>{{user.full_name}}</strong>,</p>
+        <p>Een endorsement van edubadge <strong>{{endorsement.endorsee.name}}</strong>
+            voor de edubadge <strong>{{endorsement.endorser.name}}</strong> is aangevraagd door {{current_user.email}}.</p>
+        <p>Je kan in edubadges deze endorsement accepteren of weigeren.</p>
+        <p>De claim van de aanvrager:</p>
+        <p><em>{{endorsement.claim}}</em></p>
+        <p>De omschrijving van de aanvrager:</p>
+        <p><em>{{endorsement.description}}</em></p>
+        <p>Je ontvangt deze mail, omdat je dit in edubadges hebt ingesteld. Je kan dit wijzigen in <a href="{{ui_url_notifications}}">edubadges</a></p>
+        <p>Met vriendelijke groet,</p>
+        <p>Team Edubadges</p>
+        <hr>
+        <p>Hi <strong>{{user.full_name}}</strong>,</p>
+        <p>An endorsement for edubadge <strong>{{endorsement.endorsee.name}}</strong> from
+            edubadge <strong>{{endorsement.endorser.name}}</strong> has been requested by {{current_user.email}}.</p>
+        <p>You can approve or reject this endorsement in edubadges.</p>
+        <p>The claim of the requester:</p>
+        <p><em>{{endorsement.claim}}</em></p>
+        <p>The description of the requester:</p>
+        <p><em>{{endorsement.description}}</em></p>
+        <p>You are receiving this mail, because you have configured this in edubadges. You can change this in <a href="{{ui_url_notifications}}">edubadges</a></p>
+        <p>Regards,</p>
+        <p>Team Edubadges</p>
+    </div>
+</div>
+{% endblock %}

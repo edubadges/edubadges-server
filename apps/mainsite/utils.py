@@ -228,6 +228,28 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
+    def create_endorsement_requested_mail(current_user, user, endorsement):
+        template = 'email/notification_endorsement.html'
+        email_vars = {'endorsement': endorsement,
+                      'ui_url': urllib.parse.urljoin(settings.UI_URL,
+                                                     f"badgeclass/{endorsement.endorser.entity_id}/endorsed"),
+                      'ui_url_notifications': urllib.parse.urljoin(settings.UI_URL, 'notifications'),
+                      'user': user,
+                      'current_user': current_user}
+        return render_to_string(template, email_vars)
+
+    @staticmethod
+    def reject_approve_endorsement_mail(user, endorsement, accepted):
+        template = 'email/accepted_rejected_endorsement.html'
+        email_vars = {'endorsement': endorsement,
+                      'action_en': 'accepted' if accepted else 'rejected',
+                      'action_nl': 'geaccepteerd' if accepted else 'afgewezen',
+                      'ui_url': urllib.parse.urljoin(settings.UI_URL,
+                                                     f"badgeclass/{endorsement.endorsee.entity_id}/endorsements"),
+                      'user': user}
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_staff_member_addition_email(new_staff_membership):
         template = 'email/new_role.html'
         entity = new_staff_membership.object

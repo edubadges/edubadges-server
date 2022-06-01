@@ -1,0 +1,32 @@
+{% extends 'email/base.html' %}
+
+{% block title %}
+<title>A badge endorsement has been {{action_en}}</title>
+{% endblock %}
+
+{% block content %}
+<div class="mail_container">
+    <div class="mail_subcontainer">
+        <p class="mail_title">Badge endorsement has been {{action_en}}.</p>
+        <p class="mail_subtitle">Click the button to view it in edubadges.</p>
+        <a class="button blue-button" href="{{ui_url}}">View the badge endorsement</a>
+    </div>
+    <div class="mail_subcontainer middle">
+        <p>For the English version, see below.</p>
+        <hr>
+        <p>Hoi <strong>{{endorsement.created_by.name}}</strong>,</p>
+        <p>Je endorsement van edubadge <strong>{{endorsement.endorsee.name}}</strong>
+            voor de edubadge <strong>{{endorsement.endorser.name}}</strong> is {{action_nl}} door {{user.email}}.</p>
+        <p>Je kan in edubadges deze endorsement bekijken.</p>
+        <p>Met vriendelijke groet,</p>
+        <p>Team Edubadges</p>
+        <hr>
+        <p>Hi <strong>{{user_name}}</strong>,</p>
+        <p>The endorsement for edubadge <strong>{{endorsement.endorsee.name}}</strong> from
+            edubadge <strong>{{endorsement.endorser.name}}</strong> has been {{action_en}} by {{user.email}}.</p>
+        <p>You can view this endorsement in edubadges.</p>
+        <p>Regards,</p>
+        <p>Team Edubadges</p>
+    </div>
+</div>
+{% endblock %}
