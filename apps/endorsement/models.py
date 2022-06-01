@@ -29,6 +29,7 @@ class Endorsement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
     )
 
     status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED)
+    rejection_reason = models.CharField(max_length=512, blank=True, null=True, default=None)
     revocation_reason = models.CharField(max_length=512, blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
