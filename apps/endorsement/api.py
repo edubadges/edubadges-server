@@ -47,9 +47,13 @@ class EndorsementDetail(BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ['delete', 'put']
     permission_map = {'PUT': 'may_award'}
+    model = Endorsement
 
     def put(self, request, **kwargs):
         endorsement = Endorsement.objects.get(entity_id=kwargs['entity_id'])
+        # TODO based on the status, check the permissions of endorser or endorsee
+        # if not self.has_object_permissions(request, endorsement):
+        #     return Response(status=status.HTTP_404_NOT_FOUND)
         new_status = request.data['status']
         endorsement.status = new_status
         if new_status == Endorsement.STATUS_REVOKED:
@@ -66,6 +70,16 @@ class EndorsementDetail(BaseEntityDetailView):
         endorsement.endorser.remove_cached_data(['cached_endorsed'])
         return Response({}, status=status.HTTP_200_OK)
 
+    def delete(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        obj.endorsee.remove_cached_data(['cached_endorsements'])
+        obj.endorser.remove_cached_data(['cached_endorsed'])
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class EndorsementResend(APIView):
     permission_classes = (TeachPermission,)
@@ -73,5 +87,6 @@ class EndorsementResend(APIView):
 
     def post(self, request, **kwargs):
         endorsement = Endorsement.objects.get(entity_id=kwargs['entity_id'])
-
+        thread = threading.Thread(target=send_notifications, args=(endorsement, request.user))
+        thread.start()
         return Response({}, status=status.HTTP_200_OK)
