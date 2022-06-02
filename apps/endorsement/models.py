@@ -45,7 +45,7 @@ class Endorsement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
 
     def get_permissions(self, user):
         """
-        Function that equates permission for this DirectAward to that of the BadgeClass it belongs to.
+        Function that equates permission for this Endorsement to that of the BadgeClass it belongs to.
         Used in HasObjectPermission
         """
         return self.endorsee.get_permissions(user)

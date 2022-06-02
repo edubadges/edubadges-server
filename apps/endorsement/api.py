@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from endorsement.models import Endorsement
 from endorsement.serializer import EndorsementSerializer
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
+from mainsite.exceptions import BadgrValidationError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail, TeachPermission
 from mainsite.utils import EmailMessageMaker, send_mail
 from rest_framework import status
@@ -51,9 +52,11 @@ class EndorsementDetail(BaseEntityDetailView):
 
     def put(self, request, **kwargs):
         endorsement = Endorsement.objects.get(entity_id=kwargs['entity_id'])
-        # TODO based on the status, check the permissions of endorser or endorsee
-        # if not self.has_object_permissions(request, endorsement):
-        #     return Response(status=status.HTTP_404_NOT_FOUND)
+        user = request.user
+        endorser_permissions = endorsement.endorser.get_permissions(user)
+        endorsee_permissions = endorsement.endorsee.get_permissions(user)
+        if not endorser_permissions['may_award'] and not endorsee_permissions['may_award']:
+            raise BadgrValidationError('Insufficient permission', 999)
         new_status = request.data['status']
         endorsement.status = new_status
         if new_status == Endorsement.STATUS_REVOKED:

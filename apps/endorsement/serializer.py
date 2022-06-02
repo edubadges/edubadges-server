@@ -18,10 +18,12 @@ class EndorsementSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         badge_class = validated_data['endorsee']
-        permissions = badge_class.get_permissions(self.context['request'].user)
+        user = self.context['request'].user
+        permissions = badge_class.get_permissions(user)
         if not permissions['may_update']:
             raise BadgrValidationError('Insufficient permission', 999)
         endorsement = Endorsement(**validated_data)
+        endorsement.created_by = user
         endorsement.save()
         badge_class.remove_cached_data(['cached_endorsements'])
         endorsement.endorser.remove_cached_data(['cached_endorsed'])
