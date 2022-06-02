@@ -74,13 +74,14 @@ class EndorsementDetail(BaseEntityDetailView):
         return Response({}, status=status.HTTP_200_OK)
 
     def delete(self, request, **kwargs):
-        obj = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, obj):
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        endorsement = Endorsement.objects.get(entity_id=kwargs['entity_id'])
+        permissions = endorsement.endorsee.get_permissions(request.user)
+        if not permissions['may_update']:
+            raise BadgrValidationError('Insufficient permission', 999)
 
-        obj.endorsee.remove_cached_data(['cached_endorsements'])
-        obj.endorser.remove_cached_data(['cached_endorsed'])
-        obj.delete()
+        endorsement.endorsee.remove_cached_data(['cached_endorsements'])
+        endorsement.endorser.remove_cached_data(['cached_endorsed'])
+        endorsement.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
