@@ -60,17 +60,14 @@ class EndorsementDetail(BaseEntityDetailView):
         new_status = request.data['status']
         endorsement.status = new_status
         if new_status == Endorsement.STATUS_REVOKED:
-            revocation_reason = request.data['revocation_reason']
-            endorsement.revocation_reason = revocation_reason
+            endorsement.revocation_reason = request.data['revocation_reason']
         elif new_status == Endorsement.STATUS_ACCEPTED:
             EmailMessageMaker.reject_approve_endorsement_mail(request.user, endorsement, True)
         elif new_status == Endorsement.STATUS_REJECTED:
-            rejection_reason = request.data['rejection_reason']
-            endorsement.rejection_reason = rejection_reason
+            endorsement.rejection_reason = request.data['rejection_reason']
             EmailMessageMaker.reject_approve_endorsement_mail(request.user, endorsement, False)
         endorsement.save()
-        endorsement.endorsee.remove_cached_data(['cached_endorsements'])
-        endorsement.endorser.remove_cached_data(['cached_endorsed'])
+        endorsement.clear_endorsement_cache()
         return Response({}, status=status.HTTP_200_OK)
 
     def delete(self, request, **kwargs):
@@ -79,8 +76,7 @@ class EndorsementDetail(BaseEntityDetailView):
         if not permissions['may_update']:
             raise BadgrValidationError('Insufficient permission', 999)
 
-        endorsement.endorsee.remove_cached_data(['cached_endorsements'])
-        endorsement.endorser.remove_cached_data(['cached_endorsed'])
+        endorsement.clear_endorsement_cache()
         endorsement.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

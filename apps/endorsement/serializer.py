@@ -25,6 +25,5 @@ class EndorsementSerializer(serializers.Serializer):
         endorsement = Endorsement(**validated_data)
         endorsement.created_by = user
         endorsement.save()
-        badge_class.remove_cached_data(['cached_endorsements'])
-        endorsement.endorser.remove_cached_data(['cached_endorsed'])
+        endorsement.clear_endorsement_cache()
         return endorsement

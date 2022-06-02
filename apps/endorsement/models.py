@@ -49,3 +49,7 @@ class Endorsement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
         Used in HasObjectPermission
         """
         return self.endorsee.get_permissions(user)
+
+    def clear_endorsement_cache(self):
+        self.endorsee.remove_cached_data(['cached_endorsements'])
+        self.endorser.remove_cached_data(['cached_endorsed'])
