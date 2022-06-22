@@ -376,8 +376,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
 
 
 class EvidenceItemSerializer(serializers.Serializer):
-    evidence_url = serializers.URLField(max_length=1024, required=False, allow_blank=True)
-    narrative = MarkdownCharField(required=False, allow_blank=True)
+    evidence_url = serializers.URLField(max_length=1024, required=False, allow_null=True, allow_blank=True)
+    narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
     name = serializers.CharField(max_length=255, required=False, allow_null=True, allow_blank=True)
     description = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
 
