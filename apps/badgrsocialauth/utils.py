@@ -115,21 +115,14 @@ def update_user_params(user, userinfo):
         user.last_name = userinfo['family_name']
         user.save()
     if userinfo.get('email'):
-        user_emails = user.email_items
-        email_found = False
-        for email in user_emails:
-            email_and_variants = [email] + list(email.cached_variants())
-            if userinfo['email'] in [email_variant.email for email_variant in
-                                     email_and_variants]:  # the email is already there, make it verified
-                email.verified = True
-                email.save()
-                email_found = True
-                break
-        if not email_found:  # no email, make a new verified one
-            new_email = EmailAddress.objects.create(email=userinfo['email'],
-                                                    verified=True,
-                                                    primary=False,
-                                                    user=user)
+        user.email = userinfo['email']
+        for email in user.email_items:
+            email.delete()
+        EmailAddress.objects.create(email=userinfo['email'],
+                                    verified=True,
+                                    primary=True,
+                                    user=user)
+        user.save()
 
 
 def get_privacy_content(name):
