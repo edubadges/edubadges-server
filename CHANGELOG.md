@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+## [6.3.0] - 2022-07-18
+- Allow for issuer name changes after assertions have been created.
+- Evidence URL is only required when dictated by the badgeclass.
+- Refactored cache deletion endorsements.
+- Check permissions in delete endorsement.
+- Store requested_by in endorsement.
+- Resend endorsement mail.
+- Sending endorsement email on accept, reject and create.
+- Store rejection reason for endorsements.
+- Return entityId for public API.
+- Check permissions on endorsements.
+- Retrieve badge class endorsements in public assertion api.
+- Added support for endorsements.
+- New endpoint for 3rd parties to validate ownership of badges (OB 2.1). 
 
 ## [6.2.0] - 2022-05-16
 - Added extra edubadge type filter option in badgeclass overview screen.
