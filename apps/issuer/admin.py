@@ -161,7 +161,7 @@ class BadgeInstanceExtensionInline(TabularInline):
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'source', 'source_url')
-    list_display = ('badge_image', 'user', 'entity_id', admin_list_linkify('badgeclass', 'name'), admin_list_linkify('issuer', 'name'))
+    list_display = ('badge_image', 'user', 'entity_id', admin_list_linkify('badgeclass', 'name'), admin_list_linkify('issuer', 'name'), 'award_type')
     list_display_links = ('badge_image',)
     list_filter = ('created_at',)
     search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')

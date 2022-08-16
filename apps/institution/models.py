@@ -41,6 +41,9 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     alternative_identifier = models.CharField(max_length=255, blank=True, null=True, default=None,
                                               help_text='An alternative schac_home for the Pilot microcredentials '
                                                         '(e.g. institutionX.tempguestidp.edubadges.nl)')
+    eppn_reg_exp_format = models.CharField(max_length=255, blank=True, null=True, default=None,
+                                              help_text='A regular expression which defines the EPPN of an institution '
+                                                        '(e.g. .*@tempguestidp.edubadges.nl)')
 
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
     GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
