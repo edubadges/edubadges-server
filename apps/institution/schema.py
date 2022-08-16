@@ -52,7 +52,8 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         fields = ('entity_id', 'identifier', 'name_english', 'name_dutch', 'staff', 'created_at', 'description_english',
                   'description_dutch', 'institution_type', 'image_english', 'image_dutch', 'grading_table', 'brin',
                   'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language', 'id',
-                  'direct_awarding_enabled', 'award_allow_all_institutions', 'lti_enabled', 'alternative_identifier')
+                  'direct_awarding_enabled', 'award_allow_all_institutions', 'lti_enabled', 'alternative_identifier',
+                  'eppn_reg_exp_format')
 
     faculties = graphene.List(FacultyType)
     public_faculties = graphene.List(FacultyType)
