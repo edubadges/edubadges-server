@@ -215,6 +215,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     award_non_validated_name_allowed = serializers.BooleanField(required=False, default=False)
     is_micro_credentials = serializers.BooleanField(required=False, default=False)
     direct_awarding_disabled = serializers.BooleanField(required=False, default=False)
+    self_enrollment_disabled = serializers.BooleanField(required=False, default=False)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
@@ -299,7 +300,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         if not has_unrevoked_assertions:
             self.save_extensions(validated_data, instance)
         allowed_keys = ['narrative_required', 'evidence_required', 'award_non_validated_name_allowed',
-                        'alignment_items', 'expiration_period', 'evidence_student_required',
+                        'alignment_items', 'expiration_period', 'evidence_student_required', 'self_enrollment_disabled',
                         'narrative_student_required', 'is_micro_credentials', 'direct_awarding_disabled']
         for key, value in validated_data.items():
             if key is not 'award_allowed_institutions' and (not has_unrevoked_assertions or key in allowed_keys):

@@ -491,6 +491,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     award_non_validated_name_allowed = models.BooleanField(default=False)
     is_micro_credentials = models.BooleanField(default=False)
     direct_awarding_disabled = models.BooleanField(default=False)
+    self_enrollment_disabled = models.BooleanField(default=False)
 
     old_json = JSONField()
     objects = BadgeClassManager()

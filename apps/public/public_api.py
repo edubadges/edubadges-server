@@ -398,6 +398,7 @@ class BadgeClassJson(JSONComponentView):
                                                   badge_class.award_allowed_institutions.all()]
             json['formal'] = badge_class.formal
             json['archived'] = badge_class.archived
+            json['self_enrollment_disabled'] = badge_class.self_enrollment_disabled
             json['awardNonValidatedNameAllowed'] = badge_class.award_non_validated_name_allowed
         if 'issuer' in expands:
             json['issuer'] = badge_class.cached_issuer.get_json(obi_version=obi_version,
