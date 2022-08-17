@@ -3,7 +3,8 @@ from collections import OrderedDict
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
-
+from django.core.exceptions import ValidationError
+import re
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.models import BaseAuditedModel, ArchiveMixin
@@ -73,6 +74,15 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
         (DEFAULT_LANGUAGE_ENGLISH, "en_EN")
     )
     default_language = models.CharField(max_length=254, choices=DEFAULT_LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE_DUTCH)
+
+    def clean(self):
+        if self.eppn_reg_exp_format:
+            try:
+                re.compile(self.eppn_reg_exp_format)
+                if not (self.eppn_reg_exp_format.startswith(".*") or self.eppn_reg_exp_format.startswith("(.*")):
+                    raise ValidationError("Eppn reg exp format must start with '.*' or (.*)")
+            except re.error as e:
+                raise ValidationError(f"Invalid reg exp: {e}")
 
     def get_report(self):
         total_assertions_formal = 0
