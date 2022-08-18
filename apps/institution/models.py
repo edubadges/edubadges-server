@@ -82,7 +82,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                 if not (self.eppn_reg_exp_format.startswith(".*") or self.eppn_reg_exp_format.startswith("(.*")):
                     raise ValidationError("Eppn reg exp format must start with '.*' or (.*)")
             except re.error as e:
-                raise ValidationError(f"Invalid reg exp: {e}")
+                raise ValidationError(f"Invalid Eppn reg exp format: {e}")
 
     def get_report(self):
         total_assertions_formal = 0
