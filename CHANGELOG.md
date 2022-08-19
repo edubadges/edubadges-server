@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+## [6.4.0] - 2022-08-22
+- Validation error description.
+- Check the Eppn reg exp format.
+- Expose eppn_reg_exp_format in Institution.
+- Added Direct Award entity in admin view.
+- Badgclass option to disable Invite people to enroll.
+- changed mailsubject for Direct Awards.
+
 ## [6.3.0] - 2022-07-18
 - Allow for issuer name changes after assertions have been created.
 - Evidence URL is only required when dictated by the badgeclass.
