@@ -43,9 +43,10 @@ class InsightsView(APIView):
             .annotate(award_type_count=Count('award_type', distinct=True)) \
             .values('week', 'nbr', 'year', 'badgeclass_id', 'badgeclass__name', 'award_type', 'issuer_id',
                     f"issuer__{name_lang}", 'issuer__faculty_id', f"issuer__faculty__{name_lang}") \
-            .order_by('week')
+            .order_by('year', 'week')
         if not total:
-            assertions_query_set = assertions_query_set.filter(created_at__gte=start_of_year) \
+            assertions_query_set = assertions_query_set \
+                .filter(created_at__gte=start_of_year) \
                 .filter(created_at__lt=end_of_year)
 
         direct_awards_query_set = DirectAward.objects \
@@ -57,9 +58,10 @@ class InsightsView(APIView):
             .values('week', 'year', 'nbr', 'status', 'badgeclass_id', 'badgeclass__name', 'badgeclass__issuer__id',
                     f"badgeclass__issuer__{name_lang}", 'badgeclass__issuer__faculty_id',
                     f"badgeclass__issuer__faculty__{name_lang}") \
-            .order_by('week')
+            .order_by('year', 'week')
         if not total:
-            direct_awards_query_set = direct_awards_query_set.filter(created_at__gte=start_of_year) \
+            direct_awards_query_set = direct_awards_query_set \
+                .filter(created_at__gte=start_of_year) \
                 .filter(created_at__lt=end_of_year)
 
         enrollments_query_set = StudentsEnrolled.objects \
@@ -72,10 +74,11 @@ class InsightsView(APIView):
             .values('week', 'year', 'nbr', 'denied', 'badge_class_id', 'badge_class__name', 'badge_class__issuer__id',
                     f"badge_class__issuer__{name_lang}", 'badge_class__issuer__faculty_id',
                     f"badge_class__issuer__faculty__{name_lang}") \
-            .order_by('week')
+            .order_by('year', 'week')
 
         if not total:
-            enrollments_query_set = enrollments_query_set.filter(date_created__gte=start_of_year) \
+            enrollments_query_set = enrollments_query_set \
+                .filter(date_created__gte=start_of_year) \
                 .filter(date_created__lt=end_of_year)
 
         res = {
