@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from badgeuser.models import BadgeUser, StudentAffiliation
 from directaward.models import DirectAward
-from institution.models import Faculty
+from institution.models import Faculty, Institution
 from issuer.models import BadgeInstance, Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
 from mainsite.permissions import TeachPermission
@@ -33,7 +33,13 @@ class InsightsView(APIView):
             if end_of_year.isoweekday() > 1:
                 end_of_year = (end_of_year + timedelta(days=(7 + 1) - end_of_year.isoweekday()))
         # Super users may select an institution
-        institution = request.user.institution
+        institution_id = request.data.get("institution_id")
+        if institution_id:
+            if hasattr(request.user.user, 'is_superuser') and request.user.is_superuser:
+                institution = Institution.objects.get(entity_id=id)
+        else:
+            institution = request.user.institution
+
         name_lang = 'name_english' if lang == 'en' else 'name_dutch'
         assertions_query_set = BadgeInstance.objects \
             .filter(issuer__faculty__institution=institution) \
