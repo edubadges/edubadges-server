@@ -45,13 +45,14 @@ class InsightsView(APIView):
 
         name_lang = 'name_english' if lang == 'en' else 'name_dutch'
         assertions_query_set = BadgeInstance.objects \
-            .values('award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id', "public",
+            .values('award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id', "public", "revoked",
                     f"issuer__{name_lang}", 'issuer__faculty_id', f"issuer__faculty__{name_lang}") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
-            .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id', "public",
-                    f"issuer__{name_lang}", 'issuer__faculty_id', f"issuer__faculty__{name_lang}") \
+            .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id',
+                    "public", "revoked", f"issuer__{name_lang}", 'issuer__faculty_id',
+                    f"issuer__faculty__{name_lang}") \
             .order_by('year', 'month')
         if not total:
             assertions_query_set = assertions_query_set \
