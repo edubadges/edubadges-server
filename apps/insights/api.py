@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.db.models import Count
 from django.db.models import Q
-from django.db.models.functions import TruncWeek, TruncYear, ExtractMonth, ExtractYear
+from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
@@ -34,47 +34,55 @@ class InsightsView(APIView):
                 end_of_year = (end_of_year + timedelta(days=(7 + 1) - end_of_year.isoweekday()))
         # Super users may select an institution
         institution_id = request.data.get("institution_id")
-        if institution_id:
-            if hasattr(request.user.user, 'is_superuser') and request.user.is_superuser:
-                institution = Institution.objects.get(entity_id=id)
+        filter_by_institution = True
+        if institution_id and hasattr(request.user, 'is_superuser') and request.user.is_superuser:
+            if institution_id == "all":
+                filter_by_institution = False
+            else:
+                institution = Institution.objects.get(entity_id=institution_id)
         else:
             institution = request.user.institution
 
         name_lang = 'name_english' if lang == 'en' else 'name_dutch'
         assertions_query_set = BadgeInstance.objects \
-            .filter(issuer__faculty__institution=institution) \
-            .values('award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id',
+            .values('award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id', "public",
                     f"issuer__{name_lang}", 'issuer__faculty_id', f"issuer__faculty__{name_lang}") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
-            .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id',
+            .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id', "public",
                     f"issuer__{name_lang}", 'issuer__faculty_id', f"issuer__faculty__{name_lang}") \
             .order_by('year', 'month')
         if not total:
             assertions_query_set = assertions_query_set \
                 .filter(created_at__gte=start_of_year) \
                 .filter(created_at__lt=end_of_year)
+        if filter_by_institution:
+            assertions_query_set = assertions_query_set \
+                .filter(issuer__faculty__institution=institution)
 
         direct_awards_query_set = DirectAward.objects \
-            .filter(badgeclass__issuer__faculty__institution=institution) \
             .values('status', 'badgeclass_id', 'badgeclass__name', 'badgeclass__issuer__id',
                     f"badgeclass__issuer__{name_lang}", 'badgeclass__issuer__faculty_id',
                     f"badgeclass__issuer__faculty__{name_lang}") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
-            .values('month', 'year', 'nbr', 'status', 'badgeclass_id', 'badgeclass__name', 'badgeclass__issuer__id',
+            .values('month', 'year', 'nbr', 'status', 'badgeclass_id', 'badgeclass__name',
+                    'badgeclass__issuer__id',
                     f"badgeclass__issuer__{name_lang}", 'badgeclass__issuer__faculty_id',
                     f"badgeclass__issuer__faculty__{name_lang}") \
             .order_by('year', 'month')
+
         if not total:
             direct_awards_query_set = direct_awards_query_set \
                 .filter(created_at__gte=start_of_year) \
                 .filter(created_at__lt=end_of_year)
+        if filter_by_institution:
+            direct_awards_query_set = direct_awards_query_set \
+                .filter(badgeclass__issuer__faculty__institution=institution)
 
         enrollments_query_set = StudentsEnrolled.objects \
-            .filter(badge_class__issuer__faculty__institution=institution) \
             .filter(Q(badge_instance_id__isnull=True) | Q(denied=True)) \
             .values('denied', 'badge_class_id', 'badge_class__name', 'badge_class__issuer__id',
                     f"badge_class__issuer__{name_lang}", 'badge_class__issuer__faculty_id',
@@ -82,7 +90,8 @@ class InsightsView(APIView):
             .annotate(year=ExtractYear('date_created')) \
             .annotate(month=ExtractMonth('date_created')) \
             .annotate(nbr=Count('month')) \
-            .values('month', 'year', 'nbr', 'denied', 'badge_class_id', 'badge_class__name', 'badge_class__issuer__id',
+            .values('month', 'year', 'nbr', 'denied', 'badge_class_id', 'badge_class__name',
+                    'badge_class__issuer__id',
                     f"badge_class__issuer__{name_lang}", 'badge_class__issuer__faculty_id',
                     f"badge_class__issuer__faculty__{name_lang}") \
             .order_by('year', 'month')
@@ -91,18 +100,47 @@ class InsightsView(APIView):
             enrollments_query_set = enrollments_query_set \
                 .filter(date_created__gte=start_of_year) \
                 .filter(date_created__lt=end_of_year)
+        if filter_by_institution:
+            enrollments_query_set = enrollments_query_set \
+                .filter(badge_class__issuer__faculty__institution=institution)
 
         assertions = list(assertions_query_set.all())
         direct_awards = list(direct_awards_query_set.all())
         enrollments = list(enrollments_query_set.all())
+
+        badge_user_query = BadgeUser.objects.filter(is_teacher=True)
+        if filter_by_institution:
+            badge_user_query = badge_user_query.filter(institution=institution)
+        users_count = badge_user_query.count()
+
+        faculty_query = Faculty.objects
+        if filter_by_institution:
+            faculty_query = faculty_query.filter(institution=institution)
+        faculties_count = faculty_query.count()
+
+        issuer_query = Issuer.objects
+        if filter_by_institution:
+            issuer_query = issuer_query.filter(faculty__institution=institution)
+        issuer_count = issuer_query.count()
+
+        badge_class_query = BadgeClass.objects
+        if filter_by_institution:
+            badge_class_query = badge_class_query.filter(issuer__faculty__institution=institution)
+        badge_class_count = badge_class_query.count()
+
+        backpack_query = StudentAffiliation.objects
+        if filter_by_institution:
+            backpack_query = backpack_query.filter(schac_home=institution.identifier)
+        backpack_count = backpack_query.count()
+
         res = {
             'assertions': assertions,
             'direct_awards': direct_awards,
             'enrollments': enrollments,
-            'users_count': BadgeUser.objects.filter(is_teacher=True, institution=institution).count(),
-            'faculties_count': Faculty.objects.filter(institution=institution).count(),
-            'issuers_count': Issuer.objects.filter(faculty__institution=institution).count(),
-            'badge_class_count': BadgeClass.objects.filter(issuer__faculty__institution=institution).count(),
-            'backpack_count': StudentAffiliation.objects.filter(schac_home=institution.identifier).count()
+            'users_count': users_count,
+            'faculties_count': faculties_count,
+            'issuers_count': issuer_count,
+            'badge_class_count': badge_class_count,
+            'backpack_count': backpack_count
         }
         return Response(res, status=status.HTTP_200_OK)
