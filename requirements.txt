@@ -78,7 +78,7 @@ openbadges==1.1.2
 # openbadges-bakery==1.0.1
 
 celery==4.1.1
-django-celery-results==1.0.1
+django-celery-results==2.4.0
 python-json-logger==0.1.2
 
 # SSL Support
