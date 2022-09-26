@@ -5,7 +5,7 @@ import urllib.parse
 from datetime import datetime, timedelta
 from hashlib import sha1
 
-import cachemodel
+from cachemodel.models import CacheModel
 from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
@@ -19,7 +19,7 @@ from rest_framework.authtoken.models import Token
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class BaseAuditedModel(cachemodel.CacheModel):
+class BaseAuditedModel(CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
@@ -95,7 +95,7 @@ class BadgrAppManager(Manager):
         return self.get(id=badgr_app_id)
 
 
-class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, cachemodel.CacheModel):
+class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, CacheModel):
     name = models.CharField(max_length=254, null=True, blank=True)
     cors = models.CharField(max_length=254, unique=True)
     email_confirmation_redirect = models.URLField()
@@ -132,7 +132,7 @@ class DefinedScopesValidator(object):
         return isinstance(other, self.__class__)
 
 
-class ApplicationInfo(cachemodel.CacheModel):
+class ApplicationInfo(CacheModel):
     application = models.OneToOneField('oauth2_provider.Application', on_delete=models.CASCADE)
     icon = models.FileField(blank=True, null=True)
     name = models.CharField(max_length=254, blank=True, null=True, default=None)
@@ -190,7 +190,7 @@ class LegacyTokenProxy(Token):
             return "{}***".format(self.key[:4])
 
 
-class ArchiveMixin(cachemodel.CacheModel):
+class ArchiveMixin(CacheModel):
 
     archived = models.BooleanField(default=False)
 

@@ -5,6 +5,8 @@ from django.db.models import Q
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 import re
+
+from cachemodel.decorators import cached_method
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.models import BaseAuditedModel, ArchiveMixin
@@ -180,30 +182,30 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
             assertions += faculty.assertions
         return assertions
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_staff(self):
         """returns all staff members"""
         return list(InstitutionStaff.objects.filter(institution=self))
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_faculties(self):
         return list(self.faculty_set.filter(archived=False))
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_issuers(self):
         r = []
         for faculty in self.cached_faculties():
             r += list(faculty.cached_issuers())
         return r
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         r = []
         for issuer in self.cached_issuers():
             r += list(issuer.cached_badgeclasses())
         return r
 
-    @cachemodel.cached_method()
+    @cached_method()
     def cached_terms(self):
         return list(self.terms.all())
 
@@ -369,22 +371,22 @@ class Faculty(EntityUserProvisionmentMixin,
             assertions += issuer.assertions
         return assertions
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_staff(self):
         return FacultyStaff.objects.filter(faculty=self)
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_issuers(self):
         return list(self.issuer_set.filter(archived=False))
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_pending_enrollments(self):
         r = []
         for issuer in self.cached_issuers():
             r += issuer.cached_pending_enrollments()
         return r
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         r = []
         for issuer in self.cached_issuers():

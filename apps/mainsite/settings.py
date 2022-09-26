@@ -1,5 +1,5 @@
 import os
-
+import django
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 
@@ -8,7 +8,6 @@ def legacy_boolean_parsing(env_key, default_value):
     val = os.environ.get(env_key, default_value)
     val = '1' if val == 'True' else '0' if val == 'False' else val
     return bool(int(val))
-
 
 env_settings()
 
@@ -32,6 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django_object_actions',
+    'cachemodel',
+    'basic_models',
     'graphene_django',
     'django_extensions',
     'django_otp',

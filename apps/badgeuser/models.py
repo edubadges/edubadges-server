@@ -3,7 +3,6 @@ import datetime
 import re
 from itertools import chain
 
-import cachemodel
 from allauth.account.models import EmailAddress, EmailConfirmation
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -22,6 +21,8 @@ from rest_framework.authtoken.models import Token
 
 from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, EmailAddressCacheModelManager
 from badgeuser.utils import generate_badgr_username
+from cachemodel.decorators import cached_method
+from cachemodel.models import CacheModel
 from directaward.models import DirectAward
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
@@ -33,7 +34,7 @@ from signing.models import AssertionTimeStamp
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
 
-class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     user = models.ForeignKey('badgeuser.BadgeUser', null=True, on_delete=models.CASCADE)
     email = models.EmailField()
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
@@ -165,7 +166,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         return super(UserProvisionment, self).delete(*args, **kwargs)
 
 
-class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
+class CachedEmailAddress(EmailAddress, CacheModel):
     objects = CachedEmailAddressManager()
     cached = EmailAddressCacheModelManager()
 
@@ -222,7 +223,7 @@ class CachedEmailAddress(EmailAddress, cachemodel.CacheModel):
         if not self.emailaddressvariant_set.exists() and self.email != self.email.lower():
             self.add_variant(self.email.lower())
 
-    #     @cachemodel.cached_method(auto_publish=True) # no caching due to errors in update_user_params
+    #     @cached_method(auto_publish=True) # no caching due to errors in update_user_params
     def cached_variants(self):
         return self.emailaddressvariant_set.all()
 
@@ -324,15 +325,15 @@ class UserCachedObjectGetterMixin(object):
     def get_all_badgeclasses_with_permissions(self, permissions):
         return self._get_objects_with_permissions(permissions, 'BadgeClass')
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_badgeinstances(self):
         return BadgeInstance.objects.filter(user=self)
 
-    @cachemodel.cached_method()
+    @cached_method()
     def cached_pending_enrollments(self):
         return StudentsEnrolled.objects.filter(user=self, badge_instance=None)
 
-    # @cachemodel.cached_method(auto_publish=True)
+    # @cached_method(auto_publish=True)
     # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails.
     # This results in api calls responding with a 403 after the failure of the AuthenticatedWithVerifiedEmail permission check.
     # Which will logout the user automatically with the error: Token expired.
@@ -342,40 +343,40 @@ class UserCachedObjectGetterMixin(object):
     def cached_email_variants(self):
         return chain.from_iterable(email.cached_variants() for email in self.cached_emails())
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_token(self):
         user_token, created = \
             Token.objects.get_or_create(user=self)
         return user_token.key
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_terms_agreements(self):
         return list(self.termsagreement_set.all())
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_institution_staff(self):
         try:
             return InstitutionStaff.objects.get(user=self)
         except InstitutionStaff.DoesNotExist:
             return None
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_faculty_staffs(self):
         return list(FacultyStaff.objects.filter(user=self))
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_issuer_staffs(self):
         return list(IssuerStaff.objects.filter(user=self))
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_badgeclass_staffs(self):
         return list(BadgeClassStaff.objects.filter(user=self))
 
-    @cachemodel.cached_method()
+    @cached_method()
     def cached_colleagues(self):
         return list(BadgeUser.objects.filter(institution=self.institution))
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_affiliations(self):
         return list(StudentAffiliation.objects.filter(user=self))
 
@@ -780,7 +781,7 @@ class BadgrAccessTokenManager(models.Manager):
         raise self.model.DoesNotExist
 
 
-class BadgrAccessToken(AccessToken, cachemodel.CacheModel):
+class BadgrAccessToken(AccessToken, CacheModel):
     objects = BadgrAccessTokenManager()
     fake_entity_id_prefix = "BadgrAccessToken.id="
 
@@ -810,7 +811,7 @@ class BadgrAccessToken(AccessToken, cachemodel.CacheModel):
             return ApplicationInfo()
 
 
-class TermsUrl(cachemodel.CacheModel):
+class TermsUrl(CacheModel):
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE, related_name='terms_urls')
     url = models.URLField(max_length=200, null=True)
     LANGUAGE_ENGLISH = 'en'
@@ -824,7 +825,7 @@ class TermsUrl(cachemodel.CacheModel):
     excerpt = models.BooleanField(default=False)
 
 
-class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+class Terms(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     version = models.PositiveIntegerField(default=1)
     institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE, related_name='terms',
                                     null=True, blank=True)
@@ -881,7 +882,7 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
             self.institution.remove_cached_data(['cached_terms'])
 
 
-class TermsAgreement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+class TermsAgreement(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE)
     agreed = models.BooleanField(default=True)

@@ -8,7 +8,6 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from urllib.parse import urljoin
 
-import cachemodel
 import requests
 from django.apps import apps
 from django.conf import settings
@@ -23,6 +22,9 @@ from jsonfield import JSONField
 from openbadges_bakery import bake
 from rest_framework import serializers
 
+from cachemodel.decorators import cached_method
+from cachemodel.managers import CacheModelManager
+from cachemodel.models import CacheModel
 from directaward.models import DirectAward, DirectAwardBundle
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
@@ -61,7 +63,7 @@ class OriginalJsonMixin(models.Model):
             return {key: original[key] for key in [k for k in list(original.keys()) if k not in excluded_fields]}
 
 
-class BaseOpenBadgeObjectModel(OriginalJsonMixin, cachemodel.CacheModel):
+class BaseOpenBadgeObjectModel(OriginalJsonMixin, CacheModel):
     source = models.CharField(max_length=254, default='local')
     source_url = models.CharField(max_length=254, blank=True, null=True, default=None)
 
@@ -71,7 +73,7 @@ class BaseOpenBadgeObjectModel(OriginalJsonMixin, cachemodel.CacheModel):
     def get_extensions_manager(self):
         raise NotImplementedError()
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_extensions(self):
         return self.get_extensions_manager().all()
 
@@ -106,7 +108,7 @@ class BaseOpenBadgeObjectModel(OriginalJsonMixin, cachemodel.CacheModel):
                     extension.delete()
 
 
-class BaseOpenBadgeExtension(cachemodel.CacheModel):
+class BaseOpenBadgeExtension(CacheModel):
     name = models.CharField(max_length=254)
     original_json = models.TextField(blank=True, null=True, default=None)
 
@@ -141,7 +143,7 @@ class Issuer(EntityUserProvisionmentMixin,
     email = models.CharField(max_length=254, blank=True, null=True, default=None)
     old_json = JSONField()
     objects = IssuerManager()
-    cached = cachemodel.CacheModelManager()
+    cached = CacheModelManager()
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.CASCADE, blank=False, null=False)
 
     @property
@@ -253,7 +255,7 @@ class Issuer(EntityUserProvisionmentMixin,
             assertions += bc.assertions
         return assertions
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_staff(self):
         return list(IssuerStaff.objects.filter(issuer=self))
 
@@ -267,18 +269,18 @@ class Issuer(EntityUserProvisionmentMixin,
     def badgeclasses_count(self):
         return BadgeClass.objects.filter(issuer=self).count()
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_badgeclasses(self):
         return list(self.badgeclasses.all())
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_assertions(self):
         r = []
         for bc in self.cached_badgeclasses():
             r += bc.cached_assertions()
         return r
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_pending_enrollments(self):
         r = []
         for bc in self.cached_badgeclasses():
@@ -495,7 +497,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     old_json = JSONField()
     objects = BadgeClassManager()
-    cached = cachemodel.CacheModelManager()
+    cached = CacheModelManager()
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.BadgeClassStaff")
     expiration_period = models.DurationField(null=True)
     award_allowed_institutions = models.ManyToManyField('institution.Institution', blank=True,
@@ -552,31 +554,31 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def parent(self):
         return self.issuer
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_staff(self):
         return BadgeClassStaff.objects.filter(badgeclass=self)
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_assertions(self):
         return list(self.badgeinstances.all())
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_endorsements(self):
         return list(self.endorsements.all())
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_endorsed(self):
         return list(self.endorsed.all())
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_direct_awards(self):
         return list(DirectAward.objects.filter(badgeclass=self))
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_pending_direct_awards(self):
         return DirectAward.objects.filter(badgeclass=self, status=DirectAward.STATUS_UNACCEPTED)
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_direct_award_bundles(self):
         return list(DirectAwardBundle.objects.filter(badgeclass=self))
 
@@ -649,17 +651,17 @@ class BadgeClass(EntityUserProvisionmentMixin,
     def cached_issuer(self):
         return Issuer.cached.get(pk=self.issuer_id)
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_enrollments(self):
         from lti_edu.models import StudentsEnrolled
         return StudentsEnrolled.objects.filter(badge_class=self)
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_pending_enrollments_including_denied(self):
         from lti_edu.models import StudentsEnrolled
         return StudentsEnrolled.objects.filter(badge_class=self, badge_instance=None)
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_pending_enrollments(self):
         from lti_edu.models import StudentsEnrolled
         return StudentsEnrolled.objects.filter(badge_class=self, badge_instance=None, denied=False)
@@ -670,7 +672,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
                                             revoked=False,
                                             acceptance='Accepted').count()
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_alignments(self):
         return self.badgeclassalignment_set.all()
 
@@ -710,7 +712,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
                 if _obj_identity(alignment) not in new_idx:
                     alignment.delete()
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_tags(self):
         return self.badgeclasstag_set.all()
 
@@ -931,7 +933,7 @@ class BadgeInstance(BaseAuditedModel,
     include_evidence = models.BooleanField(default=False)
 
     objects = BadgeInstanceManager()
-    cached = cachemodel.CacheModelManager()
+    cached = CacheModelManager()
 
     class Meta:
         index_together = (
@@ -966,7 +968,7 @@ class BadgeInstance(BaseAuditedModel,
     def cached_badgeclass(self):
         return BadgeClass.cached.get(pk=self.badgeclass_id)
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_evidence(self):
         return self.badgeinstanceevidence_set.all()
 
@@ -1319,7 +1321,7 @@ class BadgeInstance(BaseAuditedModel,
         return baked_image.image.url
 
 
-class BadgeInstanceEvidence(OriginalJsonMixin, cachemodel.CacheModel):
+class BadgeInstanceEvidence(OriginalJsonMixin, CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
     evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
     narrative = models.TextField(blank=True, null=True, default=None)
@@ -1357,7 +1359,7 @@ def _baked_badge_instance_filename_generator(instance, filename):
     )
 
 
-class BadgeInstanceBakedImage(cachemodel.CacheModel):
+class BadgeInstanceBakedImage(CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
     obi_version = models.CharField(max_length=254)
     image = models.FileField(upload_to=_baked_badge_instance_filename_generator, blank=True)
@@ -1371,7 +1373,7 @@ class BadgeInstanceBakedImage(cachemodel.CacheModel):
         return super(BadgeInstanceBakedImage, self).delete(*args, **kwargs)
 
 
-class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
+class BadgeClassAlignment(OriginalJsonMixin, CacheModel):
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     target_name = models.TextField()
     target_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
@@ -1405,7 +1407,7 @@ class BadgeClassAlignment(OriginalJsonMixin, cachemodel.CacheModel):
         return json
 
 
-class BadgeClassTag(cachemodel.CacheModel):
+class BadgeClassTag(CacheModel):
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     name = models.CharField(max_length=254, db_index=True)
 
@@ -1457,7 +1459,7 @@ class BadgeInstanceExtension(BaseOpenBadgeExtension):
         self.badgeinstance.publish()
 
 
-class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     name = models.CharField(max_length=255, blank=False, null=False, default=None)
     description = models.TextField(blank=True, null=True, default=None)
     user = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.CASCADE)

@@ -1,13 +1,13 @@
-import cachemodel
 from django.db import models
 
+from cachemodel.models import CacheModel
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeClass
-from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationError
+from mainsite.exceptions import BadgrValidationFieldError
 from mainsite.models import BaseAuditedModel
 
 
-class Endorsement(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+class Endorsement(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     # The source badge class representing the endorser
     endorser = models.ForeignKey(BadgeClass, blank=False, null=False, on_delete=models.CASCADE,
                                  related_name='endorsed')

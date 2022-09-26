@@ -18,9 +18,9 @@ python-resize-image==1.1.19
 
 # CSky
 # django-cachemodel==2.1.7  # python3 incompatible
--e git://github.com/concentricsky/django-cachemodel.git@0f3081a2427c525f243119426432abd6484dc837#egg=django-cachemodel
+# -e git://github.com/concentricsky/django-cachemodel.git@0f3081a2427c525f243119426432abd6484dc837#egg=django-cachemodel
 # django-basic-models==3.0.4 # python3 incompatible
--e git://github.com/concentricsky/django-basic-models.git@50ae1448e61ee14941f502ec6d470a4799da001e#egg=django-basic-models
+# -e git://github.com/concentricsky/django-basic-models.git@50ae1448e61ee14941f502ec6d470a4799da001e#egg=django-basic-models
 
 
 # DOCS
@@ -34,7 +34,7 @@ python-memcached==1.59
 djangorestframework==3.11.2
 
 # Django Allauth
-django-allauth==0.37.1
+django-allauth==0.51.0
 ## FW oauthlib==2.1.0
 oauthlib==3.1.0
 requests==2.24.0
