@@ -16,13 +16,6 @@ django-storages==1.7
 
 python-resize-image==1.1.19
 
-# CSky
-# django-cachemodel==2.1.7  # python3 incompatible
-# -e git://github.com/concentricsky/django-cachemodel.git@0f3081a2427c525f243119426432abd6484dc837#egg=django-cachemodel
-# django-basic-models==3.0.4 # python3 incompatible
-# -e git://github.com/concentricsky/django-basic-models.git@50ae1448e61ee14941f502ec6d470a4799da001e#egg=django-basic-models
-
-
 # DOCS
 django-rest-swagger==2.2.0
 
@@ -80,6 +73,7 @@ git+https://github.com/oharsta/openbadges-validator-core@develop#egg=openbadges
 
 celery==5.2.7
 django-celery-results==2.4.0
+importlib-metadata==4.13.0
 python-json-logger==0.1.2
 
 # SSL Support
