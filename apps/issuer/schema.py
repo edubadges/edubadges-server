@@ -5,6 +5,7 @@ from graphene_django.types import DjangoObjectType, Connection
 from directaward.schema import DirectAwardType, DirectAwardBundleType
 from endorsement.schema import EndorsementType
 from lti_edu.schema import StudentsEnrolledType
+from django.conf import settings
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
     StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students, \
     DefaultLanguageResolverMixin, resolver_blocker_only_for_current_user
@@ -357,7 +358,7 @@ class Query(object):
         return list(filter(lambda bi: bi.revoked == True, info.context.user.cached_badgeinstances()))
 
     def resolve_badge_instances_count(self, info):
-        return BadgeInstance.objects.count()
+        return BadgeInstance.objects.exclude(badgeclass__name=settings.EDUID_BADGE_CLASS_NAME).count()
 
     def resolve_badge_classes_count(self, info):
-        return BadgeClass.objects.count()
+        return BadgeClass.objects.exclude(name=settings.EDUID_BADGE_CLASS_NAME).count()
