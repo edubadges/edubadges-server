@@ -44,6 +44,7 @@ class InsightsView(APIView):
             institution = request.user.institution
 
         name_lang = 'name_english' if lang == 'en' else 'name_dutch'
+        student_affiliation_query = StudentAffiliation.objects.values_list('user_id', flat=True).all()
         assertions_query_set = BadgeInstance.objects \
             .values('award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id', "public", "revoked",
                     f"issuer__{name_lang}", 'issuer__faculty_id', f"issuer__faculty__{name_lang}") \
@@ -53,6 +54,7 @@ class InsightsView(APIView):
             .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id',
                     "public", "revoked", f"issuer__{name_lang}", 'issuer__faculty_id',
                     f"issuer__faculty__{name_lang}") \
+            .filter(user__id__in=student_affiliation_query) \
             .order_by('year', 'month')
         if not total:
             assertions_query_set = assertions_query_set \
