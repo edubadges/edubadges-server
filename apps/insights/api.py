@@ -43,17 +43,17 @@ class InsightsView(APIView):
         else:
             institution = request.user.institution
 
-        name_lang = 'name_english' if lang == 'en' else 'name_dutch'
         student_affiliation_query = StudentAffiliation.objects.values_list('user_id', flat=True).all()
         assertions_query_set = BadgeInstance.objects \
             .values('award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id', "public", "revoked",
-                    f"issuer__{name_lang}", 'issuer__faculty_id', f"issuer__faculty__{name_lang}") \
+                    "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
+                    "issuer__faculty__name_english", "issuer__faculty__name_dutch") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
             .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id',
-                    "public", "revoked", f"issuer__{name_lang}", 'issuer__faculty_id',
-                    f"issuer__faculty__{name_lang}") \
+                    "public", "revoked", "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
+                    "issuer__faculty__name_dutch", "issuer__faculty__name_english") \
             .filter(user__id__in=student_affiliation_query) \
             .order_by('year', 'month')
         if not total:
@@ -66,15 +66,17 @@ class InsightsView(APIView):
 
         direct_awards_query_set = DirectAward.objects \
             .values('status', 'badgeclass_id', 'badgeclass__name', 'badgeclass__issuer__id',
-                    f"badgeclass__issuer__{name_lang}", 'badgeclass__issuer__faculty_id',
-                    f"badgeclass__issuer__faculty__{name_lang}") \
+                    "badgeclass__issuer__name_dutch", "badgeclass__issuer__name_english",
+                    'badgeclass__issuer__faculty_id',
+                    "badgeclass__issuer__faculty__name_english", "badgeclass__issuer__faculty__name_dutch") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
             .values('month', 'year', 'nbr', 'status', 'badgeclass_id', 'badgeclass__name',
                     'badgeclass__issuer__id',
-                    f"badgeclass__issuer__{name_lang}", 'badgeclass__issuer__faculty_id',
-                    f"badgeclass__issuer__faculty__{name_lang}") \
+                    "badgeclass__issuer__name_dutch", "badgeclass__issuer__name_english",
+                    'badgeclass__issuer__faculty_id',
+                    "badgeclass__issuer__faculty__name_dutch", "badgeclass__issuer__faculty__name_english") \
             .order_by('year', 'month')
 
         if not total:
@@ -88,15 +90,17 @@ class InsightsView(APIView):
         enrollments_query_set = StudentsEnrolled.objects \
             .filter(Q(badge_instance_id__isnull=True) | Q(denied=True)) \
             .values('denied', 'badge_class_id', 'badge_class__name', 'badge_class__issuer__id',
-                    f"badge_class__issuer__{name_lang}", 'badge_class__issuer__faculty_id',
-                    f"badge_class__issuer__faculty__{name_lang}") \
+                    "badge_class__issuer__name_dutch", "badge_class__issuer__name_english",
+                    'badge_class__issuer__faculty_id',
+                    "badge_class__issuer__faculty__name_dutch", "badge_class__issuer__faculty__name_english") \
             .annotate(year=ExtractYear('date_created')) \
             .annotate(month=ExtractMonth('date_created')) \
             .annotate(nbr=Count('month')) \
             .values('month', 'year', 'nbr', 'denied', 'badge_class_id', 'badge_class__name',
                     'badge_class__issuer__id',
-                    f"badge_class__issuer__{name_lang}", 'badge_class__issuer__faculty_id',
-                    f"badge_class__issuer__faculty__{name_lang}") \
+                    "badge_class__issuer__name_dutch", "badge_class__issuer__name_english",
+                    'badge_class__issuer__faculty_id',
+                    "badge_class__issuer__faculty__name_dutch", "badge_class__issuer__faculty__name_english") \
             .order_by('year', 'month')
 
         if not total:
