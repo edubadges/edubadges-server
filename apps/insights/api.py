@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.db.models import Count
 from django.db.models import Q
 from django.db.models.functions import ExtractMonth, ExtractYear
@@ -55,6 +56,7 @@ class InsightsView(APIView):
                     "public", "revoked", "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
                     "issuer__faculty__name_dutch", "issuer__faculty__name_english") \
             .filter(user__id__in=student_affiliation_query) \
+            .exclude(badgeclass__name=settings.EDUID_BADGE_CLASS_NAME) \
             .order_by('year', 'month')
         if not total:
             assertions_query_set = assertions_query_set \
