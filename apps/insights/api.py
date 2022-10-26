@@ -1,3 +1,4 @@
+from datetime import datetime
 from datetime import timedelta
 
 from django.conf import settings
@@ -45,6 +46,7 @@ class InsightsView(APIView):
             institution = request.user.institution
 
         student_affiliation_query = StudentAffiliation.objects.values_list('user_id', flat=True).all()
+        today = datetime.today()
         assertions_query_set = BadgeInstance.objects \
             .values('award_type', 'badgeclass_id', 'badgeclass__name', 'issuer_id', "public", "revoked",
                     "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
@@ -56,6 +58,7 @@ class InsightsView(APIView):
                     "public", "revoked", "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
                     "issuer__faculty__name_dutch", "issuer__faculty__name_english") \
             .filter(user__id__in=student_affiliation_query) \
+            .exclude(expires_at__lte=today) \
             .exclude(badgeclass__name=settings.EDUID_BADGE_CLASS_NAME) \
             .order_by('year', 'month')
         if not total:
