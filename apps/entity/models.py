@@ -1,5 +1,6 @@
 # encoding: utf-8
-import cachemodel
+from cachemodel.decorators import cached_method
+from cachemodel.models import CacheModel
 from cachemodel.utils import generate_cache_key
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -7,7 +8,7 @@ from django.core.cache import cache
 from mainsite.utils import generate_entity_uri
 
 
-class BadgrCacheModel(cachemodel.CacheModel):
+class BadgrCacheModel(CacheModel):
 
     class Meta:
         abstract = True
@@ -66,11 +67,11 @@ class BaseVersionedEntity(_AbstractVersionedEntity):
 
 class EntityUserProvisionmentMixin(object):
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_content_type(self):
         return ContentType.objects.get_for_model(self)
 
-    @cachemodel.cached_method(auto_publish=True)
+    @cached_method(auto_publish=True)
     def cached_userprovisionments(self):
         from badgeuser.models import UserProvisionment
         return UserProvisionment.objects.filter(content_type=self.cached_content_type(), object_id=self.pk)

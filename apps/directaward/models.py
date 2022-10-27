@@ -1,6 +1,7 @@
 import urllib
 
-import cachemodel
+from cachemodel.decorators import cached_method
+from cachemodel.models import CacheModel
 from django.conf import settings
 from django.db import models, IntegrityError
 from django.utils.html import strip_tags
@@ -11,7 +12,7 @@ from mainsite.models import BaseAuditedModel, EmailBlacklist
 from mainsite.utils import send_mail, EmailMessageMaker
 
 
-class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     recipient_email = models.EmailField()
     eppn = models.CharField(max_length=254)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
@@ -112,7 +113,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
                       message=plain_text, html_message=html_message, recipient_list=[self.recipient_email])
 
 
-class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheModel):
+class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     initial_total = models.IntegerField()
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     lti_import = models.BooleanField(default=False)
@@ -139,7 +140,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, cachemodel.CacheM
         return urllib.parse.urljoin(settings.UI_URL,
                                     'badgeclass/{}/direct-awards-bundles'.format(self.badgeclass.entity_id))
 
-    @cachemodel.cached_method()
+    @cached_method()
     def cached_direct_awards(self):
         return list(DirectAward.objects.filter(bundle=self))
 

@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+=======
+## [6.5.0] - 2022-10-31
+- Exclude expired badge assertions in insights.
+- Exclude the free welcome badge in insights.
+- Insights: fixed null value due to missing language
+- Only select validated assertions in insights.
+- Exclude welcome badges in the count of the login screen.
+- Update earned_direct_award.html.
+- Update base.html.
+- Minor changes in the mail templates.
+- Explicit version of importlib-metadata.
+- Imported concentricsky modules which are no longer available on GitHub.
+- Loosened dependency for pytz.
+- Bump celery from 4.1.1 to 5.2.2.
+- Bump pillow from 8.3.2 to 9.0.1.
+- Bump django-celery-results from 1.0.1 to 2.4.0.
+- Added revoked before.
+- Do not filter on institution if super_user.
+- Super users can select institutions in the insights.
+- Changed insights queries with group by month.
+- WIP on selecting insight based on year and total.
+- Bump django-celery-results from 1.0.1 to 2.4.0.
+
 ## [6.4.0] - 2022-08-22
 - Validation error description.
 - Check the Eppn reg exp format.

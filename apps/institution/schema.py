@@ -103,7 +103,9 @@ class Query(object):
                 iss.has_permissions(user, ['may_update'])]
 
     def resolve_institutions(self, info, **kwargs):
-        return [inst for inst in Institution.objects.all() if inst.has_permissions(info.context.user, ['may_read'])]
+        is_superuser = hasattr(info.context.user, 'is_superuser') and info.context.user.is_superuser
+        return [inst for inst in Institution.objects.all() if
+                inst.has_permissions(info.context.user, ['may_read']) or is_superuser]
 
     def resolve_public_institution(self, info, **kwargs):
         id = kwargs.get('id')

@@ -1,9 +1,9 @@
 # Django stuff
 Django==2.2.28
 semver==2.6.0
-pytz==2017.2
+pytz==2022.2.1
 # PIL support
-Pillow==8.3.2
+Pillow==9.0.1
 python-dateutil==2.8.1
 
 # reporting
@@ -16,13 +16,6 @@ django-storages==1.7
 
 python-resize-image==1.1.19
 
-# CSky
-# django-cachemodel==2.1.7  # python3 incompatible
--e git://github.com/concentricsky/django-cachemodel.git@0f3081a2427c525f243119426432abd6484dc837#egg=django-cachemodel
-# django-basic-models==3.0.4 # python3 incompatible
--e git://github.com/concentricsky/django-basic-models.git@50ae1448e61ee14941f502ec6d470a4799da001e#egg=django-basic-models
-
-
 # DOCS
 django-rest-swagger==2.2.0
 
@@ -34,7 +27,7 @@ python-memcached==1.59
 djangorestframework==3.11.2
 
 # Django Allauth
-django-allauth==0.37.1
+django-allauth==0.51.0
 ## FW oauthlib==2.1.0
 oauthlib==3.1.0
 requests==2.24.0
@@ -74,11 +67,13 @@ django-markdownify==0.1.0
 bleach==3.3.0
 
 # Open Badges related utilities
-openbadges==1.1.2
+# openbadges==1.1.2
+git+https://github.com/oharsta/openbadges-validator-core@develop#egg=openbadges
 # openbadges-bakery==1.0.1
 
-celery==4.1.1
-django-celery-results==1.0.1
+celery==5.2.7
+django-celery-results==2.4.0
+importlib-metadata==4.13.0
 python-json-logger==0.1.2
 
 # SSL Support

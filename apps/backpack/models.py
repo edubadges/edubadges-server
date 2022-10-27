@@ -2,20 +2,20 @@
 
 
 from urllib.parse import urljoin
-from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrApiException400
 
-import cachemodel
 import requests
-from basic_models.models import CreatedUpdatedAt
 from django.conf import settings
 from django.db import models
 
 from backpack.sharing import SharingManager
+from basic_models.models import CreatedUpdatedAt
+from cachemodel.models import CacheModel
 from entity.models import BaseVersionedEntity
+from mainsite.exceptions import BadgrValidationFieldError
 from mainsite.models import BaseAuditedModel
 
 
-class BaseSharedModel(cachemodel.CacheModel, CreatedUpdatedAt):
+class BaseSharedModel(CacheModel, CreatedUpdatedAt):
     SHARE_PROVIDERS = [(p.provider_code, p.provider_name) for code, p in list(SharingManager.ManagerProviders.items())]
     provider = models.CharField(max_length=254, choices=SHARE_PROVIDERS)
     source = models.CharField(max_length=254, default="unknown")
