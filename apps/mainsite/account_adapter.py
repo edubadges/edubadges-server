@@ -21,6 +21,8 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return getattr(settings, 'OPEN_FOR_SIGNUP', True)
 
+    def get_signup_redirect_url(self, request):
+        return self.get_login_redirect_url(request)
 
     def get_login_redirect_url(self, request):
         """
