@@ -13,8 +13,14 @@ def expired_direct_awards(settings):
     # Prevent MySQLdb._exceptions.OperationalError: (2006, 'MySQL server has gone away')
     connections.close_all()
 
+    logger = logging.getLogger('Badgr.Debug')
+    logger.info("Running expired_direct_awards")
+
     half_year_ago = datetime.utcnow() - timedelta(days=6 * 30)
     direct_awards = DirectAward.objects.filter(created_at__lt=half_year_ago, status='Unaccepted').all()
+
+    logger.info(f"Deleting {len(direct_awards)} expired_direct_awards")
+
     for direct_award in direct_awards:
         html_message = EmailMessageMaker.create_direct_award_expired_student_mail(direct_award)
         direct_award.delete()
