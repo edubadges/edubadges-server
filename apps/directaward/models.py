@@ -66,9 +66,11 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         institution = self.badgeclass.institution
         identifiers = [inst.identifier for inst in self.badgeclass.award_allowed_institutions.all()] + [
             institution.identifier]
+        if institution.alternative_identifier:
+            identifiers.append(institution.alternative_identifier)
         schac_homes = recipient.schac_homes
         if self.badgeclass.formal:
-            allowed = institution.identifier in schac_homes
+            allowed = institution.identifier in schac_homes or institution.alternative_identifier in schac_homes
         else:
             allowed = any(identifier in schac_homes for identifier in identifiers) or recipient.validated_name
         if not allowed:
