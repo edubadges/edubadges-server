@@ -4,7 +4,6 @@ Utility functions and constants that might be used across the project.
 
 import base64
 import hashlib
-import cairosvg
 import io
 import math
 import os
@@ -18,6 +17,7 @@ from datetime import datetime
 from io import BytesIO
 from xml.etree import cElementTree as ET
 
+import cairosvg
 import requests
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from django.conf import settings
@@ -292,9 +292,24 @@ class EmailMessageMaker:
         }
         return render_to_string(template, email_vars)
 
+    @staticmethod
+    def direct_award_reminder_student_mail(direct_award):
+        badgeclass = direct_award.badgeclass
+        template = 'email/reminder_direct_award.html'
+        badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
+        email_vars = {
+            'badgeclass_image': badgeclass_image,
+            'issuer_image': badgeclass.issuer.image_url(),
+            'issuer_name': badgeclass.issuer.name,
+            'faculty_name': badgeclass.issuer.faculty.name,
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
+            'badgeclass_description': badgeclass.description,
+            'badgeclass_name': badgeclass.name,
+        }
+        return render_to_string(template, email_vars)
 
     @staticmethod
-    def create_direct_award_expired_student_mail(direct_award):
+    def direct_award_expired_student_mail(direct_award):
         badgeclass = direct_award.badgeclass
         template = 'email/expired_direct_award.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)

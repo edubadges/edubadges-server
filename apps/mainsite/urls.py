@@ -6,7 +6,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 from mainsite.admin import badgr_admin
 from mainsite.graphql_view import ExtendedGraphQLView
-from mainsite.schedule import start_scheduling
 from mainsite.views import serve_protected_document
 
 badgr_admin.autodiscover()
@@ -158,5 +157,3 @@ handler500 = error500
 urlpatterns += [
     url(r'^docs/', get_swagger_view(title='Edubadges API'))
 ]
-
-start_scheduling(settings)

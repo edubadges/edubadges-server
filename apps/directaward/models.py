@@ -23,6 +23,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     narrative = models.TextField(blank=True, null=True, default=None)
     name = models.CharField(max_length=255, blank=True, null=True, default=None)
     description = models.TextField(blank=True, null=True, default=None)
+    warning_email_send = models.BooleanField(default=False)
+
 
     STATUS_UNACCEPTED = 'Unaccepted'
     STATUS_REVOKED = 'Revoked'
