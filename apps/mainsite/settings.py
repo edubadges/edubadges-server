@@ -528,8 +528,8 @@ DATABASES = {
         'NAME': os.environ['BADGR_DB_NAME'],
         'USER': os.environ['BADGR_DB_USER'],
         'PASSWORD': os.environ['BADGR_DB_PASSWORD'],
-        'HOST': '',
-        'PORT': '',
+        'HOST': os.environ['BADGR_DB_HOST'],
+        'PORT': os.environ['BADGR_DB_PORT'],
         'TEST': {
             'CHARSET': 'utf8',
         }
