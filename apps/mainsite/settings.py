@@ -344,7 +344,7 @@ LOGGING = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': os.environ['MEMCACHED_HOST']:os.environ['MEMCACHED_PORT'],
+        'LOCATION': os.environ['MEMCACHED_HOST']":"os.environ['MEMCACHED_PORT'],
     }
 }
 
