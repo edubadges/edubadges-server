@@ -344,7 +344,7 @@ LOGGING = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': os.environ['MEMCACHED_HOST']":"os.environ['MEMCACHED_PORT'],
+        'LOCATION': f"{os.environ.get('MEMCACHED_HOST', 'localhost')}:{os.environ.get('MEMCACHED_PORT', 11211)}",
     }
 }
 
@@ -528,8 +528,8 @@ DATABASES = {
         'NAME': os.environ['BADGR_DB_NAME'],
         'USER': os.environ['BADGR_DB_USER'],
         'PASSWORD': os.environ['BADGR_DB_PASSWORD'],
-        'HOST': os.environ['BADGR_DB_HOST'],
-        'PORT': os.environ['BADGR_DB_PORT'],
+        'HOST': os.environ.get('BADGR_DB_HOST', 'localhost'),
+        'PORT': os.environ.get('BADGR_DB_PORT', 3306),
         'TEST': {
             'CHARSET': 'utf8',
         }
