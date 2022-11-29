@@ -32,16 +32,13 @@ class DirectAwardRevoke(BaseEntityDetailView):
             raise BadgrValidationFieldError('revocation_reason', "This field is required", 999)
         if not direct_awards:
             raise BadgrValidationFieldError('direct_awards', "This field is required", 999)
-        cache_cleared = False
         for direct_award in direct_awards:
             direct_award = DirectAward.objects.get(entity_id=direct_award['entity_id'])
             if direct_award.get_permissions(request.user)['may_award']:
                 direct_award.revoke(revocation_reason)
-                if not cache_cleared:
-                    direct_award.bundle.remove_cached_data(['cached_direct_awards'])
-                    direct_award.badgeclass.remove_cached_data(['cached_direct_awards'])
-                    direct_award.badgeclass.remove_cached_data(['cached_direct_award_bundles'])
-                    cache_cleared = True
+                direct_award.bundle.remove_cached_data(['cached_direct_awards'])
+                direct_award.badgeclass.remove_cached_data(['cached_direct_awards'])
+                direct_award.badgeclass.remove_cached_data(['cached_direct_award_bundles'])
             else:
                 raise BadgrApiException400("You do not have permission", 100)
         return Response({"result": "ok"}, status=status.HTTP_200_OK)

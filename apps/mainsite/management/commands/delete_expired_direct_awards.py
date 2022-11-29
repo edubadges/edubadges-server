@@ -45,4 +45,4 @@ class Command(BaseCommand):
             send_mail(subject='Your edubadge has been deleted',
                       message=None, html_message=html_message, recipient_list=[direct_award.recipient_email])
 
-        self.stdout.write(f"Direct awards {len(direct_awards)} deleted!\n")
+        logger.info(f"Direct awards {len(direct_awards)} deleted in expired_direct_awards")
