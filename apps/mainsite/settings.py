@@ -120,6 +120,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
                 'mainsite.context_processors.extra_settings'
             ],
         },
@@ -535,6 +536,7 @@ DATABASES = {
         }
     }
 }
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Email
 EMAIL_USE_TLS = True

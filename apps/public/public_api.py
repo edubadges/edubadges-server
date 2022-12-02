@@ -9,7 +9,7 @@ from PIL import Image
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render
 from django.urls import resolve, reverse, Resolver404, NoReverseMatch
 from django.views.generic import RedirectView
 from rest_framework import status, permissions
@@ -114,7 +114,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
 
         if self.is_bot():
             # if user agent matches a known bot, return a stub html with opengraph tags
-            return render_to_response(self.template_name, context=self.get_context_data())
+            return render(request, self.template_name, context=self.get_context_data())
 
         if self.is_requesting_html():
             return HttpResponseRedirect(redirect_to=self.get_badgrapp_redirect())
@@ -345,7 +345,7 @@ class IssuerPublicKeyJson(IssuerJson):
 
         if self.is_bot():
             # if user agent matches a known bot, return a stub html with opengraph tags
-            return render_to_response(self.template_name, context=self.get_context_data())
+            return render(request, self.template_name, context=self.get_context_data())
 
         pubkey_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get('public_key_id'))
         issuer_json = self.get_json(request=request, signed=True, public_key_issuer=pubkey_issuer,
@@ -474,7 +474,7 @@ class BadgeClassPublicKeyJson(BadgeClassJson):
         self.log(self.current_object)
         if self.is_bot():
             # if user agent matches a known bot, return a stub html with opengraph tags
-            return render_to_response(self.template_name, context=self.get_context_data())
+            return render(request, self.template_name, context=self.get_context_data())
 
         public_key_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get('public_key_id'))
         json = self.current_object.get_json(signed=True, public_key_issuer=public_key_issuer)

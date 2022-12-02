@@ -1,5 +1,5 @@
 # Django stuff
-Django==2.2.28
+Django==3.2
 semver==2.6.0
 pytz==2022.2.1
 # PIL support
@@ -29,20 +29,20 @@ djangorestframework==3.11.2
 # Django Allauth
 django-allauth==0.51.0
 ## FW oauthlib==2.1.0
-oauthlib==3.1.0
+oauthlib==3.2.2
 requests==2.24.0
 ## FW requests-oauthlib==0.4.2
-requests-oauthlib==1.3.0
+requests-oauthlib==1.3.1
 # Permissions framework
 rules==0.4
 
 # OAuth
-django-oauth-toolkit==1.1.2
+django-oauth-toolkit==2.2.0
 
 # Some extras
 django-cors-headers==3.10.0
 django-cors-middleware==1.5.0
-django-autoslug==1.9.6
+django-autoslug==1.9.8
 
 # wsgiref==0.1.2 # python3 incompatible
 sqlparse==0.2.2
@@ -59,7 +59,7 @@ rfc3987==1.3.4
 # The cairo png on the test / acc /prod server requires pypng 0.0.18
 #pypng==0.0.19
 #pypng==0.0.21
-jsonfield==2.0.2
+jsonfield==3.1.0
 
 # markdown support
 Markdown==2.6.8
@@ -121,8 +121,6 @@ aniso8601<=7p
 
 # inline css
 premailer==3.7.0
-
-APScheduler==3.7.0
 
 # 2FA support
 django-otp==1.1.1

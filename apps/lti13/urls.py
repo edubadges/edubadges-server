@@ -1,8 +1,8 @@
 from django.conf.urls import url
 from django.views.decorators.csrf import csrf_exempt
 
-from .api import LtiCourseDetail, LtiCourseDetailList
-from .views import login, launch, get_jwks, get_lti_context, get_members, get_grades
+from lti13.api import LtiCourseDetail, LtiCourseDetailList
+from lti13.views import login, launch, get_jwks, get_lti_context, get_members, get_grades
 
 urlpatterns = [
     url(r'^login/$', csrf_exempt(login), name='lti_login'),
