@@ -46,7 +46,9 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                                                         '(e.g. institutionX.tempguestidp.edubadges.nl)')
     eppn_reg_exp_format = models.CharField(max_length=255, blank=True, null=True, default=None,
                                               help_text='A regular expression which defines the EPPN of an institution '
-                                                        '(e.g. .*@tempguestidp.edubadges.nl)')
+                                                        '(e.g. .*@tempguestidp.edubadges.nl). '
+                                                        'For multiple logical OR use the following format:'
+                                                        '(.*@university.org|.*@university-sub.org)')
 
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
     GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
