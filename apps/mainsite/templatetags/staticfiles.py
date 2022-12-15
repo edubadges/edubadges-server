@@ -4,7 +4,7 @@ from django.templatetags.static import (do_static as _do_static, static as _stat
 register = template.Library()
 
 
-def static(path):
+def staticfiles(path):
     return _static(path)
 
 

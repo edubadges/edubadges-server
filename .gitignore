@@ -8,6 +8,7 @@ AppleDouble
 *.sass-cache
 env_vars.sh
 staticfiles*
+!staticfiles.py
 mediafiles/*
 !mediafiles/uploads/badges/eduid.png
 !mediafiles/uploads/badges/edubadge_student.png
