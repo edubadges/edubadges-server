@@ -190,8 +190,12 @@ def after_terms_agreement(request, **kwargs):
         request.user.add_affiliations([{'eppn': info["eppn"].lower(), 'schac_home': info["schac_home_organization"]}])
         logger.info(f"Stored affiliations {info['eppn']} {info['schac_home_organization']}")
     validated_names = [info['validated_name'] for info in eppn_json if 'validated_name' in info]
+    if request.user.validated_name and len(validated_names) == 0:
+        ret = HttpResponseRedirect(ret.url + '&revalidate-name=true')
     if len(validated_names) > 0:
         request.user.validated_name = validated_names[0]
+    else:
+        request.user.validated_name = None
     request.user.save()
 
     if not social_account:
