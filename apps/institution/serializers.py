@@ -32,6 +32,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
     name_dutch = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
     grading_table = serializers.URLField(max_length=254, required=False, allow_null=True, allow_blank=True)
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
+    linkedin_org_identifier = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = Institution
@@ -46,6 +47,8 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
         instance.grading_table = validated_data.get('grading_table')
         instance.name_english = validated_data.get('name_english')
         instance.name_dutch = validated_data.get('name_dutch')
+        instance.linkedin_org_identifier = validated_data.get('linkedin_org_identifier')
+
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         instance.save()
         return instance

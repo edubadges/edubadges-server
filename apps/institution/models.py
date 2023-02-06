@@ -1,16 +1,16 @@
-import cachemodel
+import re
 from collections import OrderedDict
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
-from django.core.exceptions import ValidationError
-import re
 
 from cachemodel.decorators import cached_method
 from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
 from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
-from mainsite.models import BaseAuditedModel, ArchiveMixin
 from mainsite.mixins import ImageUrlGetterMixin, DefaultLanguageMixin
+from mainsite.models import BaseAuditedModel, ArchiveMixin
 from mainsite.utils import OriginSetting
 from staff.mixins import PermissionedModelMixin
 from staff.models import FacultyStaff, InstitutionStaff
@@ -18,13 +18,14 @@ from staff.models import FacultyStaff, InstitutionStaff
 
 class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                   ImageUrlGetterMixin, BaseVersionedEntity, BaseAuditedModel):
-    
+
     def __str__(self):
         return self.name or ''
 
     DUTCH_NAME = "instelling"
 
-    identifier = models.CharField(max_length=255, unique=True, null=True, help_text="This is the schac_home, must be set when creating")
+    identifier = models.CharField(max_length=255, unique=True, null=True,
+                                  help_text="This is the schac_home, must be set when creating")
     name_english = models.CharField(max_length=255, blank=True, null=True, default=None)
     name_dutch = models.CharField(max_length=255, blank=True, null=True, default=None)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff", related_name='+')
@@ -45,10 +46,12 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                                               help_text='An alternative schac_home for the Pilot microcredentials '
                                                         '(e.g. institutionX.tempguestidp.edubadges.nl)')
     eppn_reg_exp_format = models.CharField(max_length=255, blank=True, null=True, default=None,
-                                              help_text='A regular expression which defines the EPPN of an institution '
-                                                        '(e.g. .*@tempguestidp.edubadges.nl). '
-                                                        'For multiple logical OR use the following format:'
-                                                        '(.*@university.org|.*@university-sub.org)')
+                                           help_text='A regular expression which defines the EPPN of an institution '
+                                                     '(e.g. .*@tempguestidp.edubadges.nl). '
+                                                     'For multiple logical OR use the following format:'
+                                                     '(.*@university.org|.*@university-sub.org)')
+    linkedin_org_identifier = models.CharField(max_length=255, blank=True, null=True, default=None,
+                                               help_text='LinkedIn organisation identifier')
 
     GRONDSLAG_UITVOERING_OVEREENKOMST = 'uitvoering_overeenkomst'
     GRONDSLAG_GERECHTVAARDIGD_BELANG = 'gerechtvaardigd_belang'
@@ -60,8 +63,10 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
         (GRONDSLAG_WETTELIJKE_VERPLICHTING, 'wettelijke_verplichting'),
         (GEEN_GRONDSLAG, None),
     )
-    grondslag_formeel = models.CharField(max_length=254, null=True, blank=True, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
-    grondslag_informeel = models.CharField(max_length=254, null=True, blank=True, choices=GRONDSLAG_CHOICES, default=GRONDSLAG_UITVOERING_OVEREENKOMST)
+    grondslag_formeel = models.CharField(max_length=254, null=True, blank=True, choices=GRONDSLAG_CHOICES,
+                                         default=GRONDSLAG_UITVOERING_OVEREENKOMST)
+    grondslag_informeel = models.CharField(max_length=254, null=True, blank=True, choices=GRONDSLAG_CHOICES,
+                                           default=GRONDSLAG_UITVOERING_OVEREENKOMST)
     TYPE_WO = 'WO'
     TYPE_HBO = 'HBO'
     TYPE_MBO = 'MBO'
@@ -77,7 +82,8 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
         (DEFAULT_LANGUAGE_DUTCH, "nl_NL"),
         (DEFAULT_LANGUAGE_ENGLISH, "en_EN")
     )
-    default_language = models.CharField(max_length=254, choices=DEFAULT_LANGUAGE_CHOICES, default=DEFAULT_LANGUAGE_DUTCH)
+    default_language = models.CharField(max_length=254, choices=DEFAULT_LANGUAGE_CHOICES,
+                                        default=DEFAULT_LANGUAGE_DUTCH)
 
     def clean(self):
         if self.eppn_reg_exp_format:
@@ -112,7 +118,8 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                 'total_faculties': self.cached_faculties().__len__(),
                 'total_enrollments': total_enrollments,
                 'total_recipients': unique_recipients.__len__(),
-                'total_admins': [staff for staff in self.cached_staff() if staff.permissions == staff.full_permissions()].__len__(),
+                'total_admins': [staff for staff in self.cached_staff() if
+                                 staff.permissions == staff.full_permissions()].__len__(),
                 'total_assertions_formal': total_assertions_formal,
                 'total_assertions_informal': total_assertions_informal,
                 'total_assertions_revoked': total_assertions_revoked}
@@ -156,11 +163,13 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
         if institution_same_name:
             name_english_the_same = institution_same_name.name_english == self.name_english and bool(
                 institution_same_name.name_english)
-            name_dutch_the_same = institution_same_name.name_dutch == self.name_dutch and bool(institution_same_name.name_dutch)
+            name_dutch_the_same = institution_same_name.name_dutch == self.name_dutch and bool(
+                institution_same_name.name_dutch)
             both_the_same = name_english_the_same and name_dutch_the_same
             if both_the_same:
                 raise BadgrValidationMultipleFieldError([
-                    ['name_english', "There is already an institution with this English name inside this Issuer group", 920],
+                    ['name_english', "There is already an institution with this English name inside this Issuer group",
+                     920],
                     ['name_dutch', "There is already an institution with this Dutch name inside this Issuer group", 919]
                 ])
             elif name_dutch_the_same:
@@ -172,7 +181,6 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                                                 "There is already an institution with this English name inside this Issuer group",
                                                 920)
         return super(Institution, self).validate_unique(exclude=exclude)
-
 
     @property
     def assertions(self):
@@ -327,13 +335,17 @@ class Faculty(EntityUserProvisionmentMixin,
                             archived=False) \
                     .exclude(pk=self.pk).first()
                 if faculty_same_name:
-                    name_english_the_same = faculty_same_name.name_english == self.name_english and bool(faculty_same_name.name_english)
-                    name_dutch_the_same = faculty_same_name.name_dutch == self.name_dutch and bool(faculty_same_name.name_dutch)
+                    name_english_the_same = faculty_same_name.name_english == self.name_english and bool(
+                        faculty_same_name.name_english)
+                    name_dutch_the_same = faculty_same_name.name_dutch == self.name_dutch and bool(
+                        faculty_same_name.name_dutch)
                     both_the_same = name_english_the_same and name_dutch_the_same
                     if both_the_same:
                         raise BadgrValidationMultipleFieldError([
-                            ['name_english', "There is already a Faculty with this English name inside this institution", 917],
-                            ['name_dutch', "There is already a Faculty with this Dutch name inside this institution", 916]
+                            ['name_english',
+                             "There is already a Faculty with this English name inside this institution", 917],
+                            ['name_dutch', "There is already a Faculty with this Dutch name inside this institution",
+                             916]
                         ])
                     elif name_dutch_the_same:
                         raise BadgrValidationFieldError('name_dutch',
