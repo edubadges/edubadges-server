@@ -622,18 +622,10 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def match_provisionments(self):
         """Used to match provisions on initial login"""
-        multiple_provisions = list(UserProvisionment.objects.filter(email=self.email, for_teacher=self.is_teacher))
-        if len(multiple_provisions) > 1:
-            provision = multiple_provisions[-1]
-            multiple_provisions.pop()
-            for old_provision in multiple_provisions:
-                old_provision.delete()
+        provisions = UserProvisionment.objects.filter(email=self.email, for_teacher=self.is_teacher)
+        for provision in provisions:
             provision.match_user(self)
-            return [provision]
-        else:
-            for provision in multiple_provisions:
-                provision.match_user(self)
-            return multiple_provisions
+        return provisions
 
     def email_user(self, subject, html_message):
         """
