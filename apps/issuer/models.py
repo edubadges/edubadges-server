@@ -756,7 +756,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
         )
         message = EmailMessageMaker.create_earned_badge_mail(assertion)
         if send_email:
-            recipient.email_user(subject='Je hebt een edubadge verdiend! You earned an edubadge!', html_message=message)
+            recipient.email_user(subject='Je hebt een edubadge ontvangen! You received an edubadge!', html_message=message)
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
