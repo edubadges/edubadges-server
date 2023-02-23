@@ -125,7 +125,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     @property
     def assertion_count(self):
         from issuer.models import BadgeInstance
-        return BadgeInstance.objects.filter(direct_award_bundle=self).count()
+        return BadgeInstance.objects.filter(direct_award_bundle=self, revoked=False).count()
 
     @property
     def direct_award_count(self):
@@ -137,7 +137,9 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     @property
     def direct_award_revoked_count(self):
-        return DirectAward.objects.filter(bundle=self, status='Revoked').count()
+        from issuer.models import BadgeInstance
+        revoked_count = BadgeInstance.objects.filter(direct_award_bundle=self, revoked=True).count()
+        return revoked_count + DirectAward.objects.filter(bundle=self, status='Revoked').count()
 
     @property
     def url(self):
