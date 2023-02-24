@@ -90,6 +90,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                                           acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
                                           recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
                                           send_email=False,
+                                          issued_on=self.created_at,
                                           award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD,
                                           direct_award_bundle=self.bundle,
                                           evidence=evidence,
