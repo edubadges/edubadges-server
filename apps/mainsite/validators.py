@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 import openbadges.verifier
-
 from rest_framework.exceptions import ValidationError
 
 from mainsite.utils import verify_svg
@@ -11,6 +10,7 @@ class ValidImageValidator(object):
     """
     Verify a value is file-like and is either a PNG or a SVG
     """
+
     def __call__(self, image):
         if image:
             try:
@@ -30,7 +30,9 @@ class BadgeExtensionValidator(object):
 
     def __call__(self, value):
         if len(value) > 0:
-            result = openbadges.verifier.validate_extensions(value.copy())
+            options = {"use_cache": True, "cache_expire_after": 60 * 60 * 24,
+                       "jsonld_options": {"compactArrays": False}}
+            result = openbadges.verifier.validate_extensions(value.copy(), **options)
             report = result.get('report', {})
             if not report.get('valid', False):
                 messages = report.get('messages', [])

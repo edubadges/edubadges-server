@@ -1,12 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Education Program Identifier Extension",
-  "description": "An extension that allows you to add a single string EducationProgramIdentifier to a badgeclass object.",
+  "description": "An extension that allows you to add multiple number EducationProgramIdentifier to a badgeclass object.",
   "type": "object",
   "properties": {
     "EducationProgramIdentifier": {
-      "type": "number"
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        {
+          "type": "number"
+        }
+      ]
     }
   },
-  "required": ["EducationProgramIdentifier"]
+  "required": [
+    "EducationProgramIdentifier"
+  ]
 }
