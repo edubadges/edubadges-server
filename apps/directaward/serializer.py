@@ -36,10 +36,15 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     entity_id = serializers.CharField(read_only=True)
     batch_mode = serializers.BooleanField(write_only=True)
     lti_import = serializers.BooleanField(write_only=True)
+    status = serializers.CharField(write_only=True, default='Active', required=False)
+    scheduled_at = serializers.DateTimeField(write_only=True, required=False)
     notify_recipients = serializers.BooleanField(write_only=True)
 
     def create(self, validated_data):
         badgeclass = validated_data['badgeclass']
+        scheduled_at = validated_data.get('scheduled_at')
+        if scheduled_at:
+            validated_data['status'] = 'Scheduled'
         batch_mode = validated_data.pop('batch_mode')
         notify_recipients = validated_data.pop('notify_recipients')
         direct_awards = validated_data.pop('direct_awards')
@@ -51,20 +56,21 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                                                                        **validated_data)
                 for direct_award in direct_awards:
                     direct_award['eppn'] = direct_award['eppn'].lower()
+                    direct_award['status'] = 'Scheduled' if scheduled_at else 'Unaccepted'
                     try:
                         da_created = DirectAward.objects.create(bundle=direct_award_bundle, badgeclass=badgeclass,
                                                                 **direct_award)
                         successfull_direct_awards.append(da_created)
                     except IntegrityError:
                         pass
-            if notify_recipients:
+            if notify_recipients and not scheduled_at:
                 def send_mail(awards):
                     for da in awards:
                         da.notify_recipient()
 
                 thread = threading.Thread(target=send_mail, args=(successfull_direct_awards,))
                 thread.start()
-            if batch_mode:
+            if batch_mode and not scheduled_at:
                 direct_award_bundle.notify_awarder()
             direct_award_bundle.badgeclass.remove_cached_data(['cached_direct_awards'])
             direct_award_bundle.badgeclass.remove_cached_data(['cached_direct_award_bundles'])

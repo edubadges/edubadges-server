@@ -1,11 +1,11 @@
 import urllib
 
-from cachemodel.decorators import cached_method
-from cachemodel.models import CacheModel
 from django.conf import settings
 from django.db import models, IntegrityError
 from django.utils.html import strip_tags
 
+from cachemodel.decorators import cached_method
+from cachemodel.models import CacheModel
 from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BaseAuditedModel, EmailBlacklist
@@ -25,14 +25,15 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     description = models.TextField(blank=True, null=True, default=None)
     warning_email_send = models.BooleanField(default=False)
 
-
     STATUS_UNACCEPTED = 'Unaccepted'
     STATUS_REVOKED = 'Revoked'
     STATUS_REJECTED = 'Rejected'
+    STATUS_SCHEDULED = 'Scheduled'
     STATUS_CHOICES = (
         (STATUS_UNACCEPTED, 'Unaccepted'),
         (STATUS_REVOKED, 'Revoked'),
         (STATUS_REJECTED, 'Rejected'),
+        (STATUS_SCHEDULED, 'Scheduled'),
     )
     status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
@@ -122,6 +123,15 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     initial_total = models.IntegerField()
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     lti_import = models.BooleanField(default=False)
+
+    STATUS_SCHEDULED = 'Scheduled'
+    STATUS_ACTIVE = 'Active'
+    STATUS_CHOICES = (
+        (STATUS_SCHEDULED, 'Scheduled'),
+        (STATUS_ACTIVE, 'Active'),
+    )
+    status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_ACTIVE)
+    scheduled_at = models.DateTimeField(blank=True, null=True, default=None)
 
     @property
     def assertion_count(self):
