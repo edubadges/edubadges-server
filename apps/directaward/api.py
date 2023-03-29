@@ -1,3 +1,5 @@
+import threading
+
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -41,6 +43,33 @@ class DirectAwardRevoke(BaseEntityDetailView):
                 direct_award.badgeclass.remove_cached_data(['cached_direct_award_bundles'])
             else:
                 raise BadgrApiException400("You do not have permission", 100)
+        return Response({"result": "ok"}, status=status.HTTP_200_OK)
+
+
+class DirectAwardResend(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ['post']
+    permission_map = {'POST': 'may_award'}
+
+    def post(self, request, **kwargs):
+        direct_awards = request.data.get('direct_awards', None)
+        if not direct_awards:
+            raise BadgrValidationFieldError('direct_awards', "This field is required", 999)
+        successful_direct_awards = []
+        for direct_award in direct_awards:
+            direct_award = DirectAward.objects.get(entity_id=direct_award['entity_id'])
+            if direct_award.get_permissions(request.user)['may_award']:
+                successful_direct_awards.append(direct_award)
+            else:
+                raise BadgrApiException400("You do not have permission", 100)
+
+        def send_mail(awards):
+            for da in awards:
+                da.notify_recipient()
+
+        thread = threading.Thread(target=send_mail, args=(successful_direct_awards,))
+        thread.start()
+
         return Response({"result": "ok"}, status=status.HTTP_200_OK)
 
 
