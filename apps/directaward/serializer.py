@@ -36,8 +36,8 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     entity_id = serializers.CharField(read_only=True)
     batch_mode = serializers.BooleanField(write_only=True)
     lti_import = serializers.BooleanField(write_only=True)
-    status = serializers.CharField(write_only=True, default='Active', required=False)
-    scheduled_at = serializers.DateTimeField(write_only=True, required=False)
+    status = serializers.CharField(write_only=True, default='Active', required=False, allow_null=True)
+    scheduled_at = serializers.DateTimeField(write_only=True, required=False, allow_null=True)
     notify_recipients = serializers.BooleanField(write_only=True)
 
     def create(self, validated_data):
