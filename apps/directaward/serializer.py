@@ -2,7 +2,6 @@ import threading
 
 from django.db import IntegrityError, transaction
 from rest_framework import serializers
-
 from directaward.models import DirectAward, DirectAwardBundle
 from issuer.serializers import BadgeClassSlugRelatedField
 from mainsite.exceptions import BadgrValidationError
@@ -44,7 +43,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         badgeclass = validated_data['badgeclass']
         scheduled_at = validated_data.get('scheduled_at')
         if scheduled_at:
-            validated_data['status'] = 'Scheduled'
+            validated_data['status'] = DirectAwardBundle.STATUS_SCHEDULED
         batch_mode = validated_data.pop('batch_mode')
         notify_recipients = validated_data.pop('notify_recipients')
         direct_awards = validated_data.pop('direct_awards')
@@ -56,7 +55,8 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                                                                        **validated_data)
                 for direct_award in direct_awards:
                     direct_award['eppn'] = direct_award['eppn'].lower()
-                    direct_award['status'] = 'Scheduled' if scheduled_at else 'Unaccepted'
+                    status = DirectAward.STATUS_SCHEDULED if scheduled_at else DirectAward.STATUS_UNACCEPTED
+                    direct_award['status'] = status
                     try:
                         da_created = DirectAward.objects.create(bundle=direct_award_bundle, badgeclass=badgeclass,
                                                                 **direct_award)
@@ -72,6 +72,8 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 thread.start()
             if batch_mode and not scheduled_at:
                 direct_award_bundle.notify_awarder()
+            if batch_mode and scheduled_at:
+                direct_award_bundle.notify_awarder_for_scheduled()
             direct_award_bundle.badgeclass.remove_cached_data(['cached_direct_awards'])
             direct_award_bundle.badgeclass.remove_cached_data(['cached_direct_award_bundles'])
 

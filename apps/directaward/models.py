@@ -147,6 +147,10 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return DirectAward.objects.filter(bundle=self, status='Rejected').count()
 
     @property
+    def direct_award_scheduled_count(self):
+        return DirectAward.objects.filter(bundle=self, status='Scheduled').count()
+
+    @property
     def direct_award_revoked_count(self):
         from issuer.models import BadgeInstance
         revoked_count = BadgeInstance.objects.filter(direct_award_bundle=self, revoked=True).count()
@@ -176,3 +180,8 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         plain_text = strip_tags(html_message)
         send_mail(subject='You have awarded Edubadges!',
                   message=plain_text, html_message=html_message, recipient_list=[self.created_by.email])
+
+    def notify_awarder_for_scheduled(self):
+        html_message = EmailMessageMaker.create_scheduled_direct_award_bundle_mail(self)
+        send_mail(subject='You have scheduled to award Edubadges!',
+                  message=None, html_message=html_message, recipient_list=[self.created_by.email])

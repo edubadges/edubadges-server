@@ -353,6 +353,19 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
+    def create_scheduled_direct_award_bundle_mail(direct_award_bundle):
+        badgeclass = direct_award_bundle.badgeclass
+        template = 'email/teacher_direct_award_bundle_scheduled_notification.html'
+        email_vars = {
+            'direct_award_count': direct_award_bundle.direct_award_scheduled_count,
+            'direct_award_bundle_url': direct_award_bundle.url,
+            'scheduled_at': direct_award_bundle.scheduled_at.strftime("%Y-%m-%d %H:%M"),
+            'badgeclass_description': badgeclass.description,
+            'badgeclass_name': badgeclass.name,
+        }
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_feedback_mail(current_user, message):
         template = 'email/feedback.html'
         email_vars = {

@@ -22,7 +22,8 @@ class DirectAwardAdmin(admin.ModelAdmin):
 
 class DirectAwardBundleAdmin(admin.ModelAdmin):
     list_display = (
-        'assertion_count', 'direct_award_count', 'direct_award_rejected_count', 'direct_award_revoked_count',
+        'assertion_count', 'direct_award_count', 'direct_award_rejected_count',
+        'direct_award_scheduled_count','direct_award_revoked_count',
         'created_at', admin_list_linkify('badgeclass', 'name'), 'institution_identifier')
 
     list_filter = ('created_at', 'badgeclass__issuer__faculty__institution__identifier')
