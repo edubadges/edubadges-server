@@ -23,6 +23,8 @@ class Command(BaseCommand):
         for bundle in direct_award_bundles:
             for da in bundle.directaward_set.all():
                 da.status = DirectAward.STATUS_UNACCEPTED
+                da.badgeclass.remove_cached_data(['cached_direct_awards'])
+                da.badgeclass.remove_cached_data(['cached_direct_award_bundles'])
                 try:
                     da.save()
                     da.notify_recipient()
@@ -33,5 +35,8 @@ class Command(BaseCommand):
             bundle.scheduled_at = None
             bundle.save()
             bundle.notify_awarder()
+
+            bundle.remove_cached_data(['cached_direct_awards'])
+
 
         logger.info(f"Finished {len(direct_award_bundles)} award_scheduled_direct_awards")
