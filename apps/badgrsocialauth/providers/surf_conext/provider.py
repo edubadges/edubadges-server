@@ -12,4 +12,5 @@ class SurfConextProvider(BadgrSocialAuthProviderMixin, Provider):
     def extract_uid(self, response):
         return response['sub']
 
+
 providers.registry.register(SurfConextProvider)
