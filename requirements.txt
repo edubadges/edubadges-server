@@ -17,14 +17,15 @@ django-storages==1.7
 python-resize-image==1.1.19
 
 # DOCS
-django-rest-swagger==2.2.0
+drf-spectacular==0.26.1
+drf_spectacular_sidecar==2023.4.1
 
 
 django-object-actions==2.0.0
 
 python-memcached==1.59
 
-djangorestframework==3.11.2
+djangorestframework==3.14.0
 
 # Django Allauth
 django-allauth==0.51.0

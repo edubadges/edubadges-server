@@ -28,7 +28,7 @@ class DirectAwardSerializer(serializers.Serializer):
 
 class DirectAwardBundleSerializer(serializers.Serializer):
     class Meta:
-        DirectAwardBundle
+        model = DirectAwardBundle
 
     badgeclass = BadgeClassSlugRelatedField(slug_field='entity_id', required=False)
     direct_awards = DirectAwardSerializer(many=True, write_only=True)

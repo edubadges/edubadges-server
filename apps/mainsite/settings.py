@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_celery_results',
-    'rest_framework_swagger',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
 
     # OAuth 2 provider
     'oauth2_provider',
@@ -164,7 +165,7 @@ STATICFILES_DIRS = [
 
 AUTH_USER_MODEL = 'badgeuser.BadgeUser'
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/docs'
+LOGIN_REDIRECT_URL = '/api/schema/redoc'
 
 AUTHENTICATION_BACKENDS = [
     'oauth2_provider.backends.OAuth2Backend',
@@ -399,7 +400,7 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSION': 'v1',
     'ALLOWED_VERSIONS': ['v1', 'v2'],
     'EXCEPTION_HANDLER': 'entity.views.exception_handler',
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
 ##
@@ -580,3 +581,22 @@ MAX_IMAGE_UPLOAD_SIZE = 256000  # 256Kb
 MAX_IMAGE_UPLOAD_SIZE_LABEL = '256 kB'  # used in error messaging
 
 REPORT_RECEIVER_EMAIL = os.environ.get('REPORT_RECEIVER_EMAIL', '')
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'eduBadges API',
+    'DESCRIPTION': 'Edubadges are digital certificates which show that the owner has acquired certain skills or knowledge',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+    'SERVERS': [{'url':os.environ['DEFAULT_DOMAIN']}],
+    'PREPROCESSING_HOOKS': [
+        'mainsite.drf_spectacluar.custom_preprocessing_hook'
+    ],
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.hooks.postprocess_schema_enums',
+        'mainsite.drf_spectacluar.custom_postprocessing_hook'
+    ],
+
+}

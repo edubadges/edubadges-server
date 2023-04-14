@@ -230,6 +230,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
 
     class Meta:
         apispec_definition = ('BadgeClass', {})
+        model = BadgeClass
 
     def get_expiration_period(self, instance):
         if instance.expiration_period:

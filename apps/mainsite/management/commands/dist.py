@@ -10,12 +10,7 @@ class Command(BaseCommand):
     help = 'Runs build tasks to compile javascript and css'
 
     def handle(self, *args, **options):
-        dirname = os.path.join(TOP_DIR, 'apps', 'mainsite', 'static', 'swagger-ui')
+        dirname = os.path.join(TOP_DIR, 'apps', 'mainsite', 'static')
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        call_command('generate_swagger_spec',
-            output=os.path.join(dirname, 'api_spec_{version}.json'),
-            preamble=os.path.join(dirname, "API_DESCRIPTION_{version}.md"),
-            versions=['v1', 'v2'],
-        )

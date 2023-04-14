@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
-
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from mainsite.admin import badgr_admin
 from mainsite.graphql_view import ExtendedGraphQLView
 from mainsite.views import serve_protected_document
@@ -16,7 +16,6 @@ from django.views.generic.base import RedirectView, TemplateView
 from mainsite.views import SitewideActionFormView
 from mainsite.views import email_unsubscribe, error404, error500
 
-from rest_framework_swagger.views import get_swagger_view
 
 urlpatterns = [
     path("graphql", csrf_exempt(ExtendedGraphQLView.as_view(graphiql=True))),
@@ -155,5 +154,7 @@ handler404 = error404
 handler500 = error500
 
 urlpatterns += [
-    url(r'^docs/', get_swagger_view(title='Edubadges API'))
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
