@@ -37,11 +37,7 @@ def _contains_excluded_keywords(path):
 
 
 def custom_postprocessing_hook(result, generator, request, public):
-    result["security"] = [
-                             {
-                                 "openId": []
-                             }
-                         ],
+    result["security"] = [{"openId": []}],
     result["components"]["securitySchemes"] = {
         "openId": {
             "type": "openIdConnect",
