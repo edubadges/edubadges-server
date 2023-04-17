@@ -391,8 +391,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'mainsite.oidc_authentication.OIDCAuthentication',
         'mainsite.authentication.BadgrOAuth2Authentication',
-        'rest_framework.authentication.TokenAuthentication',
         'entity.authentication.ExplicitCSRFSessionAuthentication',
     ),
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',

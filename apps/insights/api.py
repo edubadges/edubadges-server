@@ -45,7 +45,9 @@ class InsightsView(APIView):
         else:
             institution = request.user.institution
 
-        student_affiliation_query = StudentAffiliation.objects.values_list('user_id', flat=True).all()
+        # For now we don't use the student_affiliation_query
+        # student_affiliation_query = StudentAffiliation.objects.values_list('user_id', flat=True).all()
+        # .filter(user__id__in=student_affiliation_query) \
         today = datetime.today()
         assertions_query_set = BadgeInstance.objects \
             .values('award_type', 'badgeclass_id', 'badgeclass__name', 'badgeclass__is_micro_credentials',
@@ -59,7 +61,6 @@ class InsightsView(APIView):
                     'badgeclass__is_micro_credentials', 'issuer_id',
                     "public", "revoked", "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
                     "issuer__faculty__name_dutch", "issuer__faculty__name_english") \
-            .filter(user__id__in=student_affiliation_query) \
             .exclude(expires_at__lte=today) \
             .exclude(badgeclass__name=settings.EDUID_BADGE_CLASS_NAME) \
             .order_by('year', 'month')
