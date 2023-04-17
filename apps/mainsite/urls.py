@@ -30,7 +30,7 @@ urlpatterns = [
         RedirectView.as_view(url='{}images/logo.png'.format(settings.STATIC_URL), permanent=True)),
 
     # Home
-    url(r'^$', RedirectView.as_view(url='/docs/', permanent=True)),
+    url(r'^$', RedirectView.as_view(url='/api/schema/swagger-ui/', permanent=True)),
 
     # Admin URLs
     url(r'^staff/sidewide-actions$', SitewideActionFormView.as_view(), name='badgr_admin_sitewide_actions'),
