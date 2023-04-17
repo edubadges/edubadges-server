@@ -2,7 +2,6 @@ import os
 
 included_endpoint_prefixes = [
     '/directaward/create',
-    '/directaward/accept',
     '/directaward/revoke-direct-awards',
     '/directaward/resend-direct-awards',
     '/earner/badges',
@@ -49,7 +48,8 @@ def custom_postprocessing_hook(result, generator, request, public):
 
 def custom_preprocessing_hook(endpoints):
     new_endpoints = []
-    for (path, path_regex, method, callback) in endpoints:
+    for endpoint in endpoints:
+        path = endpoint[0]
         if _included_endpoint(path) and not _contains_excluded_keywords(path):
-            new_endpoints.append((path, path_regex, method, callback))
+            new_endpoints.append(endpoint)
     return new_endpoints

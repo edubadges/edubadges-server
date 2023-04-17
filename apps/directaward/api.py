@@ -2,7 +2,7 @@ import threading
 
 from rest_framework import status
 from rest_framework.response import Response
-
+from drf_spectacular.utils import extend_schema, inline_serializer
 from directaward.models import DirectAward
 from directaward.permissions import IsDirectAwardOwner
 from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
@@ -10,7 +10,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
-
+from rest_framework import serializers
 
 class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
@@ -24,6 +24,15 @@ class DirectAwardRevoke(BaseEntityDetailView):
     http_method_names = ['post']
     permission_map = {'POST': 'may_award'}
 
+    @extend_schema(
+        request=inline_serializer(
+            name="DirectAwardRevokeSerializer",
+            fields={
+                "revocation_reason": serializers.CharField(),
+                "direct_awards": serializers.ListField(child=serializers.DictField(child=serializers.CharField()))
+            },
+        ),
+    )
     def post(self, request, **kwargs):
         """
         Revoke direct awards
@@ -51,6 +60,14 @@ class DirectAwardResend(BaseEntityDetailView):
     http_method_names = ['post']
     permission_map = {'POST': 'may_award'}
 
+    @extend_schema(
+        request=inline_serializer(
+            name="DirectAwardResendSerializer",
+            fields={
+                "direct_awards": serializers.ListField(child=serializers.DictField(child=serializers.CharField()))
+            },
+        ),
+    )
     def post(self, request, **kwargs):
         direct_awards = request.data.get('direct_awards', None)
         if not direct_awards:
