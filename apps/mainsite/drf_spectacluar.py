@@ -19,7 +19,7 @@ included_endpoint_prefixes = [
     '/public/institution'
 ]
 
-excluded_keywords = ['pubkey', 'baked']
+excluded_keywords = ['pubkey', 'baked', 'image']
 
 
 def _included_endpoint(path: str):
