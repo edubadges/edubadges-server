@@ -93,7 +93,6 @@ If you login to http://localhost:8000/staff/superuser then you'll have to provid
 
 ### Migrate databases, build front-end components
 * `./manage.py migrate` - set up database tables
-* `./manage.py dist` - generate docs swagger file(s)
 
 ### Seed database
 * `./manage.py seed -c` - truncate tables and refill with seed data
@@ -123,3 +122,7 @@ Set these values in your settings_local.py file to configure the application to 
   - This defaults to True, but allows you to turn off signup if you would like to use Badgr for only single-account use or to manually create all users in `/staff`.
 * `PAGINATION_SECRET_KEY`
   - Key used for symmetrical encryption of pagination cursors.  If not defined, encryption is disabled.  Must be 32 byte, base64-encoded random string.  For example: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key())"
+
+### Swagger
+http://127.0.0.1:8000/api/schema/swagger-ui/
+https://api-test.edubadges.nl/api/schema/swagger-ui

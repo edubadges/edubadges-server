@@ -43,6 +43,9 @@ def custom_postprocessing_hook(result, generator, request, public):
             "openIdConnectUrl": f"{os.environ['EDUID_PROVIDER_URL']}/.well-known/openid-configuration"
         }
     }
+    for path, details in result["paths"].items():
+        for method, conf in details.items():
+            conf["security"] = [{"openId": ["openid"]}]
     return result
 
 
