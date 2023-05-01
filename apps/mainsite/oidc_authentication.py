@@ -7,6 +7,7 @@ from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 
 from badgeuser.models import BadgeUser
+from institution.models import Institution
 
 
 class OIDCAuthentication(BaseAuthentication):
@@ -40,9 +41,13 @@ class OIDCAuthentication(BaseAuthentication):
         introspect_json = response.json()
         if not introspect_json['active']:
             return None
-        email = introspect_json['email']
-        user = BadgeUser.objects.get(email=email, is_teacher=True)
-        if not user:
-            return None
+        user = None
+        if 'email' in introspect_json:
+            user = BadgeUser.objects.get(email=introspect_json['email'], is_teacher=True)
+        elif 'client_id' in introspect_json:
+            client_id = introspect_json['client_id']
+            institution = Institution.objects.get(manage_client_id=client_id)
+            if institution and institution.sis_integration_enabled:
+                user = institution.sis_default_user
 
         return user, bearer_token

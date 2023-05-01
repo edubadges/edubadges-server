@@ -73,7 +73,7 @@ class BaseEntityListView(BaseEntityView):
 
     def post(self, request, **kwargs):
         """
-        POST a new entity to be owned by the authenticated user
+        POST a new entity to be owned by the authenticated user and / or the default SIS user of the institution
         """
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
