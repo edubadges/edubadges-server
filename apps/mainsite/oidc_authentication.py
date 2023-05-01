@@ -49,5 +49,7 @@ class OIDCAuthentication(BaseAuthentication):
             institution = Institution.objects.get(manage_client_id=client_id)
             if institution and institution.sis_integration_enabled:
                 user = institution.sis_default_user
+        if user:
+            request.sis_api_call = True
 
         return user, bearer_token

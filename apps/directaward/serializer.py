@@ -33,6 +33,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     badgeclass = BadgeClassSlugRelatedField(slug_field='entity_id', required=False)
     direct_awards = DirectAwardSerializer(many=True, write_only=True)
     entity_id = serializers.CharField(read_only=True)
+    sis_user_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     batch_mode = serializers.BooleanField(write_only=True)
     lti_import = serializers.BooleanField(write_only=True)
     status = serializers.CharField(write_only=True, default='Active', required=False, allow_null=True)
@@ -50,6 +51,10 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         user_permissions = badgeclass.get_permissions(validated_data['created_by'])
         if user_permissions['may_award']:
             successfull_direct_awards = []
+            if hasattr(self.context['request'], 'sis_api_call') and getattr(self.context['request'], 'sis_api_call'):
+                validated_data['sis_import'] = True
+                validated_data['sis_client_id'] = badgeclass.issuer.faculty.institution.manage_client_id
+
             with transaction.atomic():
                 direct_award_bundle = DirectAwardBundle.objects.create(initial_total=direct_awards.__len__(),
                                                                        **validated_data)

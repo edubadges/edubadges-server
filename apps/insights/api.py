@@ -22,8 +22,7 @@ class InsightsView(APIView):
     permission_classes = (TeachPermission,)
 
     def post(self, request, **kwargs):
-        lang = request.data.get('lang', 'en')
-
+        surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
         current_date = timezone.now().date()
         year = request.data.get('year', current_date.year)
         total = isinstance(year, str)
@@ -44,7 +43,7 @@ class InsightsView(APIView):
                 institution = Institution.objects.get(entity_id=institution_id)
         else:
             institution = request.user.institution
-
+        include_surf = request.data.get("include_surf", True)
         # For now we don't use the student_affiliation_query
         # student_affiliation_query = StudentAffiliation.objects.values_list('user_id', flat=True).all()
         # .filter(user__id__in=student_affiliation_query) \
@@ -62,7 +61,6 @@ class InsightsView(APIView):
                     "public", "revoked", "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
                     "issuer__faculty__name_dutch", "issuer__faculty__name_english") \
             .exclude(expires_at__lte=today) \
-            .exclude(badgeclass__name=settings.EDUID_BADGE_CLASS_NAME) \
             .order_by('year', 'month')
         if not total:
             assertions_query_set = assertions_query_set \
@@ -71,6 +69,9 @@ class InsightsView(APIView):
         if filter_by_institution:
             assertions_query_set = assertions_query_set \
                 .filter(issuer__faculty__institution=institution)
+        if not filter_by_institution and not include_surf:
+            assertions_query_set = assertions_query_set \
+                .exclude(issuer__faculty__institution=surf_institution)
 
         direct_awards_query_set = DirectAward.objects \
             .values('status', 'badgeclass_id', 'badgeclass__name', 'badgeclass__issuer__id',
@@ -95,6 +96,9 @@ class InsightsView(APIView):
         if filter_by_institution:
             direct_awards_query_set = direct_awards_query_set \
                 .filter(badgeclass__issuer__faculty__institution=institution)
+        if not filter_by_institution and not include_surf:
+            direct_awards_query_set = direct_awards_query_set \
+                .exclude(badgeclass__issuer__faculty__institution=surf_institution)
 
         enrollments_query_set = StudentsEnrolled.objects \
             .filter(Q(badge_instance_id__isnull=True) | Q(denied=True)) \
@@ -119,6 +123,9 @@ class InsightsView(APIView):
         if filter_by_institution:
             enrollments_query_set = enrollments_query_set \
                 .filter(badge_class__issuer__faculty__institution=institution)
+        if not filter_by_institution and not include_surf:
+            enrollments_query_set = enrollments_query_set \
+                .exclude(badge_class__issuer__faculty__institution=surf_institution)
 
         assertions = list(assertions_query_set.all())
         direct_awards = list(direct_awards_query_set.all())
@@ -127,26 +134,36 @@ class InsightsView(APIView):
         badge_user_query = BadgeUser.objects.filter(is_teacher=True)
         if filter_by_institution:
             badge_user_query = badge_user_query.filter(institution=institution)
+        if not filter_by_institution and not include_surf:
+            badge_user_query = badge_user_query.exclude(institution=surf_institution)
         users_count = badge_user_query.count()
 
         faculty_query = Faculty.objects
         if filter_by_institution:
             faculty_query = faculty_query.filter(institution=institution)
+        if not filter_by_institution and not include_surf:
+            faculty_query = faculty_query.exclude(institution=surf_institution)
         faculties_count = faculty_query.count()
 
         issuer_query = Issuer.objects
         if filter_by_institution:
             issuer_query = issuer_query.filter(faculty__institution=institution)
+        if not filter_by_institution and not include_surf:
+            issuer_query = issuer_query.exclude(faculty__institution=surf_institution)
         issuer_count = issuer_query.count()
 
         badge_class_query = BadgeClass.objects
         if filter_by_institution:
             badge_class_query = badge_class_query.filter(issuer__faculty__institution=institution)
+        if not filter_by_institution and not include_surf:
+            badge_class_query = badge_class_query.exclude(issuer__faculty__institution=surf_institution)
         badge_class_count = badge_class_query.count()
 
         backpack_query = StudentAffiliation.objects
         if filter_by_institution:
             backpack_query = backpack_query.filter(schac_home=institution.identifier)
+        if not filter_by_institution and not include_surf:
+            backpack_query = backpack_query.exclude(schac_home__iexact=surf_institution.identifier)
         backpack_count = backpack_query.count()
 
         res = {
