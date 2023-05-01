@@ -6,6 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.serializers import PrimaryKeyRelatedField
 
+from badgeuser.models import BadgeUser
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
 from mainsite.mixins import InternalValueErrorOverrideMixin
@@ -34,8 +35,18 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
     linkedin_org_identifier = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
 
+    sis_default_user = PrimaryKeyRelatedField(many=False,
+                                              queryset=BadgeUser.objects.filter(is_teacher=True),
+                                              required=False)
+    sis_integration_enabled = serializers.BooleanField(default=False, required=False)
+    manage_client_id = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
+
     class Meta:
         model = Institution
+
+    def __init__(self, *args, **kwargs):
+        super(InstitutionSerializer, self).__init__(*args, **kwargs)
+        self.fields['sis_default_user'].queryset = BadgeUser.objects.filter(is_teacher=True)
 
     def update(self, instance, validated_data):
         instance.description_english = validated_data.get('description_english')
@@ -48,6 +59,9 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
         instance.name_english = validated_data.get('name_english')
         instance.name_dutch = validated_data.get('name_dutch')
         instance.linkedin_org_identifier = validated_data.get('linkedin_org_identifier')
+        instance.manage_client_id = validated_data.get('manage_client_id')
+        instance.sis_default_user = validated_data.get('sis_default_user')
+        instance.sis_integration_enabled = validated_data.get('sis_integration_enabled')
 
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         instance.save()
