@@ -37,6 +37,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     )
     status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
+    resend_at = models.DateTimeField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
         if self.__class__.objects \

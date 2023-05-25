@@ -11,6 +11,7 @@ from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError,
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 from rest_framework import serializers
+import datetime
 
 class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
@@ -75,6 +76,8 @@ class DirectAwardResend(BaseEntityDetailView):
         successful_direct_awards = []
         for direct_award in direct_awards:
             direct_award = DirectAward.objects.get(entity_id=direct_award['entity_id'])
+            direct_award.resend_at = datetime.datetime.now()
+            direct_award.save()
             if direct_award.get_permissions(request.user)['may_award']:
                 successful_direct_awards.append(direct_award)
             else:
