@@ -13,7 +13,7 @@ def resolver_blocker_for_students(f):
 
     def wrapper(*args, **kwargs):
         info = args[1]
-        if not hasattr(info.context.user, 'is_teacher') and not info.context.user.is_teacher:
+        if not hasattr(info.context.user, 'is_teacher') or not getattr(info.context.user, 'is_teacher'):
             raise GraphQLException('Student may not retrieve {} of {}'.format(info.field_name, info.parent_type))
         return f(*args, **kwargs)
 
