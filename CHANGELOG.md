@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [6.8.0] - 2023-06-05
+- Bugfix for teacher security.
+- Date reminder.
+- Added SIS related fields to DirectAwardBundle.
+- Support for client_credentials flow in API.
+- Added SIS integration fields to Institution.
+- Added redirect URL for swagger OIDC authentication.
+- DRF-spectacular extension inline-serializers.
+- Added API authorization.
+- Hide image API in swagger.
+- Formatter.
+- Clean up cache for scheduled direct awards.
+- Added manage job for awarding scheduled awards.
+- Scheduled at is optional.
+- Fixed Wrong use of CORS header.
+- Added scheduled_at and status to direct award bundle.
+- Resend unclaimed direct awards.
+- Server side for allowing more then one program identifier.
+- Bump cairosvg from 2.5.1 to 2.7.0.
+- Bump django from 3.2.17 to 3.2.19.
+- Bump cryptography from 3.3.2 to 39.0.1
+- Bump sqlparse from 0.2.2 to 0.4.4.
+- Bump requests from 2.24.0 to 2.31.0
+
 ## [6.7.0] - 2023-02-27
 - Issued_on date for assertion is direct_award created_at.
 - Revoked assertions are no longer claimed.
