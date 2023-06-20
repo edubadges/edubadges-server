@@ -31,6 +31,13 @@ class InstitutionAdmin(admin.ModelAdmin):
     form = InstitutionForm
     inlines = [TermsInline]
 
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if not obj:
+            for attr in ['sis_integration_enabled', 'sis_default_user', 'manage_client_id']:
+                fields.remove(attr)
+        return fields
+
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "sis_default_user":
             institution_id = request.resolver_match.kwargs.get('object_id')
