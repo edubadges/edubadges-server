@@ -33,8 +33,9 @@ class InstitutionAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "sis_default_user":
-            institution_id = request.resolver_match.kwargs['object_id']
-            kwargs["queryset"] = BadgeUser.objects.filter(is_teacher=True, institution__id=institution_id)
+            institution_id = request.resolver_match.kwargs.get('object_id')
+            if institution_id:
+                kwargs["queryset"] = BadgeUser.objects.filter(is_teacher=True, institution__id=institution_id)
         return super(InstitutionAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 
