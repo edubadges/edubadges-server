@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [6.8.1] - 2023-06-29
+- Bugfix for new institution.
+- Do not display sis integration for new institutions.
+
 ## [6.8.0] - 2023-06-05
 - Bugfix for teacher security.
 - Date reminder.
