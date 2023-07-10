@@ -2,6 +2,7 @@ import threading
 
 from django.db import IntegrityError, transaction
 from rest_framework import serializers
+
 from directaward.models import DirectAward, DirectAwardBundle
 from issuer.serializers import BadgeClassSlugRelatedField
 from mainsite.exceptions import BadgrValidationError
