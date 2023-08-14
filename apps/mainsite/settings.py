@@ -83,7 +83,7 @@ MIDDLEWARE = [
     'lti13.middleware.SameSiteMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -393,7 +393,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'mainsite.oidc_authentication.OIDCAuthentication',
         'mainsite.authentication.BadgrOAuth2Authentication',
-        'entity.authentication.ExplicitCSRFSessionAuthentication',
+        # 'entity.authentication.ExplicitCSRFSessionAuthentication',
     ),
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
