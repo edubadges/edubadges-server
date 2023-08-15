@@ -194,6 +194,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         fields = ('id', 'name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
                   'description', 'criteria_url', 'criteria_text', 'is_private',
                   'created_at', 'expiration_period', 'public_url', 'assertions_count',
+                  'self_requested_assertions_count', 'direct_awarded_assertions_count',
                   'content_type_id', 'formal', 'evidence_required', 'narrative_required',
                   'award_non_validated_name_allowed', 'evidence_student_required', 'narrative_student_required',
                   'is_micro_credentials', 'direct_awarding_disabled', 'self_enrollment_disabled')
@@ -213,6 +214,8 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     pending_enrollment_count = graphene.Int()
     expiration_period = graphene.Int()
     assertions_count = graphene.Int()
+    self_requested_assertions_count = graphene.Int()
+    direct_awarded_assertions_count = graphene.Int()
     is_private = graphene.Boolean()
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
@@ -276,6 +279,12 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
 
     def resolve_assertions_count(self, info):
         return self.assertions_count
+
+    def resolve_self_requested_assertions_count(self, info):
+        return self.self_requested_assertions_count
+
+    def resolve_direct_awarded_assertions_count(self, info):
+        return self.direct_awarded_assertions_count
 
     def resolve_award_allowed_institutions(self, info):
         return [institution.identifier for institution in self.award_allowed_institutions.all()]

@@ -672,6 +672,20 @@ class BadgeClass(EntityUserProvisionmentMixin,
                                             revoked=False,
                                             acceptance='Accepted').count()
 
+    @property
+    def direct_awarded_assertions_count(self):
+        return BadgeInstance.objects.filter(badgeclass=self,
+                                            revoked=False,
+                                            award_type='direct_award',
+                                            acceptance='Accepted').count()
+
+    @property
+    def self_requested_assertions_count(self):
+        return BadgeInstance.objects.filter(badgeclass=self,
+                                            revoked=False,
+                                            award_type='requested',
+                                            acceptance='Accepted').count()
+
     @cached_method(auto_publish=True)
     def cached_alignments(self):
         return self.badgeclassalignment_set.all()
