@@ -19,12 +19,12 @@ class OIDCAuthentication(BaseAuthentication):
         or None otherwise.
         """
         logger = logging.getLogger('Badgr.Debug')
-        logger.info(f"OIDCAuthentication {request.META}")
-
         x_requested_with = request.META.get("HTTP_X_REQUESTED_WITH")
         if x_requested_with and x_requested_with.lower() == "client":
+            logger.info("Skipping OIDCAuthentication as HTTP_X_REQUESTED_WITH = client")
             return None
 
+        logger.info(f"OIDCAuthentication {request.META}")
         authorization = request.environ.get('HTTP_AUTHORIZATION')
         if not authorization:
             logger.info("OIDCAuthentication no authorization")
@@ -32,7 +32,7 @@ class OIDCAuthentication(BaseAuthentication):
 
         bearer_token = authorization[len('bearer '):]
         if not bearer_token:
-            logger.info("OIDCAuthentication bearer_token")
+            logger.info("OIDCAuthentication no bearer_token")
             return None
 
         payload = {'token': bearer_token}
