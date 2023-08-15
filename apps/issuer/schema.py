@@ -13,6 +13,7 @@ from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeClassTag, BadgeInstanceEvidence, BadgeInstanceCollection
+from datetime import datetime
 
 
 class ExtensionResolverMixin(object):
@@ -164,8 +165,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         return self.cached_evidence()
 
 
-class BadgeInstanceCollectionType(DjangoObjectType,):
-
+class BadgeInstanceCollectionType(DjangoObjectType, ):
     badge_instances = graphene.List(BadgeInstanceType)
     public_badge_instances = graphene.List(BadgeInstanceType)
 
@@ -339,7 +339,8 @@ class Query(object):
         if id is not None:
             bc = BadgeClass.objects.get(entity_id=id)
             # Student's who are logged in need to access this to start the enrollment
-            if (hasattr(info.context.user, 'is_student') and info.context.user.is_student) or bc.has_permissions(info.context.user, ['may_read']):
+            if (hasattr(info.context.user, 'is_student') and info.context.user.is_student) or bc.has_permissions(
+                    info.context.user, ['may_read']):
                 return bc
 
     def resolve_badge_instance(self, info, **kwargs):
@@ -367,7 +368,13 @@ class Query(object):
         return list(filter(lambda bi: bi.revoked == True, info.context.user.cached_badgeinstances()))
 
     def resolve_badge_instances_count(self, info):
-        return BadgeInstance.objects.exclude(badgeclass__name=settings.EDUID_BADGE_CLASS_NAME).count()
+        surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
+        today = datetime.utcnow()
+        query = BadgeInstance.objects.exclude(badgeclass__issuer__faculty__institution=surf_institution).exclude(
+            expires_at__lte=today)
+        return query.count()
 
     def resolve_badge_classes_count(self, info):
-        return BadgeClass.objects.exclude(name=settings.EDUID_BADGE_CLASS_NAME).count()
+        surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
+        query = BadgeClass.objects.exclude(issuer__faculty__institution=surf_institution)
+        return query.count()
