@@ -7,6 +7,7 @@ from directaward.models import DirectAward
 from directaward.permissions import IsDirectAwardOwner
 from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
+from mainsite import settings
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
@@ -125,3 +126,23 @@ class DirectAwardAccept(BaseEntityDetailView):
             directaward.bundle.remove_cached_data(['cached_direct_awards'])
             return Response({'rejected': True}, status=status.HTTP_200_OK)
         raise BadgrValidationError('Neither accepted or rejected the direct award', 999)
+
+
+class DirectAwardDelete(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ['put']
+    permission_map = {'PUT': 'may_award'}
+
+    def put(self, request, **kwargs):
+        direct_awards = request.data.get('direct_awards', None)
+        if not direct_awards:
+            raise BadgrValidationFieldError('direct_awards', "This field is required", 999)
+        delete_at = datetime.datetime.utcnow() + datetime.timedelta(days=settings.DIRECT_AWARDS_DELETION_THRESHOLD_DAYS)
+        for direct_award in direct_awards:
+            direct_award = DirectAward.objects.get(entity_id=direct_award['entity_id'])
+            if direct_award.get_permissions(request.user)['may_award']:
+                direct_award.delete_at = delete_at
+                direct_award.save()
+            else:
+                raise BadgrApiException400("You do not have permission", 100)
+        return Response({"result": "ok"}, status=status.HTTP_200_OK)

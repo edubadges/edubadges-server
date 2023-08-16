@@ -29,15 +29,18 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     STATUS_REVOKED = 'Revoked'
     STATUS_REJECTED = 'Rejected'
     STATUS_SCHEDULED = 'Scheduled'
+    STATUS_DELETED = 'Deleted'
     STATUS_CHOICES = (
         (STATUS_UNACCEPTED, 'Unaccepted'),
         (STATUS_REVOKED, 'Revoked'),
         (STATUS_REJECTED, 'Rejected'),
         (STATUS_SCHEDULED, 'Scheduled'),
+        (STATUS_DELETED, 'Deleted'),
     )
     status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
     resend_at = models.DateTimeField(blank=True, null=True, default=None)
+    delete_at = models.DateTimeField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
         if self.__class__.objects \
