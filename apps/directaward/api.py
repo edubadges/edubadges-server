@@ -10,6 +10,7 @@ from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObject
 from mainsite import settings
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.utils import EmailMessageMaker, send_mail
 from staff.permissions import HasObjectPermission
 from rest_framework import serializers
 import datetime
@@ -135,6 +136,7 @@ class DirectAwardDelete(BaseEntityDetailView):
 
     def put(self, request, **kwargs):
         direct_awards = request.data.get('direct_awards', None)
+        revocation_reason = request.data.get('revocation_reason', None)
         if not direct_awards:
             raise BadgrValidationFieldError('direct_awards', "This field is required", 999)
         delete_at = datetime.datetime.utcnow() + datetime.timedelta(days=settings.DIRECT_AWARDS_DELETION_THRESHOLD_DAYS)
@@ -142,7 +144,15 @@ class DirectAwardDelete(BaseEntityDetailView):
             direct_award = DirectAward.objects.get(entity_id=direct_award['entity_id'])
             if direct_award.get_permissions(request.user)['may_award']:
                 direct_award.delete_at = delete_at
+                direct_award.status = DirectAward.STATUS_DELETED
+                direct_award.revocation_reason = revocation_reason
                 direct_award.save()
+                html_message = EmailMessageMaker.create_direct_award_deleted_email(direct_award)
+                send_mail(subject='Awarded eduBadge has been deleted',
+                          message=None,
+                          html_message=html_message,
+                          recipient_list=[direct_award.recipient_email])
+
             else:
                 raise BadgrApiException400("You do not have permission", 100)
         return Response({"result": "ok"}, status=status.HTTP_200_OK)
