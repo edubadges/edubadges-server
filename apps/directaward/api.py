@@ -147,6 +147,8 @@ class DirectAwardDelete(BaseEntityDetailView):
                 direct_award.status = DirectAward.STATUS_DELETED
                 direct_award.revocation_reason = revocation_reason
                 direct_award.save()
+                direct_award.badgeclass.remove_cached_data(['cached_direct_awards'])
+                direct_award.bundle.remove_cached_data(['cached_direct_awards'])
                 html_message = EmailMessageMaker.create_direct_award_deleted_email(direct_award)
                 send_mail(subject='Awarded eduBadge has been deleted',
                           message=None,
