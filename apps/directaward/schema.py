@@ -31,7 +31,9 @@ class DirectAwardBundleType(DjangoObjectType):
 
 class Query(object):
     direct_awards = graphene.List(DirectAwardType)
-    all_direct_awards = graphene.List(DirectAwardType)
+    all_unclaimed_direct_awards = graphene.List(DirectAwardType)
+    all_deleted_direct_awards = graphene.List(DirectAwardType)
+    deleted_direct_awards = graphene.List(DirectAwardType)
     direct_award = graphene.Field(DirectAwardType, id=graphene.String())
 
     def resolve_direct_awards(self, info, **kwargs):
@@ -44,8 +46,15 @@ class Query(object):
             if da.eppn in info.context.user.eppns:
                 return da
 
-    def resolve_all_direct_awards(self, info, **kwargs):
+    def resolve_all_unclaimed_direct_awards(self, info, **kwargs):
         user = info.context.user
         return [da for da in DirectAward.objects.filter(badgeclass__issuer__faculty__institution=user.institution,
-                                                        status=DirectAward.STATUS_UNACCEPTED) if
+                                                        status__in=[DirectAward.STATUS_UNACCEPTED,
+                                                                    DirectAward.STATUS_SCHEDULED]) if
+                da.badgeclass.has_permissions(info.context.user, ['may_award'])]
+
+    def resolve_all_deleted_direct_awards(self, info, **kwargs):
+        user = info.context.user
+        return [da for da in DirectAward.objects.filter(badgeclass__issuer__faculty__institution=user.institution,
+                                                        status=DirectAward.STATUS_DELETED) if
                 da.badgeclass.has_permissions(info.context.user, ['may_award'])]
