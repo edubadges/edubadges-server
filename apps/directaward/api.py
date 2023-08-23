@@ -64,7 +64,15 @@ class DirectAwardRevoke(BaseEntityDetailView):
             name="DirectAwardRevokeSerializer",
             fields={
                 "revocation_reason": serializers.CharField(),
-                "direct_awards": serializers.ListField(child=serializers.DictField(child=serializers.CharField()))
+                "direct_awards": serializers.ListField(
+                    child=inline_serializer(
+                        name='NestedInlineOneOffSerializer',
+                        fields={
+                            'entity_id': serializers.CharField(),
+                        },
+                        allow_null=False,
+                    )
+                )
             },
         ),
     )
@@ -99,7 +107,15 @@ class DirectAwardResend(BaseEntityDetailView):
         request=inline_serializer(
             name="DirectAwardResendSerializer",
             fields={
-                "direct_awards": serializers.ListField(child=serializers.DictField(child=serializers.CharField()))
+                "direct_awards": serializers.ListField(
+                    child=inline_serializer(
+                        name='NestedInlineOneOffSerializer',
+                        fields={
+                            'entity_id': serializers.CharField(),
+                        },
+                        allow_null=False,
+                    )
+                )
             },
         ),
     )
@@ -166,6 +182,23 @@ class DirectAwardDelete(BaseEntityDetailView):
     http_method_names = ['put']
     permission_map = {'PUT': 'may_award'}
 
+    @extend_schema(
+        request=inline_serializer(
+            name="DirectAwardDeleteSerializer",
+            fields={
+                "revocation_reason": serializers.CharField(),
+                "direct_awards": serializers.ListField(
+                    child=inline_serializer(
+                        name='NestedInlineOneOffSerializer',
+                        fields={
+                            'entity_id': serializers.CharField(),
+                        },
+                        allow_null=False,
+                    )
+                )
+            },
+        ),
+    )
     def put(self, request, **kwargs):
         direct_awards = request.data.get('direct_awards', None)
         revocation_reason = request.data.get('revocation_reason', None)
