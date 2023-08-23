@@ -25,6 +25,7 @@ class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
 
 class DirectAwardBundleView(APIView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_map = {'POST': 'may_award'}
 
     def get(self, request, **kwargs):
         award_bundle = DirectAwardBundle.objects.get(entity_id=kwargs.get("entity_id"))
