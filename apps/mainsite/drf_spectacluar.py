@@ -2,6 +2,7 @@ import os
 
 included_endpoint_prefixes = [
     '/directaward/create',
+    '/directaward/bundle',
     '/directaward/delete-direct-awards',
     '/directaward/resend-direct-awards',
     '/directaward/revoke-direct-awards',

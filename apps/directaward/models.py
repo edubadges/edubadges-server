@@ -158,6 +158,10 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return DirectAward.objects.filter(bundle=self, status='Scheduled').count()
 
     @property
+    def direct_award_deleted_count(self):
+        return DirectAward.objects.filter(bundle=self, status='Deleted').count()
+
+    @property
     def direct_award_revoked_count(self):
         from issuer.models import BadgeInstance
         revoked_count = BadgeInstance.objects.filter(direct_award_bundle=self, revoked=True).count()

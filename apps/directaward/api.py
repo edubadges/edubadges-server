@@ -1,9 +1,9 @@
 import threading
-
+from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, inline_serializer
-from directaward.models import DirectAward
+from directaward.models import DirectAward, DirectAwardBundle
 from directaward.permissions import IsDirectAwardOwner
 from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
@@ -15,11 +15,42 @@ from staff.permissions import HasObjectPermission
 from rest_framework import serializers
 import datetime
 
+
 class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     v1_serializer_class = DirectAwardBundleSerializer
     http_method_names = ['post']
     permission_map = {'POST': 'may_award'}
+
+
+class DirectAwardBundleView(APIView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+
+    def get(self, request, **kwargs):
+        award_bundle = DirectAwardBundle.objects.get(entity_id=kwargs.get("entity_id"))
+
+        def convert_direct_award(direct_award):
+            return {
+                "recipient_email": direct_award.recipient_email,
+                "eppn": direct_award.eppn,
+                "status": direct_award.status,
+                "entity_id": direct_award.entity_id
+            }
+
+        results = {
+            "initial_total": award_bundle.initial_total,
+            "status": award_bundle.status,
+            "badgeclass": award_bundle.badgeclass.name,
+            "assertion_count": award_bundle.assertion_count,
+            "direct_award_count": award_bundle.direct_award_count,
+            "direct_award_rejected_count": award_bundle.direct_award_rejected_count,
+            "direct_award_scheduled_count": award_bundle.direct_award_scheduled_count,
+            "direct_award_deleted_count": award_bundle.direct_award_deleted_count,
+            "direct_award_revoked_count": award_bundle.direct_award_revoked_count,
+            "direct_awards": [convert_direct_award(da) for da in award_bundle.directaward_set.all()]
+        }
+
+        return Response(results, status=status.HTTP_200_OK)
 
 
 class DirectAwardRevoke(BaseEntityDetailView):

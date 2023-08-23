@@ -78,6 +78,11 @@ if on a mac mysqlclient does not build, try:
 ```
 LDFLAGS=-L/usr/local/opt/openssl/lib pip install mysqlclient
 ```
+If for some reason the library files for mysql are no longer there due to an upgrade
+```
+pip install --upgrade --force-reinstall --no-cache-dir mysqlclient
+```
+
 ### Run / debug IDE
 You'll need to add the environment variables from env_vars.sh.example to a run configuration
 
