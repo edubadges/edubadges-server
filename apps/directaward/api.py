@@ -38,6 +38,15 @@ class DirectAwardBundleView(APIView):
                 "entity_id": direct_award.entity_id
             }
 
+        def convert_badge_assertion(badge_instance):
+            return {
+                "full_name": badge_instance.user.full_name,
+                "email": badge_instance.user.email,
+                "public": badge_instance.public,
+                "revoked": badge_instance.revoked,
+                "entity_id": badge_instance.entity_id
+            }
+
         results = {
             "initial_total": award_bundle.initial_total,
             "status": award_bundle.status,
@@ -48,7 +57,8 @@ class DirectAwardBundleView(APIView):
             "direct_award_scheduled_count": award_bundle.direct_award_scheduled_count,
             "direct_award_deleted_count": award_bundle.direct_award_deleted_count,
             "direct_award_revoked_count": award_bundle.direct_award_revoked_count,
-            "direct_awards": [convert_direct_award(da) for da in award_bundle.directaward_set.all()]
+            "direct_awards": [convert_direct_award(da) for da in award_bundle.directaward_set.all()],
+            "badge_assertions": [convert_badge_assertion(ba) for ba in award_bundle.badgeinstance_set.all()]
         }
 
         return Response(results, status=status.HTTP_200_OK)
