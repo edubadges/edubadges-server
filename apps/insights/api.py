@@ -87,7 +87,8 @@ class InsightsView(APIView):
                     "badgeclass__issuer__name_dutch", "badgeclass__issuer__name_english",
                     'badgeclass__issuer__faculty_id',
                     "badgeclass__issuer__faculty__name_dutch", "badgeclass__issuer__faculty__name_english") \
-            .order_by('year', 'month')
+            .order_by('year', 'month') \
+            .exclude(status='Deleted').exclude(status='Revoked')
 
         if not total:
             direct_awards_query_set = direct_awards_query_set \
