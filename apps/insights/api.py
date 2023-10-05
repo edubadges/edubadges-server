@@ -11,11 +11,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from badgeuser.models import BadgeUser, StudentAffiliation
+from badgrsocialauth.permissions import IsSuperUser
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
 from issuer.models import BadgeInstance, Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
 from mainsite.permissions import TeachPermission
+from staff.models import InstitutionStaff
 
 
 class InsightsView(APIView):
@@ -178,3 +180,17 @@ class InsightsView(APIView):
             'backpack_count': backpack_count
         }
         return Response(res, status=status.HTTP_200_OK)
+
+
+class InstitutionAdminsView(APIView):
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, **kwargs):
+        institution_admins = list(InstitutionStaff.objects
+                                  .values('institution__name_english', 'institution__name_dutch', 'user__first_name',
+                                          'user__last_name', 'user__email')
+                                  .filter(may_create=True, may_update=True, may_delete=True, may_award=True,
+                                          may_sign=True,
+                                          may_administrate_users=True)
+                                  .all())
+        return Response(institution_admins, status=status.HTTP_200_OK)
