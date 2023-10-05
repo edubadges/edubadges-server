@@ -194,3 +194,19 @@ class InstitutionAdminsView(APIView):
                                           may_administrate_users=True)
                                   .all())
         return Response(institution_admins, status=status.HTTP_200_OK)
+
+
+class InstitutionBadgesView(APIView):
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, **kwargs):
+        institution_badges = list(BadgeInstance.objects
+                                  .values('award_type', 'revoked', 'badgeclass__name',
+                                          'badgeclass__issuer__faculty__name_english',
+                                          'badgeclass__issuer__faculty__institution__name_english',
+                                          'badgeclass__issuer__faculty__institution__name_dutch',
+                                          'user__last_name', 'user__email')
+                                  .annotate(count=Count('id'))
+                                  .order_by('count')
+                                  .all())
+        return Response(institution_badges, status=status.HTTP_200_OK)
