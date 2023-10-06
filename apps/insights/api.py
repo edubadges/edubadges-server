@@ -186,13 +186,13 @@ class InstitutionAdminsView(APIView):
     permission_classes = (IsSuperUser,)
 
     def get(self, request, **kwargs):
-        institution_admins = list(InstitutionStaff.objects
-                                  .values('institution__name_english', 'institution__name_dutch', 'user__first_name',
-                                          'user__last_name', 'user__email')
-                                  .filter(may_create=True, may_update=True, may_delete=True, may_award=True,
-                                          may_sign=True,
-                                          may_administrate_users=True)
-                                  .all())
+        query_set = InstitutionStaff.objects \
+            .values('institution__name_english', 'institution__name_dutch', 'user__first_name',
+                    'user__last_name', 'user__email') \
+            .filter(may_create=True, may_update=True, may_delete=True, may_award=True, may_sign=True,
+                    may_administrate_users=True) \
+            .all()
+        institution_admins = list(query_set)
         return Response(institution_admins, status=status.HTTP_200_OK)
 
 
@@ -200,13 +200,11 @@ class InstitutionBadgesView(APIView):
     permission_classes = (IsSuperUser,)
 
     def get(self, request, **kwargs):
-        institution_badges = list(BadgeInstance.objects
-                                  .values('award_type', 'revoked', 'badgeclass__name',
-                                          'badgeclass__issuer__faculty__name_english',
-                                          'badgeclass__issuer__faculty__institution__name_english',
-                                          'badgeclass__issuer__faculty__institution__name_dutch',
-                                          'user__last_name', 'user__email')
-                                  .annotate(count=Count('id'))
-                                  .order_by('count')
-                                  .all())
+        query_set = BadgeInstance.objects \
+            .values('award_type', 'revoked', 'badgeclass__name', 'badgeclass__issuer__faculty__name_english',
+                    'badgeclass__issuer__faculty__institution__name_english') \
+            .annotate(count=Count('id')) \
+            .order_by('count') \
+            .all()
+        institution_badges = list(query_set)
         return Response(institution_badges, status=status.HTTP_200_OK)
