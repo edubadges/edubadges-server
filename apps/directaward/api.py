@@ -138,6 +138,8 @@ class DirectAwardResend(BaseEntityDetailView):
             direct_award = DirectAward.objects.get(entity_id=direct_award['entity_id'])
             direct_award.resend_at = datetime.datetime.now()
             direct_award.save()
+            direct_award.badgeclass.remove_cached_data(['cached_direct_awards'])
+            direct_award.bundle.remove_cached_data(['cached_direct_awards'])
             if direct_award.get_permissions(request.user)['may_award']:
                 successful_direct_awards.append(direct_award)
             else:
