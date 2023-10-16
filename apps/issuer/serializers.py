@@ -304,7 +304,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                         'alignment_items', 'expiration_period', 'evidence_student_required', 'self_enrollment_disabled',
                         'narrative_student_required', 'is_micro_credentials', 'direct_awarding_disabled']
         for key, value in validated_data.items():
-            if key is not 'award_allowed_institutions' and (not has_unrevoked_assertions or key in allowed_keys):
+            if key != 'award_allowed_institutions' and (not has_unrevoked_assertions or key in allowed_keys):
                 setattr(instance, key, value)
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         try:
