@@ -193,6 +193,16 @@ class EmailMessageMaker:
         return render_to_string(template, email_vars)
 
     @staticmethod
+    def create_direct_award_deleted_email(direct_award):
+        template = 'email/awarded_badge_deleted.html'
+        email_vars = {'public_badge_url': direct_award.badgeclass.public_url,
+                      'badgeclass_name': direct_award.badgeclass.name,
+                      'recipient_name': direct_award.recipient_email,
+                      'ui_url': urllib.parse.urljoin(settings.UI_URL, 'archived'),
+                      'revocation_reason': direct_award.revocation_reason}
+        return render_to_string(template, email_vars)
+
+    @staticmethod
     def create_staff_rights_changed_email(staff_membership):
         template = 'email/staff_rights_changed.html'
         email_vars = {'recipient_name': staff_membership.user.full_name,

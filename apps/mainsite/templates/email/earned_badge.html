@@ -15,7 +15,7 @@
     }
     .title{
         color: grey;
-        font-size:33px;
+        font-size:20px;
         line-height: 50px;
         margin-bottom: 10px;
         font-weight: bold;
@@ -40,7 +40,7 @@
         text-decoration: none;
         display: inline-block;
         cursor:pointer;
-        font-size: 16px;
+        font-size: 12px;
         font-weight: bold;
         width: 100%;
         margin-top: 30px;
@@ -110,7 +110,7 @@
 
 <div><p>For the English version, see below.</p></div>
 
-<p class="title">Je hebt een edubadge ontvangen.</p>
+<p class="title">{{issuer_name}} heeft je de volgende edubadge gestuurd.</p>
 <div class="message_container">
     <div class="example_container">
         <img class="badgeclass_image" src={{badgeclass_image}}>
@@ -133,7 +133,7 @@
     <a class="button" target="_blank" rel="noopener noreferrer" href="{{assertion_url}}">
         Bekijk jouw edubadge</a>
 </div>
-<p class="title">You received an edubadge.</p>
+<p class="title">{{issuer_name}} send you the following edubadge.</p>
 <div class="message_container">
     <div class="example_container">
         <img class="badgeclass_image" src={{badgeclass_image}}>

@@ -13,6 +13,7 @@ from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeClassTag, BadgeInstanceEvidence, BadgeInstanceCollection
+from datetime import datetime
 
 
 class ExtensionResolverMixin(object):
@@ -164,8 +165,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         return self.cached_evidence()
 
 
-class BadgeInstanceCollectionType(DjangoObjectType,):
-
+class BadgeInstanceCollectionType(DjangoObjectType, ):
     badge_instances = graphene.List(BadgeInstanceType)
     public_badge_instances = graphene.List(BadgeInstanceType)
 
@@ -194,6 +194,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         fields = ('id', 'name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
                   'description', 'criteria_url', 'criteria_text', 'is_private',
                   'created_at', 'expiration_period', 'public_url', 'assertions_count',
+                  'self_requested_assertions_count', 'direct_awarded_assertions_count',
                   'content_type_id', 'formal', 'evidence_required', 'narrative_required',
                   'award_non_validated_name_allowed', 'evidence_student_required', 'narrative_student_required',
                   'is_micro_credentials', 'direct_awarding_disabled', 'self_enrollment_disabled')
@@ -213,6 +214,8 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     pending_enrollment_count = graphene.Int()
     expiration_period = graphene.Int()
     assertions_count = graphene.Int()
+    self_requested_assertions_count = graphene.Int()
+    direct_awarded_assertions_count = graphene.Int()
     is_private = graphene.Boolean()
     public_url = graphene.String()
     terms = graphene.Field(terms_type())
@@ -277,6 +280,12 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     def resolve_assertions_count(self, info):
         return self.assertions_count
 
+    def resolve_self_requested_assertions_count(self, info):
+        return self.self_requested_assertions_count
+
+    def resolve_direct_awarded_assertions_count(self, info):
+        return self.direct_awarded_assertions_count
+
     def resolve_award_allowed_institutions(self, info):
         return [institution.identifier for institution in self.award_allowed_institutions.all()]
 
@@ -330,7 +339,8 @@ class Query(object):
         if id is not None:
             bc = BadgeClass.objects.get(entity_id=id)
             # Student's who are logged in need to access this to start the enrollment
-            if (hasattr(info.context.user, 'is_student') and info.context.user.is_student) or bc.has_permissions(info.context.user, ['may_read']):
+            if (hasattr(info.context.user, 'is_student') and info.context.user.is_student) or bc.has_permissions(
+                    info.context.user, ['may_read']):
                 return bc
 
     def resolve_badge_instance(self, info, **kwargs):
@@ -358,7 +368,13 @@ class Query(object):
         return list(filter(lambda bi: bi.revoked == True, info.context.user.cached_badgeinstances()))
 
     def resolve_badge_instances_count(self, info):
-        return BadgeInstance.objects.exclude(badgeclass__name=settings.EDUID_BADGE_CLASS_NAME).count()
+        surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
+        today = datetime.utcnow()
+        query = BadgeInstance.objects.exclude(badgeclass__issuer__faculty__institution=surf_institution).exclude(
+            expires_at__lte=today)
+        return query.count()
 
     def resolve_badge_classes_count(self, info):
-        return BadgeClass.objects.exclude(name=settings.EDUID_BADGE_CLASS_NAME).count()
+        surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
+        query = BadgeClass.objects.exclude(issuer__faculty__institution=surf_institution)
+        return query.count()

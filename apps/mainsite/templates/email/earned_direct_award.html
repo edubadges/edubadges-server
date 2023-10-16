@@ -15,7 +15,7 @@
     }
     .title{
         color: grey;
-        font-size:33px;
+        font-size:20px;
         line-height: 50px;
         margin-bottom: 10px;
         font-weight: bold;
@@ -40,7 +40,7 @@
         text-decoration: none;
         display: inline-block;
         cursor:pointer;
-        font-size: 16px;
+        font-size: 12px;
         font-weight: bold;
         width: 100%;
         margin-top: 30px;
@@ -110,7 +110,7 @@
 
 <div><p>For the English version, see below.</p></div>
 
-<p class="title">Je hebt een edubadge ontvangen.</p>
+<p class="title">{{issuer_name}} heeft je de volgende edubadge gestuurd die je nu kunt claimen:</p>
 <div class="message_container">
     <div class="example_container">
         <img class="badgeclass_image" src={{badgeclass_image}}>
@@ -131,9 +131,9 @@
     <p class="text">Het plaatje hierboven is een voorbeeld, de echte gepersonaliseerde edubadge kun je claimen in je backpack.
         <br><br>Denk eraan om je edubadge publiek te zetten als je deze wilt delen met anderen.</p>
     <a class="button" target="_blank" rel="noopener noreferrer" href="{{ui_url}}">
-        Ga naar je backpack</a>
+        Claim deze edubadge in je backpack</a>
 </div>
-<p class="title">You received an edubadge.</p>
+<p class="title">{{issuer_name}} send you the following edubadge that you can claim now:</p>
 <div class="message_container">
     <div class="example_container">
         <img class="badgeclass_image" src={{badgeclass_image}}>
@@ -155,6 +155,6 @@
         edubadges backpack. Go there to claim this edubadge.
         <br><br>Remember to make your edubadge public if you want to share it with others.</p>
     <a class="button" target="_blank" rel="noopener noreferrer" href="{{ui_url}}">
-        Go to your backpack</a>
+        Claim this edubadge in your backpack</a>
 </div>
 {% endblock %}

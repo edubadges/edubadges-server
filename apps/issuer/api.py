@@ -1,3 +1,5 @@
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -31,7 +33,7 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     """
     POST to create a new Issuer
     """
-    permission_classes = (AuthenticatedWithVerifiedEmail,)   # permissioned in serializer
+    permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     v1_serializer_class = IssuerSerializer
     http_method_names = ['post']
 
@@ -123,7 +125,9 @@ class BatchSignAssertions(BaseEntityListView):
             if not user in [staff.user for staff in assertion_instance.issuer.current_signers]:
                 raise ValidationError('You are not a signer for this issuer: {}'.format(assertion_instance.issuer.name))
             if assertion_instance.signature:
-                raise ValidationError('Cannot sign Assertion for Badgeclass {} with recipient identifier {}. Assertion already signed.'.format(assertion_instance.badgeclass.name, assertion_instance.recipient_identifier))
+                raise ValidationError(
+                    'Cannot sign Assertion for Badgeclass {} with recipient identifier {}. Assertion already signed.'.format(
+                        assertion_instance.badgeclass.name, assertion_instance.recipient_identifier))
             assertion_instances.append(assertion_instance)
 
             timestamp = AssertionTimeStamp.objects.get(badge_instance=assertion_instance)
@@ -144,7 +148,8 @@ class BatchSignAssertions(BaseEntityListView):
             raise ValidationError(str(e))
         for signed_badge in signed_badges:
             signature = signed_badge['signature']
-            matching_assertion = [ass for ass in assertion_instances if ass.identifier == signed_badge['plain_badge']['id']]
+            matching_assertion = [ass for ass in assertion_instances if
+                                  ass.identifier == signed_badge['plain_badge']['id']]
             if len(matching_assertion) > 1:
                 raise ValidationError('Signing failed: Signed json could not be matched to a BadgeInstance')
             matching_assertion = matching_assertion[0]
@@ -203,6 +208,23 @@ class BadgeInstanceRevoke(BaseEntityDetailView):
     http_method_names = ['post']
     permission_map = {'POST': 'may_award'}
 
+    @extend_schema(
+        request=inline_serializer(
+            name="BadgeInstanceRevokeSerializer",
+            fields={
+                "revocation_reason": serializers.CharField(),
+                "assertions": serializers.ListField(
+                    child=inline_serializer(
+                        name='NestedInlineOneOffSerializer',
+                        fields={
+                            'entity_id': serializers.CharField(),
+                        },
+                        allow_null=False,
+                    )
+                )
+            },
+        ),
+    )
     def post(self, request, **kwargs):
         revocation_reason = request.data.get('revocation_reason', None)
         if not revocation_reason:
@@ -216,18 +238,18 @@ class BadgeInstanceRevoke(BaseEntityDetailView):
                 badgeinstance.revoke(revocation_reason)
             else:
                 raise BadgrApiException400("You do not have permission", 100)
-        return Response({"result":"ok"}, status=status.HTTP_200_OK)
+        return Response({"result": "ok"}, status=status.HTTP_200_OK)
 
 
 class BadgeInstanceCollectionDetail(BaseEntityDetailView):
     model = BadgeInstanceCollection
-    permission_classes = (AuthenticatedWithVerifiedEmail, )
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
     serializer_class = BadgeInstanceCollectionSerializer
-    http_method_names = ['delete','put']
+    http_method_names = ['delete', 'put']
 
 
 class BadgeInstanceCollectionDetailList(BaseEntityListView):
     model = BadgeInstanceCollection
-    permission_classes = (AuthenticatedWithVerifiedEmail,)   # permissioned in serializer
+    permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     serializer_class = BadgeInstanceCollectionSerializer
     http_method_names = ['post']

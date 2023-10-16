@@ -11,11 +11,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from badgeuser.models import BadgeUser, StudentAffiliation
+from badgrsocialauth.permissions import IsSuperUser
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
 from issuer.models import BadgeInstance, Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
 from mainsite.permissions import TeachPermission
+from staff.models import InstitutionStaff
 
 
 class InsightsView(APIView):
@@ -47,7 +49,7 @@ class InsightsView(APIView):
         # For now we don't use the student_affiliation_query
         # student_affiliation_query = StudentAffiliation.objects.values_list('user_id', flat=True).all()
         # .filter(user__id__in=student_affiliation_query) \
-        today = datetime.today()
+        today = datetime.utcnow()
         assertions_query_set = BadgeInstance.objects \
             .values('award_type', 'badgeclass_id', 'badgeclass__name', 'badgeclass__is_micro_credentials',
                     'issuer_id', "public", "revoked",
@@ -87,7 +89,8 @@ class InsightsView(APIView):
                     "badgeclass__issuer__name_dutch", "badgeclass__issuer__name_english",
                     'badgeclass__issuer__faculty_id',
                     "badgeclass__issuer__faculty__name_dutch", "badgeclass__issuer__faculty__name_english") \
-            .order_by('year', 'month')
+            .order_by('year', 'month') \
+            .exclude(status='Deleted').exclude(status='Revoked')
 
         if not total:
             direct_awards_query_set = direct_awards_query_set \
@@ -177,3 +180,31 @@ class InsightsView(APIView):
             'backpack_count': backpack_count
         }
         return Response(res, status=status.HTTP_200_OK)
+
+
+class InstitutionAdminsView(APIView):
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, **kwargs):
+        query_set = InstitutionStaff.objects \
+            .values('institution__name_english', 'institution__name_dutch', 'user__first_name',
+                    'user__last_name', 'user__email') \
+            .filter(may_create=True, may_update=True, may_delete=True, may_award=True, may_sign=True,
+                    may_administrate_users=True) \
+            .all()
+        institution_admins = list(query_set)
+        return Response(institution_admins, status=status.HTTP_200_OK)
+
+
+class InstitutionBadgesView(APIView):
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, **kwargs):
+        query_set = BadgeInstance.objects \
+            .values('award_type', 'revoked', 'badgeclass__name', 'badgeclass__issuer__faculty__name_english',
+                    'badgeclass__issuer__faculty__institution__name_english') \
+            .annotate(count=Count('id')) \
+            .order_by('count') \
+            .all()
+        institution_badges = list(query_set)
+        return Response(institution_badges, status=status.HTTP_200_OK)

@@ -199,8 +199,7 @@ EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
-EXPIRY_DIRECT_AWARDS_WARNING_THRESHOLD_DAYS = int(os.environ.get('EXPIRY_DIRECT_AWARDS_WARNING_THRESHOLD_DAYS', 14))
-EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 180))
+DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 30))
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'
