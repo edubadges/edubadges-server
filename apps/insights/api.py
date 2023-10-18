@@ -208,3 +208,18 @@ class InstitutionBadgesView(APIView):
             .all()
         institution_badges = list(query_set)
         return Response(institution_badges, status=status.HTTP_200_OK)
+
+
+class InstitutionMicroCredentials(APIView):
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, **kwargs):
+        query_set = BadgeInstance.objects \
+            .values('badgeclass__issuer__faculty__institution__name_english',
+                    'badgeclass__issuer__faculty__institution__identifier') \
+            .annotate(count=Count('id')) \
+            .filter(badgeclass__is_micro_credentials=True) \
+            .order_by('count') \
+            .all()
+        institution_badges = list(query_set)
+        return Response(institution_badges, status=status.HTTP_200_OK)
