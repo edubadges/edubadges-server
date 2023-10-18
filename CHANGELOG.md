@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [6.9.0] - 2023-10-23
+- Added micro-credentials count query.
+- Code warning resolved.
+- Updated mail template requested edubadge.
+- Clear cache after resending direct awards.
+- Formatted code.
+- Badgeoverview query.
+- Bugfix for awarding denied enrollments.
+- Added institution admins query.
+- Do not select direct_awards that are revoked or deleted.
+- Return assertions in the direct_award_bundle endpoint.
+- Customized documentation Swagger.
+- Ensure the direct_award_bundle can only be retrieved with the correct permission.
+- Endpoint for SIS API to retrieve DA bundle info.
+- Include delete unclaimed DA's in external API.
+- Differentiate between unclaimed and deleted diract awards.
+- Delete at DA.
+- Clear cache after deletion of DA.
+- Send mail after direct award deleted.
+- Added manage command to delete direct_awards with status 'Delete' and 'Delete_at'.
+- Align insight numbers and login numbers.
+- Differtiate between direct_awarded and self_request assertions.
+- Added authentication logging.
+- Exclude create Direct Award from CSRF filter.
+- Changed the mail messages for awarded badges.
+- Fix datetime warnings in scheduling direct awards.
+- Do not display sis integration for new institutions.
+- Bugfix for new institution.
+- Bump urllib3 from 1.26.17 to 1.26.18.
+- Bump pillow from 9.3.0 to 10.0.1.
+- Bump urllib3 from 1.26.15 to 1.26.17.
+- Bump cryptography from 41.0.3 to 41.0.4.
+- Bump cryptography from 41.0.0 to 41.0.3.
+- After python 3.9.16 update: urllib3==1.26.15
+- Bump cryptography from 39.0.1 to 41.0.0.
+- Bump django from 3.2.19 to 3.2.20.
+
 ## [6.8.1] - 2023-06-29
 - Bugfix for new institution.
 - Do not display sis integration for new institutions.
