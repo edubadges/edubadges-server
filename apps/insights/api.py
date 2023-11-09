@@ -35,7 +35,7 @@ class InsightsView(APIView):
             end_of_year = current_date.replace(year=year, month=12, day=31)
             if end_of_year.isoweekday() > 1:
                 end_of_year = (end_of_year + timedelta(days=(7 + 1) - end_of_year.isoweekday()))
-        # Super users may select an institution
+        # Superusers may select an institution
         institution_id = request.data.get("institution_id")
         filter_by_institution = True
         if institution_id and hasattr(request.user, 'is_superuser') and request.user.is_superuser:
