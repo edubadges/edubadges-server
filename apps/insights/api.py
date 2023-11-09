@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
+from django.db import connection
 
 from django.conf import settings
 from django.db.models import Count
@@ -223,3 +224,28 @@ class InstitutionMicroCredentials(APIView):
             .all()
         institution_badges = list(query_set)
         return Response(institution_badges, status=status.HTTP_200_OK)
+
+
+class CountMicroCredentials(APIView):
+    permission_classes = (IsSuperUser,)
+
+    def dictfetchall(self, cursor):
+        desc = cursor.description
+        rows = cursor.fetchall()
+        res = [dict(zip([col[0] for col in desc], row)) for row in rows]
+        return res
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+select ins.identifier, count(u.id) as user_count, (select count(bi.id) from issuer_badgeinstance bi where bi.user_id = u.id ) as assertion_count 
+from users u 
+ inner join issuer_badgeinstance bi on bi.user_id = u.id
+ inner join issuer_badgeclass b on b.id = bi.badgeclass_id
+ inner join issuer_issuer i on i.id = b.issuer_id 
+ inner join institution_faculty f on f.id = i.faculty_id 
+ inner join institution_institution ins on ins.id = f.institution_id 
+ where b.is_micro_credentials = 1 and ins.institution_type is not null
+ group by assertion_count, ins.identifier ;            
+            """, [])
+            return Response(self.dictfetchall(cursor), status=status.HTTP_200_OK)
