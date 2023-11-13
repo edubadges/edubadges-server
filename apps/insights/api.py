@@ -21,6 +21,13 @@ from mainsite.permissions import TeachPermission
 from staff.models import InstitutionStaff
 
 
+def dict_fetch_all(cursor):
+    desc = cursor.description
+    rows = cursor.fetchall()
+    res = [dict(zip([col[0] for col in desc], row)) for row in rows]
+    return res
+
+
 class InsightsView(APIView):
     permission_classes = (TeachPermission,)
 
@@ -229,12 +236,6 @@ class InstitutionMicroCredentials(APIView):
 class CountMicroCredentials(APIView):
     permission_classes = (IsSuperUser,)
 
-    def dictfetchall(self, cursor):
-        desc = cursor.description
-        rows = cursor.fetchall()
-        res = [dict(zip([col[0] for col in desc], row)) for row in rows]
-        return res
-
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -248,4 +249,23 @@ from users u
  where b.is_micro_credentials = 1 and ins.institution_type is not null
  group by assertion_count, ins.identifier ;            
             """, [])
-            return Response(self.dictfetchall(cursor), status=status.HTTP_200_OK)
+            return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
+
+
+class MicroCredentialsBadgeOverview(APIView):
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+select b.id, b.name as badgeclass_name, ins.name_english as institution_name, ins.identifier, b.created_at ,
+(select original_json from issuer_badgeclassextension where name = 'extensions:EQFExtension' and badgeclass_id = b.id limit 1) as eqf_value,
+(select original_json from issuer_badgeclassextension where name = 'extensions:ECTSExtension' and badgeclass_id = b.id limit 1) as ects_value,
+ (select original_json from issuer_badgeclassextension where name = 'extensions:StudyLoadExtension' and badgeclass_id = b.id limit 1) as study_load
+ from issuer_badgeclass b
+ inner join issuer_issuer i on i.id = b.issuer_id
+ inner join institution_faculty f on f.id = i.faculty_id
+ inner join institution_institution ins on ins.id = f.institution_id
+ where b.is_micro_credentials = 1 and ins.institution_type is not null;
+             """, [])
+            return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
