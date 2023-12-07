@@ -90,10 +90,11 @@ class BadgeClassExtensionInline(TabularInline):
 class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id')
     list_display = ('name', 'badge_image', 'entity_id', 'archived',
-                    admin_list_linkify('issuer', 'name'), admin_list_linkify('institution', 'name'))
+                    admin_list_linkify('issuer', 'name_english'),
+                    admin_list_linkify('institution', 'name_english'))
     list_display_links = ('badge_image', 'name',)
     list_filter = ('created_at',)
-    search_fields = ('name', 'entity_id', 'issuer__name',)
+    search_fields = ('name', 'entity_id', 'issuer__name_english',)
     raw_id_fields = ('issuer',)
     fieldsets = (
         ('Metadata', {
