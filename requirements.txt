@@ -129,3 +129,5 @@ django-otp==1.1.1
 qrcode==7.3
 
 pycryptodome==3.18.0
+
+django-api-proxy==0.1.1

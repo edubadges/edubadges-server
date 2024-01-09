@@ -73,6 +73,9 @@ urlpatterns = [
     # include insights endpoints
     url(r'^insights/', include('insights.api_urls')),
 
+    # ob3 poc, proxies impierce endpoints
+    url(r'^ob3/', include('ob3.api_urls')),
+
     # include badge_connect endpoints
     url(r'^badge_connect/', include('badge_connect.api_urls')),
 
