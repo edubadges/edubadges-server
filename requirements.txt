@@ -127,7 +127,7 @@ premailer==3.7.0
 # 2FA support
 django-otp==1.1.1
 
-pycryptodome==3.18.0
+pycryptodome==3.19.1
 
 #https://github.com/aiselis/django-api-proxy
 django-api-proxy==0.1.1
