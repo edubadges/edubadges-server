@@ -55,7 +55,7 @@ class CredentialsView(APIView):
         response = requests.post(json=subject_id,
                                  url=f"{OB3_API_URL}/v1/offers",
                                  headers={'Accept': 'application/json'})
-        response_json = response.json
+        response_json = response.json()
 
         img = qrcode.make(response_json)
         buffered = BytesIO()
