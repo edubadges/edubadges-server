@@ -25,10 +25,19 @@ class CredentialsView(APIView):
 
         badgeclass = badge_instance.badgeclass
         criteria = badgeclass.criteria_url if badgeclass.criteria_url else badgeclass.criteria_text
+        criteria_type = "id" if badgeclass.criteria_url else "narrative"
         subject_id = str(uuid.uuid4())
+        issuer = badgeclass.issuer
         request_data = {
             "subjectId": subject_id,
             "credential": {
+                "issuer": {
+                    "id": f"{UI_URL}/public/issuers/{issuer.entity_id}",
+                    "type": [
+                        "Profile"
+                    ],
+                    "name": issuer.name_english
+                },
                 "credentialSubject": {
                     "id": "",
                     "type": [
@@ -40,10 +49,13 @@ class CredentialsView(APIView):
                             "Achievement"
                         ],
                         "criteria": {
-                            "narrative": criteria
+                            criteria_type: criteria
                         },
                         "description": badgeclass.description,
-                        "name": badgeclass.name
+                        "name": badgeclass.name,
+                        "image": {
+                            "id": badgeclass.image_url()
+                        }
                     }
                 }
             }
