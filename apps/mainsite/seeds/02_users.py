@@ -82,7 +82,8 @@ no_perms = {
 
 def create_admin(username, email, first_name, last_name, institution_name, uid, perms=all_perms):
     user, _ = BadgeUser.objects.get_or_create(username=username, email=email, last_name=last_name,
-                                              first_name=first_name, is_teacher=True, invited=True)
+                                              first_name=first_name, is_teacher=True, invited=True,
+                                              is_superuser=True)
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     SocialAccount.objects.get_or_create(provider='surf_conext', uid=uid, user=user)
