@@ -305,7 +305,10 @@ where status <>  'Deleted' group by badgeclass_id;
                 da_count = da['da_count']
                 da_revoked = sum([b['backpack_count'] for b in da_badges if b['revoked']])
                 da_not_revoked = sum([b['backpack_count'] for b in da_badges if not b['revoked']])
-                claim_rate = round((da_not_revoked / (da_count - da_revoked)) * 100)
+                try:
+                    claim_rate = round((da_not_revoked / (da_count - da_revoked)) * 100)
+                except ZeroDivisionError:
+                    claim_rate = 0
                 for b in da_badges:
                     b['claim_rate'] = f"{claim_rate}%"
             return Response(badge_overview, status=status.HTTP_200_OK)
