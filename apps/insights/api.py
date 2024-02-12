@@ -278,7 +278,7 @@ class InstitutionBadgesOverview(APIView):
         with connection.cursor() as cursor:
             cursor.execute("""
 select b.id as badge_class_id, bi.award_type, b.name as badge_name,  b.is_micro_credentials, bi.public as public_badge,
-bi.revoked, ins.name_english as institution_name, count(bi.id) as backpack_count, 'N/A' as claim_rate
+bi.revoked, ins.name_english as institution_name, count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as da_count
 from issuer_badgeinstance bi
 inner join issuer_badgeclass b on b.id = bi.badgeclass_id
 inner join issuer_issuer i on i.id = b.issuer_id
@@ -311,4 +311,5 @@ where status <>  'Deleted' group by badgeclass_id;
                     claim_rate = 0
                 for b in da_badges:
                     b['claim_rate'] = f"{claim_rate}%"
+                    b['da_count'] = da_count
             return Response(badge_overview, status=status.HTTP_200_OK)
