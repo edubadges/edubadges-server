@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from insights.api import InsightsView, InstitutionAdminsView, InstitutionBadgesView, InstitutionMicroCredentials, \
-    CountMicroCredentials, MicroCredentialsBadgeOverview
+    CountMicroCredentials, MicroCredentialsBadgeOverview, InstitutionBadgesOverview
 
 urlpatterns = [
     url(r'^insight$', InsightsView.as_view(), name='api_insight'),
@@ -13,5 +13,7 @@ urlpatterns = [
         name='api_institution_micro_credentials_count'),
     url(r'^institution/micro-credentials-badges$', MicroCredentialsBadgeOverview.as_view(),
         name='api_institution_micro_credentials_badges'),
+    url(r'^institution/badges-overview$', InstitutionBadgesOverview.as_view(),
+        name='api_institution_badges_overview'),
 
 ]
