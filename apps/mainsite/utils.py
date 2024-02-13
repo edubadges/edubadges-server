@@ -165,7 +165,7 @@ class EmailMessageMaker:
             width_ratio = background.width / overlay.width
             new_background_height = background.height * width_ratio
             new_background_size = (overlay.width, new_background_height)
-            background.thumbnail((new_background_size), Image.ANTIALIAS)
+            background.thumbnail((new_background_size), Image.LANCZOS)
         position = (0, background.height // 4)
         background.paste(overlay, position, overlay)
         buffered = BytesIO()
@@ -465,7 +465,9 @@ def add_watermark(uploaded_image, is_svg):
     preferred_width = int(math.sqrt(int(math.pow(img.size[0], 2)) + int(math.pow(img.size[1], 2))))
     font_size = int(preferred_width / (len(text) + 1))
     n_font = ImageFont.truetype(font, font_size)
-    n_width, n_height = n_font.getsize(text)
+    left, top, right, bottom = n_font.getbbox(text)
+    n_width = right - left
+    n_height = bottom - top
     draw = ImageDraw.Draw(watermark, 'RGBA')
     draw.text(((watermark.size[0] - n_width) / 2,
                (watermark.size[1] - n_height) / 2),
