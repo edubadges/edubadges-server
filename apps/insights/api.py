@@ -284,7 +284,7 @@ inner join issuer_badgeclass b on b.id = bi.badgeclass_id
 inner join issuer_issuer i on i.id = b.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
-group by b.id, b.name, i.name_english, b.is_micro_credentials, bi.award_type, bi.public, bi.revoked;
+group by b.id, bi.award_type, bi.public, bi.revoked;
             """, [])
             badge_overview = dict_fetch_all(cursor)
             cursor.execute("""
@@ -299,8 +299,7 @@ where status <>  'Deleted' group by badgeclass_id;
                 return badge['award_type'] == 'direct_award' and badge['badge_class_id'] == badge_class_identifer
 
             for da in da_overview:
-                badge_class_id = da['badgeclass_id']
-                da_badges = [b for b in badge_overview if find_direct_awards(b, badge_class_id)]
+                da_badges = [b for b in badge_overview if find_direct_awards(b, da['badgeclass_id'])]
                 da_count = da['da_count']
                 da_revoked = sum([b['backpack_count'] for b in da_badges if b['revoked']])
                 da_not_revoked = sum([b['backpack_count'] for b in da_badges if not b['revoked']])
@@ -316,6 +315,7 @@ where status <>  'Deleted' group by badgeclass_id;
             def key_func(k):
                 return str(k['badge_class_id'])
 
+            # Known caveat is to forget sorting before groupby
             sorted_assertions = sorted(badge_overview, key=key_func)
             grouped_assertions = groupby(sorted_assertions, key_func)
             results = []
