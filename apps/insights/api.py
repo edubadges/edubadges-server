@@ -278,18 +278,19 @@ class InstitutionBadgesOverview(APIView):
         with connection.cursor() as cursor:
             cursor.execute("""
 select b.id as badge_class_id, bi.award_type, b.name as badge_name,  b.is_micro_credentials, bi.public as public_badge,
-bi.revoked, ins.name_english as institution_name, count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as da_count
+bi.revoked, ins.name_english as institution_name, count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as total_da_count
 from issuer_badgeinstance bi
 inner join issuer_badgeclass b on b.id = bi.badgeclass_id
 inner join issuer_issuer i on i.id = b.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
+where bi.expires_at >= CURDATE() or bi.expires_at is NULL
 group by b.id, bi.award_type, bi.public, bi.revoked;
             """, [])
             badge_overview = dict_fetch_all(cursor)
             cursor.execute("""
 select count(id) as da_count, badgeclass_id as badgeclass_id from directaward_directaward 
-where status <>  'Deleted' group by badgeclass_id;
+where status <>  'Deleted' and status <> 'Revoked' group by badgeclass_id;
                         """, [])
             da_overview = dict_fetch_all(cursor)
 
@@ -300,16 +301,16 @@ where status <>  'Deleted' group by badgeclass_id;
 
             for da in da_overview:
                 da_badges = [b for b in badge_overview if find_direct_awards(b, da['badgeclass_id'])]
-                da_count = da['da_count']
                 da_revoked = sum([b['backpack_count'] for b in da_badges if b['revoked']])
                 da_not_revoked = sum([b['backpack_count'] for b in da_badges if not b['revoked']])
+                total_da_count = da['da_count'] + da_not_revoked + da_revoked
                 try:
-                    claim_rate = round((da_not_revoked / (da_count - da_revoked)) * 100)
+                    claim_rate = round((da_not_revoked / (total_da_count - da_revoked)) * 100)
                 except ZeroDivisionError:
                     claim_rate = 0
                 for b in da_badges:
                     b['claim_rate'] = f"{claim_rate}%"
-                    b['da_count'] = da_count
+                    b['total_da_count'] = total_da_count
 
             # Now group by badgeclass_id and create final reporting dict
             def key_func(k):
@@ -324,13 +325,13 @@ where status <>  'Deleted' group by badgeclass_id;
                 badge_instance = values[0]
                 claim_rates = [v['claim_rate'] for v in values if v['claim_rate'] != 'N/A']
                 claim_rate = claim_rates[0] if claim_rates else 'N/A'
-                da_counts = [v['da_count'] for v in values if v['da_count'] != 0]
-                da_count = da_counts[0] if da_counts else 0
+                da_counts = [v['total_da_count'] for v in values if v['total_da_count'] != 0]
+                total_da_count = da_counts[0] if da_counts else 0
                 results.append({
                     'Institution name': badge_instance['institution_name'],
                     'BadgecClass name': badge_instance['badge_name'],
                     'Type': 'Microcredential' if badge_instance['is_micro_credentials'] else 'Other',
-                    'Backpack #': sum([b['backpack_count'] for b in values]),
+                    'Total edubadges in backpack': sum([b['backpack_count'] for b in values if not b['revoked']]),
                     'DA claimed': sum(
                         [b['backpack_count'] for b in values if
                          b['award_type'] == 'direct_award' and not b['revoked']]),
@@ -342,7 +343,7 @@ where status <>  'Deleted' group by badgeclass_id;
                         [b['backpack_count'] for b in values if b['award_type'] == 'requested' and b['revoked']]),
                     'Public': sum([b['backpack_count'] for b in values if b['public_badge']]),
                     'Claim-rate': claim_rate,
-                    'Direct Awards #': da_count
+                    'Total DA send': total_da_count
                 })
 
             sorted_results = sorted(results, key=lambda a: (a['Institution name'], a['BadgecClass name']))
