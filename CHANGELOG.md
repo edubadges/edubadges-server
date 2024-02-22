@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [6.10.0] - 2024-02-23
+- Synced insights query with management query
+- Upgraded to pillow 10.2.0
+- Optimise management query
+- Admins are super-users
+- Assertions overview query
+- Added total direct award #
+- Bugfix for 0 claimrate
+- Query for awarded backpacks
+- Upgraded to latest mysqlclient
+- Bump cryptography from 41.0.4 to 42.0.0
+- Bump django from 3.2.20 to 3.2.24
+- Added issuer and image info to the credential endpoint
+- JSON response for QRcode
+- Bump pycryptodome from 3.18.0 to 3.19.1
+- Added OB3 endpoint
+- Added feature flag for ob3 integration
+- Fix for broken badge query in admin view
+- Bump cryptography from 41.0.4 to 41.0.6
+- Micro-credentials badges
+- Assertion query
+- Added raw query for counts user / assertions
+- Added queries for re-use
+
 ## [6.9.0] - 2023-10-23
 - Added micro-credentials count query.
 - Code warning resolved.
