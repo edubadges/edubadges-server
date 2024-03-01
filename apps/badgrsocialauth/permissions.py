@@ -12,7 +12,7 @@ class IsSocialAccountOwner(permissions.BasePermission):
 
 class IsSuperUser(permissions.BasePermission):
     """
-    Allows access only to teachers
+    Allows access only to super-users
     """
 
     def has_permission(self, request, view):
