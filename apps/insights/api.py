@@ -294,8 +294,6 @@ where status <>  'Deleted' and status <> 'Revoked' group by badgeclass_id;
                         """, [])
             da_overview = dict_fetch_all(cursor)
 
-            # Now add the claim-rate which is:
-            # (directAwardNonRevokedBadges / (Total Direct awards - directAwardRevokedBadges))
             def find_direct_awards(badge, badge_class_identifer):
                 return badge['award_type'] == 'direct_award' and badge['badge_class_id'] == badge_class_identifer
 
@@ -305,6 +303,8 @@ where status <>  'Deleted' and status <> 'Revoked' group by badgeclass_id;
                 da_not_revoked = sum([b['backpack_count'] for b in da_badges if not b['revoked']])
                 total_da_count = da['da_count'] + da_not_revoked + da_revoked
                 try:
+                    # Now add the claim-rate which is:
+                    # (directAwardNonRevokedBadges / (Total Direct awards - directAwardRevokedBadges))
                     claim_rate = round((da_not_revoked / (total_da_count - da_revoked)) * 100)
                 except ZeroDivisionError:
                     claim_rate = 0

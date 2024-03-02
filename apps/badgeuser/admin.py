@@ -7,7 +7,7 @@ from mainsite.admin import badgr_admin
 from mainsite.utils import admin_list_linkify
 from staff.models import PermissionedRelationshipBase
 from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl, \
-    ImportBadgeAllowedUrl
+    ImportBadgeAllowedUrl, StudentAffiliation
 
 
 class EmailAddressInline(TabularInline):
@@ -20,7 +20,7 @@ class EmailAddressInline(TabularInline):
 class BadgeUserAdmin(UserAdmin):
     readonly_fields = (
         'email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id')
-    list_display = ('last_name', 'first_name', 'email', 'is_active', 'is_staff', 'date_joined',
+    list_display = ('last_name', 'first_name', 'email', 'eppn', 'date_joined',
                     admin_list_linkify('institution', 'name'))
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
@@ -34,6 +34,10 @@ class BadgeUserAdmin(UserAdmin):
     inlines = [
         EmailAddressInline,
     ]
+
+    def eppn(self, obj):
+        student_affiliations = StudentAffiliation.objects.filter(user=obj).all()
+        return ", ".join([s.eppn for s in student_affiliations]) if student_affiliations else None
 
 
 badgr_admin.register(BadgeUser, BadgeUserAdmin)
