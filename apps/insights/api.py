@@ -98,7 +98,7 @@ class InsightsView(APIView):
                     'badgeclass__issuer__faculty_id',
                     "badgeclass__issuer__faculty__name_dutch", "badgeclass__issuer__faculty__name_english") \
             .order_by('year', 'month') \
-            .exclude(status='Deleted').exclude(status='Revoked')
+            .exclude(status='Deleted').exclude(status='Revoked').exclude(status='Scheduled')
 
         if not total:
             direct_awards_query_set = direct_awards_query_set \
@@ -284,37 +284,24 @@ inner join issuer_badgeclass b on b.id = bi.badgeclass_id
 inner join issuer_issuer i on i.id = b.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
-where bi.expires_at >= CURDATE() or bi.expires_at is NULL
+where (bi.expires_at >= CURDATE() or bi.expires_at is NULL) 
 group by b.id, bi.award_type, bi.public, bi.revoked;
             """, [])
             badge_overview = dict_fetch_all(cursor)
             cursor.execute("""
 select count(id) as da_count, badgeclass_id as badgeclass_id from directaward_directaward 
-where status <>  'Deleted' and status <> 'Revoked' group by badgeclass_id;
+where  status <>  'Deleted' and status <> 'Revoked' and status <> 'Scheduled' group by badgeclass_id;
                         """, [])
             da_overview = dict_fetch_all(cursor)
-
-            def find_direct_awards(badge, badge_class_identifer):
-                return badge['award_type'] == 'direct_award' and badge['badge_class_id'] == badge_class_identifer
-
-            for da in da_overview:
-                da_badges = [b for b in badge_overview if find_direct_awards(b, da['badgeclass_id'])]
-                da_revoked = sum([b['backpack_count'] for b in da_badges if b['revoked']])
-                da_not_revoked = sum([b['backpack_count'] for b in da_badges if not b['revoked']])
-                total_da_count = da['da_count'] + da_not_revoked + da_revoked
-                try:
-                    # Now add the claim-rate which is:
-                    # (directAwardNonRevokedBadges / (Total Direct awards - directAwardRevokedBadges))
-                    claim_rate = round((da_not_revoked / (total_da_count - da_revoked)) * 100)
-                except ZeroDivisionError:
-                    claim_rate = 0
-                for b in da_badges:
-                    b['claim_rate'] = f"{claim_rate}%"
-                    b['total_da_count'] = total_da_count
 
             # Now group by badgeclass_id and create final reporting dict
             def key_func(k):
                 return str(k['badge_class_id'])
+
+            def claim_rate(total_direct_award_count, direct_award_accepted):
+                if total_direct_award_count == 0:
+                    return "N/A"
+                return round((direct_award_accepted / total_direct_award_count) * 100)
 
             # Known caveat is to forget sorting before groupby
             sorted_assertions = sorted(badge_overview, key=key_func)
@@ -323,26 +310,26 @@ where status <>  'Deleted' and status <> 'Revoked' group by badgeclass_id;
             for key, val in grouped_assertions:
                 values = list(val)
                 badge_instance = values[0]
-                claim_rates = [v['claim_rate'] for v in values if v['claim_rate'] != 'N/A']
-                claim_rate = claim_rates[0] if claim_rates else 'N/A'
-                da_counts = [v['total_da_count'] for v in values if v['total_da_count'] != 0]
-                total_da_count = da_counts[0] if da_counts else 0
+                direct_awards_accepted = sum(
+                    [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and not b['revoked']])
+                direct_awards_assertions_revoked = sum(
+                    [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and b['revoked']])
+                direct_awards_rejected_or_unaccepted = sum(
+                    [da['da_count'] for da in da_overview if str(da['badgeclass_id']) == str(key)])
+                total_da_count = direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked
                 results.append({
                     'Institution name': badge_instance['institution_name'],
                     'BadgecClass name': badge_instance['badge_name'],
                     'Type': 'Microcredential' if badge_instance['is_micro_credentials'] else 'Other',
                     'Total edubadges in backpack': sum([b['backpack_count'] for b in values if not b['revoked']]),
-                    'DA claimed': sum(
-                        [b['backpack_count'] for b in values if
-                         b['award_type'] == 'direct_award' and not b['revoked']]),
+                    'DA claimed': direct_awards_accepted,
                     'Requested accepted': sum(
                         [b['backpack_count'] for b in values if b['award_type'] == 'requested' and not b['revoked']]),
-                    'DA revoked': sum(
-                        [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and b['revoked']]),
+                    'DA revoked': direct_awards_assertions_revoked,
                     'Requested revoked': sum(
                         [b['backpack_count'] for b in values if b['award_type'] == 'requested' and b['revoked']]),
                     'Public': sum([b['backpack_count'] for b in values if b['public_badge']]),
-                    'Claim-rate': claim_rate,
+                    'Claim-rate': claim_rate((total_da_count -  direct_awards_assertions_revoked), direct_awards_accepted),
                     'Total DA send': total_da_count
                 })
 
