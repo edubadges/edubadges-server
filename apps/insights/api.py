@@ -272,11 +272,14 @@ select b.id, b.name as badgeclass_name, ins.name_english as institution_name, in
 
 
 class InstitutionBadgesOverview(APIView):
-    permission_classes = (IsSuperUser,)
+    permission_classes = (TeachPermission,)
 
     def get(self, request, **kwargs):
+        is_super_user = hasattr(request.user, 'is_superuser') and request.user.is_superuser
+        institution_part = "" if is_super_user else f"and ins.id = {request.user.institution.id}"
+
         with connection.cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(f"""
 select b.id as badge_class_id, bi.award_type, b.name as badge_name,  b.is_micro_credentials, bi.public as public_badge,
 bi.revoked, ins.name_english as institution_name, count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as total_da_count
 from issuer_badgeinstance bi
@@ -284,7 +287,7 @@ inner join issuer_badgeclass b on b.id = bi.badgeclass_id
 inner join issuer_issuer i on i.id = b.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
-where (bi.expires_at >= CURDATE() or bi.expires_at is NULL) 
+where (bi.expires_at >= CURDATE() or bi.expires_at is NULL) {institution_part}
 group by b.id, bi.award_type, bi.public, bi.revoked;
             """, [])
             badge_overview = dict_fetch_all(cursor)
@@ -329,9 +332,46 @@ where  status <>  'Deleted' and status <> 'Revoked' and status <> 'Scheduled' gr
                     'Requested revoked': sum(
                         [b['backpack_count'] for b in values if b['award_type'] == 'requested' and b['revoked']]),
                     'Public': sum([b['backpack_count'] for b in values if b['public_badge']]),
-                    'Claim-rate': claim_rate((total_da_count -  direct_awards_assertions_revoked), direct_awards_accepted),
+                    'Claim-rate': claim_rate((total_da_count - direct_awards_assertions_revoked),
+                                             direct_awards_accepted),
                     'Total DA send': total_da_count
                 })
 
             sorted_results = sorted(results, key=lambda a: (a['Institution name'], a['BadgecClass name']))
+            return Response(sorted_results, status=status.HTTP_200_OK)
+
+
+class IssuerMembers(APIView):
+    permission_classes = (TeachPermission,)
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+select i.id, u.email, u.first_name, u.last_name, i.name_english as issuer_name_en, i.name_dutch  as issuer_name_nl, 
+si.may_update as issuer_staff
+from users u
+left join institution_institution ins on ins.id = u.institution_id
+left join institution_faculty f on f.institution_id = ins.id
+left join issuer_issuer i on i.faculty_id = f.id
+left join staff_issuerstaff si on u.id = si.user_id
+where ins.id = {request.user.institution.id} and si.may_update is not null and i.id is not null order by i.id;
+                        """, [])
+            issuer_overview = dict_fetch_all(cursor)
+
+            def key_func(k):
+                return str(k['issuer_name'])
+
+            def determine_role(row):
+                return 'Issuer Admin' if row['issuer_staff'] else 'Issuer Awarder'
+
+            results = []
+
+            for row in issuer_overview:
+                results.append({
+                    'issuer_name': row['issuer_name_en'] if row['issuer_name_en'] else row['issuer_name_nl'],
+                    'email': row['email'],
+                    'name': f"{row['first_name']} {row['last_name']}",
+                    'role': determine_role(row)
+                })
+            sorted_results = sorted(results, key=lambda a: (a['issuer_name'],))
             return Response(sorted_results, status=status.HTTP_200_OK)
