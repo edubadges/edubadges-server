@@ -345,21 +345,21 @@ class IssuerMembers(APIView):
     permission_classes = (TeachPermission,)
 
     def get(self, request, **kwargs):
+        is_super_user = hasattr(request.user, 'is_superuser') and request.user.is_superuser
+        institution_part = "" if is_super_user else f"ins.id = {request.user.institution.id} and "
+
         with connection.cursor() as cursor:
             cursor.execute(f"""
 select i.id, u.email, u.first_name, u.last_name, i.name_english as issuer_name_en, i.name_dutch  as issuer_name_nl, 
 si.may_update as issuer_staff
 from users u
-left join institution_institution ins on ins.id = u.institution_id
-left join institution_faculty f on f.institution_id = ins.id
-left join issuer_issuer i on i.faculty_id = f.id
-left join staff_issuerstaff si on u.id = si.user_id
-where ins.id = {request.user.institution.id} and si.may_update is not null and i.id is not null order by i.id;
+inner join staff_issuerstaff si on u.id = si.user_id
+inner join issuer_issuer i on i.id = si.issuer_id
+inner join institution_faculty f on f.id = i.faculty_id
+inner join institution_institution ins on ins.id = f.institution_id
+where {institution_part} si.may_update is not null and i.id is not null order by i.id;
                         """, [])
             issuer_overview = dict_fetch_all(cursor)
-
-            def key_func(k):
-                return str(k['issuer_name'])
 
             def determine_role(row):
                 return 'Issuer Admin' if row['issuer_staff'] else 'Issuer Awarder'
