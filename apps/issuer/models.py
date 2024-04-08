@@ -495,6 +495,17 @@ class BadgeClass(EntityUserProvisionmentMixin,
     direct_awarding_disabled = models.BooleanField(default=False)
     self_enrollment_disabled = models.BooleanField(default=False)
 
+    BADGE_CLASS_TYPE_MICRO = 'micro_credential'
+    BADGE_CLASS_TYPE_REGULAR = 'regular'
+    BADGE_CLASS_TYPE_CURRICULAR = 'extra_curricular'
+    BADGE_CLASS_TYPE_CHOICES = (
+        (BADGE_CLASS_TYPE_MICRO, 'micro_credential'),
+        (BADGE_CLASS_TYPE_REGULAR, 'regular'),
+        (BADGE_CLASS_TYPE_CURRICULAR, 'extra_curricular'),
+    )
+    badge_class_type = models.CharField(max_length=254, choices=BADGE_CLASS_TYPE_CHOICES,
+                                        default=BADGE_CLASS_TYPE_REGULAR)
+
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = CacheModelManager()
@@ -770,7 +781,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
         )
         message = EmailMessageMaker.create_earned_badge_mail(assertion)
         if send_email:
-            recipient.email_user(subject='Je hebt een edubadge ontvangen! You received an edubadge!', html_message=message)
+            recipient.email_user(subject='Je hebt een edubadge ontvangen! You received an edubadge!',
+                                 html_message=message)
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
@@ -1139,7 +1151,6 @@ class BadgeInstance(BaseAuditedModel,
                   html_message=html_message,
                   recipient_list=[self.user.email])
 
-
         # remove BadgeObjectiveAwards from badgebook if needed
         if apps.is_installed('badgebook'):
             try:
@@ -1206,7 +1217,8 @@ class BadgeInstance(BaseAuditedModel,
             if expand_user:
                 json['badge']['user'] = self.user.get_full_name()
                 from public.public_api import BadgeClassJson
-                json['badge']['endorsements'] = [BadgeClassJson.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
+                json['badge']['endorsements'] = [BadgeClassJson.endorsement_to_json(bc) for bc in
+                                                 badge_class.cached_endorsements()]
 
         if self.revoked:
             return OrderedDict([
