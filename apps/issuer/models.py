@@ -494,6 +494,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     is_micro_credentials = models.BooleanField(default=False)
     direct_awarding_disabled = models.BooleanField(default=False)
     self_enrollment_disabled = models.BooleanField(default=False)
+    participation = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     BADGE_CLASS_TYPE_MICRO = 'micro_credential'
     BADGE_CLASS_TYPE_REGULAR = 'regular'

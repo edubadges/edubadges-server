@@ -228,6 +228,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     expiration_period = PeriodField(required=False)
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
 
+    def validate(self, data):
+        """
+        Check if the badge_class is not a draft (e.g. private)
+        """
+        return data
+
     class Meta:
         apispec_definition = ('BadgeClass', {})
         model = BadgeClass

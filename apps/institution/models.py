@@ -54,6 +54,8 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                                                help_text='LinkedIn organisation identifier')
     sis_integration_enabled = models.BooleanField(default=False,
                                                   help_text='Set to true to enable SIS integration for this institution')
+    micro_credentials_enabled = models.BooleanField(default=False,
+                                                  help_text='Set to true to enable Micro-crdentials for this institution')
     ob3_ssi_agent_enabled = models.BooleanField(default=False,
                                                 help_text='Set to true to enable OB3 integration for this institution')
     sis_default_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True,
