@@ -222,6 +222,18 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
     criteria_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True, validators=[URLValidator()])
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
+    badge_class_type = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
+    participation = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
+    assessment_type = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
+    assessment_id_verified = serializers.BooleanField(required=False, default=False)
+    assessment_supervised = serializers.BooleanField(required=False, default=False)
+    quality_assurance_name = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
+    quality_assurance_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True,
+                                               validators=[URLValidator()])
+    quality_assurance_description = MarkdownCharField(allow_blank=True, required=False, write_only=True)
+    grade_achieved_required = serializers.BooleanField(required=False, default=False)
+    stackable = serializers.BooleanField(required=False, default=False)
+
     alignments = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
     tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])

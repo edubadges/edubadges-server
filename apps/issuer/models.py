@@ -495,6 +495,14 @@ class BadgeClass(EntityUserProvisionmentMixin,
     direct_awarding_disabled = models.BooleanField(default=False)
     self_enrollment_disabled = models.BooleanField(default=False)
     participation = models.CharField(max_length=254, blank=True, null=True, default=None)
+    assessment_type = models.CharField(max_length=254, blank=True, null=True, default=None)
+    assessment_id_verified = models.BooleanField(default=False)
+    assessment_supervised = models.BooleanField(default=False)
+    quality_assurance_name = models.CharField(max_length=254, blank=True, null=True, default=None)
+    quality_assurance_url = models.CharField(max_length=254, blank=True, null=True, default=None)
+    quality_assurance_description = models.TextField(blank=True, null=True, default=None)
+    grade_achieved_required = models.BooleanField(default=False)
+    stackable = models.BooleanField(default=False)
 
     BADGE_CLASS_TYPE_MICRO = 'micro_credential'
     BADGE_CLASS_TYPE_REGULAR = 'regular'

@@ -198,7 +198,10 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
                   'content_type_id', 'formal', 'evidence_required', 'narrative_required',
                   'award_non_validated_name_allowed', 'evidence_student_required', 'narrative_student_required',
                   'is_micro_credentials', 'direct_awarding_disabled', 'self_enrollment_disabled',
-                  'badge_class_type', 'participation')
+                  'badge_class_type', 'participation',
+                  'assessment_type', 'assessment_id_verified', 'assessment_supervised',
+                  'quality_assurance_name', 'quality_assurance_url', 'quality_assurance_description',
+                  'grade_achieved_required', 'stackable')
 
     direct_awards = graphene.List(DirectAwardType)
     direct_award_bundles = graphene.List(DirectAwardBundleType)
