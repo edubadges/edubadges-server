@@ -7,7 +7,7 @@ from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeId
     ImageResolverMixin, PermissionsResolverMixin, DefaultLanguageResolverMixin
 from mainsite.utils import generate_image_url
 from staff.schema import InstitutionStaffType, FacultyStaffType
-from .models import Institution, Faculty
+from .models import Institution, Faculty, BadgeClassTag
 
 
 class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
@@ -45,6 +45,12 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
         return any([assertion.revoked is False for assertion in self.assertions])
 
 
+class BadgeClassTagType(DjangoObjectType):
+    class Meta:
+        model = BadgeClassTag
+        fields = ('name',)
+
+
 class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
                       ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
@@ -59,6 +65,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
     faculties = graphene.List(FacultyType)
     public_faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
+    tags = graphene.List(graphene.String)
     image = graphene.String()
     name = graphene.String()
     award_allowed_institutions = graphene.List(graphene.String)
@@ -74,6 +81,9 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
 
     def resolve_image(self, info):
         return generate_image_url(self.image)
+
+    def resolve_tags(self, info):
+        return [tag.name for tag in list(self.badgeclasstag_set.all())]
 
     def resolve_faculties(self, info):
         return self.get_faculties(info.context.user, ['may_read'])

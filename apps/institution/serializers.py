@@ -7,11 +7,12 @@ from rest_framework.exceptions import ErrorDetail
 from rest_framework.serializers import PrimaryKeyRelatedField
 
 from badgeuser.models import BadgeUser
+
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.serializers import StripTagsCharField, BaseSlugRelatedField
-from .models import Faculty, Institution
+from .models import Faculty, Institution, BadgeClassTag
 
 
 class InstitutionSlugRelatedField(BaseSlugRelatedField):
@@ -20,6 +21,10 @@ class InstitutionSlugRelatedField(BaseSlugRelatedField):
 
 class FacultySlugRelatedField(BaseSlugRelatedField):
     model = Faculty
+
+
+class BadgeClassTagSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255, required=True, allow_null=False, allow_blank=False)
 
 
 class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Serializer):
@@ -34,7 +39,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
     grading_table = serializers.URLField(max_length=254, required=False, allow_null=True, allow_blank=True)
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
     linkedin_org_identifier = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
-
+    tags = BadgeClassTagSerializer(many=True, required=False)
     sis_default_user = PrimaryKeyRelatedField(many=False,
                                               queryset=BadgeUser.objects.filter(is_teacher=True),
                                               required=False)
@@ -63,6 +68,23 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
         instance.sis_default_user = validated_data.get('sis_default_user')
         instance.sis_integration_enabled = validated_data.get('sis_integration_enabled')
 
+        def is_deleted_tag(tag_list, tag):
+            return not bool([t for t in tag_list if t["name"] == tag.name])
+
+        def is_new_tag(tag_list, tag):
+            return not bool([t for t in tag_list if t.name == tag["name"]])
+
+        # can be persistent tags and transient tags (with possible the same name)
+        tags = validated_data.get('tags', [])
+        existing_tags = list(instance.badgeclasstag_set.all())
+        deleted_tags = [tag for tag in existing_tags if is_deleted_tag(tags, tag)]
+        new_tags = [tag for tag in tags if is_new_tag(existing_tags, tag)]
+        for tag in deleted_tags:
+            tag.delete()
+        for tag in new_tags:
+            new_tag = BadgeClassTag(name=tag["name"], institution=instance)
+            new_tag.save()
+
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         instance.save()
         return instance
@@ -83,9 +105,11 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
             e = OrderedDict([('image_dutch', [ErrorDetail('Dutch or English image is required', code=918)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if not data.get('description_english', False) and not data.get('description_dutch', False):
-            e = OrderedDict([('description_english', [ErrorDetail('English or Dutch description is required', code=925)])])
+            e = OrderedDict(
+                [('description_english', [ErrorDetail('English or Dutch description is required', code=925)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
-            e = OrderedDict([('description_dutch', [ErrorDetail('Dutch or English description is required', code=913)])])
+            e = OrderedDict(
+                [('description_dutch', [ErrorDetail('Dutch or English description is required', code=913)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if institution.institution_type != 'MBO' and not data.get('grading_table', False):
             e = OrderedDict([('grading_table', [ErrorDetail('Grading Table is required', code=903)])])
@@ -117,9 +141,11 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
             e = OrderedDict([('name_dutch', [ErrorDetail('English or Dutch name is required', code=912)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if not data.get('description_english', False) and not data.get('description_dutch', False):
-            e = OrderedDict([('description_english', [ErrorDetail('English or Dutch description is required', code=925)])])
+            e = OrderedDict(
+                [('description_english', [ErrorDetail('English or Dutch description is required', code=925)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
-            e = OrderedDict([('description_dutch', [ErrorDetail('English or Dutch description is required', code=913)])])
+            e = OrderedDict(
+                [('description_dutch', [ErrorDetail('English or Dutch description is required', code=913)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 

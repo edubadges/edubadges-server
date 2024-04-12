@@ -5,7 +5,7 @@ from django_object_actions import DjangoObjectActions
 from mainsite.admin import badgr_admin
 from mainsite.utils import admin_list_linkify
 
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassAlignment, BadgeClassTag, \
+from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassAlignment, \
     BadgeClassExtension, IssuerExtension, BadgeInstanceExtension
 
 
@@ -22,7 +22,6 @@ class IssuerExtensionInline(TabularInline):
 
 
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
-
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'archived')
     list_display = ('name_english', 'name_dutch', 'img', 'entity_id', 'created_by', 'created_at', 'archived',
                     admin_list_linkify('faculty', 'name_english'), admin_list_linkify('institution', 'name_english'))
@@ -35,13 +34,15 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
             'classes': ("collapse",)
         }),
         (None, {
-            'fields': ('image_dutch', 'image_english', 'name_english', 'url_english', 'name_dutch', 'url_dutch', 'email', 'description_english', 'description_dutch', 'badgrapp', 'archived')
+            'fields': (
+            'image_dutch', 'image_english', 'name_english', 'url_english', 'name_dutch', 'url_dutch', 'email',
+            'description_english', 'description_dutch', 'badgrapp', 'archived')
         }),
         ('JSON', {
             'fields': ('old_json',)
         }),
         ('Faculties', {
-            'fields': ('faculty',) 
+            'fields': ('faculty',)
         }),
     )
     inlines = [
@@ -55,6 +56,7 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
             return '<img src="{}" width="32"/>'.format(obj.image.url)
         except ValueError:
             return obj.image
+
     img.short_description = 'Image'
     img.allow_tags = True
 
@@ -62,6 +64,7 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
         return HttpResponseRedirect(
             reverse('admin:issuer_badgeclass_changelist') + '?issuer__id={}'.format(obj.id)
         )
+
     redirect_badgeclasses.label = "BadgeClasses"
     redirect_badgeclasses.short_description = "See this issuer's defined BadgeClasses"
 
@@ -72,13 +75,7 @@ badgr_admin.register(Issuer, IssuerAdmin)
 class BadgeClassAlignmentInline(TabularInline):
     model = BadgeClassAlignment
     extra = 0
-    fields = ('target_name','target_url','target_description', 'target_framework','target_code')
-
-
-class BadgeClassTagInline(TabularInline):
-    model = BadgeClassTag
-    extra = 0
-    fields = ('name',)
+    fields = ('target_name', 'target_url', 'target_description', 'target_framework', 'target_code')
 
 
 class BadgeClassExtensionInline(TabularInline):
@@ -104,7 +101,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         (None, {
             'fields': ('issuer', 'image', 'name', 'description', 'archived')
         }),
-        ('Permissions',{
+        ('Permissions', {
             'fields': ('award_allowed_institutions',)
         }),
         ('Criteria', {
@@ -115,7 +112,6 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         }),
     )
     inlines = [
-        BadgeClassTagInline,
         BadgeClassAlignmentInline,
         BadgeClassExtensionInline,
     ]
@@ -123,17 +119,21 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
 
     def badge_image(self, obj):
         return '<img src="{}" width="32"/>'.format(obj.image.url) if obj.image else ''
+
     badge_image.short_description = 'Badge'
     badge_image.allow_tags = True
 
     def issuer_link(self, obj):
-        return '<a href="{}">{}</a>'.format(reverse("admin:issuer_issuer_change", args=(obj.issuer.id,)), obj.issuer.name)
-    issuer_link.allow_tags=True
+        return '<a href="{}">{}</a>'.format(reverse("admin:issuer_issuer_change", args=(obj.issuer.id,)),
+                                            obj.issuer.name)
+
+    issuer_link.allow_tags = True
 
     def redirect_instances(self, request, obj):
         return HttpResponseRedirect(
             reverse('admin:issuer_badgeinstance_changelist') + '?badgeclass__id={}'.format(obj.id)
         )
+
     redirect_instances.label = "Instances"
     redirect_instances.short_description = "See awarded instances of this BadgeClass"
 
@@ -141,6 +141,7 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         return HttpResponseRedirect(
             reverse('admin:issuer_issuer_change', args=(obj.issuer.id,))
         )
+
     redirect_issuer.label = "Issuer"
     redirect_issuer.short_description = "See this Issuer"
 
@@ -148,8 +149,10 @@ class BadgeClassAdmin(DjangoObjectActions, ModelAdmin):
         return HttpResponseRedirect(
             reverse('admin:pathway_pathwayelementbadge_changelist') + '?badgeclass__id={}'.format(obj.id)
         )
+
     redirect_pathwaybadges.label = "Pathway Badges"
     redirect_pathwaybadges.short_description = "Pathway Badges"
+
 
 badgr_admin.register(BadgeClass, BadgeClassAdmin)
 
@@ -161,22 +164,28 @@ class BadgeInstanceExtensionInline(TabularInline):
 
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
-    readonly_fields = ('created_at', 'created_by', 'updated_at','updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id', 'source', 'source_url')
-    list_display = ('badge_image', 'user', 'entity_id', admin_list_linkify('badgeclass', 'name'), admin_list_linkify('issuer', 'name'), 'award_type')
+    readonly_fields = (
+    'created_at', 'created_by', 'updated_at', 'updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id',
+    'source', 'source_url')
+    list_display = (
+    'badge_image', 'user', 'entity_id', admin_list_linkify('badgeclass', 'name'), admin_list_linkify('issuer', 'name'),
+    'award_type')
     list_display_links = ('badge_image',)
     list_filter = ('created_at',)
     search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')
     raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
         ('Metadata', {
-            'fields': ('source', 'source_url', 'created_by', 'created_at', 'updated_by','updated_at', 'entity_id','salt'),
+            'fields': (
+            'source', 'source_url', 'created_by', 'created_at', 'updated_by', 'updated_at', 'entity_id', 'salt'),
             'classes': ("collapse",)
         }),
         ('Badgeclass', {
             'fields': ('badgeclass', 'issuer')
         }),
         ('Assertion', {
-            'fields': ('public', 'acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at')
+            'fields': (
+            'public', 'acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at')
         }),
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')
@@ -194,6 +203,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     def rebake(self, request, queryset):
         for obj in queryset:
             obj.rebake(save=True)
+
     rebake.short_description = "Rebake selected badge instances"
 
     def badge_image(self, obj):
@@ -201,6 +211,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
             return '<img src="{}" width="32"/>'.format(obj.image.url)
         except ValueError:
             return obj.image
+
     badge_image.short_description = 'Badge'
     badge_image.allow_tags = True
 
@@ -211,6 +222,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
         return HttpResponseRedirect(
             reverse('admin:issuer_badgeclass_change', args=(obj.badgeclass.id,))
         )
+
     redirect_badgeclass.label = "BadgeClass"
     redirect_badgeclass.short_description = "See this BadgeClass"
 
@@ -218,6 +230,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
         return HttpResponseRedirect(
             reverse('admin:issuer_issuer_change', args=(obj.issuer.id,))
         )
+
     redirect_issuer.label = "Issuer"
     redirect_issuer.short_description = "See this Issuer"
 

@@ -522,7 +522,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     expiration_period = models.DurationField(null=True)
     award_allowed_institutions = models.ManyToManyField('institution.Institution', blank=True,
                                                         help_text='Allow awards to this institutions')
-
+    tags = models.ManyToManyField('institution.BadgeClassTag', blank=True)
     class Meta:
         verbose_name_plural = "Badge classes"
 
@@ -748,7 +748,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
 
     @cached_method(auto_publish=True)
     def cached_tags(self):
-        return self.badgeclasstag_set.all()
+        return self.tags.all()
 
     @property
     def tag_items(self):
@@ -1440,22 +1440,6 @@ class BadgeClassAlignment(OriginalJsonMixin, CacheModel):
             json['targetCode'] = self.target_code
 
         return json
-
-
-class BadgeClassTag(CacheModel):
-    badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
-    name = models.CharField(max_length=254, db_index=True)
-
-    def __unicode__(self):
-        return self.name
-
-    def publish(self):
-        super(BadgeClassTag, self).publish()
-        self.badgeclass.publish()
-
-    def delete(self, *args, **kwargs):
-        super(BadgeClassTag, self).delete(*args, **kwargs)
-        self.badgeclass.publish()
 
 
 class IssuerExtension(BaseOpenBadgeExtension):

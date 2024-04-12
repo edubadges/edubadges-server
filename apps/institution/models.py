@@ -55,14 +55,14 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     sis_integration_enabled = models.BooleanField(default=False,
                                                   help_text='Set to true to enable SIS integration for this institution')
     micro_credentials_enabled = models.BooleanField(default=False,
-                                                  help_text='Set to true to enable Micro-crdentials for this institution')
+                                                    help_text='Set to true to enable Micro-crdentials for this institution')
     ob3_ssi_agent_enabled = models.BooleanField(default=False,
                                                 help_text='Set to true to enable OB3 integration for this institution')
     sis_default_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True,
                                          default=None,
                                          related_name='sis_institution',
                                          help_text='The edubadges user that will be used for Direct Awards through the '
-                                                  'SIS API. Must be an administrator of this institution')
+                                                   'SIS API. Must be an administrator of this institution')
     manage_client_id = models.CharField(max_length=255, blank=True, null=True, default=None,
                                         help_text='OpenConext client_id for token introspection. The secret is '
                                                   'stored in Manage')
@@ -268,6 +268,14 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
             json['sis_integration_enabled'] = self.sis_integration_enabled
             json['award_allowed_institutions'] = [inst.name for inst in self.award_allowed_institutions.all()]
         return json
+
+
+class BadgeClassTag(models.Model):
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
+    name = models.CharField(max_length=254)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Faculty(EntityUserProvisionmentMixin,

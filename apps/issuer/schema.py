@@ -4,6 +4,7 @@ from graphene_django.types import DjangoObjectType, Connection
 
 from directaward.schema import DirectAwardType, DirectAwardBundleType
 from endorsement.schema import EndorsementType
+
 from lti_edu.schema import StudentsEnrolledType
 from django.conf import settings
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
@@ -12,7 +13,7 @@ from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, Con
 from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
-    BadgeClassAlignment, BadgeClassTag, BadgeInstanceEvidence, BadgeInstanceCollection
+    BadgeClassAlignment, BadgeInstanceEvidence, BadgeInstanceCollection
 from datetime import datetime
 
 
@@ -58,12 +59,6 @@ class BadgeInstanceEvidenceType(DjangoObjectType):
     class Meta:
         model = BadgeInstanceEvidence
         fields = ('evidence_url', 'narrative', 'name', 'description')
-
-
-class BadgeClassTagType(DjangoObjectType):
-    class Meta:
-        model = BadgeClassTag
-        fields = ('name',)
 
 
 def badge_class_type():
@@ -189,6 +184,7 @@ class BadgeInstanceConnection(Connection):
 class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
                      UserProvisionmentResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                      DefaultLanguageResolverMixin, DjangoObjectType):
+
     class Meta:
         model = BadgeClass
         fields = ('id', 'name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
@@ -207,7 +203,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     direct_award_bundles = graphene.List(DirectAwardBundleType)
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
-    tags = graphene.List(BadgeClassTagType)
+    tags = graphene.List(graphene.String)
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
@@ -231,7 +227,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         return self._get_terms()
 
     def resolve_tags(self, info, **kwargs):
-        return self.cached_tags()
+        return [tag.name for tag in self.cached_tags()]
 
     def resolve_alignments(self, info, **kwargs):
         return self.cached_alignments()
