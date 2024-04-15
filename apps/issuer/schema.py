@@ -61,7 +61,7 @@ class BadgeInstanceEvidenceType(DjangoObjectType):
         fields = ('evidence_url', 'narrative', 'name', 'description')
 
 
-def badge_class_type():
+def schema_badge_class_type():
     from issuer.schema import BadgeClassType
     return BadgeClassType
 
@@ -80,7 +80,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                   'email', 'created_at', 'content_type_id', 'public_url')
 
     staff = graphene.List(IssuerStaffType)
-    public_badgeclasses = graphene.List(badge_class_type)
+    public_badgeclasses = graphene.List(schema_badge_class_type)
     assertion_count = graphene.Int()
     badgeclass_count = graphene.Int()
     badgeclasses_count = graphene.Int()
@@ -194,7 +194,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
                   'content_type_id', 'formal', 'evidence_required', 'narrative_required',
                   'award_non_validated_name_allowed', 'evidence_student_required', 'narrative_student_required',
                   'is_micro_credentials', 'direct_awarding_disabled', 'self_enrollment_disabled',
-                  'badge_class_type', 'participation',
+                  'participation', 'type_badge_class',
                   'assessment_type', 'assessment_id_verified', 'assessment_supervised',
                   'quality_assurance_name', 'quality_assurance_url', 'quality_assurance_description',
                   'grade_achieved_required', 'stackable')
@@ -203,7 +203,6 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     direct_award_bundles = graphene.List(DirectAwardBundleType)
     staff = graphene.List(BadgeClassStaffType)
     extensions = graphene.List(BadgeClassExtensionType)
-    tags = graphene.List(graphene.String)
     alignments = graphene.List(BadgeClassAlignmentType)
     enrollments = graphene.List(StudentsEnrolledType)
     pending_enrollments = graphene.List(StudentsEnrolledType)
@@ -218,8 +217,10 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     direct_awarded_assertions_count = graphene.Int()
     is_private = graphene.Boolean()
     public_url = graphene.String()
+    type_badge_class = graphene.String()
     terms = graphene.Field(terms_type())
     award_allowed_institutions = graphene.List(graphene.String)
+    tags = graphene.List(graphene.Int)
     endorsements = graphene.List(EndorsementType)
     endorsed = graphene.List(EndorsementType)
 
@@ -227,7 +228,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         return self._get_terms()
 
     def resolve_tags(self, info, **kwargs):
-        return [tag.name for tag in self.cached_tags()]
+        return [tag.id for tag in self.cached_tags()]
 
     def resolve_alignments(self, info, **kwargs):
         return self.cached_alignments()
@@ -288,6 +289,9 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
 
     def resolve_award_allowed_institutions(self, info):
         return [institution.identifier for institution in self.award_allowed_institutions.all()]
+
+    def resolve_type_badge_class(self, info):
+        return self.badge_class_type
 
 
 class Query(object):

@@ -17,7 +17,7 @@ from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.serializers import PrimaryKeyRelatedField
 
 from badgeuser.serializers import BadgeUserIdentifierField
-from institution.models import Institution
+from institution.models import Institution, BadgeClassTag
 from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
@@ -239,6 +239,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
     expiration_period = PeriodField(required=False)
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
+    tags = PrimaryKeyRelatedField(many=True, queryset=BadgeClassTag.objects.all(), required=False)
 
     def validate(self, data):
         """
@@ -321,10 +322,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         allowed_keys = ['narrative_required', 'evidence_required', 'award_non_validated_name_allowed',
                         'alignment_items', 'expiration_period', 'evidence_student_required', 'self_enrollment_disabled',
                         'narrative_student_required', 'is_micro_credentials', 'direct_awarding_disabled']
+        many_to_many_keys = ['award_allowed_institutions', 'tags']
         for key, value in validated_data.items():
-            if key != 'award_allowed_institutions' and (not has_unrevoked_assertions or key in allowed_keys):
+            if key not in many_to_many_keys and (not has_unrevoked_assertions or key in allowed_keys):
                 setattr(instance, key, value)
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
+        instance.tags.set(validated_data.get('tags', []))
         try:
             badge_class = BadgeClass.objects.get(id=instance.id)
             if badge_class.issuer.id != validated_data['issuer'].id:

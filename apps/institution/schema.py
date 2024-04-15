@@ -48,7 +48,7 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
 class BadgeClassTagType(DjangoObjectType):
     class Meta:
         model = BadgeClassTag
-        fields = ('name',)
+        fields = ('id', 'name',)
 
 
 class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
@@ -65,7 +65,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
     faculties = graphene.List(FacultyType)
     public_faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
-    tags = graphene.List(graphene.String)
+    tags = graphene.List(BadgeClassTagType)
     image = graphene.String()
     name = graphene.String()
     award_allowed_institutions = graphene.List(graphene.String)
@@ -83,7 +83,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         return generate_image_url(self.image)
 
     def resolve_tags(self, info):
-        return [tag.name for tag in list(self.badgeclasstag_set.all())]
+        return list(self.badgeclasstag_set.all())
 
     def resolve_faculties(self, info):
         return self.get_faculties(info.context.user, ['may_read'])
