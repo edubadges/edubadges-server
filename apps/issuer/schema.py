@@ -194,7 +194,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     class Meta:
         model = BadgeClass
         fields = ('id', 'name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
-                  'description', 'criteria_url', 'criteria_text', 'is_private',
+                  'description', 'criteria_text', 'is_private',
                   'created_at', 'expiration_period', 'public_url', 'assertions_count',
                   'self_requested_assertions_count', 'direct_awarded_assertions_count',
                   'content_type_id', 'formal', 'evidence_required', 'narrative_required',

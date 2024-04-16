@@ -220,7 +220,6 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
     criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
     criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
-    criteria_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True, validators=[URLValidator()])
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
     badge_class_type = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     participation = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
@@ -278,12 +277,6 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     def validate_criteria_text(self, criteria_text):
         if criteria_text is not None and criteria_text != '':
             return criteria_text
-        else:
-            return None
-
-    def validate_criteria_url(self, criteria_url):
-        if criteria_url is not None and criteria_url != '':
-            return criteria_url
         else:
             return None
 
@@ -354,15 +347,6 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         """Function used in combination with the InternalValueErrorOverrideMixin to override serializer excpetions when
         data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
-        if not data.get('criteria_text', False) and not data.get('criteria_url', False):
-            e = OrderedDict(
-                [('criteria_text', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)]),
-                 ('criteria_url', [ErrorDetail('Either criteria_url or criteria_text is required', code=905)])])
-            errors = OrderedDict(chain(errors.items(), e.items()))
-        if data.get('criteria_url', False):
-            if not utils.is_probable_url(data.get('criteria_url')):
-                e = OrderedDict([('criteria_url', [ErrorDetail('Must be a proper url.', code=902)])])
-                errors = OrderedDict(chain(errors.items(), e.items()))
         if data.get('name') == settings.EDUID_BADGE_CLASS_NAME:
             e = OrderedDict(
                 [('name', [ErrorDetail(f"{settings.EDUID_BADGE_CLASS_NAME} is a reserved name for badgeclasses",

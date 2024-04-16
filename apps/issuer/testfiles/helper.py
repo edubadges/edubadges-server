@@ -18,7 +18,7 @@ issuer_json = {"name_english": "test issuer",
 
 badgeclass_json = {"name": "test badgeclass", "description": "test description",
                    "image": png_string,
-                   "criteria_text": "test criteria", "criteria_url": "http://www.surfnet.nl",
+                   "criteria_text": "test criteria",
                    "formal": False,
                    # "extensions": {
                    #     "extensions:ECTSExtension": {

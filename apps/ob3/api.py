@@ -24,8 +24,8 @@ class CredentialsView(APIView):
             raise Http404
 
         badgeclass = badge_instance.badgeclass
-        criteria = badgeclass.criteria_url if badgeclass.criteria_url else badgeclass.criteria_text
-        criteria_type = "id" if badgeclass.criteria_url else "narrative"
+        criteria = badgeclass.criteria_text
+        criteria_type = "narrative"
         subject_id = str(uuid.uuid4())
         issuer = badgeclass.issuer
         request_data = {

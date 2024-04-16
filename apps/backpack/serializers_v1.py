@@ -274,7 +274,6 @@ class V1BadgeClassSerializer(serializers.Serializer):
     image = BadgeImageURLField()
     criteria = BadgeURLField()
     criteria_text = BadgeStringField(required=False)
-    criteria_url = BadgeURLField(required=False)
     issuer = V1IssuerSerializer()
     tags = serializers.ListField(child=BadgeStringField(), required=False)
 
@@ -305,11 +304,8 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
         localbadgeinstance_json = instance.json
         localbadgeinstance_json['uid'] = instance.entity_id
         localbadgeinstance_json['badge'] = instance.cached_badgeclass.json
-        localbadgeinstance_json['badge']['criteria'] = instance.cached_badgeclass.get_criteria_url()
         if instance.cached_badgeclass.criteria_text:
             localbadgeinstance_json['badge']['criteria_text'] = instance.cached_badgeclass.criteria_text
-        if instance.cached_badgeclass.criteria_url:
-            localbadgeinstance_json['badge']['criteria_url'] = instance.cached_badgeclass.criteria_url
         localbadgeinstance_json['badge']['issuer'] = instance.cached_issuer.json
 
         # clean up recipient to match V1InstanceSerializer

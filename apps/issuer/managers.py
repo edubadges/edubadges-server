@@ -74,13 +74,11 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
         if local_object:
             return local_object, False
 
-        criteria_url = None
         criteria_text = None
         criteria = badgeclass_obo.get('criteria', None)
         if isinstance(criteria, str):
             criteria_text = criteria
         elif criteria.get('type', 'Criteria') == 'Criteria':
-            criteria_url = criteria.get('id', None)
             criteria_text = criteria.get('narrative', None)
 
         image_url = badgeclass_obo.get('image')
@@ -96,7 +94,6 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
                 name=badgeclass_obo.get('name'),
                 description=badgeclass_obo.get('description', None),
                 image=image,
-                criteria_url=criteria_url,
                 criteria_text=criteria_text,
                 original_json=original_json
             )

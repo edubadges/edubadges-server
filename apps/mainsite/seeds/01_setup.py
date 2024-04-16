@@ -126,7 +126,7 @@ badge_class, _ = BadgeClass.objects.get_or_create(
                 "Share them anytime you like and with whomever you like. "
                 "Badges are visual representations of your knowledge, skills and competences.",
     source="local",
-    criteria_url="https://www.surf.nl/edubadges",
+    criteria_text="https://www.surf.nl/edubadges",
     old_json="{}",
     formal=True,
     image="uploads/badges/edubadge_student.png",

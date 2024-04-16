@@ -482,7 +482,6 @@ class BadgeClass(EntityUserProvisionmentMixin,
     name = models.CharField(max_length=255)
     image = models.FileField(upload_to='uploads/badges', blank=True)
     description = models.TextField(blank=True, null=True, default=None)
-    criteria_url = models.CharField(max_length=254, blank=True, null=True, default=None)
     criteria_text = models.TextField(blank=True, null=True)
     formal = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False)
@@ -653,11 +652,6 @@ class BadgeClass(EntityUserProvisionmentMixin,
     @property
     def issuer_jsonld_id(self):
         return self.cached_issuer.jsonld_id
-
-    def get_criteria_url(self):
-        if self.criteria_url:
-            return self.criteria_url
-        return OriginSetting.HTTP + reverse('badgeclass_criteria', kwargs={'entity_id': self.entity_id})
 
     @property
     def description_nonnull(self):
@@ -842,12 +836,8 @@ class BadgeClass(EntityUserProvisionmentMixin,
                         json['image']['id'] = image_url
 
         # criteria
-        if obi_version == '1_1':
-            json["criteria"] = self.get_criteria_url()
         elif obi_version == '2_0':
             json["criteria"] = {}
-            if self.criteria_url:
-                json['criteria']['id'] = self.criteria_url
             if self.criteria_text:
                 json['criteria']['narrative'] = self.criteria_text
 
