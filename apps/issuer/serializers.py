@@ -230,7 +230,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     quality_assurance_name = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     quality_assurance_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True,
                                                validators=[URLValidator()])
-    quality_assurance_description = MarkdownCharField(allow_blank=True, required=False, write_only=True)
+    quality_assurance_description = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
     grade_achieved_required = serializers.BooleanField(required=False, default=False)
     stackable = serializers.BooleanField(required=False, default=False)
 

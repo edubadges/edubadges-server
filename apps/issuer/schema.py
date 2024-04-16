@@ -5,6 +5,7 @@ from graphene_django.types import DjangoObjectType, Connection
 from directaward.schema import DirectAwardType, DirectAwardBundleType
 from endorsement.schema import EndorsementType
 
+
 from lti_edu.schema import StudentsEnrolledType
 from django.conf import settings
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
@@ -181,6 +182,11 @@ class BadgeInstanceConnection(Connection):
         node = BadgeInstanceType
 
 
+def schema_badge_class_tag_type():
+    from institution.schema import BadgeClassTagType
+    return BadgeClassTagType
+
+
 class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
                      UserProvisionmentResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                      DefaultLanguageResolverMixin, DjangoObjectType):
@@ -220,7 +226,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     type_badge_class = graphene.String()
     terms = graphene.Field(terms_type())
     award_allowed_institutions = graphene.List(graphene.String)
-    tags = graphene.List(graphene.Int)
+    tags = graphene.List(schema_badge_class_tag_type)
     endorsements = graphene.List(EndorsementType)
     endorsed = graphene.List(EndorsementType)
 
@@ -228,7 +234,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         return self._get_terms()
 
     def resolve_tags(self, info, **kwargs):
-        return [tag.id for tag in self.cached_tags()]
+        return self.cached_tags()
 
     def resolve_alignments(self, info, **kwargs):
         return self.cached_alignments()
