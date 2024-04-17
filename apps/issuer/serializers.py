@@ -218,10 +218,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     self_enrollment_disabled = serializers.BooleanField(required=False, default=False)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
-    criteria = MarkdownCharField(allow_blank=True, required=False, write_only=True)
-    criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
+    criteria_text = MarkdownCharField(required=True, allow_null=False, allow_blank=False)
     description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
-    badge_class_type = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
+    badge_class_type = StripTagsCharField(required=True, allow_blank=False, allow_null=False)
     participation = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     assessment_type = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     assessment_id_verified = serializers.BooleanField(required=False, default=False)
@@ -234,7 +233,6 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     stackable = serializers.BooleanField(required=False, default=False)
 
     alignments = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
-    tags = serializers.ListField(child=StripTagsCharField(max_length=1024), source='tag_items', required=False)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
     expiration_period = PeriodField(required=False)
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
@@ -242,8 +240,33 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
 
     def validate(self, data):
         """
-        Check if the badge_class is not a draft (e.g. private)
+        For each type of badge there are different required fields
         """
+        # TODO remove the constraints above and handle everything here for complete error return
+        type_badge = data["badge_class_type"]
+        required_fields = []
+        extensions = ["LanguageExtension"]
+        if type_badge == BadgeClass.BADGE_CLASS_TYPE_MICRO:
+            required_fields += ["participation", "assessment_type", "quality_assurance_name","quality_assurance_url",
+                                "quality_assurance_description", "stackable"]
+            extensions += ["LearningOutcomeExtension", "EQFExtension", "EducationProgramIdentifierExtension"]
+        elif type_badge == BadgeClass.BADGE_CLASS_TYPE_REGULAR:
+            required_fields += ["stackable"]
+            extensions += ["LearningOutcomeExtension", "EQFExtension", "EducationProgramIdentifierExtension"]
+        elif type_badge == BadgeClass.BADGE_CLASS_TYPE_CURRICULAR:
+            extensions += ["TimeInvestmentExtension"]
+
+        errors = OrderedDict()
+        for field_name in required_fields:
+            if not data.get(field_name):
+                errors[field_name] = ErrorDetail("This field may not be blank.", code="blank")
+        extension_items = data.get("extension_items", [])
+        for extension in extensions:
+            if not extension_items.get(f"extensions:{extension}"):
+                errors[extension] = ErrorDetail("This field may not be blank.", code="blank")
+        if errors:
+            raise ValidationError(errors)
+
         return data
 
     class Meta:
@@ -312,9 +335,11 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             [ass for ass in instance.assertions if not ass.revoked]) > 0
         if not has_unrevoked_assertions:
             self.save_extensions(validated_data, instance)
-        allowed_keys = ['narrative_required', 'evidence_required', 'award_non_validated_name_allowed',
-                        'alignment_items', 'expiration_period', 'evidence_student_required', 'self_enrollment_disabled',
-                        'narrative_student_required', 'is_micro_credentials', 'direct_awarding_disabled']
+        allowed_keys = ['narrative_required', 'evidence_required', 'narrative_student_required',
+                        'evidence_student_required', 'award_non_validated_name_allowed',
+                        'direct_awarding_disabled', 'self_enrollment_disabled',
+                        'alignment_items', 'expiration_period', 'self_enrollment_disabled',
+                        'stackable']
         many_to_many_keys = ['award_allowed_institutions', 'tags']
         for key, value in validated_data.items():
             if key not in many_to_many_keys and (not has_unrevoked_assertions or key in allowed_keys):
@@ -344,7 +369,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         return alignments
 
     def to_internal_value_error_override(self, data):
-        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer excpetions when
+        """Function used in combination with the InternalValueErrorOverrideMixin to override serializer exceptions when
         data is internalised (i.e. the to_internal_value() method is called)"""
         errors = OrderedDict()
         if data.get('name') == settings.EDUID_BADGE_CLASS_NAME:
@@ -366,7 +391,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                     "Cannot create an informal badgeclass for an institution without the judicial basis for informal badges",
                     216)
             try:
+                tags = validated_data.get("tags", [])
+                if "tags" in validated_data:
+                    del validated_data["tags"]
                 new_badgeclass = BadgeClass.objects.create(**validated_data)
+                new_badgeclass.tags.set(tags)
+                new_badgeclass.save()
             except IntegrityError:
                 raise BadgrValidationFieldError('name',
                                                 "There is already a Badgeclass with this name inside this Issuer",
