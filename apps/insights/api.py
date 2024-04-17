@@ -59,15 +59,16 @@ class InsightsView(APIView):
         # .filter(user__id__in=student_affiliation_query) \
         today = datetime.utcnow()
         assertions_query_set = BadgeInstance.objects \
-            .values('award_type', 'badgeclass_id', 'badgeclass__name', 'badgeclass__is_micro_credentials',
+            .values('award_type', 'badgeclass_id', 'badgeclass__name', 'badgeclass__archived',
+                    'badgeclass__badge_class_type',
                     'issuer_id', "public", "revoked",
                     "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
                     "issuer__faculty__name_english", "issuer__faculty__name_dutch") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
-            .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name',
-                    'badgeclass__is_micro_credentials', 'issuer_id',
+            .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name', 'badgeclass__archived',
+                    'badgeclass__badge_class_type', 'issuer_id',
                     "public", "revoked", "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
                     "issuer__faculty__name_dutch", "issuer__faculty__name_english") \
             .exclude(expires_at__lte=today) \
@@ -84,16 +85,16 @@ class InsightsView(APIView):
                 .exclude(issuer__faculty__institution=surf_institution)
 
         direct_awards_query_set = DirectAward.objects \
-            .values('status', 'badgeclass_id', 'badgeclass__name', 'badgeclass__issuer__id',
-                    'badgeclass__is_micro_credentials',
+            .values('status', 'badgeclass_id', 'badgeclass__name', 'badgeclass__archived', 'badgeclass__issuer__id',
+                    'badgeclass__badge_class_type',
                     "badgeclass__issuer__name_dutch", "badgeclass__issuer__name_english",
                     'badgeclass__issuer__faculty_id',
                     "badgeclass__issuer__faculty__name_english", "badgeclass__issuer__faculty__name_dutch") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
-            .values('month', 'year', 'nbr', 'status', 'badgeclass_id', 'badgeclass__name',
-                    'badgeclass__issuer__id', 'badgeclass__is_micro_credentials',
+            .values('month', 'year', 'nbr', 'status', 'badgeclass_id', 'badgeclass__name', 'badgeclass__archived',
+                    'badgeclass__issuer__id', 'badgeclass__badge_class_type',
                     "badgeclass__issuer__name_dutch", "badgeclass__issuer__name_english",
                     'badgeclass__issuer__faculty_id',
                     "badgeclass__issuer__faculty__name_dutch", "badgeclass__issuer__faculty__name_english") \
@@ -115,13 +116,13 @@ class InsightsView(APIView):
             .filter(Q(badge_instance_id__isnull=True) | Q(denied=True)) \
             .values('denied', 'badge_class_id', 'badge_class__name', 'badge_class__issuer__id',
                     "badge_class__issuer__name_dutch", "badge_class__issuer__name_english",
-                    'badge_class__issuer__faculty_id', 'badge_class__is_micro_credentials',
+                    'badge_class__issuer__faculty_id', 'badge_class__badge_class_type',
                     "badge_class__issuer__faculty__name_dutch", "badge_class__issuer__faculty__name_english") \
             .annotate(year=ExtractYear('date_created')) \
             .annotate(month=ExtractMonth('date_created')) \
             .annotate(nbr=Count('month')) \
             .values('month', 'year', 'nbr', 'denied', 'badge_class_id', 'badge_class__name',
-                    'badge_class__issuer__id', 'badge_class__is_micro_credentials',
+                    'badge_class__issuer__id', 'badge_class__badge_class_type',
                     "badge_class__issuer__name_dutch", "badge_class__issuer__name_english",
                     'badge_class__issuer__faculty_id',
                     "badge_class__issuer__faculty__name_dutch", "badge_class__issuer__faculty__name_english") \
@@ -226,7 +227,7 @@ class InstitutionMicroCredentials(APIView):
             .values('badgeclass__issuer__faculty__institution__name_english',
                     'badgeclass__issuer__faculty__institution__identifier') \
             .annotate(count=Count('id')) \
-            .filter(badgeclass__is_micro_credentials=True) \
+            .filter(badgeclass__badge_class_type='micro_credential') \
             .order_by('count') \
             .all()
         institution_badges = list(query_set)
@@ -246,7 +247,7 @@ from users u
  inner join issuer_issuer i on i.id = b.issuer_id 
  inner join institution_faculty f on f.id = i.faculty_id 
  inner join institution_institution ins on ins.id = f.institution_id 
- where b.is_micro_credentials = 1 and ins.institution_type is not null
+ where b.badge_class_type = 'micro_credential' and ins.institution_type is not null
  group by assertion_count, ins.identifier ;            
             """, [])
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -266,7 +267,7 @@ select b.id, b.name as badgeclass_name, ins.name_english as institution_name, in
  inner join issuer_issuer i on i.id = b.issuer_id
  inner join institution_faculty f on f.id = i.faculty_id
  inner join institution_institution ins on ins.id = f.institution_id
- where b.is_micro_credentials = 1 and ins.institution_type is not null;
+ where b.badge_class_type = 'micro_credential' and ins.institution_type is not null;
              """, [])
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
 
@@ -280,7 +281,7 @@ class InstitutionBadgesOverview(APIView):
 
         with connection.cursor() as cursor:
             cursor.execute(f"""
-select b.id as badge_class_id, bi.award_type, b.name as badge_name,  b.is_micro_credentials, bi.public as public_badge,
+select b.id as badge_class_id, bi.award_type, b.name as badge_name,  b.badge_class_type, bi.public as public_badge,
 bi.revoked, ins.name_english as institution_name, count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as total_da_count
 from issuer_badgeinstance bi
 inner join issuer_badgeclass b on b.id = bi.badgeclass_id
@@ -323,7 +324,7 @@ where  status <>  'Deleted' and status <> 'Revoked' and status <> 'Scheduled' gr
                 results.append({
                     'Institution name': badge_instance['institution_name'],
                     'BadgecClass name': badge_instance['badge_name'],
-                    'Type': 'Microcredential' if badge_instance['is_micro_credentials'] else 'Other',
+                    'Type': badge_instance['badge_class_type'],
                     'Total edubadges in backpack': sum([b['backpack_count'] for b in values if not b['revoked']]),
                     'DA claimed': direct_awards_accepted,
                     'Requested accepted': sum(
