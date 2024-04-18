@@ -836,10 +836,9 @@ class BadgeClass(EntityUserProvisionmentMixin,
                         json['image']['id'] = image_url
 
         # criteria
-        elif obi_version == '2_0':
-            json["criteria"] = {}
-            if self.criteria_text:
-                json['criteria']['narrative'] = self.criteria_text
+        json["criteria"] = {}
+        if self.criteria_text:
+            json['criteria']['narrative'] = self.criteria_text
 
         # source_url
         if self.source_url:

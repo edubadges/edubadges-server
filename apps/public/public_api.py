@@ -407,6 +407,11 @@ class BadgeClassJson(JSONComponentView):
         if 'endorsements' in expands:
             json['endorsements'] = [self.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
             json['endorsed'] = [endorsement.endorsee.entity_id for endorsement in badge_class.cached_endorsed()]
+        if 'micro' in expands:
+            json['participation'] = badge_class.participation
+            json['assessmentType'] = badge_class.assessment_type
+            json['assessmentIdVerified'] = badge_class.assessment_id_verified
+            json['assessmentSupervised'] = badge_class.assessment_supervised
         return json
 
     @staticmethod
