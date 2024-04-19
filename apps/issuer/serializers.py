@@ -243,6 +243,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         For each type of badge there are different required fields
         """
         # TODO remove the constraints above and handle everything here for complete error return
+        # Case MBO institution -> then timeInvestment must be there
+        issuer = data["issuer"]
         type_badge = data["badge_class_type"]
         required_fields = []
         extensions = ["LanguageExtension"]
@@ -263,7 +265,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         extension_items = data.get("extension_items", [])
         for extension in extensions:
             if not extension_items.get(f"extensions:{extension}"):
-                errors[extension] = ErrorDetail("This field may not be blank.", code="blank")
+                errors[f"extensions.{extension}"] = ErrorDetail("This field may not be blank.", code="blank")
         if errors:
             raise ValidationError(errors)
 
@@ -339,7 +341,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                         'evidence_student_required', 'award_non_validated_name_allowed',
                         'direct_awarding_disabled', 'self_enrollment_disabled',
                         'alignment_items', 'expiration_period', 'self_enrollment_disabled',
-                        'stackable']
+                        'stackable', 'grade_achieved_required']
         many_to_many_keys = ['award_allowed_institutions', 'tags']
         for key, value in validated_data.items():
             if key not in many_to_many_keys and (not has_unrevoked_assertions or key in allowed_keys):
