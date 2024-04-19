@@ -30,8 +30,7 @@ Badgr was developed by [Concentric Sky](https://concentricsky.com), starting in 
 Prerequisites:
 
 * git
-* python 3.7.6
-* virtualenv
+* python 3.8
 * mysql
 * [cairo](https://www.cairographics.org/download/) (SVG utility)
 
@@ -49,7 +48,7 @@ Note: some of these packages would introduce additional security considerations 
 ### Create project directory and environment
 
 * `mkdir edubadges && cd edubadges`
-* `virtualenv .venv`
+* `python3.8 -m venv .venv`
 * `source .venv/bin/activate` *Activate the environment (each time you start a session working with the code)*
 
 *Obtain source code and clone into code directory*
@@ -82,9 +81,8 @@ If for some reason the library files for mysql are no longer there due to an upg
 ```
 pip install --upgrade --force-reinstall --no-cache-dir mysqlclient
 ```
-
 ### Run / debug IDE
-You'll need to add the environment variables from env_vars.sh.example to a run configuration
+If you use an IDE, you'll need to add the environment variables from env_vars.sh.example to a run configuration
 
 ### Generate a TOTP for first login with super user
 If you login to http://localhost:8000/staff/superuser then you'll have to provide a TOTP token. Generate one with:
@@ -95,6 +93,9 @@ If you login to http://localhost:8000/staff/superuser then you'll have to provid
 ### Customize local settings to your environment
 * `cp env_vars.sh.example env_vars.sh`
 * Edit the env_vars.sh file and insert local credentials for DATABASES and email, then run the following from within the `edubadges-server` directory after sourcing the env_vars.sh:
+
+### Load envionment variables
+`source env.vars.sh`
 
 ### Migrate databases, build front-end components
 * `./manage.py migrate` - set up database tables
