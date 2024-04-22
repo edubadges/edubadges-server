@@ -69,3 +69,17 @@ class FacultyList(VersionedObjectMixin, BaseEntityListView):
 
     def post(self, request, **kwargs):
         return super(FacultyList, self).post(request, **kwargs)
+
+
+class InstitutionsTagUsage(APIView):
+    """
+    Endpoint used to check if a tag is being used by non-archived badge classes
+    POST to check, expects a tag name
+    """
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ['post']
+
+    def post(self, request, **kwargs):
+        data = []
+        tag_name = request.data.get("name")
+        return Response(data, status=HTTP_200_OK)

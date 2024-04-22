@@ -346,9 +346,14 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                         'direct_awarding_disabled', 'self_enrollment_disabled',
                         'alignment_items', 'expiration_period', 'self_enrollment_disabled',
                         'stackable', 'grade_achieved_required']
+        # Because of new required fields there are invalid badge_classes that are allowed to update
+        upgrade_keys = ['quality_assurance_description', 'quality_assurance_name', 'quality_assurance_url',
+                        'assessment_type', 'assessment_supervised', 'assessment_id_verified', 'participation']
         many_to_many_keys = ['award_allowed_institutions', 'tags']
         for key, value in validated_data.items():
             if key not in many_to_many_keys and (not has_unrevoked_assertions or key in allowed_keys):
+                setattr(instance, key, value)
+            if key in upgrade_keys and getattr(instance, key) is None:
                 setattr(instance, key, value)
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         instance.tags.set(validated_data.get('tags', []))
