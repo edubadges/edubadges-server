@@ -205,7 +205,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=255)
-    image = ValidImageField(required=True)
+    image = ValidImageField(required=False, allow_empty_file=True)
     formal = serializers.BooleanField(required=True)
     is_private = serializers.BooleanField(required=False, default=False)
     narrative_required = serializers.BooleanField(required=False, default=False)
@@ -218,8 +218,8 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     self_enrollment_disabled = serializers.BooleanField(required=False, default=False)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     issuer = IssuerSlugRelatedField(slug_field='entity_id', required=True)
-    criteria_text = MarkdownCharField(required=True, allow_null=False, allow_blank=False)
-    description = StripTagsCharField(max_length=16384, required=True, convert_null=True)
+    criteria_text = MarkdownCharField(required=False, allow_null=True, allow_blank=True)
+    description = StripTagsCharField(max_length=16384, required=False, convert_null=True, allow_blank=True)
     badge_class_type = StripTagsCharField(required=True, allow_blank=False, allow_null=False)
     participation = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
     assessment_type = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
@@ -242,25 +242,29 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         """
         For each type of badge there are different required fields
         """
-        # TODO remove the constraints above and handle everything here for complete error return
-        # Case MBO institution -> then timeInvestment must be there
         issuer = data["issuer"]
-        type_badge = data["badge_class_type"]
-        required_fields = []
+        required_fields = ["name"]
         extensions = ["LanguageExtension"]
-        if type_badge == BadgeClass.BADGE_CLASS_TYPE_MICRO:
-            required_fields += ["participation", "assessment_type", "quality_assurance_name","quality_assurance_url",
-                                "quality_assurance_description", "stackable"]
-            extensions += ["LearningOutcomeExtension", "EQFExtension", "EducationProgramIdentifierExtension"]
-        elif type_badge == BadgeClass.BADGE_CLASS_TYPE_REGULAR:
-            required_fields += ["stackable"]
-            extensions += ["LearningOutcomeExtension", "EQFExtension", "EducationProgramIdentifierExtension"]
-        elif type_badge == BadgeClass.BADGE_CLASS_TYPE_CURRICULAR:
-            extensions += ["TimeInvestmentExtension"]
+        is_mbo = issuer.institution.institution_type == Institution.TYPE_MBO
+        if is_mbo:
+            extensions += ["StudyLoadExtension"]
+        is_private = data.get("is_private", False)
+        type_badge = data["badge_class_type"]
+        if not is_private:
+            required_fields += ["description", "criteria_text"]
+            if type_badge == BadgeClass.BADGE_CLASS_TYPE_MICRO:
+                required_fields += ["participation", "assessment_type", "quality_assurance_name",
+                                    "quality_assurance_url", "quality_assurance_description"]
+                extensions += ["LearningOutcomeExtension", "EQFExtension"]
+            elif type_badge == BadgeClass.BADGE_CLASS_TYPE_REGULAR:
+                required_fields += ["criteria_text"]
+                extensions += ["LearningOutcomeExtension", "EQFExtension", "EducationProgramIdentifierExtension"]
+            elif type_badge == BadgeClass.BADGE_CLASS_TYPE_CURRICULAR and not is_mbo:
+                extensions += ["TimeInvestmentExtension"]
 
         errors = OrderedDict()
         for field_name in required_fields:
-            if not data.get(field_name):
+            if data.get(field_name) is None:
                 errors[field_name] = ErrorDetail("This field may not be blank.", code="blank")
         extension_items = data.get("extension_items", [])
         for extension in extensions:

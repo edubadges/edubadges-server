@@ -480,7 +480,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     DUTCH_NAME = "badge class"
     issuer = models.ForeignKey(Issuer, blank=False, null=False, on_delete=models.CASCADE, related_name="badgeclasses")
     name = models.CharField(max_length=255)
-    image = models.FileField(upload_to='uploads/badges', blank=True)
+    image = models.FileField(upload_to='uploads/badges', blank=True, null=True)
     description = models.TextField(blank=True, null=True, default=None)
     criteria_text = models.TextField(blank=True, null=True)
     formal = models.BooleanField(default=False)
