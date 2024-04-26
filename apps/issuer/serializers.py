@@ -437,7 +437,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
     signing_password = serializers.CharField(max_length=1024, required=False)
     enrollment_entity_id = serializers.CharField(max_length=1024, required=False)
     extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
-
+    grade_achieved = serializers.CharField(max_length=254, required=False, allow_blank=True, allow_null=True)
     narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
     evidence_items = EvidenceItemSerializer(many=True, required=False)
 

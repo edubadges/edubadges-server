@@ -955,6 +955,8 @@ class BadgeInstance(BaseAuditedModel,
     public = models.BooleanField(default=False)
 
     include_evidence = models.BooleanField(default=False)
+    grade_achieved = models.CharField(max_length=254, blank=True, null=True, default=None)
+    include_grade_achieved = models.BooleanField(default=False)
 
     objects = BadgeInstanceManager()
     cached = CacheModelManager()
@@ -1212,6 +1214,9 @@ class BadgeInstance(BaseAuditedModel,
                                                                       expand_public_key=False,
                                                                       public_key_issuer=public_key_issuer,
                                                                       expand_institution=True)
+            if self.include_grade_achieved:
+                json['badge']['grade_achieved'] = self.grade_achieved
+
             if expand_user:
                 json['badge']['user'] = self.user.get_full_name()
                 from public.public_api import BadgeClassJson

@@ -152,7 +152,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         fields = ('id', 'entity_id', 'badgeclass', 'identifier', 'image', 'updated_at',
                   'recipient_identifier', 'recipient_type', 'revoked', 'issued_on',
                   'revocation_reason', 'expires_at', 'acceptance', 'created_at',
-                  'public', 'award_type')
+                  'public', 'award_type', 'grade_achieved')
 
     def resolve_validation(self, info, **kwargs):
         return self.validate()

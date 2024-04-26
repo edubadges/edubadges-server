@@ -24,6 +24,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     name = models.CharField(max_length=255, blank=True, null=True, default=None)
     description = models.TextField(blank=True, null=True, default=None)
     warning_email_send = models.BooleanField(default=False)
+    grade_achieved = models.CharField(max_length=254, blank=True, null=True, default=None)
 
     STATUS_UNACCEPTED = 'Unaccepted'
     STATUS_REVOKED = 'Revoked'
@@ -99,7 +100,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                                           award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD,
                                           direct_award_bundle=self.bundle,
                                           evidence=evidence,
-                                          include_evidence=evidence is not None)
+                                          include_evidence=evidence is not None,
+                                          grade_achieved=self.grade_achieved,)
         # delete any pending enrollments for this badgeclass and user
         recipient.cached_pending_enrollments().filter(badge_class=self.badgeclass).delete()
         recipient.remove_cached_data(['cached_pending_enrollments'])

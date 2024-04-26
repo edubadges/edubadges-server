@@ -20,6 +20,7 @@ class DirectAwardSerializer(serializers.Serializer):
     narrative = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     name = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    grade_achieved = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     def update(self, instance, validated_data):
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]

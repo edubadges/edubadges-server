@@ -37,6 +37,7 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
     acceptance = serializers.CharField(default='Accepted')
     public = serializers.BooleanField(required=False, default=False)
     include_evidence = serializers.BooleanField(required=False, default=False)
+    include_grade_achieved = serializers.BooleanField(required=False, default=False)
     narrative = MarkdownCharField(required=False, read_only=True)
 
     extensions = serializers.DictField(source='extension_items', read_only=True)
@@ -115,6 +116,7 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
         if public is not None:
             instance.public = public
             instance.include_evidence = validated_data.get('include_evidence', False)
+            instance.include_grade_achieved = validated_data.get('include_grade_achieved', False)
             instance.save()
         return instance
 
