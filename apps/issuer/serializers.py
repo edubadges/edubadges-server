@@ -540,7 +540,8 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 expires_at=expires_at,
                 extensions=validated_data.get('extension_items', None),
                 evidence=validated_data.get('evidence_items', None),
-                narrative=validated_data.get('narrative', None)
+                narrative=validated_data.get('narrative', None),
+                grade_achieved=validated_data.get('grade_achieved', None)
             )
 
         enrollment.date_awarded = timezone.now()

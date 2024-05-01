@@ -412,6 +412,10 @@ class BadgeClassJson(JSONComponentView):
             json['assessmentType'] = badge_class.assessment_type
             json['assessmentIdVerified'] = badge_class.assessment_id_verified
             json['assessmentSupervised'] = badge_class.assessment_supervised
+            json['participation'] = badge_class.participation
+            json['stackable'] = badge_class.stackable
+            json['gradeAchievedRequired'] = badge_class.grade_achieved_required
+            json['typeBadgeClass'] = badge_class.badge_class_type
         return json
 
     @staticmethod
