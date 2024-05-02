@@ -494,7 +494,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     direct_awarding_disabled = models.BooleanField(default=False)
     self_enrollment_disabled = models.BooleanField(default=False)
     participation = models.CharField(max_length=254, blank=True, null=True, default=None)
-    assessment_type = models.CharField(max_length=254, blank=True, null=True, default=None)
+    assessment_type = models.TextField(blank=True, null=True, default=None)
     assessment_id_verified = models.BooleanField(default=False)
     assessment_supervised = models.BooleanField(default=False)
     quality_assurance_name = models.CharField(max_length=254, blank=True, null=True, default=None)
