@@ -493,7 +493,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     is_micro_credentials = models.BooleanField(default=False)
     direct_awarding_disabled = models.BooleanField(default=False)
     self_enrollment_disabled = models.BooleanField(default=False)
-    participation = models.CharField(max_length=254, blank=True, null=True, default=None)
+    participation = models.TextField(blank=True, null=True, default=None)
     assessment_type = models.TextField(blank=True, null=True, default=None)
     assessment_id_verified = models.BooleanField(default=False)
     assessment_supervised = models.BooleanField(default=False)
