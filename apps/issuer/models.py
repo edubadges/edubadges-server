@@ -1205,6 +1205,14 @@ class BadgeInstance(BaseAuditedModel,
 
         if expand_badgeclass:
             json['badge'] = badge_class.get_json(obi_version=obi_version, include_extra=include_extra)
+            json['badge']['stackable'] = badge_class.stackable
+            json['badge']['gradeAchievedRequired'] = badge_class.grade_achieved_required
+            json['badge']['typeBadgeClass'] = badge_class.badge_class_type
+            json['badge']['participation'] = badge_class.participation
+            json['badge']['assessmentType'] = badge_class.assessment_type
+            json['badge']['assessmentSupervised'] = badge_class.assessment_supervised
+            json['badge']['assessmentIdVerified'] = badge_class.assessment_id_verified
+
             if signed:
                 json['badge']['id'] = badge_class.get_url_with_public_key(public_key_issuer)
             if expand_issuer:
