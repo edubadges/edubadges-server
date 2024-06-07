@@ -339,7 +339,8 @@ class Query(object):
 
     def resolve_badge_classes_to_award(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.filter(archived=False)
-                if bc.has_permissions(info.context.user, ['may_award'])]
+                if bc.has_permissions(info.context.user, ['may_award']) and
+                bc.cached_pending_enrollments().__len__() > 0]
 
     def resolve_public_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.filter(is_private=False)]
