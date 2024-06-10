@@ -25,6 +25,7 @@ class FacultySlugRelatedField(BaseSlugRelatedField):
 
 class BadgeClassTagSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255, required=True, allow_null=False, allow_blank=False)
+    status = serializers.CharField(max_length=255, required=True, allow_null=False, allow_blank=False)
 
 
 class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Serializer):
@@ -68,22 +69,31 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
         instance.sis_default_user = validated_data.get('sis_default_user')
         instance.sis_integration_enabled = validated_data.get('sis_integration_enabled')
 
-        def is_deleted_tag(tag_list, tag):
-            return not bool([t for t in tag_list if t["name"] == tag.name])
-
-        def is_new_tag(tag_list, tag):
-            return not bool([t for t in tag_list if t.name == tag["name"]])
-
-        # can be persistent tags and transient tags (with possible the same name)
+        # can be persistent tags and transient tags
         tags = validated_data.get('tags', [])
-        existing_tags = list(instance.badgeclasstag_set.all())
-        deleted_tags = [tag for tag in existing_tags if is_deleted_tag(tags, tag)]
-        new_tags = [tag for tag in tags if is_new_tag(existing_tags, tag)]
-        for tag in deleted_tags:
-            tag.delete()
+        new_tags = [tag for tag in tags if tag["status"] == "new"]
         for tag in new_tags:
-            new_tag = BadgeClassTag(name=tag["name"], institution=instance)
+            new_tag = BadgeClassTag(name=tag["name"], archived=False, institution=instance)
             new_tag.save()
+
+        existing_tags = list(instance.badgeclasstag_set.all())
+        for tag in [t for t in tags if t["status"] != "new"]:
+            tags_from_db = [t for t in existing_tags if t.name == tag["name"]]
+            if tags_from_db:
+                tag_db = tags_from_db[0]
+                if tag["status"] == "active" or tag["status"] == "archived":
+                    tag_db.archived = tag["status"] == "archived"
+                    tag_db.save()
+                else:
+                    from issuer.models import BadgeClass
+                    # Now remove all the cached tags on badgeClasses
+                    badge_classes = BadgeClass.objects \
+                        .filter(tags__name=tag_db.name) \
+                        .filter(issuer__faculty__institution=instance) \
+                        .all()
+                    for bc in badge_classes:
+                        bc.remove_cached_data(['cached_tags'])
+                    tag_db.delete()
 
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         instance.save()

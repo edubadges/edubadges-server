@@ -48,7 +48,7 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
 class BadgeClassTagType(DjangoObjectType):
     class Meta:
         model = BadgeClassTag
-        fields = ('id', 'name',)
+        fields = ('id', 'name', 'archived')
 
 
 class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,

@@ -4,7 +4,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView, BaseArchiveView
-from institution.models import Faculty, Institution
+from institution.models import Faculty, Institution, BadgeClassTag
 from institution.serializers import FacultySerializer, InstitutionSerializer
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
@@ -73,13 +73,21 @@ class FacultyList(VersionedObjectMixin, BaseEntityListView):
 
 class InstitutionsTagUsage(APIView):
     """
-    Endpoint used to check if a tag is being used by non-archived badge classes
-    POST to check, expects a tag name
+    Endpoint used to check if a tag is being used by non-archived badge classes within the users institution
+    POST to check, expects a single dict with the tag name to check
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ['post']
 
     def post(self, request, **kwargs):
-        data = []
         tag_name = request.data.get("name")
+
+        from issuer.models import BadgeClass
+
+        badge_classes = BadgeClass.objects\
+            .filter(tags__name=tag_name)\
+            .filter(archived=False) \
+            .filter(issuer__faculty__institution=request.user.institution)\
+            .all()
+        data = [{"name": bc.name} for bc in badge_classes]
         return Response(data, status=HTTP_200_OK)

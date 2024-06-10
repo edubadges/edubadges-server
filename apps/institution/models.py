@@ -273,6 +273,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
 class BadgeClassTag(models.Model):
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     name = models.CharField(max_length=254)
+    archived = models.BooleanField(default=False, help_text='Set to true to disable this tag from being selectable')
 
     def __unicode__(self):
         return self.name
