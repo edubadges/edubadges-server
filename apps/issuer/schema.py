@@ -5,7 +5,6 @@ from graphene_django.types import DjangoObjectType, Connection
 from directaward.schema import DirectAwardType, DirectAwardBundleType
 from endorsement.schema import EndorsementType
 
-
 from lti_edu.schema import StudentsEnrolledType
 from django.conf import settings
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
@@ -190,7 +189,6 @@ def schema_badge_class_tag_type():
 class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
                      UserProvisionmentResolverMixin, ImageResolverMixin, ExtensionResolverMixin,
                      DefaultLanguageResolverMixin, DjangoObjectType):
-
     class Meta:
         model = BadgeClass
         fields = ('id', 'name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
@@ -304,6 +302,7 @@ class Query(object):
     issuers = graphene.List(IssuerType)
     badge_classes = graphene.List(BadgeClassType)
     badge_classes_to_award = graphene.List(BadgeClassType)
+    enrollments_to_award = graphene.List(StudentsEnrolledType)
     public_badge_classes = graphene.List(BadgeClassType)
     badge_instances = graphene.List(BadgeInstanceType)
     revoked_badge_instances = graphene.List(BadgeInstanceType)
@@ -338,9 +337,22 @@ class Query(object):
                 if bc.has_permissions(info.context.user, ['may_read'])]
 
     def resolve_badge_classes_to_award(self, info, **kwargs):
-        return [bc for bc in BadgeClass.objects.filter(archived=False)
-                if bc.has_permissions(info.context.user, ['may_award']) and
-                bc.cached_pending_enrollments().__len__() > 0]
+        user = info.context.user
+        badge_classes = [bc for bc in
+                         BadgeClass.objects.filter(archived=False).filter(issuer__faculty__institution=user.institution)
+                         if
+                         bc.has_permissions(info.context.user,
+                                            ['may_award']) and bc.cached_pending_enrollments().__len__() > 0]
+        return badge_classes
+
+    def resolve_enrollments_to_award(self, info, **kwargs):
+        user = info.context.user
+        from lti_edu.models import StudentsEnrolled
+        enrollments = [se for se in
+                       StudentsEnrolled.objects.filter(badge_class__issuer__faculty__institution=user.institution)
+                       .filter(badge_instance=None, denied=False) if
+                       se.badge_class.has_permissions(user, ['may_award'])]
+        return enrollments
 
     def resolve_public_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.filter(is_private=False)]
