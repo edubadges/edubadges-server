@@ -11,11 +11,10 @@ from django.core.files.storage import DefaultStorage
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import resolve, reverse, Resolver404, NoReverseMatch
+from django.views.decorators.cache import never_cache
 from django.views.generic import RedirectView
 from rest_framework import status, permissions
-from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.exceptions import ValidationError
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -607,6 +606,7 @@ class ValidatorVersion(APIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ('get',)
 
+    @never_cache
     def get(self, request, *args, **kwargs):
         response = requests.get(headers={'Accept': 'application/json'}, url=urljoin(settings.VALIDATOR_URL, 'git.info'))
         return Response(response.json(), status=status.HTTP_200_OK)
