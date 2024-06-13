@@ -97,6 +97,13 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     )
     default_language = models.CharField(max_length=254, choices=DEFAULT_LANGUAGE_CHOICES,
                                         default=DEFAULT_LANGUAGE_DUTCH)
+    COUNTRY_DUTCH = "NL"
+    COUNTRY_ENGLISH = "EN"
+    COUNTRY_CHOICES = (
+        (COUNTRY_DUTCH, "NL"),
+        (COUNTRY_ENGLISH, "EN")
+    )
+    country_code = models.CharField(max_length=254, choices=COUNTRY_CHOICES, default=COUNTRY_DUTCH)
 
     def clean(self):
         if self.eppn_reg_exp_format:
