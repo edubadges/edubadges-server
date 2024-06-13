@@ -56,6 +56,8 @@ def login(request):
         "claims": "{\"id_token\":{\"preferred_username\":null,\"given_name\":null,"
                   "\"family_name\":null,\"email\":null,\"schac_home_organization\":null}}"
     }
+    if request.GET.get("force_login") == 'True':
+        params["prompt"] = "login"
     args = urllib.parse.urlencode(params)
     # Redirect to eduID and enforce a linked SURFconext user with validated names
     login_url = f"{settings.SURFCONEXT_DOMAIN_URL}/authorize?{args}"

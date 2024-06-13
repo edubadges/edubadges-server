@@ -31,7 +31,6 @@ class BadgrSocialLogin(RedirectView):
         try:
             lti_data = request.session.get('lti_data', None)
             logout(request)
-            # logout_badgr_user(request, request.user)
             request.session['lti_data'] = lti_data
             return super(BadgrSocialLogin, self).get(request, *args, **kwargs)
         except ValidationError as e:
@@ -60,7 +59,8 @@ class BadgrSocialLogin(RedirectView):
             return set_url_query_params(redirect_url, process=AuthProcess.CONNECT)
         else:
             validate_name = self.request.GET.get('validateName', "false").lower() == "true"
-            return set_url_query_params(redirect_url, validateName=validate_name)
+            force_login = self.request.GET.get('force') is not None
+            return set_url_query_params(redirect_url, validateName=validate_name, force_login=force_login)
 
 
 class BadgrSocialLoginCancel(RedirectView):

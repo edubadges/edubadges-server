@@ -60,7 +60,8 @@ def login(request):
     validate_name = request.GET.get("validateName")
     if validate_name and validate_name.lower() == "true":
         params["acr_values"] = "https://eduid.nl/trust/validate-names"
-
+    if request.GET.get("force_login") == 'True':
+        params["prompt"] = "login"
     args = urllib.parse.urlencode(params)
     # Redirect to eduID and enforce a linked SURFconext user with validated names
     login_url = f"{settings.EDUID_PROVIDER_URL}/authorize?{args}"
