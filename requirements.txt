@@ -116,7 +116,7 @@ git+https://github.com/edubadges/pylti1.3@master#egg=PyLTI1p3
 
 # after python3 upgrade
 social-auth-app-django==3.1.0
-urllib3==1.26.18
+urllib3==1.26.19
 
 # graphql
 graphene-django==2.15.0
