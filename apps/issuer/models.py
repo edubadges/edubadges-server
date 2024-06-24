@@ -417,6 +417,12 @@ class Issuer(EntityUserProvisionmentMixin,
                     "type": ["Extension", "extensions:InstitutionNameExtension"],
                     "InstitutionName": self.faculty.institution.name
                 }
+            if self.faculty.institution.country_code:
+                json['extensions:InstitutionCountryExtension'] = {
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionCountryExtension/context.json",
+                    "type": ["Extension", "extensions:InstitutionCountryExtension"],
+                    "InstitutionCountry": self.faculty.institution.country_code
+                }
 
         if expand_institution:
             if not self.faculty:
