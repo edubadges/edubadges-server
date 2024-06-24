@@ -60,7 +60,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
                   'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language', 'id',
                   'direct_awarding_enabled', 'award_allow_all_institutions', 'lti_enabled', 'alternative_identifier',
                   'eppn_reg_exp_format', 'linkedin_org_identifier', 'sis_integration_enabled', 'ob3_ssi_agent_enabled',
-                  'micro_credentials_enabled')
+                  'micro_credentials_enabled', 'country_code')
 
     faculties = graphene.List(FacultyType)
     public_faculties = graphene.List(FacultyType)
