@@ -1,12 +1,13 @@
+from datetime import datetime
+
 import graphene
+from django.conf import settings
 from graphene.relay import ConnectionField
 from graphene_django.types import DjangoObjectType, Connection
 
 from directaward.schema import DirectAwardType, DirectAwardBundleType
 from endorsement.schema import EndorsementType
-
 from lti_edu.schema import StudentsEnrolledType
-from django.conf import settings
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
     StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students, \
     DefaultLanguageResolverMixin, resolver_blocker_only_for_current_user
@@ -14,7 +15,6 @@ from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeInstanceEvidence, BadgeInstanceCollection
-from datetime import datetime
 
 
 class ExtensionResolverMixin(object):
