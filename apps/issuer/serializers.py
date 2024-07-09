@@ -259,7 +259,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             elif type_badge == BadgeClass.BADGE_CLASS_TYPE_REGULAR:
                 required_fields += ["criteria_text"]
                 extensions += ["LearningOutcomeExtension", "EQFExtension", "EducationProgramIdentifierExtension"]
-            elif type_badge == BadgeClass.BADGE_CLASS_TYPE_CURRICULAR and not is_mbo:
+            elif type_badge != BadgeClass.BADGE_CLASS_TYPE_CURRICULAR:
                 extensions += ["TimeInvestmentExtension"]
 
         errors = OrderedDict()
