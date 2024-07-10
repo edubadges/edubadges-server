@@ -246,10 +246,10 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         required_fields = ["name"]
         extensions = ["LanguageExtension"]
         is_mbo = issuer.institution.institution_type == Institution.TYPE_MBO
-        if is_mbo:
-            extensions += ["StudyLoadExtension"]
         is_private = data.get("is_private", False)
         type_badge = data["badge_class_type"]
+        if is_mbo and not is_private:
+            extensions += ["StudyLoadExtension"]
         if not is_private:
             required_fields += ["description", "criteria_text"]
             if type_badge == BadgeClass.BADGE_CLASS_TYPE_MICRO:
@@ -259,8 +259,6 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             elif type_badge == BadgeClass.BADGE_CLASS_TYPE_REGULAR:
                 required_fields += ["criteria_text"]
                 extensions += ["LearningOutcomeExtension", "EQFExtension", "EducationProgramIdentifierExtension"]
-            elif type_badge != BadgeClass.BADGE_CLASS_TYPE_CURRICULAR:
-                extensions += ["TimeInvestmentExtension"]
 
         errors = OrderedDict()
         for field_name in required_fields:
