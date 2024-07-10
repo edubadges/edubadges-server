@@ -2,16 +2,21 @@
 
 from django.db import migrations
 
+from issuer.micro_credentials_constants import micro_credentials_framework, micro_credentials_framework_mbo
+
 
 def migrate_micro_credentials_badge_class_alignment(apps, schema_editor):
     BadgeClassAlignment = apps.get_model('issuer', 'BadgeClassAlignment')
-    mc_alignments = BadgeClassAlignment.object.filter(name__icontains="Microcredentials voor Professionals").all()
+    mc_alignments = BadgeClassAlignment.objects \
+        .filter(target_name__icontains="Microcredentials voor Professionals") \
+        .all()
     for alignment in mc_alignments:
         bc = alignment.badgeclass
         is_mbo = bc.issuer.faculty.institution.institution_type == "MBO"
-        bc.quality_assurance_name = bc.target_name
-        bc.quality_assurance_description = bc.target_description
-        bc.quality_assurance_url = "https://npuls.nl/microcredentials-mbo/" if is_mbo else "https://www.versnellingsplan.nl/en/Kennisbank/pilot-microcredentials-2/"
+        mc_framework = micro_credentials_framework_mbo if is_mbo else micro_credentials_framework
+        bc.quality_assurance_name = mc_framework.get("name")
+        bc.quality_assurance_description = mc_framework.get("description")
+        bc.quality_assurance_url = mc_framework.get("url")
         bc.save()
         alignment.delete()
 
