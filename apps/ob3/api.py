@@ -61,11 +61,11 @@ class CredentialsView(APIView):
             }
         }
         requests.post(json=request_data,
-                      url=f"{OB3_API_URL}/v1/credentials",
+                      url=f"{OB3_API_URL}/v0/credentials",
                       headers={'Accept': 'application/json'})
         subject_id = {"subjectId": subject_id}
         response = requests.post(json=subject_id,
-                                 url=f"{OB3_API_URL}/v1/offers",
+                                 url=f"{OB3_API_URL}/v0/offers",
                                  headers={'Accept': 'application/json'})
         response_json = response.json()
 
