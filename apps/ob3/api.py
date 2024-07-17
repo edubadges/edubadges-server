@@ -30,6 +30,7 @@ class CredentialsView(APIView):
         issuer = badgeclass.issuer
         request_data = {
             "subjectId": subject_id,
+            "credentialConfigurationId": "w3c_vc_credential",
             "credential": {
                 "issuer": {
                     "id": f"{UI_URL}/public/issuers/{issuer.entity_id}",
@@ -39,7 +40,6 @@ class CredentialsView(APIView):
                     "name": issuer.name_english
                 },
                 "credentialSubject": {
-                    "id": "",
                     "type": [
                         "AchievementSubject"
                     ],
