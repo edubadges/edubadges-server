@@ -26,10 +26,10 @@ class CredentialsView(APIView):
         badgeclass = badge_instance.badgeclass
         criteria = badgeclass.criteria_text
         criteria_type = "narrative"
-        subject_id = str(uuid.uuid4())
+        offer_id = str(uuid.uuid4())
         issuer = badgeclass.issuer
         request_data = {
-            "subjectId": subject_id,
+            "offerId": offer_id,
             "credentialConfigurationId": "w3c_vc_credential",
             "credential": {
                 "issuer": {
@@ -63,8 +63,9 @@ class CredentialsView(APIView):
         requests.post(json=request_data,
                       url=f"{OB3_API_URL}/v0/credentials",
                       headers={'Accept': 'application/json'})
-        subject_id = {"subjectId": subject_id}
-        response = requests.post(json=subject_id,
+
+        offer_id = {"offerId": subject_id}
+        response = requests.post(json=offer_id,
                                  url=f"{OB3_API_URL}/v0/offers",
                                  headers={'Accept': 'application/json'})
         response_json = response.json()
