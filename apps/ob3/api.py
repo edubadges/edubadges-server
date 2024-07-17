@@ -64,7 +64,7 @@ class CredentialsView(APIView):
                       url=f"{OB3_API_URL}/v0/credentials",
                       headers={'Accept': 'application/json'})
 
-        offer_id = {"offerId": subject_id}
+        offer_id = {"offerId": offer_id}
         response = requests.post(json=offer_id,
                                  url=f"{OB3_API_URL}/v0/offers",
                                  headers={'Accept': 'application/json'})
