@@ -21,9 +21,11 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 class BaseAuditedModel(CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True,
+                                   related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
-    updated_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name="+")
+    updated_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True,
+                                   related_name="+")
 
     class Meta:
         abstract = True
@@ -108,7 +110,8 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, CacheModel):
     oauth_authorization_redirect = models.URLField(null=True)
     use_auth_code_exchange = models.BooleanField(default=False)
     is_demo_environment = models.BooleanField(default=False, blank=True, null=True)
-    oauth_application = models.ForeignKey("oauth2_provider.Application", on_delete=models.PROTECT, null=True, blank=True)
+    oauth_application = models.ForeignKey("oauth2_provider.Application", on_delete=models.PROTECT, null=True,
+                                          blank=True)
 
     objects = BadgrAppManager()
 
@@ -191,7 +194,6 @@ class LegacyTokenProxy(Token):
 
 
 class ArchiveMixin(CacheModel):
-
     archived = models.BooleanField(default=False)
 
     class Meta:
@@ -227,3 +229,20 @@ class ArchiveMixin(CacheModel):
                 self.parent.publish()
             except AttributeError:  # no parent
                 pass
+
+
+class SystemNotification(models.Model):
+    title = models.CharField(max_length=255, blank=False, null=False, default=None)
+    notification_en = models.TextField(blank=False, null=False, default=None)
+    notification_nl = models.TextField(blank=False, null=False, default=None)
+    display_start = models.DateTimeField(blank=False, null=False)
+    display_end = models.DateTimeField(blank=False, null=False)
+
+    NOTIFICATION_TYPE_WARNING = 'warning'
+    NOTIFICATION_TYPE_INFO = 'info'
+    NOTIFICATION_TYPE_CHOICES = (
+        (NOTIFICATION_TYPE_WARNING, 'warning'),
+        (NOTIFICATION_TYPE_INFO, 'info'),
+    )
+    notification_type = models.CharField(max_length=254, choices=NOTIFICATION_TYPE_CHOICES, blank=False, null=False,
+                                         default=NOTIFICATION_TYPE_INFO)
