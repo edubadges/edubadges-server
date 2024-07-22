@@ -30,7 +30,7 @@ python-memcached==1.59
 
 # djangorestframework==3.15.2
 # Can't upgrade because Django < 4.2 no longer supported
-djangorestframework==3.15.0
+djangorestframework==3.15.1
 
 # Django Allauth
 django-allauth==0.51.0
