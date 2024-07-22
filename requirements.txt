@@ -122,7 +122,7 @@ urllib3==1.26.19
 
 # graphql
 graphene-django==2.15.0
-aniso8601<=7p
+aniso8601<=7
 
 # inline css
 premailer==3.7.0
