@@ -25,12 +25,11 @@ class CredentialsView(APIView):
 
         badgeclass = badge_instance.badgeclass
         criteria = badgeclass.criteria_text
-        criteria_type = "narrative"
         offer_id = str(uuid.uuid4())
         issuer = badgeclass.issuer
         request_data = {
             "offerId": offer_id,
-            "credentialConfigurationId": "w3c_vc_credential",
+            "credentialConfigurationId": "openbadge_credential",
             "credential": {
                 "issuer": {
                     "id": f"{UI_URL}/public/issuers/{issuer.entity_id}",
@@ -49,7 +48,7 @@ class CredentialsView(APIView):
                             "Achievement"
                         ],
                         "criteria": {
-                            criteria_type: criteria
+                            "narrative": criteria
                         },
                         "description": badgeclass.description,
                         "name": badgeclass.name,
