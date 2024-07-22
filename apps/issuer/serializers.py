@@ -248,6 +248,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         is_mbo = issuer.institution.institution_type == Institution.TYPE_MBO
         is_private = data.get("is_private", False)
         type_badge = data["badge_class_type"]
+        self.formal = type_badge == BadgeClass.BADGE_CLASS_TYPE_REGULAR
         if is_mbo and not is_private:
             extensions += ["StudyLoadExtension"]
         if not is_private:
@@ -314,16 +315,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         return strip_tags(description)
 
     def validate_extensions(self, extensions):
-        is_formal = False
         if extensions:
             for ext_name, ext in extensions.items():
                 if "@context" in ext and not ext['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
                     raise BadgrValidationError(
                         error_code=999,
                         error_message=f"extensions @context invalid {ext['@context']}")
-                if ext_name.endswith('ECTSExtension') or ext_name.endswith('StudyLoadExtension'):
-                    is_formal = True
-        self.formal = is_formal
         return extensions
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
