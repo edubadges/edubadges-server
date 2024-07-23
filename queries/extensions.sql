@@ -11,13 +11,13 @@ select i.name_english,  ins.name_english as institution_name, ins.identifier
  inner join institution_institution ins on ins.id = f.institution_id
  where ins.identifier = 'university-example.org';
 
- select ins.institution_type
+ select b.id, b.entity_id, ins.institution_type, b.name, ext.name, ext.original_json
  from issuer_badgeclass b
  inner join issuer_badgeclassextension ext on ext.badgeclass_id = b.id
  inner join issuer_issuer i on i.id = b.issuer_id
  inner join institution_faculty f on f.id = i.faculty_id
  inner join institution_institution ins on ins.id = f.institution_id
- where b.is_micro_credentials = 1 and ins.institution_type is not null;
+ where ins.institution_type <> 'MBO' and ext.name = 'extensions:StudyLoadExtension';
 
 
 
@@ -30,3 +30,11 @@ select i.name_english,  ins.name_english as institution_name, ins.identifier
  inner join institution_faculty f on f.id = i.faculty_id
  inner join institution_institution ins on ins.id = f.institution_id
  where b.is_micro_credentials = 1 and ins.institution_type is not null;
+
+
+select b.id, b.name as badgeclass_name,  ins.name_english as institution_name, ins.identifier
+ from issuer_badgeclass b
+ inner join issuer_issuer i on i.id = b.issuer_id
+ inner join institution_faculty f on f.id = i.faculty_id
+ inner join institution_institution ins on ins.id = f.institution_id
+ where b.is_micro_credentials = 1 and ins.institution_type = 'MBO';
