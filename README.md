@@ -26,6 +26,49 @@ Read more on [edubadges.nl](https://www.surf.nl/en/edubadges-national-approach-t
 Badgr was developed by [Concentric Sky](https://concentricsky.com), starting in 2015 to serve as an open source reference implementation of the Open Badges Specification. It provides functionality to issue portable, verifiable Open Badges as well as to allow users to manage badges they have been awarded by any issuer that uses this open data standard. Since 2015, Badgr has grown to be used by hundreds of educational institutions and other people and organizations worldwide. See [Project Homepage](https://badgr.org) for more details about contributing to and integrating with Badgr.
 
 # Edubadges installation instructions
+
+Either choose local development, where everything is installed and running on the local machine. Or choose Docker
+
+## How to use Docker and docker compose.
+
+Prerequisites: 
+* Docker and Docker compose (current docker desktop ships them by default)
+
+### Prepare a dotenv file for running docker commands
+
+Make an .env.docker file with a few secrets. See docker-compose for the ENV vars that are referenced from
+the shell running docker compose commands. At time of writing these are:
+
+```
+BADGR_DB_PASSWORD=local-secret-only
+OIDC_RS_SECRET=
+EDU_ID_SECRET=
+SURF_CONEXT_SECRET=
+```
+
+The BADGR_DB_PASSWORD isn't critical as it's only used within the docker-compose cluster. The
+other secrets should be asked at a colleague as they are required to communicate with auth, profile
+and sso services.
+
+Load these in the shell where you run docker-compse. E.g by sourcing it, or with a tool like dotenv.
+
+### Run docker compose up
+
+This will build and run any docker images in the foreground. Ctrl-C to exit.
+Add the `-d` flag to run in the background.
+
+```
+docker compose up
+```
+
+This will:
+* Start Mysql
+* Start memcached
+* Build a container that can run and host the app.
+* Run that container and mount the local source code in the app.
+
+TODO: can we run the server so it reboots on detecting changes instead of having to reboot the image?
+
 ## How to get started on your local development environment.
 Prerequisites:
 
