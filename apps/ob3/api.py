@@ -53,6 +53,7 @@ class CredentialsView(APIView):
                         "description": badgeclass.description,
                         "name": badgeclass.name,
                         "image": {
+                            "type":"Image",
                             "id": badgeclass.image_url()
                         }
                     }
