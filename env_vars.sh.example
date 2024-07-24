@@ -33,5 +33,5 @@ export UI_URL="http://localhost:4000"
 export UNSUBSCRIBE_SECRET_KEY="secret"
 export LC_ALL="en_US.UTF-8"
 export LANG="en_US.UTF-8"
-export MEMCACHED_HOST="127.0.0.1
+export MEMCACHED_HOST="127.0.0.1"
 export MEMCACHED_PORT="11211"
