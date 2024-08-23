@@ -350,6 +350,12 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                 setattr(instance, key, value)
             if key in upgrade_keys and getattr(instance, key) is None:
                 setattr(instance, key, value)
+            if key == 'extension_items':
+                has_existing_lo = [ext for ext in list(instance.badgeclassextension_set.all()) if ext.name == 'extensions:LearningOutcomeExtension']
+                has_new_lo = validated_data.get('extension_items').get('extensions:LearningOutcomeExtension', False)
+                # Corner case where previously LO was not required and now is
+                if not has_existing_lo and has_new_lo:
+                    setattr(instance, key, value)
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         instance.tags.set(validated_data.get('tags', []))
         try:
