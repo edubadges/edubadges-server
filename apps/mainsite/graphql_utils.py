@@ -39,7 +39,7 @@ def resolver_blocker_for_super_user(f):
 
     def wrapper(*args, **kwargs):
         info = args[1]
-        if not hasattr(info.context.user, 'is_superuser') and not info.context.user.is_superuser:
+        if not getattr(info.context.user, 'is_superuser', False):
             raise GraphQLException('Only super users may retrieve {} of {}'.format(info.field_name, info.parent_type))
         return f(*args, **kwargs)
 
