@@ -24,7 +24,8 @@ class IssuerExtensionInline(TabularInline):
 class IssuerAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = ('created_at', 'created_by', 'old_json', 'source', 'source_url', 'entity_id', 'archived')
     list_display = ('name_english', 'name_dutch', 'img', 'entity_id', 'created_by', 'created_at', 'archived',
-                    admin_list_linkify('faculty', 'name_english'), admin_list_linkify('institution', 'name_english'))
+                    admin_list_linkify('faculty', 'name_english'),
+                    admin_list_linkify('institution', 'name_english'))
     list_display_links = ('name_english',)
     list_filter = ('created_at',)
     search_fields = ('name_english', 'name_dutch', 'entity_id')
@@ -35,8 +36,8 @@ class IssuerAdmin(DjangoObjectActions, ModelAdmin):
         }),
         (None, {
             'fields': (
-            'image_dutch', 'image_english', 'name_english', 'url_english', 'name_dutch', 'url_dutch', 'email',
-            'description_english', 'description_dutch', 'badgrapp', 'archived')
+                'image_dutch', 'image_english', 'name_english', 'url_english', 'name_dutch', 'url_dutch', 'email',
+                'description_english', 'description_dutch', 'badgrapp', 'archived')
         }),
         ('JSON', {
             'fields': ('old_json',)
@@ -165,19 +166,21 @@ class BadgeInstanceExtensionInline(TabularInline):
 
 class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
     readonly_fields = (
-    'created_at', 'created_by', 'updated_at', 'updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id',
-    'source', 'source_url')
+        'created_at', 'created_by', 'updated_at', 'updated_by', 'image', 'entity_id', 'old_json', 'salt', 'entity_id',
+        'source', 'source_url')
     list_display = (
-    'badge_image', 'user', 'entity_id', admin_list_linkify('badgeclass', 'name'), admin_list_linkify('issuer', 'name'),
-    'award_type')
+        'badge_image', 'user', 'entity_id',
+        admin_list_linkify('badgeclass', 'name'),
+        admin_list_linkify('issuer', 'name'),
+        'award_type')
     list_display_links = ('badge_image',)
     list_filter = ('created_at',)
-    search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name')
+    search_fields = ('recipient_identifier', 'entity_id', 'badgeclass__name', 'issuer__name_english')
     raw_id_fields = ('badgeclass', 'issuer')
     fieldsets = (
         ('Metadata', {
             'fields': (
-            'source', 'source_url', 'created_by', 'created_at', 'updated_by', 'updated_at', 'entity_id', 'salt'),
+                'source', 'source_url', 'created_by', 'created_at', 'updated_by', 'updated_at', 'entity_id', 'salt'),
             'classes': ("collapse",)
         }),
         ('Badgeclass', {
@@ -185,7 +188,7 @@ class BadgeInstanceAdmin(DjangoObjectActions, ModelAdmin):
         }),
         ('Assertion', {
             'fields': (
-            'public', 'acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at')
+                'public', 'acceptance', 'recipient_type', 'recipient_identifier', 'image', 'issued_on', 'expires_at')
         }),
         ('Revocation', {
             'fields': ('revoked', 'revocation_reason')
