@@ -5,8 +5,10 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView, \
     SpectacularSwaggerOauthRedirectView
+from graphene_django.debug.middleware import DjangoDebugMiddleware
+
 from mainsite.admin import badgr_admin
-from mainsite.graphql_view import ExtendedGraphQLView
+from mainsite.graphql_view import ExtendedGraphQLView, DisableIntrospectionMiddleware
 from mainsite.views import serve_protected_document
 
 badgr_admin.autodiscover()
@@ -17,9 +19,9 @@ from django.views.generic.base import RedirectView, TemplateView
 from mainsite.views import SitewideActionFormView
 from mainsite.views import email_unsubscribe, error404, error500
 
-
 urlpatterns = [
-    path("graphql", csrf_exempt(ExtendedGraphQLView.as_view(graphiql=True))),
+    path("graphql", csrf_exempt(ExtendedGraphQLView.as_view(
+        graphiql=True, middleware=[DisableIntrospectionMiddleware(), DjangoDebugMiddleware()]))),
 
     # Backup URLs in case the server isn't serving these directly
     url(r'^favicon\.png[/]?$', RedirectView.as_view(url='%simages/favicon.png' % settings.STATIC_URL, permanent=True)),
@@ -160,6 +162,7 @@ handler500 = error500
 urlpatterns += [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/swagger-ui/oauth2-redirect.html', SpectacularSwaggerOauthRedirectView.as_view(), name='redirect-ui'),
+    path('api/schema/swagger-ui/oauth2-redirect.html', SpectacularSwaggerOauthRedirectView.as_view(),
+         name='redirect-ui'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
