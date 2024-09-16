@@ -411,6 +411,9 @@ class BadgeClassJson(JSONComponentView):
             json['assessmentType'] = badge_class.assessment_type
             json['assessmentIdVerified'] = badge_class.assessment_id_verified
             json['assessmentSupervised'] = badge_class.assessment_supervised
+            json['qualityAssuranceDescription'] = badge_class.quality_assurance_description
+            json['qualityAssuranceName'] = badge_class.quality_assurance_name
+            json['qualityAssuranceUrl'] = badge_class.quality_assurance_url
             json['participation'] = badge_class.participation
             json['stackable'] = badge_class.stackable
             json['gradeAchievedRequired'] = badge_class.grade_achieved_required
