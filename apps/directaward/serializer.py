@@ -1,5 +1,7 @@
 import threading
+import re
 
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from rest_framework import serializers
 
@@ -28,6 +30,14 @@ class DirectAwardSerializer(serializers.Serializer):
     grade_achieved = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
     )
+
+    def validate_eppn(self, eppn):
+        eppn_reg_exp_format = self.context['request'].user.institution.eppn_reg_exp_format
+        if eppn_reg_exp_format:
+            eppn_re = re.compile(eppn_reg_exp_format, re.IGNORECASE)
+            if not bool(eppn_re.match(eppn)):
+                raise ValidationError(message="Incorrect eppn format", code="error")
+        return eppn
 
     def update(self, instance, validated_data):
         [setattr(instance, attr, validated_data.get(attr)) for attr in validated_data]
@@ -75,7 +85,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         if user_permissions["may_award"]:
             successfull_direct_awards = []
             if hasattr(self.context["request"], "sis_api_call") and getattr(
-                self.context["request"], "sis_api_call"
+                    self.context["request"], "sis_api_call"
             ):
                 validated_data["sis_import"] = True
                 validated_data["sis_client_id"] = (
