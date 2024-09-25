@@ -17,4 +17,8 @@ class Migration(migrations.Migration):
             name='recipient_identifier',
             field=models.EmailField(db_index=True, max_length=768),
         ),
+        migrations.AlterIndexTogether(
+            name='badgeinstance',
+            index_together=set([('recipient_identifier', 'badgeclass', 'revoked')]),
+        ),
     ]
