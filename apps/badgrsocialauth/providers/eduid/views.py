@@ -1,4 +1,3 @@
-import os
 import json
 import logging
 import urllib.error
@@ -8,11 +7,11 @@ from base64 import b64encode
 from urllib.parse import urlparse
 
 import requests
+from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import (
     render_authentication_error,
     complete_social_login,
 )
-from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
@@ -29,7 +28,6 @@ from mainsite.models import BadgrApp
 from .provider import EduIDProvider
 
 logger = logging.getLogger("Badgr.Debug")
-from allauth.account.adapter import get_adapter as get_account_adapter
 
 
 def encode(username, password):  # client_id, secret
@@ -60,7 +58,7 @@ def login(request):
 
     params = {
         "state": state,
-        "client_id": os.environ.get("EDU_ID_CLIENT"),
+        "client_id": settings.EDU_ID_CLIENT,
         "response_type": "code",
         "scope": "openid eduid.nl/links",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
@@ -97,8 +95,8 @@ def callback(request):
         "grant_type": "authorization_code",
         "redirect_uri": "%s/account/eduid/login/callback/" % settings.HTTP_ORIGIN,
         "code": code,
-        "client_id": os.environ.get("EDU_ID_CLIENT"),
-        "client_secret": os.environ.get("EDU_ID_SECRET"),
+        "client_id": settings.EDU_ID_CLIENT,
+        "client_secret": settings.EDU_ID_SECRET,
     }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",

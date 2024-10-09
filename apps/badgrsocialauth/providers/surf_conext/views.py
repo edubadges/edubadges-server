@@ -1,4 +1,3 @@
-import os
 import datetime
 import json
 import logging
@@ -12,7 +11,6 @@ from allauth.socialaccount.helpers import (
     render_authentication_error,
     complete_social_login,
 )
-from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
@@ -59,11 +57,9 @@ def login(request):
         ]
     )
 
-    client_id = os.environ.get("SURF_CONEXT_CLIENT")
-
     params = {
         "state": state,
-        "client_id": client_id,
+        "client_id": settings.SURF_CONEXT_CLIENT,
         "response_type": "code",
         "scope": "openid",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/openid/login/callback/",
@@ -116,8 +112,8 @@ def callback(request):
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/openid/login/callback/",
         "code": code,
         "scope": "openid",
-        "client_id": os.environ.get("EDU_ID_CLIENT"),
-        "client_secret": os.environ.get("EDU_ID_SECRET"),
+        "client_id": settings.SURF_CONEXT_CLIENT,
+        "client_secret": settings.SURF_CONEXT_SECRET,
     }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
