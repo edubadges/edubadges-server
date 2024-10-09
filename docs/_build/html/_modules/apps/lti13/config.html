@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>apps.lti13.config &#8212; Edubadges 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for apps.lti13.config</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">pylti1p3.deployment</span> <span class="kn">import</span> <span class="n">Deployment</span>
+<span class="kn">from</span> <span class="nn">pylti1p3.exception</span> <span class="kn">import</span> <span class="n">LtiException</span>
+<span class="kn">from</span> <span class="nn">pylti1p3.registration</span> <span class="kn">import</span> <span class="n">Registration</span>
+<span class="kn">from</span> <span class="nn">pylti1p3.tool_config.abstract</span> <span class="kn">import</span> <span class="n">ToolConfAbstract</span>
+
+
+<span class="n">default_app_config</span> <span class="o">=</span> <span class="s1">&#39;pylti1p3.contrib.django.lti1p3_tool_config.apps.PyLTI1p3ToolConfig&#39;</span>
+
+
+<div class="viewcode-block" id="DjangoDbToolConf"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf">[docs]</a><span class="k">class</span> <span class="nc">DjangoDbToolConf</span><span class="p">(</span><span class="n">ToolConfAbstract</span><span class="p">):</span>
+    <span class="n">_lti_tools</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_tools_cls</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_keys_cls</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">LtiTool</span><span class="p">,</span> <span class="n">LtiToolKey</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DjangoDbToolConf</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lti_tools</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tools_cls</span> <span class="o">=</span> <span class="n">LtiTool</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keys_cls</span> <span class="o">=</span> <span class="n">LtiToolKey</span>
+
+<div class="viewcode-block" id="DjangoDbToolConf.get_lti_tool"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf.get_lti_tool">[docs]</a>    <span class="k">def</span> <span class="nf">get_lti_tool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iss</span><span class="p">,</span> <span class="n">client_id</span><span class="p">):</span>
+        <span class="n">lti_tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lti_tools</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">iss</span><span class="p">)</span> <span class="k">if</span> <span class="n">client_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lti_tools</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">iss</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lti_tool</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lti_tool</span>
+
+        <span class="k">if</span> <span class="n">client_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lti_tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tools_cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">issuer</span><span class="o">=</span><span class="n">iss</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;use_by_default&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">lti_tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tools_cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">issuer</span><span class="o">=</span><span class="n">iss</span><span class="p">,</span> <span class="n">client_id</span><span class="o">=</span><span class="n">client_id</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tools_cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="n">lti_tool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LtiException</span><span class="p">(</span><span class="s1">&#39;iss </span><span class="si">%s</span><span class="s1"> [client_id=</span><span class="si">%s</span><span class="s1">] not found in settings&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">iss</span><span class="p">,</span> <span class="n">client_id</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">client_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lti_tools</span><span class="p">[</span><span class="n">iss</span><span class="p">]</span> <span class="o">=</span> <span class="n">lti_tool</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">iss</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lti_tools</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lti_tools</span><span class="p">[</span><span class="n">iss</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lti_tools</span><span class="p">[</span><span class="n">iss</span><span class="p">][</span><span class="n">client_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">lti_tool</span>
+
+        <span class="k">return</span> <span class="n">lti_tool</span></div>
+
+<div class="viewcode-block" id="DjangoDbToolConf.check_iss_has_one_client"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf.check_iss_has_one_client">[docs]</a>    <span class="k">def</span> <span class="nf">check_iss_has_one_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iss</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DjangoDbToolConf.check_iss_has_many_clients"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf.check_iss_has_many_clients">[docs]</a>    <span class="k">def</span> <span class="nf">check_iss_has_many_clients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iss</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="DjangoDbToolConf.find_registration_by_issuer"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf.find_registration_by_issuer">[docs]</a>    <span class="k">def</span> <span class="nf">find_registration_by_issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iss</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="DjangoDbToolConf.find_registration_by_params"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf.find_registration_by_params">[docs]</a>    <span class="k">def</span> <span class="nf">find_registration_by_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iss</span><span class="p">,</span> <span class="n">client_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">lti_tool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lti_tool</span><span class="p">(</span><span class="n">iss</span><span class="p">,</span> <span class="n">client_id</span><span class="p">)</span>
+        <span class="n">auth_audience</span> <span class="o">=</span> <span class="n">lti_tool</span><span class="o">.</span><span class="n">auth_audience</span> <span class="k">if</span> <span class="n">lti_tool</span><span class="o">.</span><span class="n">auth_audience</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">key_set</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">lti_tool</span><span class="o">.</span><span class="n">key_set</span><span class="p">)</span> <span class="k">if</span> <span class="n">lti_tool</span><span class="o">.</span><span class="n">key_set</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">key_set_url</span> <span class="o">=</span> <span class="n">lti_tool</span><span class="o">.</span><span class="n">key_set_url</span> <span class="k">if</span> <span class="n">lti_tool</span><span class="o">.</span><span class="n">key_set_url</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">tool_public_key</span> <span class="o">=</span> <span class="n">lti_tool</span><span class="o">.</span><span class="n">tool_key</span><span class="o">.</span><span class="n">public_key</span> <span class="k">if</span> <span class="n">lti_tool</span><span class="o">.</span><span class="n">tool_key</span><span class="o">.</span><span class="n">public_key</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">Registration</span><span class="p">()</span>
+        <span class="n">reg</span><span class="o">.</span><span class="n">set_auth_login_url</span><span class="p">(</span><span class="n">lti_tool</span><span class="o">.</span><span class="n">auth_login_url</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_auth_token_url</span><span class="p">(</span><span class="n">lti_tool</span><span class="o">.</span><span class="n">auth_token_url</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_auth_audience</span><span class="p">(</span><span class="n">auth_audience</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_client_id</span><span class="p">(</span><span class="n">lti_tool</span><span class="o">.</span><span class="n">client_id</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_institution_identifier</span><span class="p">(</span><span class="n">lti_tool</span><span class="o">.</span><span class="n">institution</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_key_set</span><span class="p">(</span><span class="n">key_set</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_key_set_url</span><span class="p">(</span><span class="n">key_set_url</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_issuer</span><span class="p">(</span><span class="n">lti_tool</span><span class="o">.</span><span class="n">issuer</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_tool_private_key</span><span class="p">(</span><span class="n">lti_tool</span><span class="o">.</span><span class="n">tool_key</span><span class="o">.</span><span class="n">private_key</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">set_tool_public_key</span><span class="p">(</span><span class="n">tool_public_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reg</span></div>
+
+<div class="viewcode-block" id="DjangoDbToolConf.find_deployment"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf.find_deployment">[docs]</a>    <span class="k">def</span> <span class="nf">find_deployment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iss</span><span class="p">,</span> <span class="n">deployment_id</span><span class="p">):</span>
+        <span class="c1"># we don&#39;t check for deployments</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">Deployment</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">d</span><span class="o">.</span><span class="n">set_deployment_id</span><span class="p">(</span><span class="n">deployment_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DjangoDbToolConf.find_deployment_by_params"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf.find_deployment_by_params">[docs]</a>    <span class="k">def</span> <span class="nf">find_deployment_by_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iss</span><span class="p">,</span> <span class="n">deployment_id</span><span class="p">,</span> <span class="n">client_id</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># we don&#39;t check for deployments</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">Deployment</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">d</span><span class="o">.</span><span class="n">set_deployment_id</span><span class="p">(</span><span class="n">deployment_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DjangoDbToolConf.get_jwks"><a class="viewcode-back" href="../../../apps.lti13.html#apps.lti13.config.DjangoDbToolConf.get_jwks">[docs]</a>    <span class="k">def</span> <span class="nf">get_jwks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">client_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">search_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">iss</span><span class="p">:</span>
+            <span class="n">search_kwargs</span><span class="p">[</span><span class="s1">&#39;lti_tools__issuer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">iss</span>
+        <span class="k">if</span> <span class="n">client_id</span><span class="p">:</span>
+            <span class="n">search_kwargs</span><span class="p">[</span><span class="s1">&#39;lti_tools__client_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">client_id</span>
+
+        <span class="k">if</span> <span class="n">search_kwargs</span><span class="p">:</span>
+            <span class="n">search_kwargs</span><span class="p">[</span><span class="s1">&#39;lti_tools__is_active&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">**</span><span class="n">search_kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keys_cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+        <span class="n">jwks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">public_key_lst</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">public_key</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">public_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">public_key_lst</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">public_jwk</span><span class="p">:</span>
+                    <span class="n">jwks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">public_jwk</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">jwks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Registration</span><span class="o">.</span><span class="n">get_jwk</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">public_key</span><span class="p">))</span>
+                <span class="n">public_key_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">public_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;keys&#39;</span><span class="p">:</span> <span class="n">jwks</span>
+        <span class="p">}</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Edubadges</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps.html">apps package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Okke, Daniel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

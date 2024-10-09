@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>apps.lti13.migrations package &#8212; Edubadges 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=af2ce170"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="apps.lti_edu package" href="apps.lti_edu.html" />
+    <link rel="prev" title="apps.lti13 package" href="apps.lti13.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="apps-lti13-migrations-package">
+<h1>apps.lti13.migrations package<a class="headerlink" href="#apps-lti13-migrations-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-apps.lti13.migrations.0001_initial">
+<span id="apps-lti13-migrations-0001-initial-module"></span><h2>apps.lti13.migrations.0001_initial module<a class="headerlink" href="#module-apps.lti13.migrations.0001_initial" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0001_initial.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.lti13.migrations.0001_initial.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/lti13/migrations/0001_initial.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.lti13.migrations.0001_initial.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0001_initial.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('institution',</span> <span class="pre">'0043_institution_public_institution')]</span></em><a class="headerlink" href="#apps.lti13.migrations.0001_initial.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0001_initial.Migration.initial">
+<span class="sig-name descname"><span class="pre">initial</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#apps.lti13.migrations.0001_initial.Migration.initial" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0001_initial.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='LtiToolKey',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.AutoField&gt;),</span> <span class="pre">('name',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('private_key',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('public_key',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('public_jwk',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;)],</span> <span class="pre">options={'verbose_name':</span> <span class="pre">'lti</span> <span class="pre">1.3</span> <span class="pre">tool</span> <span class="pre">key',</span> <span class="pre">'verbose_name_plural':</span> <span class="pre">'lti</span> <span class="pre">1.3</span> <span class="pre">tool</span> <span class="pre">keys',</span> <span class="pre">'db_table':</span> <span class="pre">'lti1p3_tool_key'}&gt;,</span> <span class="pre">&lt;CreateModel</span>&#160; <span class="pre">name='LtiTool',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.AutoField&gt;),</span> <span class="pre">('title',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('is_active',</span> <span class="pre">&lt;django.db.models.fields.BooleanField&gt;),</span> <span class="pre">('issuer',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('client_id',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('use_by_default',</span> <span class="pre">&lt;django.db.models.fields.BooleanField&gt;),</span> <span class="pre">('auth_login_url',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('auth_token_url',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('auth_audience',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('key_set_url',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('key_set',</span> <span class="pre">&lt;django.db.models.fields.TextField&gt;),</span> <span class="pre">('institution',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;),</span> <span class="pre">('tool_key',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)],</span> <span class="pre">options={'unique_together':</span> <span class="pre">{('issuer',</span> <span class="pre">'client_id')}}&gt;]</span></em><a class="headerlink" href="#apps.lti13.migrations.0001_initial.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="apps-lti13-migrations-0002-lticourse-module">
+<h2>apps.lti13.migrations.0002_lticourse module<a class="headerlink" href="#apps-lti13-migrations-0002-lticourse-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-apps.lti13.migrations.0003_lticourse_entity_id">
+<span id="apps-lti13-migrations-0003-lticourse-entity-id-module"></span><h2>apps.lti13.migrations.0003_lticourse_entity_id module<a class="headerlink" href="#module-apps.lti13.migrations.0003_lticourse_entity_id" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0003_lticourse_entity_id.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.lti13.migrations.0003_lticourse_entity_id.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/lti13/migrations/0003_lticourse_entity_id.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.lti13.migrations.0003_lticourse_entity_id.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0003_lticourse_entity_id.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('lti13',</span> <span class="pre">'0002_lticourse')]</span></em><a class="headerlink" href="#apps.lti13.migrations.0003_lticourse_entity_id.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0003_lticourse_entity_id.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='lticourse',</span> <span class="pre">name='entity_id',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;]</span></em><a class="headerlink" href="#apps.lti13.migrations.0003_lticourse_entity_id.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.lti13.migrations.0004_auto_20211117_1258">
+<span id="apps-lti13-migrations-0004-auto-20211117-1258-module"></span><h2>apps.lti13.migrations.0004_auto_20211117_1258 module<a class="headerlink" href="#module-apps.lti13.migrations.0004_auto_20211117_1258" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0004_auto_20211117_1258.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.lti13.migrations.0004_auto_20211117_1258.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/lti13/migrations/0004_auto_20211117_1258.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.lti13.migrations.0004_auto_20211117_1258.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0004_auto_20211117_1258.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('lti13',</span> <span class="pre">'0003_lticourse_entity_id')]</span></em><a class="headerlink" href="#apps.lti13.migrations.0004_auto_20211117_1258.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.lti13.migrations.0004_auto_20211117_1258.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='lticourse',</span> <span class="pre">name='tool',</span> <span class="pre">field=&lt;django.db.models.fields.related.ForeignKey&gt;,</span> <span class="pre">preserve_default=False&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='ltitool',</span> <span class="pre">name='description',</span> <span class="pre">field=&lt;django.db.models.fields.TextField&gt;&gt;]</span></em><a class="headerlink" href="#apps.lti13.migrations.0004_auto_20211117_1258.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.lti13.migrations">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-apps.lti13.migrations" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Edubadges</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="apps.html">apps package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apps.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.html#module-apps">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="apps.html">apps package</a><ul>
+  <li><a href="apps.lti13.html">apps.lti13 package</a><ul>
+      <li>Previous: <a href="apps.lti13.html" title="previous chapter">apps.lti13 package</a></li>
+      <li>Next: <a href="apps.lti_edu.html" title="next chapter">apps.lti_edu package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Okke, Daniel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/apps.lti13.migrations.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

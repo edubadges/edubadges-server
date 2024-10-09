@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>apps.issuer package &#8212; Edubadges 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=af2ce170"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="apps.issuer.management package" href="apps.issuer.management.html" />
+    <link rel="prev" title="apps.institution.tests package" href="apps.institution.tests.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="apps-issuer-package">
+<h1>apps.issuer package<a class="headerlink" href="#apps-issuer-package" title="Permalink to this heading">¶</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="apps.issuer.management.html">apps.issuer.management package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.management.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.management.commands.html">apps.issuer.management.commands package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.management.commands.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.management.commands.html#apps-issuer-management-commands-fix-badgeclass-images-module">apps.issuer.management.commands.fix_badgeclass_images module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.management.commands.html#apps-issuer-management-commands-verify-get-json-module">apps.issuer.management.commands.verify_get_json module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.management.commands.html#module-apps.issuer.management.commands">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.management.html#module-apps.issuer.management">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="apps.issuer.migrations.html">apps.issuer.migrations package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0001-initial-module">apps.issuer.migrations.0001_initial module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0002_auto_20150409_1200">apps.issuer.migrations.0002_auto_20150409_1200 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0002_auto_20150409_1200.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0002_auto_20150409_1200.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0002_auto_20150409_1200.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0003_auto_20150512_0657">apps.issuer.migrations.0003_auto_20150512_0657 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0003_auto_20150512_0657.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0003_auto_20150512_0657.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0003_auto_20150512_0657.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0004-auto-20150915-1722-module">apps.issuer.migrations.0004_auto_20150915_1722 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0005_auto_20150915_1723">apps.issuer.migrations.0005_auto_20150915_1723 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0005_auto_20150915_1723.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0005_auto_20150915_1723.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0005_auto_20150915_1723.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0005_auto_20150915_1723.copy_email_into_recipient_identifier"><code class="docutils literal notranslate"><span class="pre">copy_email_into_recipient_identifier()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0006_remove_badgeinstance_email">apps.issuer.migrations.0006_remove_badgeinstance_email module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0006_remove_badgeinstance_email.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0006_remove_badgeinstance_email.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0006_remove_badgeinstance_email.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0007_auto_20151117_1555">apps.issuer.migrations.0007_auto_20151117_1555 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0007_auto_20151117_1555.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0007_auto_20151117_1555.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0007_auto_20151117_1555.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0008_auto_20160322_1404">apps.issuer.migrations.0008_auto_20160322_1404 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0008_auto_20160322_1404.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0008_auto_20160322_1404.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0008_auto_20160322_1404.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0009_badgeinstance_acceptance">apps.issuer.migrations.0009_badgeinstance_acceptance module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0009_badgeinstance_acceptance.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0009_badgeinstance_acceptance.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0009_badgeinstance_acceptance.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0010_auto_20170120_1724">apps.issuer.migrations.0010_auto_20170120_1724 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0010_auto_20170120_1724.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0010_auto_20170120_1724.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0010_auto_20170120_1724.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0011_auto_20170213_1531">apps.issuer.migrations.0011_auto_20170213_1531 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0011_auto_20170213_1531.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0011_auto_20170213_1531.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0011_auto_20170213_1531.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0012-auto-20170213-1531-module">apps.issuer.migrations.0012_auto_20170213_1531 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0013_auto_20170214_0711">apps.issuer.migrations.0013_auto_20170214_0711 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0013_auto_20170214_0711.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0013_auto_20170214_0711.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0013_auto_20170214_0711.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0014_issuerstaff_role">apps.issuer.migrations.0014_issuerstaff_role module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0014_issuerstaff_role.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0014_issuerstaff_role.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0014_issuerstaff_role.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0015_auto_20170214_0738">apps.issuer.migrations.0015_auto_20170214_0738 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0015_auto_20170214_0738.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0015_auto_20170214_0738.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0015_auto_20170214_0738.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0015_auto_20170214_0738.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0015_auto_20170214_0738.update_staff_role"><code class="docutils literal notranslate"><span class="pre">update_staff_role()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0016_auto_20170214_0749">apps.issuer.migrations.0016_auto_20170214_0749 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0016_auto_20170214_0749.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0016_auto_20170214_0749.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0016_auto_20170214_0749.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0017-auto-20170227-1334-module">apps.issuer.migrations.0017_auto_20170227_1334 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0018-auto-20170413-1054-module">apps.issuer.migrations.0018_auto_20170413_1054 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0019_auto_20170413_1136">apps.issuer.migrations.0019_auto_20170413_1136 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0019_auto_20170413_1136.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0019_auto_20170413_1136.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0019_auto_20170413_1136.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0019_auto_20170420_0810">apps.issuer.migrations.0019_auto_20170420_0810 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0019_auto_20170420_0810.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0019_auto_20170420_0810.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0019_auto_20170420_0810.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0020-auto-20170413-1139-module">apps.issuer.migrations.0020_auto_20170413_1139 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0020_auto_20170420_0811">apps.issuer.migrations.0020_auto_20170420_0811 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0020_auto_20170420_0811.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0020_auto_20170420_0811.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0020_auto_20170420_0811.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0020_auto_20170420_0811.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0021_auto_20170424_1427">apps.issuer.migrations.0021_auto_20170424_1427 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0021_auto_20170424_1427.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0021_auto_20170424_1427.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0021_auto_20170424_1427.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0021_remove_badgeinstance_evidence_url">apps.issuer.migrations.0021_remove_badgeinstance_evidence_url module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0021_remove_badgeinstance_evidence_url.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0021_remove_badgeinstance_evidence_url.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0021_remove_badgeinstance_evidence_url.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0022_merge">apps.issuer.migrations.0022_merge module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0022_merge.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0022_merge.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0022_merge.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0023_auto_20170531_1044">apps.issuer.migrations.0023_auto_20170531_1044 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0023_auto_20170531_1044.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0023_auto_20170531_1044.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0023_auto_20170531_1044.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0024_auto_20170609_0845">apps.issuer.migrations.0024_auto_20170609_0845 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0024_auto_20170609_0845.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0024_auto_20170609_0845.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0024_auto_20170609_0845.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0025_badgeinstance_issued_on">apps.issuer.migrations.0025_badgeinstance_issued_on module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0025_badgeinstance_issued_on.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0025_badgeinstance_issued_on.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0025_badgeinstance_issued_on.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0026_auto_20170726_1409">apps.issuer.migrations.0026_auto_20170726_1409 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0026_auto_20170726_1409.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0026_auto_20170726_1409.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0026_auto_20170726_1409.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0026_auto_20170726_1409.created_at_to_issued_on"><code class="docutils literal notranslate"><span class="pre">created_at_to_issued_on()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0027_auto_20170801_1636">apps.issuer.migrations.0027_auto_20170801_1636 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0027_auto_20170801_1636.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0027_auto_20170801_1636.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0027_auto_20170801_1636.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0028_auto_20170802_1035">apps.issuer.migrations.0028_auto_20170802_1035 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0028_auto_20170802_1035.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0028_auto_20170802_1035.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0028_auto_20170802_1035.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0029_badgeinstance_recipient_type">apps.issuer.migrations.0029_badgeinstance_recipient_type module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0029_badgeinstance_recipient_type.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0029_badgeinstance_recipient_type.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0029_badgeinstance_recipient_type.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0030_badgeclassalignment">apps.issuer.migrations.0030_badgeclassalignment module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0030_badgeclassalignment.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0030_badgeclassalignment.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0030_badgeclassalignment.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0031_auto_20170918_0735">apps.issuer.migrations.0031_auto_20170918_0735 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0031_auto_20170918_0735.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0031_auto_20170918_0735.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0031_auto_20170918_0735.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0032_badgeclasstag">apps.issuer.migrations.0032_badgeclasstag module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0032_badgeclasstag.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0032_badgeclasstag.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0032_badgeclasstag.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0033_auto_20171002_1413">apps.issuer.migrations.0033_auto_20171002_1413 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0033_auto_20171002_1413.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0033_auto_20171002_1413.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0033_auto_20171002_1413.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0034-auto-20171025-1020-module">apps.issuer.migrations.0034_auto_20171025_1020 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0034_badgeinstance_hashed">apps.issuer.migrations.0034_badgeinstance_hashed module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0034_badgeinstance_hashed.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0034_badgeinstance_hashed.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0034_badgeinstance_hashed.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0035_issuer_badgrapp">apps.issuer.migrations.0035_issuer_badgrapp module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0035_issuer_badgrapp.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0035_issuer_badgrapp.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0035_issuer_badgrapp.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0036_merge_20171101_0815">apps.issuer.migrations.0036_merge_20171101_0815 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0036_merge_20171101_0815.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0036_merge_20171101_0815.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0036_merge_20171101_0815.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0037_auto_20171113_1015">apps.issuer.migrations.0037_auto_20171113_1015 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0037_auto_20171113_1015.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0037_auto_20171113_1015.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0037_auto_20171113_1015.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0038_badgeinstance_expires_at">apps.issuer.migrations.0038_badgeinstance_expires_at module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0038_badgeinstance_expires_at.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0038_badgeinstance_expires_at.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0038_badgeinstance_expires_at.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0039_badgeclassextension">apps.issuer.migrations.0039_badgeclassextension module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0039_badgeclassextension.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0039_badgeclassextension.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0039_badgeclassextension.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0040_badgeinstanceextension_issuerextension">apps.issuer.migrations.0040_badgeinstanceextension_issuerextension module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0040_badgeinstanceextension_issuerextension.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0040_badgeinstanceextension_issuerextension.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0040_badgeinstanceextension_issuerextension.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0041-badgeinstancebakedimage-module">apps.issuer.migrations.0041_badgeinstancebakedimage module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0042_auto_20180220_1150">apps.issuer.migrations.0042_auto_20180220_1150 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0042_auto_20180220_1150.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0042_auto_20180220_1150.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0042_auto_20180220_1150.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0043_auto_20180614_0949">apps.issuer.migrations.0043_auto_20180614_0949 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0043_auto_20180614_0949.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0043_auto_20180614_0949.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0043_auto_20180614_0949.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0044_auto_20180713_0658">apps.issuer.migrations.0044_auto_20180713_0658 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0044_auto_20180713_0658.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0044_auto_20180713_0658.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0044_auto_20180713_0658.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0044_issuer_faculty">apps.issuer.migrations.0044_issuer_faculty module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0044_issuer_faculty.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0044_issuer_faculty.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0044_issuer_faculty.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0045_auto_20180925_0534">apps.issuer.migrations.0045_auto_20180925_0534 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0045_auto_20180925_0534.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0045_auto_20180925_0534.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0045_auto_20180925_0534.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0046_auto_20190613_0820">apps.issuer.migrations.0046_auto_20190613_0820 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0046_auto_20190613_0820.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0046_auto_20190613_0820.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0046_auto_20190613_0820.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0047_issuerstaff_is_signer">apps.issuer.migrations.0047_issuerstaff_is_signer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0047_issuerstaff_is_signer.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0047_issuerstaff_is_signer.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0047_issuerstaff_is_signer.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0048_merge_20191011_0722">apps.issuer.migrations.0048_merge_20191011_0722 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0048_merge_20191011_0722.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0048_merge_20191011_0722.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0048_merge_20191011_0722.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0049_auto_20191024_0852">apps.issuer.migrations.0049_auto_20191024_0852 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0049_auto_20191024_0852.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0049_auto_20191024_0852.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0049_auto_20191024_0852.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0050_badgeinstance_identifier">apps.issuer.migrations.0050_badgeinstance_identifier module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0050_badgeinstance_identifier.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0050_badgeinstance_identifier.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0050_badgeinstance_identifier.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0051_badgeinstance_public_key_issuer">apps.issuer.migrations.0051_badgeinstance_public_key_issuer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0051_badgeinstance_public_key_issuer.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0051_badgeinstance_public_key_issuer.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0051_badgeinstance_public_key_issuer.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0052_badgeclass_type">apps.issuer.migrations.0052_badgeclass_type module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0052_badgeclass_type.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0052_badgeclass_type.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0052_badgeclass_type.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0053_auto_20191126_0212">apps.issuer.migrations.0053_auto_20191126_0212 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0053_auto_20191126_0212.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0053_auto_20191126_0212.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0053_auto_20191126_0212.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0054-auto-20191203-0250-module">apps.issuer.migrations.0054_auto_20191203_0250 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0055-badgeinstance-user-module">apps.issuer.migrations.0055_badgeinstance_user module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0056_populate_badgeinstance_user">apps.issuer.migrations.0056_populate_badgeinstance_user module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0056_populate_badgeinstance_user.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0056_populate_badgeinstance_user.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0056_populate_badgeinstance_user.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0056_populate_badgeinstance_user.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0056_populate_badgeinstance_user.populate_badgeinstance_user"><code class="docutils literal notranslate"><span class="pre">populate_badgeinstance_user()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0057_remove_badgeclass_category">apps.issuer.migrations.0057_remove_badgeclass_category module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0057_remove_badgeclass_category.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0057_remove_badgeclass_category.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0057_remove_badgeclass_category.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0058-badgeclass-staff-module">apps.issuer.migrations.0058_badgeclass_staff module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0059_auto_20200221_0655">apps.issuer.migrations.0059_auto_20200221_0655 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0059_auto_20200221_0655.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0059_auto_20200221_0655.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0059_auto_20200221_0655.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0060-issuer-staff-module">apps.issuer.migrations.0060_issuer_staff module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0061_remove_issuer_slug">apps.issuer.migrations.0061_remove_issuer_slug module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0061_remove_issuer_slug.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0061_remove_issuer_slug.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0061_remove_issuer_slug.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0062_auto_20200305_0713">apps.issuer.migrations.0062_auto_20200305_0713 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0062_auto_20200305_0713.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0062_auto_20200305_0713.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0062_auto_20200305_0713.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0063_auto_20200305_1108">apps.issuer.migrations.0063_auto_20200305_1108 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0063_auto_20200305_1108.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0063_auto_20200305_1108.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0063_auto_20200305_1108.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0064_auto_20200305_1111">apps.issuer.migrations.0064_auto_20200305_1111 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0064_auto_20200305_1111.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0064_auto_20200305_1111.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0064_auto_20200305_1111.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0065_delete_badgeinstanceevidence">apps.issuer.migrations.0065_delete_badgeinstanceevidence module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0065_delete_badgeinstanceevidence.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0065_delete_badgeinstanceevidence.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0065_delete_badgeinstanceevidence.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0066_remove_badgeinstance_narrative">apps.issuer.migrations.0066_remove_badgeinstance_narrative module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0066_remove_badgeinstance_narrative.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0066_remove_badgeinstance_narrative.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0066_remove_badgeinstance_narrative.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0067_badgeclass_expiration_period">apps.issuer.migrations.0067_badgeclass_expiration_period module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0067_badgeclass_expiration_period.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0067_badgeclass_expiration_period.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0067_badgeclass_expiration_period.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0068-auto-20200421-1138-module">apps.issuer.migrations.0068_auto_20200421_1138 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0069_auto_20200511_1528">apps.issuer.migrations.0069_auto_20200511_1528 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0069_auto_20200511_1528.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0069_auto_20200511_1528.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0069_auto_20200511_1528.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0070_auto_20200630_1315">apps.issuer.migrations.0070_auto_20200630_1315 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0070_auto_20200630_1315.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0070_auto_20200630_1315.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0070_auto_20200630_1315.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0071_badgeclass_formal">apps.issuer.migrations.0071_badgeclass_formal module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0071_badgeclass_formal.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0071_badgeclass_formal.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0071_badgeclass_formal.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0072_badgeclass_populate_formal">apps.issuer.migrations.0072_badgeclass_populate_formal module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0072_badgeclass_populate_formal.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0072_badgeclass_populate_formal.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0072_badgeclass_populate_formal.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0072_badgeclass_populate_formal.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0072_badgeclass_populate_formal.populate_badgeclass_formal"><code class="docutils literal notranslate"><span class="pre">populate_badgeclass_formal()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0073_auto_20200729_1425">apps.issuer.migrations.0073_auto_20200729_1425 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0073_auto_20200729_1425.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0073_auto_20200729_1425.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0073_auto_20200729_1425.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0074_auto_20201013_1219">apps.issuer.migrations.0074_auto_20201013_1219 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0074_auto_20201013_1219.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0074_auto_20201013_1219.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0074_auto_20201013_1219.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0075_description_multi_language_isssuer">apps.issuer.migrations.0075_description_multi_language_isssuer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0075_description_multi_language_isssuer.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0075_description_multi_language_isssuer.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0075_description_multi_language_isssuer.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0075_description_multi_language_isssuer.copy_description_to_new_columns"><code class="docutils literal notranslate"><span class="pre">copy_description_to_new_columns()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0075_description_multi_language_isssuer.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0076_remove_issuer_description">apps.issuer.migrations.0076_remove_issuer_description module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0076_remove_issuer_description.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0076_remove_issuer_description.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0076_remove_issuer_description.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0077_auto_20210104_1507">apps.issuer.migrations.0077_auto_20210104_1507 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0077_auto_20210104_1507.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0077_auto_20210104_1507.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0077_auto_20210104_1507.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0078_auto_20210106_1855">apps.issuer.migrations.0078_auto_20210106_1855 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0078_auto_20210106_1855.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0078_auto_20210106_1855.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0078_auto_20210106_1855.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0079_auto_20210131_1539">apps.issuer.migrations.0079_auto_20210131_1539 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0079_auto_20210131_1539.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0079_auto_20210131_1539.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0079_auto_20210131_1539.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0080_auto_20210218_1312">apps.issuer.migrations.0080_auto_20210218_1312 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0080_auto_20210218_1312.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0080_auto_20210218_1312.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0080_auto_20210218_1312.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0080_badgeclass_is_private">apps.issuer.migrations.0080_badgeclass_is_private module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0080_badgeclass_is_private.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0080_badgeclass_is_private.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0080_badgeclass_is_private.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0081_auto_20210218_1336">apps.issuer.migrations.0081_auto_20210218_1336 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0081_auto_20210218_1336.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0081_auto_20210218_1336.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0081_auto_20210218_1336.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0082_auto_20210218_1346">apps.issuer.migrations.0082_auto_20210218_1346 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0082_auto_20210218_1346.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0082_auto_20210218_1346.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0082_auto_20210218_1346.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0083_auto_20210223_1844">apps.issuer.migrations.0083_auto_20210223_1844 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0083_auto_20210223_1844.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0083_auto_20210223_1844.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0083_auto_20210223_1844.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0084_merge_20210301_1048">apps.issuer.migrations.0084_merge_20210301_1048 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0084_merge_20210301_1048.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0084_merge_20210301_1048.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0084_merge_20210301_1048.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0085_auto_20210302_0950">apps.issuer.migrations.0085_auto_20210302_0950 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0085_auto_20210302_0950.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0085_auto_20210302_0950.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0085_auto_20210302_0950.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0086_badgeinstance_include_evidence">apps.issuer.migrations.0086_badgeinstance_include_evidence module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0086_badgeinstance_include_evidence.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0086_badgeinstance_include_evidence.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0086_badgeinstance_include_evidence.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0087_auto_20210322_1042">apps.issuer.migrations.0087_auto_20210322_1042 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0087_auto_20210322_1042.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0087_auto_20210322_1042.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0087_auto_20210322_1042.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0088_badgeinstance_award_type">apps.issuer.migrations.0088_badgeinstance_award_type module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0088_badgeinstance_award_type.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0088_badgeinstance_award_type.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0088_badgeinstance_award_type.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0089_auto_20210329_1519">apps.issuer.migrations.0089_auto_20210329_1519 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0089_auto_20210329_1519.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0089_auto_20210329_1519.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0089_auto_20210329_1519.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0090_badgeinstance_direct_award_bundle">apps.issuer.migrations.0090_badgeinstance_direct_award_bundle module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0090_badgeinstance_direct_award_bundle.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0090_badgeinstance_direct_award_bundle.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0090_badgeinstance_direct_award_bundle.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0091_auto_20210512_1538">apps.issuer.migrations.0091_auto_20210512_1538 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0091_auto_20210512_1538.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0091_auto_20210512_1538.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0091_auto_20210512_1538.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0092_auto_20210609_1457">apps.issuer.migrations.0092_auto_20210609_1457 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0092_auto_20210609_1457.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0092_auto_20210609_1457.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0092_auto_20210609_1457.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0093_migrate_studyload_time_investment_extensions">apps.issuer.migrations.0093_migrate_studyload_time_investment_extensions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0093_migrate_studyload_time_investment_extensions.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0093_migrate_studyload_time_investment_extensions.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0093_migrate_studyload_time_investment_extensions.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0093_migrate_studyload_time_investment_extensions.migrate_studyload_time_investment"><code class="docutils literal notranslate"><span class="pre">migrate_studyload_time_investment()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0094-badgeinstancecollection-module">apps.issuer.migrations.0094_badgeinstancecollection module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0095_auto_20210915_0941">apps.issuer.migrations.0095_auto_20210915_0941 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0095_auto_20210915_0941.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0095_auto_20210915_0941.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0095_auto_20210915_0941.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0096_badgeclass_award_non_validated_name_allowed">apps.issuer.migrations.0096_badgeclass_award_non_validated_name_allowed module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0096_badgeclass_award_non_validated_name_allowed.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0096_badgeclass_award_non_validated_name_allowed.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0096_badgeclass_award_non_validated_name_allowed.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0097_auto_20220315_1623">apps.issuer.migrations.0097_auto_20220315_1623 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0097_auto_20220315_1623.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0097_auto_20220315_1623.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0097_auto_20220315_1623.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0098_badgeclass_is_micro_credentials">apps.issuer.migrations.0098_badgeclass_is_micro_credentials module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0098_badgeclass_is_micro_credentials.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0098_badgeclass_is_micro_credentials.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0098_badgeclass_is_micro_credentials.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0099_badgeclass_direct_awarding_disabled">apps.issuer.migrations.0099_badgeclass_direct_awarding_disabled module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0099_badgeclass_direct_awarding_disabled.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0099_badgeclass_direct_awarding_disabled.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0099_badgeclass_direct_awarding_disabled.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0100_auto_20220509_1338">apps.issuer.migrations.0100_auto_20220509_1338 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0100_auto_20220509_1338.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0100_auto_20220509_1338.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0100_auto_20220509_1338.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0101_badgeclass_self_enrollment_disabled">apps.issuer.migrations.0101_badgeclass_self_enrollment_disabled module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0101_badgeclass_self_enrollment_disabled.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0101_badgeclass_self_enrollment_disabled.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0101_badgeclass_self_enrollment_disabled.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0102_multiple_educationProgramIdentifiers_badgeClassExtension">apps.issuer.migrations.0102_multiple_educationProgramIdentifiers_badgeClassExtension module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0102_multiple_educationProgramIdentifiers_badgeClassExtension.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0102_multiple_educationProgramIdentifiers_badgeClassExtension.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0102_multiple_educationProgramIdentifiers_badgeClassExtension.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0102_multiple_educationProgramIdentifiers_badgeClassExtension.migrate_education_program_identifiers_badge_class_extension"><code class="docutils literal notranslate"><span class="pre">migrate_education_program_identifiers_badge_class_extension()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0102_multiple_educationProgramIdentifiers_badgeClassExtension.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0103_badgeclass_badge_class_type">apps.issuer.migrations.0103_badgeclass_badge_class_type module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0103_badgeclass_badge_class_type.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0103_badgeclass_badge_class_type.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0103_badgeclass_badge_class_type.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0103_badgeclass_badge_class_type.migrate_badge_class_type"><code class="docutils literal notranslate"><span class="pre">migrate_badge_class_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0103_badgeclass_badge_class_type.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0104_alter_badgeclass_badge_class_type">apps.issuer.migrations.0104_alter_badgeclass_badge_class_type module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0104_alter_badgeclass_badge_class_type.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0104_alter_badgeclass_badge_class_type.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0104_alter_badgeclass_badge_class_type.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0105_badgeclass_participation">apps.issuer.migrations.0105_badgeclass_participation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0105_badgeclass_participation.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0105_badgeclass_participation.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0105_badgeclass_participation.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0106_auto_20240412_1201">apps.issuer.migrations.0106_auto_20240412_1201 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0106_auto_20240412_1201.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0106_auto_20240412_1201.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0106_auto_20240412_1201.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0107_auto_20240412_1521">apps.issuer.migrations.0107_auto_20240412_1521 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0107_auto_20240412_1521.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0107_auto_20240412_1521.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0107_auto_20240412_1521.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0108_badge_class_criteria_url_migration">apps.issuer.migrations.0108_badge_class_criteria_url_migration module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0108_badge_class_criteria_url_migration.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0108_badge_class_criteria_url_migration.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0108_badge_class_criteria_url_migration.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0108_badge_class_criteria_url_migration.migrate_badge_class_criteria_url"><code class="docutils literal notranslate"><span class="pre">migrate_badge_class_criteria_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0108_badge_class_criteria_url_migration.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0109_remove_badgeclass_criteria_url">apps.issuer.migrations.0109_remove_badgeclass_criteria_url module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0109_remove_badgeclass_criteria_url.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0109_remove_badgeclass_criteria_url.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0109_remove_badgeclass_criteria_url.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0110_alter_badgeclass_image">apps.issuer.migrations.0110_alter_badgeclass_image module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0110_alter_badgeclass_image.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0110_alter_badgeclass_image.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0110_alter_badgeclass_image.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0111_badgeinstance_grade_achieved">apps.issuer.migrations.0111_badgeinstance_grade_achieved module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0111_badgeinstance_grade_achieved.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0111_badgeinstance_grade_achieved.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0111_badgeinstance_grade_achieved.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0112_badgeinstance_include_grade_achieved">apps.issuer.migrations.0112_badgeinstance_include_grade_achieved module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0112_badgeinstance_include_grade_achieved.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0112_badgeinstance_include_grade_achieved.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0112_badgeinstance_include_grade_achieved.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0113_alter_badgeclass_assessment_type">apps.issuer.migrations.0113_alter_badgeclass_assessment_type module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0113_alter_badgeclass_assessment_type.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0113_alter_badgeclass_assessment_type.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0113_alter_badgeclass_assessment_type.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0114_alter_badgeclass_participation">apps.issuer.migrations.0114_alter_badgeclass_participation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0114_alter_badgeclass_participation.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0114_alter_badgeclass_participation.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0114_alter_badgeclass_participation.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#apps-issuer-migrations-0115-migrate-microcredentials-frameworks-to-quality-assurance-module">apps.issuer.migrations.0115_migrate_microcredentials_frameworks_to_quality_assurance module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations.0116_migrate_studyLoad_to_timeExtension">apps.issuer.migrations.0116_migrate_studyLoad_to_timeExtension module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0116_migrate_studyLoad_to_timeExtension.Migration"><code class="docutils literal notranslate"><span class="pre">Migration</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0116_migrate_studyLoad_to_timeExtension.Migration.dependencies"><code class="docutils literal notranslate"><span class="pre">Migration.dependencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0116_migrate_studyLoad_to_timeExtension.Migration.operations"><code class="docutils literal notranslate"><span class="pre">Migration.operations</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0116_migrate_studyLoad_to_timeExtension.migrate_studyload_to_time_investment_badge_class_extension"><code class="docutils literal notranslate"><span class="pre">migrate_studyload_to_time_investment_badge_class_extension()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="apps.issuer.migrations.html#apps.issuer.migrations.0116_migrate_studyLoad_to_timeExtension.noop"><code class="docutils literal notranslate"><span class="pre">noop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.migrations.html#module-apps.issuer.migrations">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="apps.issuer.testfiles.html">apps.issuer.testfiles package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.testfiles.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.testfiles.html#module-apps.issuer.testfiles.helper">apps.issuer.testfiles.helper module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.testfiles.html#module-apps.issuer.testfiles">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="apps.issuer.tests.html">apps.issuer.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.tests.html#apps-issuer-tests-test-issuer-module">apps.issuer.tests.test_issuer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.issuer.tests.html#module-apps.issuer.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="apps-issuer-admin-module">
+<h2>apps.issuer.admin module<a class="headerlink" href="#apps-issuer-admin-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="apps-issuer-api-module">
+<h2>apps.issuer.api module<a class="headerlink" href="#apps-issuer-api-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="apps-issuer-api-urls-module">
+<h2>apps.issuer.api_urls module<a class="headerlink" href="#apps-issuer-api-urls-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="apps-issuer-helpers-module">
+<h2>apps.issuer.helpers module<a class="headerlink" href="#apps-issuer-helpers-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="apps-issuer-managers-module">
+<h2>apps.issuer.managers module<a class="headerlink" href="#apps-issuer-managers-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-apps.issuer.micro_credentials_constants">
+<span id="apps-issuer-micro-credentials-constants-module"></span><h2>apps.issuer.micro_credentials_constants module<a class="headerlink" href="#module-apps.issuer.micro_credentials_constants" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="apps-issuer-models-module">
+<h2>apps.issuer.models module<a class="headerlink" href="#apps-issuer-models-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-apps.issuer.permissions">
+<span id="apps-issuer-permissions-module"></span><h2>apps.issuer.permissions module<a class="headerlink" href="#module-apps.issuer.permissions" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.issuer.permissions.AwardedAssertionsBlock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.issuer.permissions.</span></span><span class="sig-name descname"><span class="pre">AwardedAssertionsBlock</span></span><a class="reference internal" href="_modules/apps/issuer/permissions.html#AwardedAssertionsBlock"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.AwardedAssertionsBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePermission</span></code></p>
+<p>Object can’t have any assertions that are not revoked</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.issuer.permissions.AwardedAssertionsBlock.has_object_permission">
+<span class="sig-name descname"><span class="pre">has_object_permission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/issuer/permissions.html#AwardedAssertionsBlock.has_object_permission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.AwardedAssertionsBlock.has_object_permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <cite>True</cite> if permission is granted, <cite>False</cite> otherwise.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.issuer.permissions.BadgrOAuthTokenHasScope">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.issuer.permissions.</span></span><span class="sig-name descname"><span class="pre">BadgrOAuthTokenHasScope</span></span><a class="reference internal" href="_modules/apps/issuer/permissions.html#BadgrOAuthTokenHasScope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.BadgrOAuthTokenHasScope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePermission</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.issuer.permissions.BadgrOAuthTokenHasScope.has_permission">
+<span class="sig-name descname"><span class="pre">has_permission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/issuer/permissions.html#BadgrOAuthTokenHasScope.has_permission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.BadgrOAuthTokenHasScope.has_permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <cite>True</cite> if permission is granted, <cite>False</cite> otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.issuer.permissions.BadgrOAuthTokenHasScope.valid_scopes_for_view">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_scopes_for_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/issuer/permissions.html#BadgrOAuthTokenHasScope.valid_scopes_for_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.BadgrOAuthTokenHasScope.valid_scopes_for_view" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.issuer.permissions.NoUnrevokedAssertionsPermission">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.issuer.permissions.</span></span><span class="sig-name descname"><span class="pre">NoUnrevokedAssertionsPermission</span></span><a class="reference internal" href="_modules/apps/issuer/permissions.html#NoUnrevokedAssertionsPermission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.NoUnrevokedAssertionsPermission" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePermission</span></code></p>
+<p>Object must have no unrevoked assertions</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.issuer.permissions.NoUnrevokedAssertionsPermission.has_object_permission">
+<span class="sig-name descname"><span class="pre">has_object_permission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/issuer/permissions.html#NoUnrevokedAssertionsPermission.has_object_permission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.NoUnrevokedAssertionsPermission.has_object_permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <cite>True</cite> if permission is granted, <cite>False</cite> otherwise.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.issuer.permissions.RecipientIdentifiersMatch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.issuer.permissions.</span></span><span class="sig-name descname"><span class="pre">RecipientIdentifiersMatch</span></span><a class="reference internal" href="_modules/apps/issuer/permissions.html#RecipientIdentifiersMatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.RecipientIdentifiersMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BasePermission</span></code></p>
+<p>one of request user’s verified emails matches obj.recipient_identifier
+OR
+user’s edu ID matches obj.recipient_identifier
+—
+model: BadgeInstance</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="apps.issuer.permissions.RecipientIdentifiersMatch.has_object_permission">
+<span class="sig-name descname"><span class="pre">has_object_permission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/issuer/permissions.html#RecipientIdentifiersMatch.has_object_permission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.issuer.permissions.RecipientIdentifiersMatch.has_object_permission" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <cite>True</cite> if permission is granted, <cite>False</cite> otherwise.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="apps-issuer-schema-module">
+<h2>apps.issuer.schema module<a class="headerlink" href="#apps-issuer-schema-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="apps-issuer-serializers-module">
+<h2>apps.issuer.serializers module<a class="headerlink" href="#apps-issuer-serializers-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="apps-issuer-utils-module">
+<h2>apps.issuer.utils module<a class="headerlink" href="#apps-issuer-utils-module" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-apps.issuer">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-apps.issuer" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Edubadges</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="apps.html">apps package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apps.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.html#module-apps">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="apps.html">apps package</a><ul>
+      <li>Previous: <a href="apps.institution.tests.html" title="previous chapter">apps.institution.tests package</a></li>
+      <li>Next: <a href="apps.issuer.management.html" title="next chapter">apps.issuer.management package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Okke, Daniel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/apps.issuer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

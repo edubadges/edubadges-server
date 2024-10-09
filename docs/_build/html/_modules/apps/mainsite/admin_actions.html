@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>apps.mainsite.admin_actions &#8212; Edubadges 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for apps.mainsite.admin_actions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Created by wiggins@concentricsky.com on 10/8/15.</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">messages</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin</span> <span class="kn">import</span> <span class="n">helpers</span>
+<span class="kn">from</span> <span class="nn">django.contrib.admin.utils</span> <span class="kn">import</span> <span class="n">get_deleted_objects</span><span class="p">,</span> <span class="n">model_ngettext</span>
+<span class="kn">from</span> <span class="nn">django.core.cache</span> <span class="kn">import</span> <span class="n">cache</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="kn">import</span> <span class="n">PermissionDenied</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">router</span>
+<span class="kn">from</span> <span class="nn">django.template.response</span> <span class="kn">import</span> <span class="n">TemplateResponse</span>
+<span class="kn">from</span> <span class="nn">django.utils.encoding</span> <span class="kn">import</span> <span class="n">force_text</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_lazy</span><span class="p">,</span> <span class="n">ugettext</span> <span class="k">as</span> <span class="n">_</span>
+
+
+<div class="viewcode-block" id="delete_selected"><a class="viewcode-back" href="../../../apps.mainsite.html#apps.mainsite.admin_actions.delete_selected">[docs]</a><span class="k">def</span> <span class="nf">delete_selected</span><span class="p">(</span><span class="n">modeladmin</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a fork of django.contrib.admin.actions.delete_selected</span>
+<span class="sd">    But this calls object.delete() instead of queryset.delete()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">opts</span> <span class="o">=</span> <span class="n">modeladmin</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">_meta</span>
+    <span class="n">app_label</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">app_label</span>
+
+    <span class="c1"># Check that the user has delete permission for the actual model</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">modeladmin</span><span class="o">.</span><span class="n">has_delete_permission</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">PermissionDenied</span>
+
+    <span class="n">using</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">db_for_write</span><span class="p">(</span><span class="n">modeladmin</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="c1"># Populate deletable_objects, a data structure of all related objects that</span>
+    <span class="c1"># will also be deleted.</span>
+    <span class="n">deletable_objects</span><span class="p">,</span> <span class="n">perms_needed</span><span class="p">,</span> <span class="n">protected</span> <span class="o">=</span> <span class="n">get_deleted_objects</span><span class="p">(</span>
+        <span class="n">queryset</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">modeladmin</span><span class="o">.</span><span class="n">admin_site</span><span class="p">,</span> <span class="n">using</span><span class="p">)</span>
+
+    <span class="c1"># The user has already confirmed the deletion.</span>
+    <span class="c1"># Do the deletion and return a None to display the change list view again.</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;post&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">perms_needed</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PermissionDenied</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">n</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">:</span>
+                <span class="n">obj_display</span> <span class="o">=</span> <span class="n">force_text</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">modeladmin</span><span class="o">.</span><span class="n">log_deletion</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">obj_display</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+            <span class="n">modeladmin</span><span class="o">.</span><span class="n">message_user</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Successfully deleted </span><span class="si">%(count)d</span><span class="s2"> </span><span class="si">%(items)s</span><span class="s2">.&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">{</span>
+                <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">n</span><span class="p">,</span> <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="n">model_ngettext</span><span class="p">(</span><span class="n">modeladmin</span><span class="o">.</span><span class="n">opts</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="p">},</span> <span class="n">messages</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">)</span>
+        <span class="c1"># Return None to display the change list page again.</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">queryset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">objects_name</span> <span class="o">=</span> <span class="n">force_text</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">verbose_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">objects_name</span> <span class="o">=</span> <span class="n">force_text</span><span class="p">(</span><span class="n">opts</span><span class="o">.</span><span class="n">verbose_name_plural</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">perms_needed</span> <span class="ow">or</span> <span class="n">protected</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Cannot delete </span><span class="si">%(name)s</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">objects_name</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Are you sure?&quot;</span><span class="p">)</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+        <span class="s2">&quot;objects_name&quot;</span><span class="p">:</span> <span class="n">objects_name</span><span class="p">,</span>
+        <span class="s2">&quot;deletable_objects&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">deletable_objects</span><span class="p">],</span>
+        <span class="s1">&#39;queryset&#39;</span><span class="p">:</span> <span class="n">queryset</span><span class="p">,</span>
+        <span class="s2">&quot;perms_lacking&quot;</span><span class="p">:</span> <span class="n">perms_needed</span><span class="p">,</span>
+        <span class="s2">&quot;protected&quot;</span><span class="p">:</span> <span class="n">protected</span><span class="p">,</span>
+        <span class="s2">&quot;opts&quot;</span><span class="p">:</span> <span class="n">opts</span><span class="p">,</span>
+        <span class="s1">&#39;action_checkbox_name&#39;</span><span class="p">:</span> <span class="n">helpers</span><span class="o">.</span><span class="n">ACTION_CHECKBOX_NAME</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Display the confirmation page</span>
+    <span class="k">return</span> <span class="n">TemplateResponse</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">modeladmin</span><span class="o">.</span><span class="n">delete_selected_confirmation_template</span> <span class="ow">or</span> <span class="p">[</span>
+        <span class="s2">&quot;admin/</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">/delete_selected_confirmation.html&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">app_label</span><span class="p">,</span> <span class="n">opts</span><span class="o">.</span><span class="n">model_name</span><span class="p">),</span>
+        <span class="s2">&quot;admin/</span><span class="si">%s</span><span class="s2">/delete_selected_confirmation.html&quot;</span> <span class="o">%</span> <span class="n">app_label</span><span class="p">,</span>
+        <span class="s2">&quot;admin/delete_selected_confirmation.html&quot;</span>
+    <span class="p">],</span> <span class="n">context</span><span class="p">,</span> <span class="n">current_app</span><span class="o">=</span><span class="n">modeladmin</span><span class="o">.</span><span class="n">admin_site</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<span class="n">delete_selected</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="n">ugettext_lazy</span><span class="p">(</span><span class="s2">&quot;Delete selected </span><span class="si">%(verbose_name_plural)s</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="clear_cache"><a class="viewcode-back" href="../../../apps.mainsite.html#apps.mainsite.admin_actions.clear_cache">[docs]</a><span class="k">def</span> <span class="nf">clear_cache</span><span class="p">():</span>
+    <span class="n">cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="send_application_report"><a class="viewcode-back" href="../../../apps.mainsite.html#apps.mainsite.admin_actions.send_application_report">[docs]</a><span class="k">def</span> <span class="nf">send_application_report</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">django.core.management</span> <span class="kn">import</span> <span class="n">call_command</span>
+    <span class="n">call_command</span><span class="p">(</span><span class="s1">&#39;send_app_report&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Edubadges</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../apps.html">apps package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../mainsite.html">apps.mainsite</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Okke, Daniel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

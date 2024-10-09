@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>apps.theming.migrations package &#8212; Edubadges 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=af2ce170"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="apps.theming package" href="apps.theming.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="apps-theming-migrations-package">
+<h1>apps.theming.migrations package<a class="headerlink" href="#apps-theming-migrations-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-apps.theming.migrations.0001_initial">
+<span id="apps-theming-migrations-0001-initial-module"></span><h2>apps.theming.migrations.0001_initial module<a class="headerlink" href="#module-apps.theming.migrations.0001_initial" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0001_initial.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0001_initial.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0001_initial.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0001_initial.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0001_initial.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('institution',</span> <span class="pre">'0002_auto_20181023_0709')]</span></em><a class="headerlink" href="#apps.theming.migrations.0001_initial.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0001_initial.Migration.initial">
+<span class="sig-name descname"><span class="pre">initial</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#apps.theming.migrations.0001_initial.Migration.initial" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0001_initial.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;CreateModel</span>&#160; <span class="pre">name='Theme',</span> <span class="pre">fields=[('id',</span> <span class="pre">&lt;django.db.models.fields.AutoField&gt;),</span> <span class="pre">('welcome_message',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('service_name',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('showPoweredByBadgr',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('showApiDocsLink',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('termsOfServiceLink',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('privacyPolicyLink',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('logo_small',</span> <span class="pre">&lt;django.db.models.fields.files.FileField&gt;),</span> <span class="pre">('logo_desktop',</span> <span class="pre">&lt;django.db.models.fields.files.FileField&gt;),</span> <span class="pre">('subdomain',</span> <span class="pre">&lt;django.db.models.fields.CharField&gt;),</span> <span class="pre">('institution',</span> <span class="pre">&lt;django.db.models.fields.related.ForeignKey&gt;)]&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0001_initial.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0002_theme_changed">
+<span id="apps-theming-migrations-0002-theme-changed-module"></span><h2>apps.theming.migrations.0002_theme_changed module<a class="headerlink" href="#module-apps.theming.migrations.0002_theme_changed" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0002_theme_changed.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0002_theme_changed.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0002_theme_changed.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0002_theme_changed.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0002_theme_changed.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0001_initial')]</span></em><a class="headerlink" href="#apps.theming.migrations.0002_theme_changed.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0002_theme_changed.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='changed',</span> <span class="pre">field=&lt;django.db.models.fields.DateTimeField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0002_theme_changed.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0003_auto_20190111_0158">
+<span id="apps-theming-migrations-0003-auto-20190111-0158-module"></span><h2>apps.theming.migrations.0003_auto_20190111_0158 module<a class="headerlink" href="#module-apps.theming.migrations.0003_auto_20190111_0158" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0003_auto_20190111_0158.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0003_auto_20190111_0158.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0003_auto_20190111_0158.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0003_auto_20190111_0158.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0003_auto_20190111_0158.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0002_theme_changed')]</span></em><a class="headerlink" href="#apps.theming.migrations.0003_auto_20190111_0158.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0003_auto_20190111_0158.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RenameField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">old_name='changed',</span> <span class="pre">new_name='changed_on'&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0003_auto_20190111_0158.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0004_auto_20190115_0423">
+<span id="apps-theming-migrations-0004-auto-20190115-0423-module"></span><h2>apps.theming.migrations.0004_auto_20190115_0423 module<a class="headerlink" href="#module-apps.theming.migrations.0004_auto_20190115_0423" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0004_auto_20190115_0423.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0004_auto_20190115_0423.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0004_auto_20190115_0423.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0004_auto_20190115_0423.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0004_auto_20190115_0423.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0003_auto_20190111_0158')]</span></em><a class="headerlink" href="#apps.theming.migrations.0004_auto_20190115_0423.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0004_auto_20190115_0423.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RenameField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">old_name='privacyPolicyLink',</span> <span class="pre">new_name='privacy_policy_link'&gt;,</span> <span class="pre">&lt;RenameField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">old_name='showApiDocsLink',</span> <span class="pre">new_name='show_api_docs_link'&gt;,</span> <span class="pre">&lt;RenameField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">old_name='showPoweredByBadgr',</span> <span class="pre">new_name='show_powered_by_badgr'&gt;,</span> <span class="pre">&lt;RenameField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">old_name='termsOfServiceLink',</span> <span class="pre">new_name='terms_of_service_link'&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0004_auto_20190115_0423.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0005_auto_20190121_0729">
+<span id="apps-theming-migrations-0005-auto-20190121-0729-module"></span><h2>apps.theming.migrations.0005_auto_20190121_0729 module<a class="headerlink" href="#module-apps.theming.migrations.0005_auto_20190121_0729" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0005_auto_20190121_0729.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0005_auto_20190121_0729.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0005_auto_20190121_0729.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0005_auto_20190121_0729.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0005_auto_20190121_0729.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0004_auto_20190115_0423')]</span></em><a class="headerlink" href="#apps.theming.migrations.0005_auto_20190121_0729.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0005_auto_20190121_0729.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='show_api_docs_link',</span> <span class="pre">field=&lt;django.db.models.fields.BooleanField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='show_powered_by_badgr',</span> <span class="pre">field=&lt;django.db.models.fields.BooleanField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0005_auto_20190121_0729.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0006_auto_20190122_0413">
+<span id="apps-theming-migrations-0006-auto-20190122-0413-module"></span><h2>apps.theming.migrations.0006_auto_20190122_0413 module<a class="headerlink" href="#module-apps.theming.migrations.0006_auto_20190122_0413" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0006_auto_20190122_0413.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0006_auto_20190122_0413.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0006_auto_20190122_0413.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0006_auto_20190122_0413.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0006_auto_20190122_0413.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('sites',</span> <span class="pre">'0002_alter_domain_unique'),</span> <span class="pre">('theming',</span> <span class="pre">'0005_auto_20190121_0729')]</span></em><a class="headerlink" href="#apps.theming.migrations.0006_auto_20190122_0413.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0006_auto_20190122_0413.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RemoveField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='subdomain'&gt;,</span> <span class="pre">&lt;AddField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='site',</span> <span class="pre">field=&lt;django.db.models.fields.related.OneToOneField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0006_auto_20190122_0413.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0007_auto_20190211_0152">
+<span id="apps-theming-migrations-0007-auto-20190211-0152-module"></span><h2>apps.theming.migrations.0007_auto_20190211_0152 module<a class="headerlink" href="#module-apps.theming.migrations.0007_auto_20190211_0152" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0007_auto_20190211_0152.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0007_auto_20190211_0152.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0007_auto_20190211_0152.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0007_auto_20190211_0152.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0007_auto_20190211_0152.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0006_auto_20190122_0413')]</span></em><a class="headerlink" href="#apps.theming.migrations.0007_auto_20190211_0152.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0007_auto_20190211_0152.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='privacy_policy_link',</span> <span class="pre">field=&lt;django.db.models.fields.files.FileField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_of_service_link',</span> <span class="pre">field=&lt;django.db.models.fields.files.FileField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0007_auto_20190211_0152.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0008_auto_20190219_0515">
+<span id="apps-theming-migrations-0008-auto-20190219-0515-module"></span><h2>apps.theming.migrations.0008_auto_20190219_0515 module<a class="headerlink" href="#module-apps.theming.migrations.0008_auto_20190219_0515" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0008_auto_20190219_0515.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0008_auto_20190219_0515.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0008_auto_20190219_0515.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0008_auto_20190219_0515.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0008_auto_20190219_0515.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0007_auto_20190211_0152')]</span></em><a class="headerlink" href="#apps.theming.migrations.0008_auto_20190219_0515.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0008_auto_20190219_0515.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='privacy_policy_link',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_of_service_link',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0008_auto_20190219_0515.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0009_theme_badgr_app">
+<span id="apps-theming-migrations-0009-theme-badgr-app-module"></span><h2>apps.theming.migrations.0009_theme_badgr_app module<a class="headerlink" href="#module-apps.theming.migrations.0009_theme_badgr_app" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0009_theme_badgr_app.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0009_theme_badgr_app.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0009_theme_badgr_app.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0009_theme_badgr_app.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0009_theme_badgr_app.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('mainsite',</span> <span class="pre">'0016_auto_20181116_0324'),</span> <span class="pre">('theming',</span> <span class="pre">'0008_auto_20190219_0515')]</span></em><a class="headerlink" href="#apps.theming.migrations.0009_theme_badgr_app.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0009_theme_badgr_app.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='badgr_app',</span> <span class="pre">field=&lt;django.db.models.fields.related.OneToOneField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0009_theme_badgr_app.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0010_auto_20190304_0113">
+<span id="apps-theming-migrations-0010-auto-20190304-0113-module"></span><h2>apps.theming.migrations.0010_auto_20190304_0113 module<a class="headerlink" href="#module-apps.theming.migrations.0010_auto_20190304_0113" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0010_auto_20190304_0113.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0010_auto_20190304_0113.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0010_auto_20190304_0113.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0010_auto_20190304_0113.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0010_auto_20190304_0113.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0009_theme_badgr_app')]</span></em><a class="headerlink" href="#apps.theming.migrations.0010_auto_20190304_0113.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0010_auto_20190304_0113.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RunPython</span> <span class="pre">&lt;function</span> <span class="pre">migrate_them_to_badger_app&gt;</span> <span class="pre">reverse_code=&lt;function</span> <span class="pre">RunPython.noop&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0010_auto_20190304_0113.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="apps.theming.migrations.0010_auto_20190304_0113.migrate_them_to_badger_app">
+<span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0010_auto_20190304_0113.</span></span><span class="sig-name descname"><span class="pre">migrate_them_to_badger_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">apps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_editor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0010_auto_20190304_0113.html#migrate_them_to_badger_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0010_auto_20190304_0113.migrate_them_to_badger_app" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0011_theme_terms_and_conditions_template">
+<span id="apps-theming-migrations-0011-theme-terms-and-conditions-template-module"></span><h2>apps.theming.migrations.0011_theme_terms_and_conditions_template module<a class="headerlink" href="#module-apps.theming.migrations.0011_theme_terms_and_conditions_template" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0011_theme_terms_and_conditions_template.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0011_theme_terms_and_conditions_template.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0011_theme_terms_and_conditions_template.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0011_theme_terms_and_conditions_template.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0011_theme_terms_and_conditions_template.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0010_auto_20190304_0113')]</span></em><a class="headerlink" href="#apps.theming.migrations.0011_theme_terms_and_conditions_template.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0011_theme_terms_and_conditions_template.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_and_conditions_template',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0011_theme_terms_and_conditions_template.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0012_remove_theme_site">
+<span id="apps-theming-migrations-0012-remove-theme-site-module"></span><h2>apps.theming.migrations.0012_remove_theme_site module<a class="headerlink" href="#module-apps.theming.migrations.0012_remove_theme_site" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0012_remove_theme_site.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0012_remove_theme_site.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0012_remove_theme_site.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0012_remove_theme_site.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0012_remove_theme_site.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0011_theme_terms_and_conditions_template')]</span></em><a class="headerlink" href="#apps.theming.migrations.0012_remove_theme_site.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0012_remove_theme_site.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;RemoveField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='site'&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0012_remove_theme_site.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0013_theme_terms_and_conditions_template_en">
+<span id="apps-theming-migrations-0013-theme-terms-and-conditions-template-en-module"></span><h2>apps.theming.migrations.0013_theme_terms_and_conditions_template_en module<a class="headerlink" href="#module-apps.theming.migrations.0013_theme_terms_and_conditions_template_en" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0013_theme_terms_and_conditions_template_en.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0013_theme_terms_and_conditions_template_en.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0013_theme_terms_and_conditions_template_en.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0013_theme_terms_and_conditions_template_en.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0013_theme_terms_and_conditions_template_en.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0012_remove_theme_site')]</span></em><a class="headerlink" href="#apps.theming.migrations.0013_theme_terms_and_conditions_template_en.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0013_theme_terms_and_conditions_template_en.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AddField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_and_conditions_template_en',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0013_theme_terms_and_conditions_template_en.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0014_auto_20190705_0144">
+<span id="apps-theming-migrations-0014-auto-20190705-0144-module"></span><h2>apps.theming.migrations.0014_auto_20190705_0144 module<a class="headerlink" href="#module-apps.theming.migrations.0014_auto_20190705_0144" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0014_auto_20190705_0144.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0014_auto_20190705_0144.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0014_auto_20190705_0144.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0014_auto_20190705_0144.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0014_auto_20190705_0144.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0013_theme_terms_and_conditions_template_en')]</span></em><a class="headerlink" href="#apps.theming.migrations.0014_auto_20190705_0144.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0014_auto_20190705_0144.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_and_conditions_template',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_and_conditions_template_en',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0014_auto_20190705_0144.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations.0015_auto_20191203_0250">
+<span id="apps-theming-migrations-0015-auto-20191203-0250-module"></span><h2>apps.theming.migrations.0015_auto_20191203_0250 module<a class="headerlink" href="#module-apps.theming.migrations.0015_auto_20191203_0250" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="apps.theming.migrations.0015_auto_20191203_0250.Migration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">apps.theming.migrations.0015_auto_20191203_0250.</span></span><span class="sig-name descname"><span class="pre">Migration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apps/theming/migrations/0015_auto_20191203_0250.html#Migration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#apps.theming.migrations.0015_auto_20191203_0250.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Migration</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0015_auto_20191203_0250.Migration.dependencies">
+<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('theming',</span> <span class="pre">'0014_auto_20190705_0144')]</span></em><a class="headerlink" href="#apps.theming.migrations.0015_auto_20191203_0250.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="apps.theming.migrations.0015_auto_20191203_0250.Migration.operations">
+<span class="sig-name descname"><span class="pre">operations</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='badgr_app',</span> <span class="pre">field=&lt;django.db.models.fields.related.OneToOneField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='logo_desktop',</span> <span class="pre">field=&lt;django.db.models.fields.files.FileField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='logo_small',</span> <span class="pre">field=&lt;django.db.models.fields.files.FileField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='privacy_policy_link',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='service_name',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='show_api_docs_link',</span> <span class="pre">field=&lt;django.db.models.fields.BooleanField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='show_powered_by_badgr',</span> <span class="pre">field=&lt;django.db.models.fields.BooleanField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_and_conditions_template',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_and_conditions_template_en',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='terms_of_service_link',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;,</span> <span class="pre">&lt;AlterField</span>&#160; <span class="pre">model_name='theme',</span> <span class="pre">name='welcome_message',</span> <span class="pre">field=&lt;django.db.models.fields.CharField&gt;&gt;]</span></em><a class="headerlink" href="#apps.theming.migrations.0015_auto_20191203_0250.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-apps.theming.migrations">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-apps.theming.migrations" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Edubadges</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="apps.html">apps package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="apps.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="apps.html#module-apps">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="apps.html">apps package</a><ul>
+  <li><a href="apps.theming.html">apps.theming package</a><ul>
+      <li>Previous: <a href="apps.theming.html" title="previous chapter">apps.theming package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2024, Okke, Daniel.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/apps.theming.migrations.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
