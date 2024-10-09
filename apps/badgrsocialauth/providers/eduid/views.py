@@ -5,18 +5,19 @@ import urllib.parse
 import urllib.request
 from base64 import b64encode
 from urllib.parse import urlparse
-
+from allauth.account.adapter import get_adapter as get_account_adapter
+from badgrsocialauth.providers.eduid.signals import val_name_audit_trail_signal
 import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import (
     render_authentication_error,
     complete_social_login,
 )
+from allauth.socialaccount.models import SocialApp
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from jose import jwt
-
 from badgeuser.models import BadgeUser
 from badgrsocialauth.utils import (
     set_session_badgr_app,
@@ -63,7 +64,7 @@ def login(request):
         "scope": "openid eduid.nl/links",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
         "claims": '{"id_token":{"preferred_username":null,"given_name":null,"family_name":null,"email":null,'
-        '"eduid":null, "eduperson_scoped_affiliation":null, "preferred_username":null, "uids":null}}',
+                  '"eduid":null, "eduperson_scoped_affiliation":null, "preferred_username":null, "uids":null}}',
     }
     validate_name = request.GET.get("validateName")
     if validate_name and validate_name.lower() == "true":
@@ -109,8 +110,8 @@ def callback(request):
     )
     if response.status_code != 200:
         error = (
-            "Server error: User info endpoint error (http %s). Try alternative login methods"
-            % response.status_code
+                "Server error: User info endpoint error (http %s). Try alternative login methods"
+                % response.status_code
         )
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
@@ -232,8 +233,20 @@ def after_terms_agreement(request, **kwargs):
     if request.user.validated_name and len(validated_names) == 0:
         ret = HttpResponseRedirect(ret.url + "&revalidate-name=true")
     if len(validated_names) > 0:
+        val_name_audit_trail_signal.send(
+            sender=request.user.__class__,
+            user=request.user,
+            old_validated_name=request.user.validated_name,
+            new_validated_name=validated_names[0],
+        )
         request.user.validated_name = validated_names[0]
     else:
+        val_name_audit_trail_signal.send(
+            sender=request.user.__class__,
+            user=request.user,
+            old_validated_name=request.user.validated_name,
+            new_validated_name=None,
+        )
         request.user.validated_name = None
     request.user.save()
 

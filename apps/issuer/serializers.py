@@ -394,11 +394,17 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     def create(self, validated_data, **kwargs):
         user_permissions = validated_data['issuer'].get_permissions(validated_data['created_by'])
         if user_permissions['may_create']:
-            if validated_data['formal'] and not validated_data['issuer'].faculty.institution.grondslag_formeel:
+            is_micro_micro_credential = validated_data['badge_class_type'] == 'micro_credential'
+            institution = validated_data['issuer'].faculty.institution
+            if is_micro_micro_credential and not institution.micro_credentials_enabled:
+                raise BadgrValidationError(
+                    "Cannot create a micro_credential badgeclass for an institution not configured for ",
+                    217)
+            if validated_data['formal'] and not institution.grondslag_formeel and not is_micro_micro_credential:
                 raise BadgrValidationError(
                     "Cannot create a formal badgeclass for an institution without the judicial basis for formal badges",
                     215)
-            if not validated_data['formal'] and not validated_data['issuer'].faculty.institution.grondslag_informeel:
+            if not validated_data['formal'] and not institution.grondslag_informeel and not is_micro_micro_credential:
                 raise BadgrValidationError(
                     "Cannot create an informal badgeclass for an institution without the judicial basis for informal badges",
                     216)
