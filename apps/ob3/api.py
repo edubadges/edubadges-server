@@ -12,7 +12,6 @@ from rest_framework.views import APIView
 from issuer.models import BadgeInstance
 from mainsite.settings import OB3_API_URL, UI_URL
 
-
 class CredentialsView(APIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ['post']
@@ -26,13 +25,7 @@ class CredentialsView(APIView):
 
         self.__issue_badge(badge_instance)
         credential_offer = self.__get_offer(offer_id)
-
-        img = qrcode.make(credential_offer)
-
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-
+        img_str = self.__qr_code(credential_offer)
         return Response({"qr_code_base64": img_str}, status=status.HTTP_201_CREATED)
 
     def __badge_instance(self, badge_id, user):
@@ -92,3 +85,9 @@ class CredentialsView(APIView):
                 }
             }
         }
+
+    def __qr_code(self, credential_offer):
+        img = qrcode.make(credential_offer)
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode()
