@@ -73,6 +73,8 @@ surf_net_institution, _ = Institution.objects.get_or_create(name_english=SURF_IN
                                                             description_dutch=SURF_INSTITUTION_NAME,
                                                             image_english="uploads/issuers/surf.png",
                                                             image_dutch="uploads/issuers/surf.png",
+                                                            ob3_ssi_agent_enabled=True,
+                                                            micro_credentials_enabled=True,
                                                             )
 # Terms general
 terms_service_agreement_student, _ = Terms.objects.get_or_create(institution=None, terms_type=Terms.TYPE_SERVICE_AGREEMENT_STUDENT)
