@@ -4,88 +4,102 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [7.1.0] - 2024-10-10
+- Use of settings vars instead of looking up env vars again.
+- Added audit trail for changing validated name.
+- Fix for informal MicroCredential (#147).
+- BOk2vwtM : Used env vars insteaf of social app db table.
+- Improper Input Validation (pentest 2024).
+- Disable graphql introspection.
+- Searching for badge instances leads to 500 error.
+- Tonen kwaliteitskader in de catalogus.
+- Uitbreiden query awarded edubadges overview.
+- Bugfix superuser.
+- Save required extensions if not present.
+- Bump cryptography from 42.0.4 to 43.0.1.
+
 ## [7.0.0] - 2024-08-14
 - fix: Add a type:image to the image payload in our credential request.
-- WIP for migration studyload to time-investment for non MBO badges
-- Formal badges are regular badges
-- Update requirements.txt
-- WIP for Banner on login screen
-- fix: New SSI-agent offer response is not JSON but plain text
-- fix: Rename forgotton variable
-- fix: use OfferId, instead of subjectId for impierce ssi-agent
-- fix: Make payload for verification request compatible with ssi-agent
-- Changed endpoint in reference with agent.poc9.eduwallet.nl
-- For private badges we don't require studyload / ects
-- Use JS constants for microcredentials in migration
-- As-is first draft of migration of micro-credential
-- Merge branch 'master' into develop
-- TimeInvestmentExtension is optional for Extra Curricular
-- Expose country_code in institution graphql
-- Added InstitutionCountryExtension
-- Added country code for institutions
-- Force login after logout
-- Added new performant query for requested edubadges
-- Re-enabled BadgeExtensionValidator
-- Temporarily disable validator for extenstions
-- WIP on no-cache for versions/info
-- Added new performant query for requested edubadges
-- Refactored tags
-- Quick - but not final - fix for slow Requested Badges query
-- added more metadata to public bagde class
-- Increased participation
-- Store assessment_types in one column instead of many-to-many
-- Updated gitignore
-- Save grade achieved from requestedbadges
-- Added grades to sample DA
-- Grade required flow
-- Allow for updates of new required fields after assertions are awarded
-- Server side badge class validation
-- WIP for refactoring validation
-- Added extra info for public badge endpoint
-- WIP for extended server side error handling
-- Insights new badge class types
+- WIP for migration studyload to time-investment for non MBO badges.
+- Formal badges are regular badges.
+- Update requirements.txt.
+- WIP for Banner on login screen.
+- fix: New SSI-agent offer response is not JSON but plain text.
+- fix: Rename forgotton variable.
+- fix: use OfferId, instead of subjectId for impierce ssi-agent.
+- fix: Make payload for verification request compatible with ssi-agent.
+- Changed endpoint in reference with agent.poc9.eduwallet.nl.
+- For private badges we don't require studyload / ects.
+- Use JS constants for microcredentials in migration.
+- As-is first draft of migration of micro-credential.
+- Merge branch 'master' into develop.
+- TimeInvestmentExtension is optional for Extra Curricular.
+- Expose country_code in institution graphql.
+- Added InstitutionCountryExtension.
+- Added country code for institutions.
+- Force login after logout.
+- Added new performant query for requested edubadges.
+- Re-enabled BadgeExtensionValidator.
+- Temporarily disable validator for extenstions.
+- WIP on no-cache for versions/info.
+- Added new performant query for requested edubadges.
+- Refactored tags.
+- Quick - but not final - fix for slow Requested Badges query.
+- added more metadata to public bagde class.
+- Increased participation.
+- Store assessment_types in one column instead of many-to-many.
+- Updated gitignore.
+- Save grade achieved from requestedbadges.
+- Added grades to sample DA.
+- Grade required flow.
+- Allow for updates of new required fields after assertions are awarded.
+- Server side badge class validation.
+- WIP for refactoring validation.
+- Added extra info for public badge endpoint.
+- WIP for extended server side error handling.
+- Insights new badge class types.
 - criteria_url is no more....
-- Tag values in badge overview
-- Added migration for institutions is_micro_credentials_enabled
-- WIP for new badge class forms
-- Institution has badge class tags
-- Extra badge class fields
-- Feature toggle micro_credential
-- Expose badge_class_type
-- Added badge_class_type for new forms
-- Narrow search issuers
-- Management query for issuers
-- Bugfix for query awarded badges
-- Added EPPN to admin views
-- Bump django from 3.2.24 to 3.2.25
-- Bump pillow from 10.2.0 to 10.3.0
-- Bump sqlparse from 0.4.4 to 0.5.0
-- Bump urllib3 from 1.26.18 to 1.26.19
-- Bump djangorestframework from 3.14.0 to 3.15.2
+- Tag values in badge overview.
+- Added migration for institutions is_micro_credentials_enabled.
+- WIP for new badge class forms.
+- Institution has badge class tags.
+- Extra badge class fields.
+- Feature toggle micro_credential.
+- Expose badge_class_type.
+- Added badge_class_type for new forms.
+- Narrow search issuers.
+- Management query for issuers.
+- Bugfix for query awarded badges.
+- Added EPPN to admin views.
+- Bump django from 3.2.24 to 3.2.25.
+- Bump pillow from 10.2.0 to 10.3.0.
+- Bump sqlparse from 0.4.4 to 0.5.0.
+- Bump urllib3 from 1.26.18 to 1.26.19.
+- Bump djangorestframework from 3.14.0 to 3.15.2.
 
 ## [6.10.0] - 2024-02-23
-- Synced insights query with management query
-- Upgraded to pillow 10.2.0
-- Optimise management query
-- Admins are super-users
-- Assertions overview query
-- Added total direct award #
-- Bugfix for 0 claimrate
-- Query for awarded backpacks
-- Upgraded to latest mysqlclient
-- Bump cryptography from 41.0.4 to 42.0.0
-- Bump django from 3.2.20 to 3.2.24
-- Added issuer and image info to the credential endpoint
-- JSON response for QRcode
-- Bump pycryptodome from 3.18.0 to 3.19.1
-- Added OB3 endpoint
-- Added feature flag for ob3 integration
-- Fix for broken badge query in admin view
-- Bump cryptography from 41.0.4 to 41.0.6
-- Micro-credentials badges
-- Assertion query
-- Added raw query for counts user / assertions
-- Added queries for re-use
+- Synced insights query with management query.
+- Upgraded to pillow 10.2.0.
+- Optimise management query.
+- Admins are super-users.
+- Assertions overview query.
+- Added total direct award.
+- Bugfix for 0 claimrate.
+- Query for awarded backpacks.
+- Upgraded to latest mysqlclient.
+- Bump cryptography from 41.0.4 to 42.0.0.
+- Bump django from 3.2.20 to 3.2.24.
+- Added issuer and image info to the credential endpoint.
+- JSON response for QRcode.
+- Bump pycryptodome from 3.18.0 to 3.19.1.
+- Added OB3 endpoint.
+- Added feature flag for ob3 integration.
+- Fix for broken badge query in admin view.
+- Bump cryptography from 41.0.4 to 41.0.6.
+- Micro-credentials badges.
+- Assertion query.
+- Added raw query for counts user / assertions.
+- Added queries for re-use.
 
 ## [6.9.0] - 2023-10-23
 - Added micro-credentials count query.
