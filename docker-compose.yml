@@ -45,6 +45,7 @@ services:
       - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
       - UI_URL=http://0.0.0.0:8080
       - UNSUBSCRIBE_SECRET_KEY=secret
+      - OB3_API_URL=https://agent.poc9.eduwallet.nl
     depends_on:
       db:
         condition: service_healthy

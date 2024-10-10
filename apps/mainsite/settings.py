@@ -201,7 +201,7 @@ EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.ed
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
 DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 30))
-OB3_API_URL = os.environ.get('OB3_API_URL', 'http://poc4.educredentials.eu:3033')
+OB3_API_URL = os.environ.get('OB3_API_URL', '')
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'
