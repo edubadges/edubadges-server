@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Uitbreiden query awarded edubadges overview.
 - Bugfix superuser.
 - Save required extensions if not present.
+- Merge pull request #142 from edubadges/feature/directaward_audit.
 - Bump cryptography from 42.0.4 to 43.0.1.
 
 ## [7.0.0] - 2024-08-14
