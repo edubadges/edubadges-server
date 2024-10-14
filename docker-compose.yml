@@ -1,0 +1,81 @@
+---
+services:
+  badgr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: badgr
+    command: "./docker/entrypoint.sh"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      # Be sure to set BADGR_DB_PASSWORD when running docker-compose
+      - ACCOUNT_SALT=secret
+      - ALLOW_SEEDS=1
+      - BADGR_APP_ID=1
+      - BADGR_DB_HOST=db
+      - BADGR_DB_NAME=badgr
+      - BADGR_DB_PASSWORD=${BADGR_DB_PASSWORD}
+      - BADGR_DB_PORT=3306
+      - BADGR_DB_USER=badgr
+      - DEBUG=1
+      - DEFAULT_DOMAIN=http://0.0.0.0:8000
+      - DEFAULT_FROM_EMAIL=noreply@surf.nl
+      - DOMAIN=0.0.0.0:8000
+      - EDUID_PROVIDER_URL=https://connect.test.surfconext.nl/oidc
+      - EDUID_REGISTRATION_URL=https://login.test.eduid.nl/register
+      - EDU_ID_CLIENT=edubadges
+      - EDU_ID_SECRET=${EDU_ID_SECRET}
+      - EMAIL_HOST=mailhog
+      - EMAIL_PORT=1025
+      - LTI_FRONTEND_URL=localhost
+      - MEMCACHED_HOST=memcached
+      - MEMCACHED_PORT=11211
+      - OIDC_RS_ENTITY_ID=test.edubadges.rs.nl
+      - OIDC_RS_SECRET=${OIDC_RS_SECRET}
+      - ROOT_INFO_SECRET_KEY=secret
+      - SITE_ID=1
+      - SUPERUSER_EMAIL=superuser@example.com
+      - SUPERUSER_NAME=superuser
+      - SUPERUSER_PWD=secert
+      - SURF_CONEXT_CLIENT=test.edubadges.nl
+      - SURF_CONEXT_CLIENT=www.edubadges.nl
+      - SURF_CONEXT_SECRET=${SURF_CONEXT_SECRET}
+      - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
+      - UI_URL=http://0.0.0.0:8080
+      - UNSUBSCRIBE_SECRET_KEY=secret
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+      
+  db:
+    image: mysql:8.4
+    container_name: badgr_mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${BADGR_DB_PASSWORD}
+      MYSQL_DATABASE: badgr
+      MYSQL_USER: badgr
+      MYSQL_PASSWORD: ${BADGR_DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    # Health check for MySQL
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  memcached:
+    image: memcached:latest
+    container_name: memcached
