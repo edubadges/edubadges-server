@@ -83,10 +83,12 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     TYPE_WO = 'WO'
     TYPE_HBO = 'HBO'
     TYPE_MBO = 'MBO'
+    TYPE_HBO_MBO = 'HBO/MBO'
     TYPE_CHOICES = (
         (TYPE_WO, 'WO'),
         (TYPE_HBO, 'HBO'),
         (TYPE_MBO, 'MBO'),
+        (TYPE_HBO_MBO, 'HBO/MBO'),
     )
     institution_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
     DEFAULT_LANGUAGE_DUTCH = "nl_NL"
@@ -309,6 +311,14 @@ class Faculty(EntityUserProvisionmentMixin,
     on_behalf_of = models.BooleanField(default=False)
     on_behalf_of_url = models.CharField(max_length=512, blank=True, null=True, default=None)
     on_behalf_of_display_name = models.CharField(max_length=512, blank=True, null=True, default=None)
+
+    TYPE_HBO = 'HBO'
+    TYPE_MBO = 'MBO'
+    TYPE_CHOICES = (
+        (TYPE_HBO, 'HBO'),
+        (TYPE_MBO, 'MBO'),
+    )
+    faculty_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
 
     @property
     def name(self):

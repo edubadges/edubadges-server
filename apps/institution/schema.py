@@ -16,7 +16,7 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
         model = Faculty
         fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english',
                   'description_dutch', 'content_type_id', 'on_behalf_of', 'on_behalf_of_url',
-                  'on_behalf_of_display_name')
+                  'on_behalf_of_display_name', 'faculty_type')
 
     issuers = graphene.List(IssuerType)
     issuer_count = graphene.Int()

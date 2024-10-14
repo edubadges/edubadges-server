@@ -137,6 +137,7 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
     on_behalf_of = serializers.BooleanField(default=False, required=False)
     on_behalf_of_url = serializers.URLField(max_length=512, required=False, allow_null=True, allow_blank=True)
     on_behalf_of_display_name = serializers.CharField(max_length=512, required=False, allow_null=True, allow_blank=True)
+    faculty_type = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = Faculty
@@ -156,6 +157,11 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
             errors = OrderedDict(chain(errors.items(), e.items()))
             e = OrderedDict(
                 [('description_dutch', [ErrorDetail('English or Dutch description is required', code=913)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        user_institution = self.context['request'].user.institution
+        if user_institution.institution_type == Institution.TYPE_HBO_MBO and not data.get('faculty_type', False):
+            e = OrderedDict(
+                [('faculty_type', [ErrorDetail('faculty_type is required', code=945)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
