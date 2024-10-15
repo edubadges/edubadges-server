@@ -12,7 +12,6 @@ from .models import Institution, Faculty, BadgeClassTag
 
 class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
                   ImageResolverMixin, ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
-
     class Meta:
         model = Faculty
         fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english',
@@ -101,7 +100,9 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         return self.get_faculties(info.context.user, ['may_read'])
 
     def resolve_public_faculties(self, info):
-        return self.cached_faculties()
+        faculties = self.cached_faculties()
+        return [faculty for faculty in faculties if
+                faculty.visibility_type is None or faculty.visibility_type == Faculty.VISIBILITY_PUBLIC]
 
     def resolve_award_allowed_institutions(self, info):
         institutions = Institution.objects.all() if self.award_allow_all_institutions else self.award_allowed_institutions.all()
