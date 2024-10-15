@@ -141,6 +141,7 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
     on_behalf_of_url = serializers.URLField(max_length=512, required=False, allow_null=True, allow_blank=True)
     on_behalf_of_display_name = serializers.CharField(max_length=512, required=False, allow_null=True, allow_blank=True)
     faculty_type = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
+    visibility_type = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = Faculty
@@ -165,6 +166,10 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
         if user_institution.institution_type == Institution.TYPE_HBO_MBO and not data.get('faculty_type', False):
             e = OrderedDict(
                 [('faculty_type', [ErrorDetail('faculty_type is required', code=945)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if user_institution.institution_type == Institution.TYPE_SURF and not data.get('visibility_type', False):
+            e = OrderedDict(
+                [('visibility_type', [ErrorDetail('visibility_type is required', code=946)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 

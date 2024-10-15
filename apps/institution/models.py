@@ -86,13 +86,16 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     TYPE_HBO = 'HBO'
     TYPE_MBO = 'MBO'
     TYPE_HBO_MBO = 'HBO/MBO'
+    TYPE_SURF = 'SURF'
     TYPE_CHOICES = (
         (TYPE_WO, 'WO'),
         (TYPE_HBO, 'HBO'),
         (TYPE_MBO, 'MBO'),
         (TYPE_HBO_MBO, 'HBO/MBO'),
+        (TYPE_SURF, 'SURF'),
     )
     institution_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
+
     DEFAULT_LANGUAGE_DUTCH = "nl_NL"
     DEFAULT_LANGUAGE_ENGLISH = "en_EN"
     DEFAULT_LANGUAGE_CHOICES = (
@@ -329,6 +332,14 @@ class Faculty(EntityUserProvisionmentMixin,
         (TYPE_MBO, 'MBO'),
     )
     faculty_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
+
+    VISIBILITY_PUBLIC = 'PUBLIC'
+    VISIBILITY_TEST = 'TEST'
+    VISIBILITY_CHOICES = (
+        (VISIBILITY_PUBLIC, 'PUBLIC'),
+        (VISIBILITY_TEST, 'TEST'),
+    )
+    visibility_type = models.CharField(max_length=254, null=True, blank=True, choices=VISIBILITY_CHOICES)
 
     @property
     def name(self):

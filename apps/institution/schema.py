@@ -18,7 +18,7 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
         fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english',
                   'description_dutch', 'content_type_id', 'on_behalf_of', 'on_behalf_of_url',
                   'on_behalf_of_display_name', 'faculty_type', 'image_english', 'image_dutch',
-                  'linkedin_org_identifier')
+                  'linkedin_org_identifier', 'visibility_type')
 
     issuers = graphene.List(IssuerType)
     issuer_count = graphene.Int()
