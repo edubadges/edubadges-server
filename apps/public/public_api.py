@@ -20,7 +20,7 @@ from rest_framework.views import APIView
 
 import badgrlog
 from entity.api import VersionedObjectMixin, BaseEntityDetailView
-from institution.models import Institution
+from institution.models import Institution, Faculty
 from issuer import utils
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 from mainsite.exceptions import BadgrApiException400
@@ -300,6 +300,16 @@ class InstitutionImage(ImagePropertyDetailView):
 
     def log(self, obj):
         logger.event(badgrlog.InstitutionImageRetrievedEvent(obj, self.request))
+
+
+class FacultyImage(ImagePropertyDetailView):
+    model = Faculty
+    prop = 'image'
+    prop_en = 'image_english'
+    prop_nl = 'image_dutch'
+
+    def log(self, obj):
+        logger.event(badgrlog.FacultyImageRetrievedEvent(obj, self.request))
 
 
 class IssuerJson(JSONComponentView):

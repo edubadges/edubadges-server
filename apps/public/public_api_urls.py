@@ -6,7 +6,7 @@ from .public_api import (InstitutionJson, InstitutionImage, IssuerJson, IssuerBa
                          BadgeClassImage, BadgeClassCriteria, BadgeInstanceJson,
                          BadgeInstanceImage, BakedBadgeInstanceImage,
                          BadgeClassPublicKeyJson, IssuerPublicKeyJson, AssertionValidate, AssertionRecipientName,
-                         ValidatorVersion)
+                         ValidatorVersion, FacultyImage)
 
 json_patterns = [
     url(r'^institutions/(?P<entity_id>[^/.]+)$',
@@ -34,7 +34,10 @@ json_patterns = [
 image_patterns = [
     url(r'^institution/(?P<entity_id>[^/]+)/image$', InstitutionImage.as_view(slugToEntityIdRedirect=True),
         name='institution_image'),
-    url(r'^issuers/(?P<entity_id>[^/]+)/image$', IssuerImage.as_view(slugToEntityIdRedirect=True), name='issuer_image'),
+    url(r'^faculties/(?P<entity_id>[^/]+)/image$', FacultyImage.as_view(slugToEntityIdRedirect=True),
+        name='faculty_image'),
+    url(r'^issuers/(?P<entity_id>[^/]+)/image$', IssuerImage.as_view(slugToEntityIdRedirect=True),
+        name='issuer_image'),
     url(r'^badges/(?P<entity_id>[^/]+)/image', BadgeClassImage.as_view(slugToEntityIdRedirect=True),
         name='badgeclass_image'),
     url(r'^badges/(?P<entity_id>[^/]+)/criteria', BadgeClassCriteria.as_view(slugToEntityIdRedirect=True),
