@@ -6,7 +6,7 @@ import json
 import qrcode
 import requests
 from django.http import Http404
-from django.core.exceptions import BadRequest
+from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,7 +45,7 @@ class CredentialsView(APIView):
     def __badge_instance(self, badge_id, user):
         try:
             return BadgeInstance.objects.get(id=badge_id, user=user)
-        except BadgeInstance.DoesNotExist:
+        except ObjectDoesNotExist:
             raise Http404
 
     def __issue_sphereon_badge(self, credential):
