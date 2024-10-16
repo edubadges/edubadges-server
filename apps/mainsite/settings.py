@@ -301,9 +301,19 @@ LOGGING = {
             'interval': 1,
             'backupCount': 30*24,  # 30 days times 24 hours
             'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
-        }
+        },
+        'badgr_debug_console': {
+            'level': 'DEBUG',
+            'formatter': 'default',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler'
+        },
     },
     'loggers': {
+        'django': {
+            'handlers': ['badgr_debug_console'],
+            'propagate': True,
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
@@ -336,6 +346,11 @@ LOGGING = {
             '()': 'mainsite.formatters.JsonFormatter',
             'format': '%(asctime)s',
             'datefmt': '%Y-%m-%dT%H:%M:%S%z',
+        }
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
         }
     },
 }
