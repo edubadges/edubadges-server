@@ -1,5 +1,5 @@
 import os
-import django
+
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 
@@ -9,8 +9,10 @@ def legacy_boolean_parsing(env_key, default_value):
     val = '1' if val == 'True' else '0' if val == 'False' else val
     return bool(int(val))
 
+
 env_settings()
 
+SESSION_COOKIE_AGE = 60 * 60  # 1 hour session validity
 SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
 SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -56,7 +58,6 @@ INSTALLED_APPS = [
     'django_celery_results',
     'drf_spectacular',
     'drf_spectacular_sidecar',
-
     # OAuth 2 provider
     'oauth2_provider',
     # eduBadges apps
@@ -96,11 +97,12 @@ MIDDLEWARE = [
     # 'mainsite.middleware.TrailingSlashMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
-
 ]
 
 ROOT_URLCONF = 'mainsite.urls'
-ALLOWED_HOSTS = ['*', ]
+ALLOWED_HOSTS = [
+    '*',
+]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ##
@@ -123,7 +125,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
-                'mainsite.context_processors.extra_settings'
+                'mainsite.context_processors.extra_settings',
             ],
         },
     },
@@ -171,7 +173,7 @@ LOGIN_REDIRECT_URL = '/api/schema/redoc'
 AUTHENTICATION_BACKENDS = [
     'oauth2_provider.backends.OAuth2Backend',
     # Needed to login by username in Django admin, regardless of `allauth`
-    "badgeuser.backends.CachedModelBackend",
+    'badgeuser.backends.CachedModelBackend',
 ]
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
@@ -185,9 +187,7 @@ ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
 ACCOUNT_UNIQUE_EMAIL = False
-ACCOUNT_FORMS = {
-    'add_email': 'badgeuser.account_forms.AddEmailForm'
-}
+ACCOUNT_FORMS = {'add_email': 'badgeuser.account_forms.AddEmailForm'}
 ACCOUNT_SIGNUP_FORM_CLASS = 'badgeuser.forms.BadgeUserCreationForm'
 ACCOUNT_SALT = os.environ['ACCOUNT_SALT']
 
@@ -221,7 +221,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
             'min_length': 8,
-        }
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -277,19 +277,15 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': [],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
+        'mail_admins': {'level': 'ERROR', 'filters': [], 'class': 'django.utils.log.AdminEmailHandler'},
         'badgr_events': {
             'level': 'INFO',
             'formatter': 'json',
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'H',
             'interval': 1,
-            'backupCount': 30*24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
+            'backupCount': 30 * 24,  # 30 days times 24 hours
+            'filename': os.path.join(LOGS_DIR, 'badgr_events.log'),
         },
         'badgr_debug': {
             'level': 'INFO',
@@ -297,9 +293,9 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'H',
             'interval': 1,
-            'backupCount': 30*24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
-        }
+            'backupCount': 30 * 24,  # 30 days times 24 hours
+            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
+        },
     },
     'loggers': {
         'django.request': {
@@ -321,20 +317,16 @@ LOGGING = {
             'handlers': ['badgr_debug'],
             'level': 'DEBUG',
             'propagate': True,
-        }
+        },
     },
     'formatters': {
-        'default': {
-            'format': '%(asctime)s %(levelname)s %(module)s %(message)s'
-        },
-        'badgr': {
-            'format': '%(asctime)s | %(levelname)s | %(message)s'
-        },
+        'default': {'format': '%(asctime)s %(levelname)s %(module)s %(message)s'},
+        'badgr': {'format': '%(asctime)s | %(levelname)s | %(message)s'},
         'json': {
             '()': 'mainsite.formatters.JsonFormatter',
             'format': '%(asctime)s',
             'datefmt': '%Y-%m-%dT%H:%M:%S%z',
-        }
+        },
     },
 }
 
@@ -383,9 +375,7 @@ TEST_RUNNER = 'mainsite.testrunner.BadgrRunner'
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'],
     'DEFAULT_RENDERER_CLASSES': (
         'mainsite.renderers.JSONLDRenderer',
         'rest_framework.renderers.JSONRenderer',
@@ -400,7 +390,7 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSION': 'v1',
     'ALLOWED_VERSIONS': ['v1', 'v2'],
     'EXCEPTION_HANDLER': 'entity.views.exception_handler',
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 ##
@@ -420,7 +410,7 @@ LINKED_DATA_DOCUMENT_FETCHER = 'badgeanalysis.utils.custom_docloader'
 
 LTI_STORE_IN_SESSION = False
 TIME_STAMPED_OPEN_BADGES_BASE_URL = os.environ['TIME_STAMPED_OPEN_BADGES_BASE_URL']
-CAIROSVG_VERSION_SUFFIX = "2"
+CAIROSVG_VERSION_SUFFIX = '2'
 
 USE_I18N = True
 USE_L10N = False
@@ -439,7 +429,12 @@ LANGUAGE_CODE = 'en-us'
 ##
 
 MARKDOWNIFY_WHITELIST_TAGS = [
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
     'a',
     'abbr',
     'acronym',
@@ -454,7 +449,7 @@ MARKDOWNIFY_WHITELIST_TAGS = [
     'ul',
     'code',
     'pre',
-    'hr'
+    'hr',
 ]
 
 OAUTH2_PROVIDER = {
@@ -464,16 +459,13 @@ OAUTH2_PROVIDER = {
         'r:backpack': "List assertions in a User's Backpack",
         'rw:backpack': "Upload badges into a User's Backpack",
         'rw:issuer': 'Create and update Issuers, create and update Badgeclasses, and award Assertions',
-
         # private scopes used for integrations
         'rw:issuer:*': 'Create and update Badgeclasses, and award Assertions for a single Issuer',
         'r:assertions': 'Batch receive assertions',
     },
     'DEFAULT_SCOPES': ['r:profile'],
-
     'OAUTH2_VALIDATOR_CLASS': 'mainsite.oauth_validator.BadgrRequestValidator',
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 86400
-
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 86400,
 }
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
@@ -519,9 +511,7 @@ AUTHCODE_EXPIRES_SECONDS = 600  # needs to be long enough to fetch information f
 
 SESSION_COOKIE_SAMESITE = None
 
-GRAPHENE = {
-    'SCHEMA': 'apps.mainsite.schema.schema'
-}
+GRAPHENE = {'SCHEMA': 'apps.mainsite.schema.schema'}
 
 # Database
 DATABASES = {
@@ -534,7 +524,7 @@ DATABASES = {
         'PORT': os.environ.get('BADGR_DB_PORT', 3306),
         'TEST': {
             'CHARSET': 'utf8',
-        }
+        },
     }
 }
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -549,20 +539,20 @@ DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
 # Seeds
 ALLOW_SEEDS = legacy_boolean_parsing('ALLOW_SEEDS', '0')
 EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
-EDU_ID_CLIENT = os.environ.get('EDU_ID_CLIENT', "edubadges")
+EDU_ID_CLIENT = os.environ.get('EDU_ID_CLIENT', 'edubadges')
 
 OIDC_RS_ENTITY_ID = os.environ.get('OIDC_RS_ENTITY_ID', 'edubadges')
 OIDC_RS_SECRET = os.environ['OIDC_RS_SECRET']
 
 SURF_CONEXT_SECRET = os.environ.get('SURF_CONEXT_SECRET', 'secret')
-SURF_CONEXT_CLIENT = os.environ.get('SURF_CONEXT_CLIENT', "test.edubadges.nl")
+SURF_CONEXT_CLIENT = os.environ.get('SURF_CONEXT_CLIENT', 'test.edubadges.nl')
 
 SUPERUSER_NAME = os.environ.get('SUPERUSER_NAME', '')
 SUPERUSER_EMAIL = os.environ.get('SUPERUSER_EMAIL', '')
 SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
 
 # Used in 01_setup sed
-EDUID_BADGE_CLASS_NAME = "Edubadge account complete"
+EDUID_BADGE_CLASS_NAME = 'Edubadge account complete'
 
 # Debug
 DEBUG = legacy_boolean_parsing('DEBUG', '0')
@@ -575,7 +565,6 @@ SUPERUSER_LOGIN_WITH_SURFCONEXT = legacy_boolean_parsing('SUPERUSER_LOGIN_WITH_S
 
 VALIDATOR_URL = os.environ.get('VALIDATOR_URL', 'http://localhost:5000')
 EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://127.0.0.1:8000/static')
-
 
 MAX_IMAGE_UPLOAD_SIZE = 256000  # 256Kb
 MAX_IMAGE_UPLOAD_SIZE_LABEL = '256 kB'  # used in error messaging
@@ -590,18 +579,13 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
-    'SERVERS': [{'url':os.environ['DEFAULT_DOMAIN']}],
-    'PREPROCESSING_HOOKS': [
-        'mainsite.drf_spectacluar.custom_preprocessing_hook'
-    ],
+    'SERVERS': [{'url': os.environ['DEFAULT_DOMAIN']}],
+    'PREPROCESSING_HOOKS': ['mainsite.drf_spectacluar.custom_preprocessing_hook'],
     'POSTPROCESSING_HOOKS': [
         'drf_spectacular.hooks.postprocess_schema_enums',
-        'mainsite.drf_spectacluar.custom_postprocessing_hook'
+        'mainsite.drf_spectacluar.custom_postprocessing_hook',
     ],
-
 }
 
 # settings.py
-API_PROXY = {
-    'HOST': OB3_API_URL
-}
+API_PROXY = {'HOST': OB3_API_URL}
