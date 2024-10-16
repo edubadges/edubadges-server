@@ -14,7 +14,7 @@ services:
       - ACCOUNT_SALT=secret
       - ALLOW_SEEDS=1
       - BADGR_APP_ID=1
-      - BADGR_DB_HOST=db
+      - BADGR_DB_HOST=badgr_mysql_db
       - BADGR_DB_NAME=badgr
       - BADGR_DB_PASSWORD=${BADGR_DB_PASSWORD}
       - BADGR_DB_PORT=3306
@@ -48,6 +48,9 @@ services:
       - OB3_AGENT_URL_UNIME=https://agent.poc9.eduwallet.nl
       - OB3_AGENT_URL_SPHEREON=http://veramo-agent:3000
       - OB3_AGENT_AUTHZ_TOKEN_SPHEREON=${OB3_AGENT_AUTHZ_TOKEN_SPHEREON}
+    networks:
+      - shared-network
+      - edubadges-server
     depends_on:
       db:
         condition: service_healthy
@@ -71,6 +74,8 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
+    networks:
+      - edubadges-server
 
   mailhog:
     image: mailhog/mailhog
@@ -78,7 +83,17 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+    networks:
+      - edubadges-server
 
   memcached:
     image: memcached:latest
     container_name: memcached
+    networks:
+      - edubadges-server
+
+networks:
+  shared-network:
+    external: true
+  edubadges-server:
+    driver: bridge
