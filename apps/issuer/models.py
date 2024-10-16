@@ -158,6 +158,8 @@ class Issuer(EntityUserProvisionmentMixin,
     def image(self):
         image = self.return_value_according_to_language(self.image_english, self.image_dutch)
         if not image:
+            if self.faculty.image:
+                return self.faculty.image
             return self.institution.image
         return image
 
