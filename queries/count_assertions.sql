@@ -9,8 +9,6 @@ from users u
  group by assertion_count, ins.identifier
  order by ins.identifier ;
 
-
-
 select count(bi.id), b.badge_class_type, b.archived from issuer_badgeinstance bi
  inner join issuer_badgeclass b on b.id = bi.badgeclass_id
  group by b.badge_class_type, b.archived;

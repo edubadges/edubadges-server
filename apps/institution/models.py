@@ -56,7 +56,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                                                   help_text='Set to true to enable SIS integration for this institution')
     micro_credentials_enabled = models.BooleanField(default=False,
                                                     help_text='Set to true to enable Micro-credentials for this institution')
-    virtual_organization_allowed = models.BooleanField(default=False,
+    virtual_organization_allowed = models.BooleanField(default=True,
                                                     help_text='Set to true to enable Virtual Organizations for this institution')
     ob3_ssi_agent_enabled = models.BooleanField(default=False,
                                                 help_text='Set to true to enable OB3 integration for this institution')
