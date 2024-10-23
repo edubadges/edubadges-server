@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Edubadges OpenBadge version 3.0 Glossary</title>
+    <style type="text/css" media="all">
+      body {
+        font-family: 'Ubuntu', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        margin: 4em;
+        padding: 0;
+
+        font-size: 1em;
+        line-height: 1.6;
+        color: #222;
+        background-color: #f5f5f5;
+      }
+      h1 {
+        font-size: 2em;
+        margin: 0 0 0.5em;
+      }
+      h2 {
+        font-size: 1.5em;
+        margin: 1em 0 0.5em;
+      }
+      p {
+        margin: 0 0 1em;
+      }
+      dl {
+        margin: 0;
+        padding: 0;
+      }
+      dt {
+        font-weight: bold;
+        margin-top: 1em;
+      }
+      dd {
+        margin-bottom: 1em;
+      }
+      footer {
+        margin-top: 2em;
+        padding-top: 1em;
+        border-top: 1px solid #ccc;
+        font-size: 0.8em;
+        color: #666;
+      }
+
+      .anchored {
+        position: relative;
+      }
+      .anchored a {
+        text-decoration: none;
+        color: #000;
+      }
+      .anchored i.icon {
+        position: absolute;
+        left: -1.2em;
+        top: 0;
+        color: #ccc;
+      }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var elements = document.querySelectorAll('[id]');
+        for (var i = 0; i < elements.length; i++) {
+          var id = elements[i].id;
+          var icon = document.createElement('i');
+          icon.className = 'icon';
+          icon.innerHTML = '#';
+
+          var anchor = document.createElement('a');
+          anchor.href = '#' + id;
+          anchor.innerHTML = elements[i].innerHTML;
+          anchor.appendChild(icon);
+
+          elements[i].className = 'anchored';
+          elements[i].innerHTML = '';
+          elements[i].appendChild(anchor);
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <h1 id="top">Edubadges OpenBadge version 3.0 Glossary</h1>
+    <p>This document provides definitions for terms used in the Edubadges OpenBadge version 3.0 specification. It explains the extensions and differences with the published <a href="https://www.imsglobal.org/spec/ob/v3p0/">OpenBadge Specification</a>.</p>
+
+    <h2 id="BadgeClass">BadgeClass</h2>
+    <p>A type of badge, with different business rules and attributes for each type.</p>
+
+    <h2 id="RegularAchievement">RegularAchievement</h2>
+    <p>A badge class for acquired knowledge and skills that are part of the curriculum of a recognized education program. <strong>This badge class is associated with ECTS/SBU.</strong></p>
+    <dl>
+      <dt id="ects">ECTS</dt>
+      <dd>European Credit Transfer and Accumulation System</dd>
+      <dt id="timeInvestment">Time Investment</dt>
+      <dd>The time investment required to recieve the credential. In hours, and not associated with either the SBU or ECTS framework.</dd>
+      <dt id="sbu">SBU</dt>
+      <dd>Study Burden Unit</dd>
+    </dl>
+
+    <h2 id="MicroCredentialAchievement">MicroCredentialAchievement</h2>
+    <p>A badge class for microcredentials with the quality framework for professionals HBO/WO or MBO and all metadata <strong><a href="https://wiki.surfnet.nl/display/Edubadges/Microcredentials+Definition+EU">conform the EU recommendations</a>.</strong></p>
+
+    <h2 id="ExtraCurricularAchievement">ExtraCurricularAchievement</h2>
+    <p>A badge class for acquired knowledge and skills that are not part of the curriculum of a recognized education program. <strong>This badge class is not associated with ECTS/SBU.</strong></p>
+
+
+    <h2 id="EducredentialAchievement">EducredentialAchievement</h2>
+    <p>An Achievement that matches the OpenBadge v3 specification and defines the extensions for all of the RegularAchievement, MicroCredentialAchievement and ExtraCurricularAchievement badge classes.<br>
+       It extends the [OpenBadge v3 Achievement](https://www.imsglobal.org/spec/ob/v3p0/#achievement). It uses the extension ability as defined in the spec and as suggested to be implemented in the [OpenBadge impl guidelines](https://www.imsglobal.org/spec/ob/v3p0/impl/#open-badges-extensions)
+    </p>
+
+    <dl>
+      <dt id="assessmentType">AssessmentType</dt>
+      <dd>The type of assessment used to determine if the badge class has been achieved.</dd>
+      <dt id="identityChecked">IdentityChecked</dt>
+      <dd>Indicates if the identity of the badge earner has been checked.</dd>
+      <dt id="supervisionType">SupervisionType</dt>
+      <dd>The type of supervision required during assessement.</dd>
+      <dt id="participationType">ParticipationType</dt>
+      <dd>The type of participation required to achieve the badge class.</dd>
+      <dt id="assessment-type-testing">Testing</dt>
+      <dd>Assessment by testing the knowledge and skills of the badge earner.</dd>
+      <dt id="assessment-type-application-of-a-skill">Application of a skill</dt>
+      <dd>Assessment by applying a skill in a real-life situation.</dd>
+      <dt id="assessment-type-portfolio">Portfolio</dt>
+      <dd>Assessment by presenting a portfolio of work.</dd>
+      <dt id="assessment-type-recognition-of-prior-learning">Recognition of prior learning</dt>
+      <dd>Assessment by recognizing prior learning.</dd>
+      <dt id="supervision-type-unsupervised-with-no-identity-verification">Unsupervised with no identity verification</dt>
+      <dd>Assessment without supervision and without identity verification.</dd>
+      <dt id="supervision-type-supervised-with-no-identity-verification">Supervised with no identity verification</dt>
+      <dd>Assessment with supervision but without identity verification.</dd>
+      <dt id="supervision-type-supervised-online">Supervised online</dt>
+      <dd>Assessment with supervision online.</dd>
+      <dt id="supervision-type-onsite-with-identity-verification">Onsite with identity verification</dt>
+      <dd>Assessment with supervision onsite and with identity verification.</dd>
+      <dt id="participation-type-online">Online</dt>
+      <dd>Participation online.</dd>
+      <dt id="participation-type-onsite-or-blended">Onsite or blended</dt>
+      <dd>Participation onsite or online or both.</dd>
+      <dt id="participation-type-volunteering">Volunteering</dt>
+      <dd>Participation by volunteering.</dd>
+      <dt id="participation-type-work-experience">Work experience</dt>
+      <dd>Participation by work experience.</dd>
+      <dt id="participation-type-personalized-learning-activities">Personalized learning activities</dt>
+      <dd>Participation by personalized learning activities.</dd>
+      <dt id="educationProgramIdentifier">EducationProgramIdentifier</dt>
+      <dd>The identifier of the education program.</dd>
+    </dl>
+
+    <footer>
+      <p><a href="#top">Back to top</a></p>
+      <p>Trots aangeboden door <a href="https://www.surf.nl" target="_blank" rel="noreferrer noopener">SURF</a></p>
+      <p><a href="https://wiki.surfnet.nl/display/Edubadges" target="_blank" rel="noreferrer noopener">Over edubadges</a></p>
+    </footer>
+  </body>
+</html>
