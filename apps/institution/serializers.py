@@ -171,6 +171,13 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
             e = OrderedDict(
                 [('visibility_type', [ErrorDetail('visibility_type is required', code=946)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
+        if data.get("on_behalf_of") and not data.get('image_english', False) and not data.get('image_dutch', False):
+            e = OrderedDict(
+                [('image_english', [ErrorDetail('English or Dutch logo is required', code=947)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+            e = OrderedDict(
+                [('image_dutch', [ErrorDetail('English or Dutch logo is required', code=947)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
     def update(self, instance, validated_data):

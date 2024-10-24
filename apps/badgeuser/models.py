@@ -618,6 +618,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     @property
     def direct_awards(self):
+        # TODO - add or query to use personal email address
         return DirectAward.objects.filter(eppn__in=self.eppns, status='Unaccepted')
 
     def match_provisionments(self):
