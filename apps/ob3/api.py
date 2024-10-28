@@ -65,7 +65,7 @@ class CredentialsView(APIView):
                     "user_pin_required": False
                 }
             },
-            "CredentialDataSupplierInput": credential
+            "credentialDataSupplierInput": credential
         }
         resp = requests.post(json=offer_request_body,
                       url=f"{OB3_AGENT_URL_SPHEREON}/edubadges/api/create-offer",
