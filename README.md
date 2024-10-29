@@ -73,7 +73,7 @@ TODO: can we run the server so it reboots on detecting changes instead of having
 Prerequisites:
 
 * git
-* python 3.8
+* python 3.9
 * mysql
 * [cairo](https://www.cairographics.org/download/) (SVG utility)
 
@@ -84,14 +84,14 @@ Prerequisites:
 #### System-specific requirements:
 * OS X: [XCode Command line tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/)
 * Ubuntu 12.04 (install packages with apt-get): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, mariadb-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
-* CentOS 7.x (install packages with yum): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, mariadb-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
+* Fedora / Rocky 9.x (install packages with dnf): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, mariadb-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
 
 Note: some of these packages would introduce additional security considerations if left installed on a server used in production.
 
 ### Create project directory and environment
 
 * `mkdir edubadges && cd edubadges`
-* `python3.8 -m venv .venv`
+* `python3.9 -m venv .venv`
 * `source .venv/bin/activate` *Activate the environment (each time you start a session working with the code)*
 
 *Obtain source code and clone into code directory*
@@ -174,4 +174,4 @@ Set these values in your settings_local.py file to configure the application to 
 
 ### Swagger
 http://127.0.0.1:8000/api/schema/swagger-ui/
-https://api-test.edubadges.nl/api/schema/swagger-ui
+https://api.edubadges.nl/api/schema/swagger-ui
