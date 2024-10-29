@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from allauth.account.adapter import get_adapter as get_account_adapter
 from badgrsocialauth.providers.eduid.signals import val_name_audit_trail_signal
 import requests
+from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import (
     render_authentication_error,
     complete_social_login,
@@ -46,7 +47,6 @@ def encode(username, password):  # client_id, secret
 
 
 def login(request):
-    current_app = SocialApp.objects.get_current(provider="edu_id")
     # the only thing set in state is the referer (frontend, or staff) , this is not the referer url.
     referer = json.dumps(urlparse(request.META["HTTP_REFERER"]).path.split("/")[1:])
     badgr_app_pk = request.session.get("badgr_app_pk", None)
@@ -59,12 +59,12 @@ def login(request):
 
     params = {
         "state": state,
-        "client_id": current_app.client_id,
+        "client_id": settings.EDU_ID_CLIENT,
         "response_type": "code",
         "scope": "openid eduid.nl/links",
         "redirect_uri": f"{settings.HTTP_ORIGIN}/account/eduid/login/callback/",
         "claims": '{"id_token":{"preferred_username":null,"given_name":null,"family_name":null,"email":null,'
-        '"eduid":null, "eduperson_scoped_affiliation":null, "preferred_username":null, "uids":null}}',
+                  '"eduid":null, "eduperson_scoped_affiliation":null, "preferred_username":null, "uids":null}}',
     }
     validate_name = request.GET.get("validateName")
     if validate_name and validate_name.lower() == "true":
@@ -83,7 +83,6 @@ def callback(request):
             request
         )  # logging in while being authenticated breaks the login procedure
 
-    current_app = SocialApp.objects.get_current(provider="edu_id")
     # extract state of redirect
     state = json.loads(request.GET.get("state"))
     referer, badgr_app_pk = state
@@ -97,8 +96,8 @@ def callback(request):
         "grant_type": "authorization_code",
         "redirect_uri": "%s/account/eduid/login/callback/" % settings.HTTP_ORIGIN,
         "code": code,
-        "client_id": current_app.client_id,
-        "client_secret": current_app.secret,
+        "client_id": settings.EDU_ID_CLIENT,
+        "client_secret": settings.EDU_ID_SECRET,
     }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -111,8 +110,8 @@ def callback(request):
     )
     if response.status_code != 200:
         error = (
-            "Server error: User info endpoint error (http %s). Try alternative login methods"
-            % response.status_code
+                "Server error: User info endpoint error (http %s). Try alternative login methods"
+                % response.status_code
         )
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)

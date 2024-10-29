@@ -158,6 +158,8 @@ class Issuer(EntityUserProvisionmentMixin,
     def image(self):
         image = self.return_value_according_to_language(self.image_english, self.image_dutch)
         if not image:
+            if self.faculty.image:
+                return self.faculty.image
             return self.institution.image
         return image
 
@@ -432,11 +434,18 @@ class Issuer(EntityUserProvisionmentMixin,
             json['faculty'] = {'name': self.faculty.name,
                                'name_english': self.faculty.name_english,
                                'name_dutch': self.faculty.name_dutch,
+                               'image_english': self.faculty.image_english,
+                               'image_dutch': self.faculty.image_dutch,
                                'on_behalf_of': self.faculty.on_behalf_of,
                                'on_behalf_of_url': self.faculty.on_behalf_of_url,
                                'on_behalf_of_display_name': self.faculty.on_behalf_of_display_name,
                                'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION,
                                                                                 expand_awards=expand_awards)}
+            image_url = OriginSetting.HTTP + reverse('faculty_image', kwargs={'entity_id': self.faculty.entity_id})
+            if self.faculty.image_english:
+                json['faculty']['image_english'] = f"{image_url}?lang=en"
+            if self.faculty.image_dutch:
+                json['faculty']['image_dutch'] = f"{image_url}?lang=nl"
 
         # pass through imported json
         if include_extra:
@@ -528,6 +537,7 @@ class BadgeClass(EntityUserProvisionmentMixin,
     award_allowed_institutions = models.ManyToManyField('institution.Institution', blank=True,
                                                         help_text='Allow awards to this institutions')
     tags = models.ManyToManyField('institution.BadgeClassTag', blank=True)
+
     class Meta:
         verbose_name_plural = "Badge classes"
 

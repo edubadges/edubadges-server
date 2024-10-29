@@ -58,3 +58,7 @@ class IssuerImageRetrievedEvent(BaseBadgeAssertionEvent):
 
 class InstitutionImageRetrievedEvent(BaseBadgeAssertionEvent):
     pass
+
+
+class FacultyImageRetrievedEvent(BaseBadgeAssertionEvent):
+    pass

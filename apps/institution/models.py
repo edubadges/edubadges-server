@@ -55,7 +55,9 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     sis_integration_enabled = models.BooleanField(default=False,
                                                   help_text='Set to true to enable SIS integration for this institution')
     micro_credentials_enabled = models.BooleanField(default=False,
-                                                    help_text='Set to true to enable Micro-crdentials for this institution')
+                                                    help_text='Set to true to enable Micro-credentials for this institution')
+    virtual_organization_allowed = models.BooleanField(default=True,
+                                                    help_text='Set to true to enable Virtual Organizations for this institution')
     ob3_ssi_agent_enabled = models.BooleanField(default=False,
                                                 help_text='Set to true to enable OB3 integration for this institution')
     sis_default_user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True,
@@ -83,12 +85,17 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
     TYPE_WO = 'WO'
     TYPE_HBO = 'HBO'
     TYPE_MBO = 'MBO'
+    TYPE_HBO_MBO = 'HBO/MBO'
+    TYPE_SURF = 'SURF'
     TYPE_CHOICES = (
         (TYPE_WO, 'WO'),
         (TYPE_HBO, 'HBO'),
         (TYPE_MBO, 'MBO'),
+        (TYPE_HBO_MBO, 'HBO/MBO'),
+        (TYPE_SURF, 'SURF'),
     )
     institution_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
+
     DEFAULT_LANGUAGE_DUTCH = "nl_NL"
     DEFAULT_LANGUAGE_ENGLISH = "en_EN"
     DEFAULT_LANGUAGE_CHOICES = (
@@ -287,8 +294,12 @@ class BadgeClassTag(models.Model):
 
 
 class Faculty(EntityUserProvisionmentMixin,
-              ArchiveMixin, DefaultLanguageMixin,
-              PermissionedModelMixin, BaseVersionedEntity, BaseAuditedModel):
+              ArchiveMixin,
+              DefaultLanguageMixin,
+              PermissionedModelMixin,
+              BaseVersionedEntity,
+              ImageUrlGetterMixin,
+              BaseAuditedModel):
 
     def __str__(self):
         return self.name or ''
@@ -302,6 +313,8 @@ class Faculty(EntityUserProvisionmentMixin,
     DUTCH_NAME = "issuer group"
     name_dutch = models.CharField(max_length=512, null=True)
     name_english = models.CharField(max_length=512, null=True)
+    image_english = models.FileField(upload_to='uploads/faculties', blank=True, null=True)
+    image_dutch = models.FileField(upload_to='uploads/faculties', blank=True, null=True)
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.FacultyStaff")
     description_english = models.TextField(blank=True, null=True, default=None)
@@ -309,6 +322,24 @@ class Faculty(EntityUserProvisionmentMixin,
     on_behalf_of = models.BooleanField(default=False)
     on_behalf_of_url = models.CharField(max_length=512, blank=True, null=True, default=None)
     on_behalf_of_display_name = models.CharField(max_length=512, blank=True, null=True, default=None)
+    linkedin_org_identifier = models.CharField(max_length=255, blank=True, null=True, default=None,
+                                               help_text='LinkedIn organisation identifier')
+
+    TYPE_HBO = 'HBO'
+    TYPE_MBO = 'MBO'
+    TYPE_CHOICES = (
+        (TYPE_HBO, 'HBO'),
+        (TYPE_MBO, 'MBO'),
+    )
+    faculty_type = models.CharField(max_length=254, null=True, blank=True, choices=TYPE_CHOICES)
+
+    VISIBILITY_PUBLIC = 'PUBLIC'
+    VISIBILITY_TEST = 'TEST'
+    VISIBILITY_CHOICES = (
+        (VISIBILITY_PUBLIC, 'PUBLIC'),
+        (VISIBILITY_TEST, 'TEST'),
+    )
+    visibility_type = models.CharField(max_length=254, null=True, blank=True, choices=VISIBILITY_CHOICES)
 
     @property
     def name(self):
@@ -317,6 +348,17 @@ class Faculty(EntityUserProvisionmentMixin,
     @property
     def description(self):
         return self.return_value_according_to_language(self.description_english, self.description_dutch)
+
+    @property
+    def image(self):
+        image = self.return_value_according_to_language(self.image_english, self.image_dutch)
+        if not image:
+            return self.institution.image
+        return image
+
+    @property
+    def url(self):
+        return self.return_value_according_to_language(self.url_english, self.url_dutch)
 
     def get_report(self):
         total_assertions_formal = 0

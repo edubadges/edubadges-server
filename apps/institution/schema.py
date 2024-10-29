@@ -11,12 +11,13 @@ from .models import Institution, Faculty, BadgeClassTag
 
 
 class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
-                  ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
+                  ImageResolverMixin, ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
         model = Faculty
         fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english',
                   'description_dutch', 'content_type_id', 'on_behalf_of', 'on_behalf_of_url',
-                  'on_behalf_of_display_name')
+                  'on_behalf_of_display_name', 'faculty_type', 'image_english', 'image_dutch',
+                  'linkedin_org_identifier', 'visibility_type')
 
     issuers = graphene.List(IssuerType)
     issuer_count = graphene.Int()
@@ -24,7 +25,17 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
     public_issuers = graphene.List(IssuerType)
     staff = graphene.List(FacultyStaffType)
     name = graphene.String()
+    image = graphene.String()
     has_unrevoked_assertions = graphene.Boolean()
+
+    def resolve_image_english(self, info):
+        return generate_image_url(self.image_english)
+
+    def resolve_image_dutch(self, info):
+        return generate_image_url(self.image_dutch)
+
+    def resolve_image(self, info):
+        return generate_image_url(self.image)
 
     def resolve_name(self, info):
         return self.name
@@ -60,7 +71,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
                   'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language', 'id',
                   'direct_awarding_enabled', 'award_allow_all_institutions', 'lti_enabled', 'alternative_identifier',
                   'eppn_reg_exp_format', 'linkedin_org_identifier', 'sis_integration_enabled', 'ob3_ssi_agent_enabled',
-                  'micro_credentials_enabled', 'country_code')
+                  'micro_credentials_enabled', 'country_code', 'virtual_organization_allowed')
 
     faculties = graphene.List(FacultyType)
     public_faculties = graphene.List(FacultyType)
@@ -89,7 +100,9 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         return self.get_faculties(info.context.user, ['may_read'])
 
     def resolve_public_faculties(self, info):
-        return self.cached_faculties()
+        faculties = self.cached_faculties()
+        return [faculty for faculty in faculties if
+                faculty.visibility_type is None or faculty.visibility_type == Faculty.VISIBILITY_PUBLIC]
 
     def resolve_award_allowed_institutions(self, info):
         institutions = Institution.objects.all() if self.award_allow_all_institutions else self.award_allowed_institutions.all()

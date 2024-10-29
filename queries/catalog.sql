@@ -9,6 +9,9 @@ from users u
  group by assertion_count, ins.identifier
  order by ins.identifier ;
 
-select count(bi.id), b.badge_class_type, b.archived from issuer_badgeinstance bi
- inner join issuer_badgeclass b on b.id = bi.badgeclass_id
- group by b.badge_class_type, b.archived;
+select count(b.id), b.badge_class_type, b.archived, ins.name_english, ins.id, ins.institution_type
+       from issuer_badgeclass b
+ inner join issuer_issuer i on i.id = b.issuer_id
+ inner join institution_faculty f on f.id = i.faculty_id
+ inner join institution_institution ins on ins.id = f.institution_id
+ group by b.badge_class_type, b.archived, ins.name_english, ins.id, ins.institution_type;

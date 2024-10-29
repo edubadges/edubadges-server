@@ -133,10 +133,15 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
     name_dutch = serializers.CharField(max_length=512, required=False, allow_null=True, allow_blank=True)
     description_english = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
     description_dutch = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
+    image_english = ValidImageField(required=False)
+    image_dutch = ValidImageField(required=False)
+    linkedin_org_identifier = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     on_behalf_of = serializers.BooleanField(default=False, required=False)
     on_behalf_of_url = serializers.URLField(max_length=512, required=False, allow_null=True, allow_blank=True)
     on_behalf_of_display_name = serializers.CharField(max_length=512, required=False, allow_null=True, allow_blank=True)
+    faculty_type = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
+    visibility_type = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = Faculty
@@ -156,6 +161,22 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
             errors = OrderedDict(chain(errors.items(), e.items()))
             e = OrderedDict(
                 [('description_dutch', [ErrorDetail('English or Dutch description is required', code=913)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        user_institution = self.context['request'].user.institution
+        if user_institution.institution_type == Institution.TYPE_HBO_MBO and not data.get('faculty_type', False):
+            e = OrderedDict(
+                [('faculty_type', [ErrorDetail('faculty_type is required', code=945)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if user_institution.institution_type == Institution.TYPE_SURF and not data.get('visibility_type', False):
+            e = OrderedDict(
+                [('visibility_type', [ErrorDetail('visibility_type is required', code=946)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+        if data.get("on_behalf_of") and not data.get('image_english', False) and not data.get('image_dutch', False):
+            e = OrderedDict(
+                [('image_english', [ErrorDetail('English or Dutch logo is required', code=947)])])
+            errors = OrderedDict(chain(errors.items(), e.items()))
+            e = OrderedDict(
+                [('image_dutch', [ErrorDetail('English or Dutch logo is required', code=947)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
