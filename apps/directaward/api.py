@@ -1,12 +1,16 @@
+import datetime
 import threading
-from rest_framework.views import APIView
+
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework import status
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework.views import APIView
+
 from directaward.models import DirectAward, DirectAwardBundle
 from directaward.permissions import IsDirectAwardOwner
 from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
-from directaward.signals import audit_trail_signal, direct_award_audit_trail
+from directaward.signals import audit_trail_signal
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from mainsite import settings
 from mainsite.exceptions import (
@@ -17,8 +21,6 @@ from mainsite.exceptions import (
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import EmailMessageMaker, send_mail
 from staff.permissions import HasObjectPermission
-from rest_framework import serializers
-import datetime
 
 
 class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
@@ -50,6 +52,7 @@ class DirectAwardBundleView(APIView):
                 "public": badge_instance.public,
                 "revoked": badge_instance.revoked,
                 "entity_id": badge_instance.entity_id,
+                "eppn": badge_instance.user.eppns[0]
             }
 
         results = {
