@@ -3,21 +3,22 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView, \
-    SpectacularSwaggerOauthRedirectView
+from django.views.generic.base import RedirectView, TemplateView
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerOauthRedirectView,
+    SpectacularSwaggerView,
+)
 from graphene_django.debug.middleware import DjangoDebugMiddleware
 
 from mainsite.admin import badgr_admin
-from mainsite.graphql_view import ExtendedGraphQLView, DisableIntrospectionMiddleware
+from mainsite.graphql_view import DisableIntrospectionMiddleware, ExtendedGraphQLView
+from mainsite.views import SitewideActionFormView, email_unsubscribe, error404, error500
 from mainsite.views import serve_protected_document
 
 badgr_admin.autodiscover()
 # make sure that any view/model/form imports occur AFTER admin.autodiscover
-
-from django.views.generic.base import RedirectView, TemplateView
-
-from mainsite.views import SitewideActionFormView
-from mainsite.views import email_unsubscribe, error404, error500
 
 urlpatterns = [
     path("graphql", csrf_exempt(ExtendedGraphQLView.as_view(

@@ -1,5 +1,8 @@
 import os
+import sys
+
 import django
+
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 
@@ -8,6 +11,7 @@ def legacy_boolean_parsing(env_key, default_value):
     val = os.environ.get(env_key, default_value)
     val = '1' if val == 'True' else '0' if val == 'False' else val
     return bool(int(val))
+
 
 env_settings()
 
@@ -96,7 +100,6 @@ MIDDLEWARE = [
     # 'mainsite.middleware.TrailingSlashMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
-
 ]
 
 ROOT_URLCONF = 'mainsite.urls'
@@ -290,7 +293,7 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'H',
             'interval': 1,
-            'backupCount': 30*24,  # 30 days times 24 hours
+            'backupCount': 30 * 24,  # 30 days times 24 hours
             'filename': os.path.join(LOGS_DIR, 'badgr_events.log')
         },
         'badgr_debug': {
@@ -299,7 +302,7 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'H',
             'interval': 1,
-            'backupCount': 30*24,  # 30 days times 24 hours
+            'backupCount': 30 * 24,  # 30 days times 24 hours
             'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
         },
         'badgr_debug_console': {
@@ -593,7 +596,6 @@ SUPERUSER_LOGIN_WITH_SURFCONEXT = legacy_boolean_parsing('SUPERUSER_LOGIN_WITH_S
 VALIDATOR_URL = os.environ.get('VALIDATOR_URL', 'http://localhost:5000')
 EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://127.0.0.1:8000/static')
 
-
 MAX_IMAGE_UPLOAD_SIZE = 256000  # 256Kb
 MAX_IMAGE_UPLOAD_SIZE_LABEL = '256 kB'  # used in error messaging
 
@@ -607,7 +609,7 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
-    'SERVERS': [{'url':os.environ['DEFAULT_DOMAIN']}],
+    'SERVERS': [{'url': os.environ['DEFAULT_DOMAIN']}],
     'PREPROCESSING_HOOKS': [
         'mainsite.drf_spectacluar.custom_preprocessing_hook'
     ],
@@ -618,7 +620,27 @@ SPECTACULAR_SETTINGS = {
 
 }
 
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
+]
+
 # settings.py
 API_PROXY = {
     'HOST': OB3_AGENT_URL_UNIME
 }
+
+# Only enable the toolbar when we're in debug mode and we're
+# not running tests. Django will change DEBUG to be False for
+# tests, so we can't rely on DEBUG alone.
+ENABLE_DEBUG_TOOLBAR = DEBUG and "test" not in sys.argv
+if ENABLE_DEBUG_TOOLBAR:
+    INSTALLED_APPS += [
+        "debug_toolbar",
+    ]
+    MIDDLEWARE += [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ]
+    # Customize the config to support turbo and htmx boosting.
+    DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "data-turbo-permanent hx-preserve"}
