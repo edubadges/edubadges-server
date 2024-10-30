@@ -1,5 +1,5 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.8
+FROM python:3.9
 
 # Install system dependencies for cairo and MySQL client
 RUN apt-get update && apt-get install -y \
