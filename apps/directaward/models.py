@@ -15,7 +15,7 @@ from mainsite.utils import send_mail, EmailMessageMaker
 
 class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     recipient_email = models.EmailField()
-    eppn = models.CharField(max_length=254)
+    eppn = models.CharField(max_length=254, blank=True, null=True, default=None)
     badgeclass = models.ForeignKey("issuer.BadgeClass", on_delete=models.CASCADE)
     bundle = models.ForeignKey(
         "directaward.DirectAwardBundle", null=True, on_delete=models.CASCADE
@@ -177,6 +177,15 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     )
     status = models.CharField(
         max_length=254, choices=STATUS_CHOICES, default=STATUS_ACTIVE
+    )
+    IDENTIFIER_EPPN = "eppn"
+    IDENTIFIER_EMAIL = "email"
+    IDENTIFIER_TYPES = (
+        (IDENTIFIER_EPPN, "eppn"),
+        (IDENTIFIER_EMAIL, "email"),
+    )
+    identifier_type = models.CharField(
+        max_length=254, choices=IDENTIFIER_TYPES, default=IDENTIFIER_EPPN
     )
     scheduled_at = models.DateTimeField(blank=True, null=True, default=None)
 

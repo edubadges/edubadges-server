@@ -68,6 +68,9 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     status = serializers.CharField(
         write_only=True, default="Active", required=False, allow_null=True
     )
+    identifier_type = serializers.CharField(
+        write_only=True, default="eppn", allow_null=False
+    )
     scheduled_at = serializers.DateTimeField(
         write_only=True, required=False, allow_null=True
     )

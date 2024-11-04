@@ -216,17 +216,18 @@ def after_terms_agreement(request, **kwargs):
     eppn_json = response.json()
     request.user.clear_affiliations()
     for info in eppn_json:
-        request.user.add_affiliations(
-            [
-                {
-                    "eppn": info["eppn"].lower(),
-                    "schac_home": info["schac_home_organization"],
-                }
-            ]
-        )
-        logger.info(
-            f"Stored affiliations {info['eppn']} {info['schac_home_organization']}"
-        )
+        if "eppn" in info and "schac_home_organization" in info:
+            request.user.add_affiliations(
+                [
+                    {
+                        "eppn": info["eppn"].lower(),
+                        "schac_home": info["schac_home_organization"],
+                    }
+                ]
+            )
+            logger.info(
+                f"Stored affiliations {info['eppn']} {info['schac_home_organization']}"
+            )
     validated_names = [
         info["validated_name"] for info in eppn_json if "validated_name" in info
     ]
