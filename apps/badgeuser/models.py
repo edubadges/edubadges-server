@@ -632,15 +632,9 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         """
         Sends an email to this User.
         """
-        try:
-            EmailBlacklist.objects.get(email=self.primary_email)
-        except EmailBlacklist.DoesNotExist:
-            # Allow sending, as this email is not blacklisted.
-            plain_text = strip_tags(html_message)
-            send_mail(subject, message=plain_text, html_message=html_message, recipient_list=[self.primary_email])
-        else:
-            return
-            # TODO: Report email non-delivery somewhere.
+        # Allow sending, as this email is not blacklisted.
+        plain_text = strip_tags(html_message)
+        send_mail(subject, message=plain_text, html_message=html_message, recipient_list=[self.primary_email])
 
     def publish(self):
         super(BadgeUser, self).publish()
