@@ -16,7 +16,7 @@ class DirectAwardSerializer(serializers.Serializer):
         model = DirectAward
 
     badgeclass = BadgeClassSlugRelatedField(slug_field="entity_id", required=False)
-    eppn = serializers.CharField(required=False)
+    eppn = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     recipient_email = serializers.EmailField(required=False)
     status = serializers.CharField(required=False)
     evidence_url = serializers.URLField(
@@ -33,7 +33,8 @@ class DirectAwardSerializer(serializers.Serializer):
 
     def validate_eppn(self, eppn):
         eppn_reg_exp_format = self.context['request'].user.institution.eppn_reg_exp_format
-        if eppn_reg_exp_format:
+        # For email identifier_type we don't validate eppn
+        if eppn_reg_exp_format and self.root.initial_data["identifier_type"] == "eppn":
             eppn_re = re.compile(eppn_reg_exp_format, re.IGNORECASE)
             if not bool(eppn_re.match(eppn)):
                 raise ValidationError(message="Incorrect eppn format", code="error")

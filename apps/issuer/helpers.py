@@ -15,7 +15,6 @@ from requests_cache.backends import BaseCache
 
 
 class DjangoCacheDict(MutableMapping):
-    """TODO: Fix this class, its broken!"""
     _keymap_cache_key = "DjangoCacheDict_keys"
 
     def __init__(self, namespace, id=None, timeout=None):
@@ -124,7 +123,6 @@ class BadgeCheckHelper(object):
     @classmethod
     def cache_instance(cls):
         if cls._cache_instance is None:
-            # TODO: note this class is broken and does not work correctly!
             cls._cache_instance = DjangoCacheRequestsCacheBackend(namespace='badgr_requests_cache')
         return cls._cache_instance
 

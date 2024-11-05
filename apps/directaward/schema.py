@@ -43,7 +43,8 @@ class Query(object):
         id = kwargs.get('id')
         if id is not None:
             da = DirectAward.objects.get(entity_id=id)
-            if da.eppn in info.context.user.eppns:
+            user = info.context.user
+            if da.eppn in user.eppns or (da.recipient_email == user.email and da.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL):
                 return da
 
     def resolve_all_unclaimed_direct_awards(self, info, **kwargs):

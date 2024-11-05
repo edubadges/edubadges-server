@@ -30,7 +30,7 @@ def validate_errors(serializer):
                         'error_code': get_form_error_code(vars(error)['code']),
                         'error_message': error
                     })
-                except TypeError as e:  # TODO: make this recursive for endless depth
+                except TypeError:
                     sub_fields = {}
                     for sub_attr, sub_errors in error.items():
                         sub_fields[sub_attr] = []
