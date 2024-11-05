@@ -1,9 +1,6 @@
-import base64
 import uuid
-from io import BytesIO
 
 import json
-import qrcode
 import requests
 import logging
 from django.http import Http404
@@ -49,8 +46,7 @@ class CredentialsView(APIView):
         else:
             raise Http404 # Should best be a 400 error, but that seems hard in Django?
 
-        img_str = self.__qr_code(offer)
-        return Response({"qr_code_base64": img_str}, status=status.HTTP_201_CREATED)
+        return Response({"offer": offer}, status=status.HTTP_201_CREATED)
 
     def __badge_instance(self, badge_id, user):
         try:
@@ -135,9 +131,3 @@ class CredentialsView(APIView):
                 }
             }
         }
-
-    def __qr_code(self, credential_offer):
-        img = qrcode.make(credential_offer)
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        return base64.b64encode(buffered.getvalue()).decode()
