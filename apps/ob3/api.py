@@ -21,7 +21,9 @@ class CredentialsView(APIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ['post']
 
-    def post(self, request, **kwargs):
+    def post(self, request, **_kwargs):
+        _ = _kwargs # explicitly ignore kwargs
+
         offer_id = str(uuid.uuid4())
         badge_id = request.data.get('badge_id')
         variant = request.data.get('variant')
