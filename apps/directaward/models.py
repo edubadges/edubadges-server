@@ -87,26 +87,9 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         if self.eppn not in recipient.eppns:
             raise BadgrValidationError("Cannot award, eppn does not match", 999)
 
-        institution = self.badgeclass.institution
-        identifiers = [
-            inst.identifier for inst in self.badgeclass.award_allowed_institutions.all()
-        ] + [institution.identifier]
-        if institution.alternative_identifier:
-            identifiers.append(institution.alternative_identifier)
-        schac_homes = recipient.schac_homes
-        if self.badgeclass.formal:
-            allowed = (
-                institution.identifier in schac_homes
-                or institution.alternative_identifier in schac_homes
-            )
-        else:
-            allowed = (
-                any(identifier in schac_homes for identifier in identifiers)
-                or recipient.validated_name
-            )
-        if not allowed:
+        if not recipient.validated_name:
             raise BadgrValidationError(
-                "Cannot award, you are not a member of the institution of the badgeclass",
+                "Cannot award, you do not have a validated name",
                 999,
             )
         evidence = None
