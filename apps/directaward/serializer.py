@@ -34,7 +34,8 @@ class DirectAwardSerializer(serializers.Serializer):
     def validate_eppn(self, eppn):
         eppn_reg_exp_format = self.context['request'].user.institution.eppn_reg_exp_format
         # For email identifier_type we don't validate eppn
-        if eppn_reg_exp_format and self.root.initial_data["identifier_type"] == "eppn":
+        eppn_required = self.root.initial_data["identifier_type"] == "eppn"
+        if eppn_reg_exp_format and eppn_required:
             eppn_re = re.compile(eppn_reg_exp_format, re.IGNORECASE)
             if not bool(eppn_re.match(eppn)):
                 raise ValidationError(message="Incorrect eppn format", code="error")
@@ -100,8 +101,10 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 direct_award_bundle = DirectAwardBundle.objects.create(
                     initial_total=direct_awards.__len__(), **validated_data
                 )
+                eppn_required = validated_data.get("identifier_type", "eppn") == "eppn"
                 for direct_award in direct_awards:
-                    direct_award["eppn"] = direct_award["eppn"].lower()
+                    # Not required and already validated
+                    direct_award["eppn"] = direct_award["eppn"].lower() if eppn_required else None
                     status = (
                         DirectAward.STATUS_SCHEDULED
                         if scheduled_at

@@ -14,7 +14,7 @@ class DirectAwardType(DjangoObjectType):
 class DirectAwardBundleType(DjangoObjectType):
     class Meta:
         model = DirectAwardBundle
-        fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at',
+        fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at', 'identifier_type',
                   'assertion_count', 'direct_award_count', 'direct_award_rejected_count',
                   'direct_award_scheduled_count', 'direct_award_revoked_count', 'initial_total')
 

@@ -57,7 +57,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     def validate_unique(self, exclude=None):
         if (
             self.__class__.objects.filter(
-                eppn=self.eppn, badgeclass=self.badgeclass, status="Unaccepted"
+                eppn=self.eppn, badgeclass=self.badgeclass, status="Unaccepted",
+                bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN
             )
             .exclude(pk=self.pk)
             .exists()
