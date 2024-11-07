@@ -252,7 +252,7 @@ def after_terms_agreement(request, **kwargs):
     request.user.save()
 
     if not social_account:
-        # This fails if there is already an User account with that email, so we need to delete the old one
+        # This fails if there is already a User account with that email, so we need to delete the old one
         try:
             user = (
                 BadgeUser.objects.filter(is_teacher=False, email=payload["email"])
