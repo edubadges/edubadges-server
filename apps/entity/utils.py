@@ -2,13 +2,13 @@ from mainsite.exceptions import BadgrValidationError
 
 
 def get_form_error_code(error_type):
-    if error_type is 'null':
+    if error_type == 'null':
         return 901
-    elif error_type is 'invalid':
+    elif error_type == 'invalid':
         return 902
-    elif error_type is 'blank':
+    elif error_type == 'blank':
         return 903
-    elif error_type is 'required':
+    elif error_type == 'required':
         return 904
     elif isinstance(error_type, int):
         return error_type
