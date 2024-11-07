@@ -263,8 +263,8 @@ def after_terms_agreement(request, **kwargs):
                 user.delete()
         except BadgeUser.DoesNotExist:
             pass
-        # Create an eduIDBadge
-        create_edu_id_badge_instance(login)
+
+        # We don't create welcome badges anymore
 
     return ret
 
