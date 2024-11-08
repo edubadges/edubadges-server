@@ -56,12 +56,12 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     def validate_unique(self, exclude=None):
         if (
-            self.__class__.objects.filter(
-                eppn=self.eppn, badgeclass=self.badgeclass, status="Unaccepted",
-                bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN
-            )
-            .exclude(pk=self.pk)
-            .exists()
+                self.__class__.objects.filter(
+                    eppn=self.eppn, badgeclass=self.badgeclass, status="Unaccepted",
+                    bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN
+                )
+                        .exclude(pk=self.pk)
+                        .exists()
         ):
             raise IntegrityError(
                 "DirectAward with this eppn and status Unaccepted already exists in the same badgeclass."
@@ -85,8 +85,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         """Accept the direct award and make an assertion out of it"""
         from issuer.models import BadgeInstance
 
-        if self.eppn not in recipient.eppns:
-            raise BadgrValidationError("Cannot award, eppn does not match", 999)
+        if self.eppn not in recipient.eppns and self.recipient_email != recipient.email and self.bundle.identifier_type != DirectAwardBundle.IDENTIFIER_EMAIL:
+            raise BadgrValidationError("Cannot award, eppn / email does not match", 999)
 
         if not recipient.validated_name:
             raise BadgrValidationError(
@@ -205,8 +205,8 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             direct_award_bundle=self, revoked=True
         ).count()
         return (
-            revoked_count
-            + DirectAward.objects.filter(bundle=self, status="Revoked").count()
+                revoked_count
+                + DirectAward.objects.filter(bundle=self, status="Revoked").count()
         )
 
     @property
