@@ -121,7 +121,7 @@ social-auth-app-django==3.1.0
 urllib3==1.26.19
 
 # graphql
-graphene-django==2.15.0
+graphene-django==3.2.2
 aniso8601<=7
 
 # inline css
