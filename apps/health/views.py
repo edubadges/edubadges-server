@@ -5,8 +5,6 @@ https://github.com/edx/ecommerce/blob/master/LICENSE.txt
 """
 from django.db import connection, DatabaseError
 from django.http import JsonResponse
-# import logger  # TODO integrate logging into results of health endpoint queries
-# import requests  # use for making requests to any dependency HTTP APIs.
 from rest_framework import status
 
 OK = 'OK'
