@@ -2,13 +2,13 @@ from mainsite.exceptions import BadgrValidationError
 
 
 def get_form_error_code(error_type):
-    if error_type == 'null':
+    if error_type is 'null':
         return 901
-    elif error_type == 'invalid':
+    elif error_type is 'invalid':
         return 902
-    elif error_type == 'blank':
+    elif error_type is 'blank':
         return 903
-    elif error_type == 'required':
+    elif error_type is 'required':
         return 904
     elif isinstance(error_type, int):
         return error_type
@@ -30,7 +30,7 @@ def validate_errors(serializer):
                         'error_code': get_form_error_code(vars(error)['code']),
                         'error_message': error
                     })
-                except TypeError:
+                except TypeError as e:  # TODO: make this recursive for endless depth
                     sub_fields = {}
                     for sub_attr, sub_errors in error.items():
                         sub_fields[sub_attr] = []

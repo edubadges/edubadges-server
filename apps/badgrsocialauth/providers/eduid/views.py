@@ -216,18 +216,17 @@ def after_terms_agreement(request, **kwargs):
     eppn_json = response.json()
     request.user.clear_affiliations()
     for info in eppn_json:
-        if "eppn" in info and "schac_home_organization" in info:
-            request.user.add_affiliations(
-                [
-                    {
-                        "eppn": info["eppn"].lower(),
-                        "schac_home": info["schac_home_organization"],
-                    }
-                ]
-            )
-            logger.info(
-                f"Stored affiliations {info['eppn']} {info['schac_home_organization']}"
-            )
+        request.user.add_affiliations(
+            [
+                {
+                    "eppn": info["eppn"].lower(),
+                    "schac_home": info["schac_home_organization"],
+                }
+            ]
+        )
+        logger.info(
+            f"Stored affiliations {info['eppn']} {info['schac_home_organization']}"
+        )
     validated_names = [
         info["validated_name"] for info in eppn_json if "validated_name" in info
     ]
@@ -252,7 +251,7 @@ def after_terms_agreement(request, **kwargs):
     request.user.save()
 
     if not social_account:
-        # This fails if there is already a User account with that email, so we need to delete the old one
+        # This fails if there is already an User account with that email, so we need to delete the old one
         try:
             user = (
                 BadgeUser.objects.filter(is_teacher=False, email=payload["email"])
@@ -263,8 +262,8 @@ def after_terms_agreement(request, **kwargs):
                 user.delete()
         except BadgeUser.DoesNotExist:
             pass
-
-        # We don't create welcome badges anymore
+        # Create an eduIDBadge
+        create_edu_id_badge_instance(login)
 
     return ret
 

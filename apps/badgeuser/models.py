@@ -2,7 +2,7 @@ import base64
 import datetime
 import re
 from itertools import chain
-from django.db.models import Q
+
 from allauth.account.models import EmailAddress, EmailConfirmation
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -23,7 +23,7 @@ from badgeuser.managers import CachedEmailAddressManager, BadgeUserManager, Emai
 from badgeuser.utils import generate_badgr_username
 from cachemodel.decorators import cached_method
 from cachemodel.models import CacheModel
-from directaward.models import DirectAward, DirectAwardBundle
+from directaward.models import DirectAward
 from entity.models import BaseVersionedEntity
 from issuer.models import BadgeInstance
 from lti_edu.models import StudentsEnrolled
@@ -618,10 +618,8 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     @property
     def direct_awards(self):
-        eppn_query = Q(eppn__in=self.eppns)
-        email_query = Q(recipient_email=self.email, bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EMAIL)
-        unaccepted_direct_awards = DirectAward.objects.filter(eppn_query | email_query, status='Unaccepted')
-        return unaccepted_direct_awards
+        # TODO - add or query to use personal email address
+        return DirectAward.objects.filter(eppn__in=self.eppns, status='Unaccepted')
 
     def match_provisionments(self):
         """Used to match provisions on initial login"""
@@ -634,9 +632,15 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         """
         Sends an email to this User.
         """
-        # Allow sending, as this email is not blacklisted.
-        plain_text = strip_tags(html_message)
-        send_mail(subject, message=plain_text, html_message=html_message, recipient_list=[self.primary_email])
+        try:
+            EmailBlacklist.objects.get(email=self.primary_email)
+        except EmailBlacklist.DoesNotExist:
+            # Allow sending, as this email is not blacklisted.
+            plain_text = strip_tags(html_message)
+            send_mail(subject, message=plain_text, html_message=html_message, recipient_list=[self.primary_email])
+        else:
+            return
+            # TODO: Report email non-delivery somewhere.
 
     def publish(self):
         super(BadgeUser, self).publish()
