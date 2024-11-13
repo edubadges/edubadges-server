@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [7.2.0] - 2024-11-13
+- fix: This tiny rascal kept me busy for days: credentialDataSupplierInput, not Credential.
+- feat: Document all attributes and enum items for Educredential.
+- feat: Add Glossary for OBv3.
+- Migrate all institutions to enable virtual_organization_allowed.
+- Default virtual_organization_allowed true.
+- Added SESSION_COOKIE_AGE and ruff.toml.
+- feat: Add shared network to docker-compose to connect w veramo-agent.
+- feat: Attempt to add a debug logger.
+- Fix: Ensure payload for sphereon backend is correct.
+- refactor: Use the generic ObjectDoesNotExist to avoid pyright error.
+- feat: Print offer from Veramo in QR code.
+- feat: Extract QR image generation into private method.
+- feat: Allow importing of seeded badges for Team Edubadges.
+- Issue #942: usecase-uitgeven-surf.
+- Issue #944: advanced-issuergroup-functionaliteit.
+- Issue #940: sector-kunnen-selecteren-in-de-issuergroup-case-aeres.
+- fix: Allow migrations to create indexes that are guaranteed to be under 3072.
+- feat: Docker compose with required services.
+- Fix unclosed quote in example env var file.
+
 ## [7.1.0] - 2024-10-10
 - Use of settings vars instead of looking up env vars again.
 - Added audit trail for changing validated name.
