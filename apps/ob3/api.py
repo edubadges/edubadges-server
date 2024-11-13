@@ -15,7 +15,7 @@ from mainsite.settings import OB3_AGENT_URL_SPHEREON, OB3_AGENT_AUTHZ_TOKEN_SPHE
 from .serializers import EduCredentialSerializer
 from .models import EduCredential
 
-logger = logging.getLogger('Badgr.Debug')
+logger = logging.getLogger('django')
 
 class CredentialsView(APIView):
     permission_classes = (permissions.AllowAny,)
