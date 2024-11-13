@@ -60,7 +60,7 @@ badge_class_extensions = {
     "extensions:EducationProgramIdentifierExtension": {
         "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/EducationProgramIdentifierExtension/context.json",
         "type": ["Extension", "extensions:EducationProgramIdentifierExtension"],
-        "EducationProgramIdentifier": 56823
+        "EducationProgramIdentifier": [56823]
     }
 }
 
