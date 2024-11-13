@@ -311,6 +311,7 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["badgr_debug_console"],
+            "level": "DEBUG",
             "propagate": True,
         },
         "django.request": {
