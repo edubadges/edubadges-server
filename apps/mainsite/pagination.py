@@ -124,6 +124,10 @@ class EncryptedCursorPagination(BasePagination):
     page_size = 100
 
     # Model field to use for ordering.  Must be unique, not null, and monotonically increasing.
+    #
+    # TODO: Add support for non-unique keys.  This should be possible by adding support for ordering by multiple fields.
+    # For example, ordering = ('non_unique_field', 'pk') would fully disambiguate records. Would require  compound index
+    # on those fields for efficient queries.
     ordering = 'pk'
 
     pagination_secret_key = getattr(settings, 'PAGINATION_SECRET_KEY', None)

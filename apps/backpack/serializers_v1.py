@@ -290,7 +290,7 @@ class V1InstanceSerializer(serializers.Serializer):
     id = serializers.URLField(required=False)
     type = serializers.CharField()
     uid = BadgeStringField(required=False)
-    recipient = BadgeEmailField()
+    recipient = BadgeEmailField()  # TODO: improve for richer types
     badge = V1BadgeClassSerializer()
     issuedOn = BadgeDateTimeField(required=False)  # missing in some translated v0.5.0
     expires = BadgeDateTimeField(required=False)

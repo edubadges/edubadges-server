@@ -21,6 +21,15 @@ class CSVDictRenderer(renderers.BaseRenderer):
 
         if response is not None and response.exception:
             return None
+
+            # TODO: Replace return None with commented lines below to get human-readable description in response
+            #
+            # Returning a non-None value in this function, as part of the exception handling code path in Django REST
+            # Framework, generates an HTTP response that Chrome rejects as invalid (ERR_INVALID_RESPONSE).  Possible
+            # Django REST Framework bug?
+            #
+            # fieldnames = data.keys()
+            # rows = [data]
         else:
             fieldnames = data['fieldnames']
             rows = data['rowdicts']

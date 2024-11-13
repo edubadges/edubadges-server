@@ -1,5 +1,0 @@
-Recipient mailadres;Narrative (optional);Evidence URL (optional);Evidence NAME (optional);Evidence Description (optional);Grade (optional)
-john@example.org;Lorum ipsum dolor set amet.;https://evicence.url/;Thesis of John;Description of the evidence;ECTS8
-andrew@example.org;;https://evicence.url/;;;
-mary@shachome.org;;;;;
-peter@shachome.org
