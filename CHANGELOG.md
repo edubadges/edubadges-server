@@ -5,6 +5,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [7.2.0] - 2024-11-13
+- Bugfix for single value educationProgramIdentifier.
+- Merge pull request #158 from edubadges/revert-156-feature/eppn-email-956.
+- Updated graphene-django version to 3.2.2.
+- Allow for recipient mail Direct Awards.
+- DirectAward can also be owned by recipient_email.
+- We don't create welcome badges anymore.
+- Added sample_direct_award template for email only.
+- Formatter rules.
+- Bugfix for assumptation that user has always eppn values.
+- Issue #964: direct-award-geen-check-onderwijsinstelling.
+- Validated name is only requirement for direct award.
+- Fetch DirectAwards by email if bundle type = 'email'.
+- We dont use email blacklisting.
+- WIP Issue #956: uitreiken-op-prive-mailadres-mogelijk-maken
+- Fix issue #961: migration-surf-issuergroups-to-type-test.
+- Bugifx for None image_url faculty.
+- Create radon.yml.
+- Merge pull request #154 from berkes/feature/docker-python-bump.
+- Merge pull request #153 from edubadges/feature/extra_eppn_directaward.
+- feat: Upgrade python from 3.8 to 3.9 in our app Docker image.
+- Merge pull request #152 from edubadges/feature/session_exp.
+- Update README.md.
+- Added EPPN to badge_assertions in GET directaward bundle.
+- Create ruff.yml.
+- Create audit.yml.
+- Update codeql-analysis.yml.
+- Create bandit.yml.
 - fix: This tiny rascal kept me busy for days: credentialDataSupplierInput, not Credential.
 - feat: Document all attributes and enum items for Educredential.
 - feat: Add Glossary for OBv3.
