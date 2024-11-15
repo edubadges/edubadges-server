@@ -23,5 +23,4 @@ class ExtendedGraphQLView(GraphQLView):
                                               show_graphiql=show_graphiql)
         if res.errors:
             logger.exception(str(res.errors))
-            res.invalid = True
         return res
