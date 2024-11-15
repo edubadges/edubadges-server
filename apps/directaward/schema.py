@@ -14,7 +14,7 @@ class DirectAwardType(DjangoObjectType):
 class DirectAwardBundleType(DjangoObjectType):
     class Meta:
         model = DirectAwardBundle
-        fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at',
+        fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at', 'identifier_type',
                   'assertion_count', 'direct_award_count', 'direct_award_rejected_count',
                   'direct_award_scheduled_count', 'direct_award_revoked_count', 'initial_total')
 
@@ -43,7 +43,8 @@ class Query(object):
         id = kwargs.get('id')
         if id is not None:
             da = DirectAward.objects.get(entity_id=id)
-            if da.eppn in info.context.user.eppns:
+            user = info.context.user
+            if da.eppn in user.eppns or (da.recipient_email == user.email and da.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL):
                 return da
 
     def resolve_all_unclaimed_direct_awards(self, info, **kwargs):

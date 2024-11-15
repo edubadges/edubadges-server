@@ -46,13 +46,14 @@ class DirectAwardBundleView(APIView):
             }
 
         def convert_badge_assertion(badge_instance):
+            user = badge_instance.user
             return {
-                "full_name": badge_instance.user.full_name,
-                "email": badge_instance.user.email,
+                "full_name": user.full_name,
+                "email": user.email,
                 "public": badge_instance.public,
                 "revoked": badge_instance.revoked,
                 "entity_id": badge_instance.entity_id,
-                "eppn": badge_instance.user.eppns[0]
+                "eppn": user.eppns[0] if user.eppns else []
             }
 
         results = {
@@ -69,8 +70,7 @@ class DirectAwardBundleView(APIView):
                 convert_direct_award(da) for da in award_bundle.directaward_set.all()
             ],
             "badge_assertions": [
-                convert_badge_assertion(ba)
-                for ba in award_bundle.badgeinstance_set.all()
+                convert_badge_assertion(ba) for ba in award_bundle.badgeinstance_set.all()
             ],
         }
 
