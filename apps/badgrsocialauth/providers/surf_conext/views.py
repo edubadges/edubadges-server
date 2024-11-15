@@ -187,7 +187,9 @@ def callback(request):
                     BadgrValidationError,
                 ):  # there is no provisionment
                     extra_context = {}
-                    if institution and institution.cached_staff():
+                    if institution.email:
+                        extra_context["admin_email"] = institution.email
+                    elif institution and institution.cached_staff():
                         cached_staff = institution.cached_staff()
                         admins = list(
                             filter(lambda u: u.may_administrate_users, cached_staff)

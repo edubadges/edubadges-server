@@ -32,6 +32,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
     description_english = StripTagsCharField(max_length=256, required=False, allow_null=True, allow_blank=True)
     description_dutch = StripTagsCharField(max_length=256, required=False, allow_null=True, allow_blank=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
+    email = serializers.EmailField(max_length=255, required=False, allow_null=True, allow_blank=True)
     image_english = ValidImageField(required=False, allow_null=True)
     image_dutch = ValidImageField(required=False, allow_null=True)
     brin = serializers.CharField(read_only=True)
@@ -62,6 +63,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
         if 'image_dutch' in validated_data:
             instance.image_dutch = validated_data.get('image_dutch')
         instance.grading_table = validated_data.get('grading_table')
+        instance.email = validated_data.get('email')
         instance.name_english = validated_data.get('name_english')
         instance.name_dutch = validated_data.get('name_dutch')
         instance.linkedin_org_identifier = validated_data.get('linkedin_org_identifier')

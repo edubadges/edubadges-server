@@ -68,7 +68,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         model = Institution
         fields = ('entity_id', 'identifier', 'name_english', 'name_dutch', 'staff', 'created_at', 'description_english',
                   'description_dutch', 'institution_type', 'image_english', 'image_dutch', 'grading_table', 'brin',
-                  'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language', 'id',
+                  'content_type_id', 'grondslag_formeel', 'grondslag_informeel', 'default_language', 'id', 'email',
                   'direct_awarding_enabled', 'award_allow_all_institutions', 'lti_enabled', 'alternative_identifier',
                   'eppn_reg_exp_format', 'linkedin_org_identifier', 'sis_integration_enabled', 'ob3_ssi_agent_enabled',
                   'micro_credentials_enabled', 'country_code', 'virtual_organization_allowed')

@@ -28,6 +28,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
                                   help_text="This is the schac_home, must be set when creating")
     name_english = models.CharField(max_length=255, blank=True, null=True, default=None)
     name_dutch = models.CharField(max_length=255, blank=True, null=True, default=None)
+    email = models.CharField(max_length=254, blank=True, null=True, default=None)
     staff = models.ManyToManyField('badgeuser.BadgeUser', through="staff.InstitutionStaff", related_name='+')
     description_english = models.TextField(blank=True, null=True, default=None)
     description_dutch = models.TextField(blank=True, null=True, default=None)
