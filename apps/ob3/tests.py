@@ -33,8 +33,8 @@ class IssuerMock:
 class TestCredentialsSerializers(SimpleTestCase):
     def test_serializer_serializes_credential(self):
         badge_instance = BadgeInstanceMock()
-        edu_credential = EduCredential("offer_id", "credential_configuration_id", badge_instance)
-        serializer = EduCredentialSerializer(edu_credential)
+        actual_data = self._serialize_it(badge_instance)
+
         expected_data = {
             "offerId": "offer_id",
             "credentialConfigurationId": "credential_configuration_id",
@@ -63,33 +63,30 @@ class TestCredentialsSerializers(SimpleTestCase):
             }
         }
 
-        actual_data = dict(serializer.data)
         self.maxDiff = None # Debug full diff
         self.assertDictEqual(actual_data, expected_data)
 
     def test_optional_valid_from_field_set(self):
         badge_instance = BadgeInstanceMock()
         badge_instance.issued_on = DateTime.fromisoformat("2020-01-01:01:13:37")
-
-        edu_credential = EduCredential("offer_id", "credential_configuration_id", badge_instance)
-        actual_data = dict(EduCredentialSerializer(edu_credential).data)
+        actual_data = self._serialize_it(badge_instance)
 
         self.assertEqual(actual_data["credential"]["validFrom"], "2020-01-01T01:13:37Z")
 
     def test_optional_valid_from_field_notset(self):
         badge_instance = BadgeInstanceMock()
         badge_instance.issued_on = None
-
-        edu_credential = EduCredential("offer_id", "credential_configuration_id", badge_instance)
-        actual_data = dict(EduCredentialSerializer(edu_credential).data)
+        actual_data = self._serialize_it(badge_instance)
 
         self.assertNotIn("validFrom", actual_data)
 
     def test_optional_valid_until(self):
         badge_instance = BadgeInstanceMock()
         badge_instance.expires_at = DateTime.fromisoformat("2020-01-01:01:13:37")
-
-        edu_credential = EduCredential("offer_id", "credential_configuration_id", badge_instance)
-        actual_data = dict(EduCredentialSerializer(edu_credential).data)
+        actual_data = self._serialize_it(badge_instance)
 
         self.assertEqual(actual_data["credential"]["validUntil"], "2020-01-01T01:13:37Z")
+
+    def _serialize_it(self, badge_instance: BadgeInstanceMock):
+       edu_credential = EduCredential("offer_id", "credential_configuration_id", badge_instance)
+       return dict(EduCredentialSerializer(edu_credential).data)
