@@ -22,20 +22,26 @@ class Credential:
         self.valid_until = kwargs.get('valid_until', None)
 
 class Achievement:
-    def __init__(self, id, criteria, description, name, image):
+    def __init__(self, id, criteria, description, name, image, in_language):
         self.id = id
         self.criteria = criteria
         self.description = description
         self.name = name
         self.image = image
+        self.in_language = in_language
 
     @staticmethod
     def from_badge_instance(badge_instance):
         badge_class = badge_instance.badgeclass
+        in_language = None
+        if badge_class.extension_items["extensions:LanguageExtension"]:
+            in_language = badge_class.extension_items["extensions:LanguageExtension"]["Language"]
+
         return Achievement(
             id=badge_instance.entity_id,
             criteria= { "narrative": badge_class.criteria_text }, 
             description=badge_class.description,
             name=badge_class.name,
-            image= { "id": badge_class.image_url() }
+            image= { "id": badge_class.image_url() },
+            in_language=in_language
         )

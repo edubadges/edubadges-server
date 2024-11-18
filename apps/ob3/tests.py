@@ -14,6 +14,7 @@ class BadgeClassMock:
         self.description = "This badge is a Lorem Ipsum, **dolor** _sit_ amet"
         self.name = "Mock Badge"
         self.issuer = IssuerMock()
+        self.extension_items = {}
 
     def image_url(self):
         return "https://example.com/images/mock.png"
@@ -86,6 +87,14 @@ class TestCredentialsSerializers(SimpleTestCase):
         actual_data = self._serialize_it(badge_instance)
 
         self.assertEqual(actual_data["credential"]["validUntil"], "2020-01-01T01:13:37Z")
+
+    def test_optional_education_language_extension(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.badgeclass.extension_items = {
+                "extensions:LanguageExtension": { "Language": "en_EN" }
+                }
+        actual_data = self._serialize_it(badge_instance)
+        self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["inLanguage"], "en_EN")
 
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
        edu_credential = EduCredential("offer_id", "credential_configuration_id", badge_instance)

@@ -33,6 +33,11 @@ class AchievementSerializer(serializers.Serializer):
     description = serializers.CharField()
     name = serializers.CharField()
     image = ImageSerializer()
+    inLanguage = serializers.CharField(
+            source='in_language',
+            required=False,
+            allow_null=True,
+    )
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -40,6 +45,12 @@ class AchievementSerializer(serializers.Serializer):
         # TODO: DRY the id-to-url conversion
         """Convert the id to a URL"""
         ret['id'] = f"{UI_URL}/public/assertions/{ret['id']}"
+
+        """Remove a list of specific fields if they are None"""
+        to_remove = ['inLanguage']
+        for key in to_remove:
+            if ret.get(key) is None:
+                ret.pop(key)
 
         return ret
 
