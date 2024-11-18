@@ -1,3 +1,4 @@
+from typing import Optional
 from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
@@ -21,8 +22,8 @@ class BadgeInstanceMock:
     def __init__(self):
         self.entity_id = "BADGE1234"
         self.badgeclass = BadgeClassMock()
-        self.issued_on = None
-        self.expires_at = None
+        self.issued_on: Optional[DateTime] = None
+        self.expires_at: Optional[DateTime] = None
 
 class IssuerMock:
     def __init__(self):
