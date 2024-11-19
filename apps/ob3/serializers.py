@@ -69,6 +69,7 @@ class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
             source='ects',
             decimal_places=1,
             max_digits=3, # Up to 99,9 ECTS (in reality, it's up to 10.0, IIRC)
+            coerce_to_string=False,
     )
 
     def to_representation(self, instance):
