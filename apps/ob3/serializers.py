@@ -1,7 +1,32 @@
+from typing import Any, Dict
 from django.utils import timezone
 from rest_framework import serializers
 
 from apps.mainsite.settings import UI_URL
+
+class OmitNoneFieldsMixin:
+    """
+    A mixin that allows serializers to automatically remove fields with None values.
+
+    Usage:
+    1. Add the mixin to your serializer class
+    2. Define OMIT_IF_NONE = ['field1', 'field2'] in the serializer
+
+    Example:
+    class MySerializer(OmitNoneFieldsMixin, serializers.Serializer):
+        OMIT_IF_NONE = ['description', 'optional_field']
+    """
+    OMIT_IF_NONE = []
+
+    def to_representation(self, instance: Any) -> Dict[str, Any]:
+        # Juggling to call the parent's to_representation method and not raise type errors
+        fallback_to_representation = lambda x: dict(x.__dict__)
+        representation = getattr(super(), 'to_representation', fallback_to_representation)(instance)
+
+        for key in self.OMIT_IF_NONE:
+            representation.pop(key, None) if representation.get(key) is None else None
+
+        return representation
 
 class IssuerSerializer(serializers.Serializer):
     id = serializers.URLField()
@@ -22,7 +47,9 @@ class ImageSerializer(serializers.Serializer):
     type = serializers.CharField(read_only=True, default="Image")
     id = serializers.URLField()
 
-class AchievementSerializer(serializers.Serializer):
+class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
+    OMIT_IF_NONE = ['inLanguage', 'ECTS']
+
     id = serializers.URLField()
     type = serializers.ListField(
             child=serializers.CharField(),
@@ -38,6 +65,11 @@ class AchievementSerializer(serializers.Serializer):
             required=False,
             allow_null=True,
     )
+    ECTS = serializers.DecimalField(
+            source='ects',
+            decimal_places=1,
+            max_digits=3, # Up to 99,9 ECTS (in reality, it's up to 10.0, IIRC)
+    )
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -45,12 +77,6 @@ class AchievementSerializer(serializers.Serializer):
         # TODO: DRY the id-to-url conversion
         """Convert the id to a URL"""
         ret['id'] = f"{UI_URL}/public/assertions/{ret['id']}"
-
-        """Remove a list of specific fields if they are None"""
-        to_remove = ['inLanguage']
-        for key in to_remove:
-            if ret.get(key) is None:
-                ret.pop(key)
 
         return ret
 
@@ -62,7 +88,9 @@ class AchievementSubjectSerializer(serializers.Serializer):
     )
     achievement = AchievementSerializer()
 
-class CredentialSerializer(serializers.Serializer):
+class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
+    OMIT_IF_NONE = ['validFrom', 'validUntil']
+
     issuer = IssuerSerializer()
     validFrom = serializers.DateTimeField(
             source='valid_from',
@@ -77,17 +105,6 @@ class CredentialSerializer(serializers.Serializer):
             default_timezone=timezone.utc
     )
     credentialSubject = AchievementSubjectSerializer(source='credential_subject')
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-
-        """Remove a list of specific fields if they are None"""
-        to_remove = ['validFrom', 'validUntil']
-        for key in to_remove:
-            if ret.get(key) is None:
-                ret.pop(key)
-
-        return ret
 
 class EduCredentialSerializer(serializers.Serializer):
     offerId = serializers.CharField(source='offer_id')
