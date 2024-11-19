@@ -1,0 +1,31 @@
+@contentType = application/json
+
+#########################################################
+### Request: POST /issuer/revoke-assertions
+### Description: Endpoint for revoking a badge (DELETE)
+#########################################################
+
+### Query Parameter: format
+@format = str
+
+
+POST https://api.edubadges.nl/issuer/revoke-assertions?format={{format}}
+Content-Type: {{contentType}}
+
+{
+  "revocation_reason": "revocation_reason",
+  "assertions": [
+    {
+      "entity_id": "entity_id"
+    }
+  ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(
+            response.status === 200, 
+            "Response status is not 200");
+    });
+%}
+

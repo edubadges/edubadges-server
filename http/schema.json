@@ -1,0 +1,1906 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "eduBadges API",
+    "version": "1.0.0 (v1)",
+    "description": "Edubadges are digital certificates which show that the owner has acquired certain skills or knowledge"
+  },
+  "paths": {
+    "/directaward/bundle/{entity_id}": {
+      "get": {
+        "operationId": "directaward_bundle_retrieve",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "directaward"
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/directaward/create": {
+      "post": {
+        "operationId": "directaward_create_create",
+        "description": "POST a new entity to be owned by the authenticated user and / or the default SIS user of the institution",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "directaward"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardBundle"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardBundle"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardBundle"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectAwardBundle"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectAwardBundle"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/directaward/delete-direct-awards": {
+      "put": {
+        "operationId": "directaward_delete_direct_awards_update",
+        "description": "PUT a new version of an entity",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "directaward"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardDelete"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardDelete"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardDelete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/directaward/resend-direct-awards": {
+      "post": {
+        "operationId": "directaward_resend_direct_awards_create",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "directaward"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardResend"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardResend"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardResend"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/directaward/revoke-direct-awards": {
+      "post": {
+        "operationId": "directaward_revoke_direct_awards_create",
+        "description": "Revoke direct awards",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "directaward"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardRevoke"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardRevoke"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/DirectAwardRevoke"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/earner/badges": {
+      "post": {
+        "operationId": "earner_badges_create",
+        "description": "Upload a new Assertion to the backpack",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "earner"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/earner/badges/{entity_id}": {
+      "put": {
+        "operationId": "earner_badges_update",
+        "description": "Update acceptance of an Assertion in the user's Backpack and make public / private",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "earner"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalBadgeInstanceUploadSerializerV1"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "earner_badges_destroy",
+        "description": "Remove an assertion from the backpack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "earner"
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/badgeclasses/archive/{entity_id}": {
+      "put": {
+        "operationId": "issuer_badgeclasses_archive_update",
+        "description": "PUT a new version of an entity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeClass"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeClass"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/badgeclasses/award-enrollments/{entity_id}": {
+      "post": {
+        "operationId": "issuer_badgeclasses_award_enrollments_create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeInstance"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeInstance"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeInstance"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeInstance"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeInstance"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/badgeclasses/create": {
+      "post": {
+        "operationId": "issuer_badgeclasses_create_create",
+        "description": "POST a new entity to be owned by the authenticated user and / or the default SIS user of the institution",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeClass"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeClass"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/badgeclasses/delete/{entity_id}": {
+      "delete": {
+        "operationId": "issuer_badgeclasses_delete_destroy",
+        "description": "DELETE a single entity by identifier",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/badgeclasses/edit/{entity_id}": {
+      "put": {
+        "operationId": "issuer_badgeclasses_edit_update",
+        "description": "PUT a new version of an entity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeClass"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeClass"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeClass"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/create": {
+      "post": {
+        "operationId": "issuer_create_create",
+        "description": "POST a new entity to be owned by the authenticated user and / or the default SIS user of the institution",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Issuer"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Issuer"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Issuer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issuer"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issuer"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/delete/{entity_id}": {
+      "delete": {
+        "operationId": "issuer_delete_destroy",
+        "description": "DELETE a single entity by identifier",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/edit/{entity_id}": {
+      "put": {
+        "operationId": "issuer_edit_update",
+        "description": "PUT a new version of an entity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Issuer"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/Issuer"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Issuer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issuer"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issuer"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/issuer/revoke-assertions": {
+      "post": {
+        "operationId": "issuer_revoke_assertions_create",
+        "description": "Endpoint for revoking a badge (DELETE)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "issuer"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeInstanceRevoke"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeInstanceRevoke"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/BadgeInstanceRevoke"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        },
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ]
+      }
+    },
+    "/public/assertions/{entity_id}": {
+      "get": {
+        "operationId": "public_assertions_retrieve",
+        "description": "## You might see this screen because the badge you are looking for is <span style=\"color:red\">*set to private*</span>.\n## Ask the recipient to set the badge to public, then try again.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "public"
+        ],
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/public/assertions/identity/{identity}/{salt}": {
+      "get": {
+        "operationId": "public_assertions_identity_retrieve",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          },
+          {
+            "in": "path",
+            "name": "identity",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "salt",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "public"
+        ],
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/public/assertions/validate/{entity_id}": {
+      "get": {
+        "operationId": "public_assertions_validate_retrieve",
+        "description": "GET a single entity by its identifier",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string",
+              "pattern": "^[^/]+$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "public"
+        ],
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/public/badges/{entity_id}": {
+      "get": {
+        "operationId": "public_badges_retrieve",
+        "description": "Abstract Component Class",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "public"
+        ],
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/public/institutions/{entity_id}": {
+      "get": {
+        "operationId": "public_institutions_retrieve",
+        "description": "Abstract Component Class",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "public"
+        ],
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/public/issuers/{entity_id}": {
+      "get": {
+        "operationId": "public_issuers_retrieve",
+        "description": "Abstract Component Class",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "public"
+        ],
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    },
+    "/public/issuers/{entity_id}/badges": {
+      "get": {
+        "operationId": "public_issuers_badges_retrieve",
+        "description": "Abstract Component Class",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ld+json"
+              ]
+            }
+          }
+        ],
+        "tags": [
+          "public"
+        ],
+        "security": [
+          {
+            "openId": [
+              "openid"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No response body"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlignmentItem": {
+        "type": "object",
+        "properties": {
+          "target_name": {
+            "type": "string"
+          },
+          "target_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "target_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "target_framework": {
+            "type": "string",
+            "nullable": true
+          },
+          "target_code": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "target_name"
+        ]
+      },
+      "BadgeClass": {
+        "type": "object",
+        "description": "Mixin used to override errors created when to_internal_value() Serializer method is called\ncreate your own to_internal_value_error_override() method to go along with this mixin.",
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "formal": {
+            "type": "boolean"
+          },
+          "is_private": {
+            "type": "boolean",
+            "default": false
+          },
+          "narrative_required": {
+            "type": "boolean",
+            "default": false
+          },
+          "evidence_required": {
+            "type": "boolean",
+            "default": false
+          },
+          "narrative_student_required": {
+            "type": "boolean",
+            "default": false
+          },
+          "evidence_student_required": {
+            "type": "boolean",
+            "default": false
+          },
+          "award_non_validated_name_allowed": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_micro_credentials": {
+            "type": "boolean",
+            "default": false
+          },
+          "direct_awarding_disabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "self_enrollment_disabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "entity_id": {
+            "type": "string",
+            "readOnly": true,
+            "maxLength": 255
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "criteria_text": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 16384
+          },
+          "badge_class_type": {
+            "type": "string"
+          },
+          "participation": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessment_type": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessment_id_verified": {
+            "type": "boolean",
+            "default": false
+          },
+          "assessment_supervised": {
+            "type": "boolean",
+            "default": false
+          },
+          "quality_assurance_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "quality_assurance_url": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri"
+          },
+          "quality_assurance_description": {
+            "type": "string",
+            "nullable": true
+          },
+          "grade_achieved_required": {
+            "type": "boolean",
+            "default": false
+          },
+          "stackable": {
+            "type": "boolean",
+            "default": false
+          },
+          "alignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlignmentItem"
+            }
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "expiration_period": {
+            "type": "string"
+          },
+          "award_allowed_institutions": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "badge_class_type",
+          "created_at",
+          "created_by",
+          "entity_id",
+          "formal",
+          "issuer",
+          "name"
+        ]
+      },
+      "BadgeInstance": {
+        "type": "object",
+        "properties": {
+          "allow_uppercase": {
+            "type": "boolean",
+            "writeOnly": true,
+            "default": false
+          },
+          "issue_signed": {
+            "type": "boolean"
+          },
+          "signing_password": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "enrollment_entity_id": {
+            "type": "string",
+            "maxLength": 1024
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "grade_achieved": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 254
+          },
+          "narrative": {
+            "type": "string",
+            "nullable": true
+          },
+          "evidence_items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EvidenceItem"
+            }
+          }
+        }
+      },
+      "BadgeInstanceRevoke": {
+        "type": "object",
+        "properties": {
+          "revocation_reason": {
+            "type": "string"
+          },
+          "assertions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NestedInlineOneOff"
+            }
+          }
+        },
+        "required": [
+          "assertions",
+          "revocation_reason"
+        ]
+      },
+      "DirectAward": {
+        "type": "object",
+        "properties": {
+          "badgeclass": {
+            "type": "string"
+          },
+          "eppn": {
+            "type": "string"
+          },
+          "recipient_email": {
+            "type": "string",
+            "format": "email"
+          },
+          "status": {
+            "type": "string"
+          },
+          "evidence_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "narrative": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "grade_achieved": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DirectAwardBundle": {
+        "type": "object",
+        "properties": {
+          "badgeclass": {
+            "type": "string"
+          },
+          "direct_awards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DirectAward"
+            },
+            "writeOnly": true
+          },
+          "entity_id": {
+            "type": "string",
+            "readOnly": true
+          },
+          "sis_user_id": {
+            "type": "string",
+            "writeOnly": true,
+            "nullable": true
+          },
+          "batch_mode": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "lti_import": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "status": {
+            "type": "string",
+            "writeOnly": true,
+            "nullable": true,
+            "default": "Active"
+          },
+          "scheduled_at": {
+            "type": "string",
+            "format": "date-time",
+            "writeOnly": true,
+            "nullable": true
+          },
+          "notify_recipients": {
+            "type": "boolean",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "batch_mode",
+          "direct_awards",
+          "entity_id",
+          "lti_import",
+          "notify_recipients"
+        ]
+      },
+      "DirectAwardDelete": {
+        "type": "object",
+        "properties": {
+          "revocation_reason": {
+            "type": "string"
+          },
+          "direct_awards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NestedInlineOneOff"
+            }
+          }
+        },
+        "required": [
+          "direct_awards",
+          "revocation_reason"
+        ]
+      },
+      "DirectAwardResend": {
+        "type": "object",
+        "properties": {
+          "direct_awards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NestedInlineOneOff"
+            }
+          }
+        },
+        "required": [
+          "direct_awards"
+        ]
+      },
+      "DirectAwardRevoke": {
+        "type": "object",
+        "properties": {
+          "revocation_reason": {
+            "type": "string"
+          },
+          "direct_awards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NestedInlineOneOff"
+            }
+          }
+        },
+        "required": [
+          "direct_awards",
+          "revocation_reason"
+        ]
+      },
+      "EvidenceItem": {
+        "type": "object",
+        "properties": {
+          "evidence_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 1024
+          },
+          "narrative": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 16384
+          }
+        }
+      },
+      "Issuer": {
+        "type": "object",
+        "description": "Mixin used to override errors created when to_internal_value() Serializer method is called\ncreate your own to_internal_value_error_override() method to go along with this mixin.",
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "created_by": {
+            "type": "string",
+            "readOnly": true
+          },
+          "name_english": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1024
+          },
+          "name_dutch": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 1024
+          },
+          "entity_id": {
+            "type": "string",
+            "readOnly": true,
+            "maxLength": 255
+          },
+          "image_english": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "image_dutch": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255
+          },
+          "description_english": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 16384
+          },
+          "description_dutch": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 16384
+          },
+          "url_english": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 1024
+          },
+          "url_dutch": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "maxLength": 1024
+          },
+          "faculty": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "created_at",
+          "created_by",
+          "email",
+          "entity_id",
+          "faculty"
+        ]
+      },
+      "LocalBadgeInstanceUploadSerializerV1": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "writeOnly": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "writeOnly": true
+          },
+          "assertion": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "recipient_identifier": {
+            "type": "string",
+            "readOnly": true
+          },
+          "acceptance": {
+            "type": "string",
+            "default": "Accepted"
+          },
+          "public": {
+            "type": "boolean",
+            "default": false
+          },
+          "include_evidence": {
+            "type": "boolean",
+            "default": false
+          },
+          "include_grade_achieved": {
+            "type": "boolean",
+            "default": false
+          },
+          "narrative": {
+            "type": "string",
+            "readOnly": true
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": {},
+            "readOnly": true
+          }
+        },
+        "required": [
+          "extensions",
+          "narrative",
+          "recipient_identifier"
+        ]
+      },
+      "NestedInlineOneOff": {
+        "type": "object",
+        "properties": {
+          "entity_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "openId": {
+        "type": "openIdConnect",
+        "openIdConnectUrl": "https://connect.surfconext.nl/oidc/.well-known/openid-configuration"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.edubadges.nl"
+    }
+  ],
+  "security": [
+    {
+      "openId": []
+    }
+  ]
+}

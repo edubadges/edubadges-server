@@ -1,0 +1,47 @@
+@contentType = application/json
+
+##########################################################
+### Request: GET /public/assertions/validate/{entity_id}
+### Description: GET a single entity by its identifier
+##########################################################
+
+### Path Parameter: entity_id
+@entity_id = str
+
+### Query Parameter: format
+@format = str
+
+
+GET https://api.edubadges.nl/public/assertions/validate/{{entity_id}}
+Content-Type: {{contentType}}
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(
+            response.status === 200, 
+            "Response status is not 200");
+    });
+%}
+
+###########################################################
+
+### Path Parameter: entity_id
+@entity_id = str
+
+### Query Parameter: format
+@format = str
+
+
+GET https://api.edubadges.nl/public/assertions/{{entity_id}}
+Content-Type: {{contentType}}
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(
+            response.status === 200, 
+            "Response status is not 200");
+    });
+%}
+

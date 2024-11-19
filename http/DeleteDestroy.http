@@ -1,0 +1,26 @@
+@contentType = application/json
+
+#######################################################
+### Request: DELETE /issuer/delete/{entity_id}
+### Description: DELETE a single entity by identifier
+#######################################################
+
+### Path Parameter: entity_id
+@entity_id = str
+
+### Query Parameter: format
+@format = str
+
+
+DELETE https://api.edubadges.nl/issuer/delete/{{entity_id}}
+Content-Type: {{contentType}}
+
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(
+            response.status === 200, 
+            "Response status is not 200");
+    });
+%}
+
