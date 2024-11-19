@@ -1,5 +1,4 @@
 # A plain old Python object (POPO) that represents an educational credential
-
 class EduCredential:
     def __init__(self, offer_id, credential_configuration_id, badge_instance):
         self.offer_id = offer_id
@@ -22,26 +21,51 @@ class Credential:
         self.valid_until = kwargs.get('valid_until', None)
 
 class Achievement:
-    def __init__(self, id, criteria, description, name, image, in_language):
-        self.id = id
-        self.criteria = criteria
-        self.description = description
-        self.name = name
-        self.image = image
-        self.in_language = in_language
+    FIELDS = ['id', 'criteria', 'description', 'name', 'image', 'in_language', 'ects']
+
+    def __init__(self, **kwargs):
+        """
+        Initialize the course with dynamic field assignment.
+        Fields are validated against FIELDS class variable.
+
+        Args:
+            **kwargs: Keyword arguments corresponding to FIELDS
+
+        Raises:
+            ValueError: If any provided field is not in FIELDS or if any field
+                        is missing
+        """
+        # Check for invalid fields
+        invalid_fields = set(kwargs.keys()) - set(self.FIELDS)
+        if invalid_fields:
+            raise ValueError(f"Invalid fields provided: {invalid_fields}")
+
+        # Check for missing fields
+        missing_fields = set(self.FIELDS) - set(kwargs.keys())
+        if missing_fields:
+            raise ValueError(f"Missing required fields: {missing_fields}")
+
+        for field in self.FIELDS:
+            setattr(self, field, kwargs.get(field, None))
 
     @staticmethod
     def from_badge_instance(badge_instance):
         badge_class = badge_instance.badgeclass
         in_language = None
+        ects = None
+
         if "extensions:LanguageExtension" in badge_class.extension_items:
             in_language = badge_class.extension_items["extensions:LanguageExtension"]["Language"]
 
+        if "extensions:ECTSExtension" in badge_class.extension_items:
+            ects = badge_class.extension_items["extensions:ECTSExtension"]["ECTS"]
+
         return Achievement(
             id=badge_instance.entity_id,
-            criteria= { "narrative": badge_class.criteria_text }, 
+            criteria= { "narrative": badge_class.criteria_text },
             description=badge_class.description,
             name=badge_class.name,
             image= { "id": badge_class.image_url() },
-            in_language=in_language
+            in_language=in_language,
+            ects=ects
         )
