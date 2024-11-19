@@ -88,7 +88,7 @@ class TestCredentialsSerializers(SimpleTestCase):
 
         self.assertEqual(actual_data["credential"]["validUntil"], "2020-01-01T01:13:37Z")
 
-    def test_optional_education_language_extension(self):
+    def test_education_language_extension(self):
         badge_instance = BadgeInstanceMock()
         badge_instance.badgeclass.extension_items = {
                 "extensions:LanguageExtension": { "Language": "en_EN" }

@@ -34,7 +34,7 @@ class Achievement:
     def from_badge_instance(badge_instance):
         badge_class = badge_instance.badgeclass
         in_language = None
-        if badge_class.extension_items["extensions:LanguageExtension"]:
+        if "extensions:LanguageExtension" in badge_class.extension_items:
             in_language = badge_class.extension_items["extensions:LanguageExtension"]["Language"]
 
         return Achievement(
