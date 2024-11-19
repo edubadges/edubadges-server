@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.azure',
     'allauth.socialaccount.providers.linkedin_oauth2',
     'allauth.socialaccount.providers.oauth2',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -295,14 +297,14 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'H',
             'interval': 1,
-            'backupCount': 30*24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
+            'backupCount': 30 * 24,  # 30 days times 24 hours
+            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
         },
         'badgr_debug_console': {
             'level': 'DEBUG',
             'formatter': 'default',
             'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler'
+            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
@@ -402,12 +404,18 @@ REST_FRAMEWORK = {
         'mainsite.oidc_authentication.OIDCAuthentication',
         'mainsite.authentication.BadgrOAuth2Authentication',
         'entity.authentication.ExplicitCSRFSessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
     'DEFAULT_VERSION': 'v1',
     'ALLOWED_VERSIONS': ['v1', 'v2'],
     'EXCEPTION_HANDLER': 'entity.views.exception_handler',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 ##
@@ -604,6 +612,4 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
-API_PROXY = {
-    'HOST': OB3_AGENT_URL_UNIME
-}
+API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
