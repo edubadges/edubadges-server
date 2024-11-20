@@ -112,7 +112,7 @@ class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     )
     credentialSubject = AchievementSubjectSerializer(source='credential_subject')
 
-class EduCredentialSerializer(serializers.Serializer):
+class OfferRequestSerializer(serializers.Serializer):
     offerId = serializers.CharField(source='offer_id')
     credentialConfigurationId = serializers.CharField(source='credential_configuration_id')
     credential = CredentialSerializer()

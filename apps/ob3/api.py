@@ -12,8 +12,8 @@ from pprint import pformat
 
 from issuer.models import BadgeInstance
 from mainsite.settings import OB3_AGENT_URL_SPHEREON, OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_UNIME
-from .serializers import EduCredentialSerializer
-from .models import EduCredential
+from .serializers import OfferRequestSerializer
+from .models import OfferRequest
 
 logger = logging.getLogger('django')
 
@@ -34,8 +34,8 @@ class CredentialsView(APIView):
             'sphereon': "OpenBadgeCredential",
             'unime': "openbadge_credential"
         }.get(variant) 
-        credential = EduCredential(offer_id, credential_configuration_id, badge_instance)
-        serializer = EduCredentialSerializer(credential)
+        credential = OfferRequest(offer_id, credential_configuration_id, badge_instance)
+        serializer = OfferRequestSerializer(credential)
 
         if variant == 'sphereon':
             offer = self.__issue_sphereon_badge(serializer.data)
