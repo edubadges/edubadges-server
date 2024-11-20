@@ -1,3 +1,4 @@
+import rest_framework_simplejwt
 from allauth.account.adapter import get_adapter
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import logout
@@ -8,7 +9,7 @@ from oauth2_provider.models import AccessToken
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
 from badgeuser.authcode import authcode_for_accesstoken
 from badgrsocialauth.permissions import IsSocialAccountOwner
@@ -63,15 +64,15 @@ class BadgrSocialAccountConnect(APIView):
     # https://docs.authlib.org/en/latest/specs/rfc7009.html
     @staticmethod
     def revoke_token(request, **kwargs):
-        # Need to get refresh token
-        refresh_token = request.data.get("refresh")
-        if not refresh_token:
-            return Response({"error": "Refresh token is required"}, status=400)
+        auth_header = request.headers.get('Authorization', '')
+        if not auth_header.startswith('Bearer '):
+            return Response({"error": "Invalid token"}, status=400)
 
-        # Blacklist the refresh token
-        token = RefreshToken(refresh_token)
-        token.blacklist()
-
+        access_token = auth_header.split()[1]  # Extract the token string
+        # Parse the token
+        token = rest_framework_simplejwt.tokens.AccessToken(access_token)
+        # Blacklist the token
+        BlacklistedToken.objects.create(token=token)
 
 class BadgrSocialAccountDetail(BaseEntityDetailView):
     model = SocialAccount
