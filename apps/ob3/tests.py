@@ -105,6 +105,14 @@ class TestCredentialsSerializers(SimpleTestCase):
         # It must be serialized as a Number, not a string
         self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["ECTS"], 2.5)
 
+    def test_education_program_identifier_extension(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.badgeclass.extension_items = {
+                "extensions:EducationProgramIdentifierExtension": { "EducationProgramIdentifier": "1234" }
+                }
+        actual_data = self._serialize_it(badge_instance)
+        self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["educationProgramIdentifier"], "1234")
+
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
        edu_credential = EduCredential("offer_id", "credential_configuration_id", badge_instance)
        return dict(EduCredentialSerializer(edu_credential).data)
