@@ -1,5 +1,5 @@
 # A plain old Python object (POPO) that represents an educational credential
-class EduCredential:
+class OfferRequest:
     def __init__(self, offer_id, credential_configuration_id, badge_instance):
         self.offer_id = offer_id
         self.credential_configuration_id = credential_configuration_id
