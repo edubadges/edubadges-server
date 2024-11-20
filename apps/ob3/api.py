@@ -69,10 +69,13 @@ class CredentialsView(APIView):
             },
             "credentialDataSupplierInput": credential
         }
-        resp = requests.post(json=offer_request_body,
-                      url=f"{OB3_AGENT_URL_SPHEREON}/edubadges/api/create-offer",
-                      headers={'Accept': 'application/json',
-                               "Authorization": f"Bearer {OB3_AGENT_AUTHZ_TOKEN_SPHEREON}"})
+        resp = requests.post(
+                timeout=5,
+                url=f"{OB3_AGENT_URL_SPHEREON}/edubadges/api/create-offer",
+                json=offer_request_body,
+                headers={'Accept': 'application/json',
+                         "Authorization": f"Bearer {OB3_AGENT_AUTHZ_TOKEN_SPHEREON}"}
+        )
 
         if resp.status_code >= 400:
             msg = f"Failed to issue badge:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
@@ -86,16 +89,23 @@ class CredentialsView(APIView):
         return json_resp.get('uri')
 
     def __issue_unime_badge(self, credential):
-        resp = requests.post(json=credential,
-                      url=f"{OB3_AGENT_URL_UNIME}/v0/credentials",
-                      headers={'Accept': 'application/json'})
+        resp = requests.post(
+                timeout=5,
+                json=credential,
+                url=f"{OB3_AGENT_URL_UNIME}/v0/credentials",
+                headers={'Accept': 'application/json'}
+        )
 
         if resp.status_code >= 400:
             msg = f"Failed to issue badge:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
             raise BadRequest(msg)
 
     def __get_unime_offer(self, offer_id):
-        response = requests.post(json= { "offerId": offer_id },
-                                 url=f"{OB3_AGENT_URL_UNIME}/v0/offers",
-                                 headers={'Accept': 'application/json'})
+        response = requests.post(
+                timeout=5,
+                url=f"{OB3_AGENT_URL_UNIME}/v0/offers",
+                json= { "offerId": offer_id },
+                headers={'Accept': 'application/json'}
+        )
+
         return response.text
