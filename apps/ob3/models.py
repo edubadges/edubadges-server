@@ -21,7 +21,7 @@ class Credential:
         self.valid_until = kwargs.get('valid_until', None)
 
 class Achievement:
-    FIELDS = ['id', 'criteria', 'description', 'name', 'image', 'in_language', 'ects']
+    FIELDS = ['id', 'criteria', 'description', 'name', 'image', 'in_language', 'ects', 'education_program_identifier']
 
     def __init__(self, **kwargs):
         """
@@ -53,12 +53,16 @@ class Achievement:
         badge_class = badge_instance.badgeclass
         in_language = None
         ects = None
+        education_program_identifier = None
 
         if "extensions:LanguageExtension" in badge_class.extension_items:
             in_language = badge_class.extension_items["extensions:LanguageExtension"]["Language"]
 
         if "extensions:ECTSExtension" in badge_class.extension_items:
             ects = badge_class.extension_items["extensions:ECTSExtension"]["ECTS"]
+
+        if "extensions:EducationProgramIdentifierExtension" in badge_class.extension_items:
+            education_program_identifier = badge_class.extension_items["extensions:EducationProgramIdentifierExtension"]["EducationProgramIdentifier"]
 
         return Achievement(
             id=badge_instance.entity_id,
@@ -67,5 +71,6 @@ class Achievement:
             name=badge_class.name,
             image= { "id": badge_class.image_url() },
             in_language=in_language,
-            ects=ects
+            ects=ects,
+            education_program_identifier=education_program_identifier
         )
