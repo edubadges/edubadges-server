@@ -290,19 +290,19 @@ LOGGING = {
             'filename': os.path.join(LOGS_DIR, 'badgr_events.log'),
         },
         'badgr_debug': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'formatter': 'badgr',
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'H',
+            'when': 'D',
             'interval': 1,
-            'backupCount': 30*24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
+            'backupCount': 30,  # 30 days
+            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
         },
         'badgr_debug_console': {
             'level': 'DEBUG',
             'formatter': 'default',
             'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler'
+            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
@@ -322,7 +322,7 @@ LOGGING = {
         },
         'Badgr.Debug': {
             'handlers': ['badgr_debug'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'apscheduler': {
@@ -604,6 +604,4 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
-API_PROXY = {
-    'HOST': OB3_AGENT_URL_UNIME
-}
+API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
