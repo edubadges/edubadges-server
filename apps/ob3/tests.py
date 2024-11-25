@@ -3,8 +3,8 @@ from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
 
-from .models import EduCredential
-from .serializers import EduCredentialSerializer
+from .models import OfferRequest
+from .serializers import OfferRequestSerializer
 
 from  mainsite.settings import UI_URL
 
@@ -114,5 +114,5 @@ class TestCredentialsSerializers(SimpleTestCase):
         self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["educationProgramIdentifier"], "1234")
 
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
-       edu_credential = EduCredential("offer_id", "credential_configuration_id", badge_instance)
-       return dict(EduCredentialSerializer(edu_credential).data)
+       edu_credential = OfferRequest("offer_id", "credential_configuration_id", badge_instance)
+       return dict(OfferRequestSerializer(edu_credential).data)
