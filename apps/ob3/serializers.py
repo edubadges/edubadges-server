@@ -24,7 +24,8 @@ class OmitNoneFieldsMixin:
         representation = getattr(super(), 'to_representation', fallback_to_representation)(instance)
 
         for key in self.OMIT_IF_NONE:
-            representation.pop(key, None) if representation.get(key) is None else None
+            if representation.get(key) is None or representation.get(key) == []:
+                representation.pop(key, None)
 
         return representation
 
@@ -47,8 +48,45 @@ class ImageSerializer(serializers.Serializer):
     type = serializers.CharField(read_only=True, default="Image")
     id = serializers.URLField()
 
+class AlignmentSerializer(serializers.Serializer):
+    type = serializers.ListField(
+            child=serializers.CharField(),
+            read_only=True,
+            default=["Alignment"]
+    )
+    targetType = serializers.CharField(
+            source='target_type',
+            read_only=True,
+    )
+    targetName = serializers.CharField(
+            source='target_name',
+    )
+    targetDescription = serializers.CharField(
+            source='target_description',
+            required=False,
+            allow_null=True,
+    )
+    targetUrl = serializers.URLField(
+            source='target_url',
+    )
+    targetCode = serializers.CharField(
+            source='target_code',
+            required=False,
+            allow_null=True,
+    )
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+
+        # TODO: decide on what to do if framework is missing
+        # TODO: we should really make this an enum with allowed values instead
+        framework = instance.get("target_framework", "")
+        ret["targetType"] = f"ext:{framework}Alignment"
+        return ret
+
+
 class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
-    OMIT_IF_NONE = ['inLanguage', 'ECTS', 'educationProgramIdentifier', 'participationType']
+    OMIT_IF_NONE = ['inLanguage', 'ECTS', 'educationProgramIdentifier', 'participationType', 'alignment']
 
     id = serializers.URLField()
     type = serializers.ListField(
@@ -81,6 +119,7 @@ class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
             required=False,
             allow_null=True,
     )
+    alignment = AlignmentSerializer(many=True)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
