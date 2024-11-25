@@ -14,6 +14,7 @@ class BadgeClassMock:
         self.description = "This badge is a Lorem Ipsum, **dolor** _sit_ amet"
         self.name = "Mock Badge"
         self.issuer = IssuerMock()
+        self.participation: Optional[str] = None
         self.extension_items = {}
 
     def image_url(self):
@@ -112,6 +113,13 @@ class TestCredentialsSerializers(SimpleTestCase):
                 }
         actual_data = self._serialize_it(badge_instance)
         self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["educationProgramIdentifier"], "1234")
+
+    def test_participation_type(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.badgeclass.participation = "blended"
+
+        actual_data = self._serialize_it(badge_instance)
+        self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["participationType"], "blended")
 
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
        edu_credential = OfferRequest("offer_id", "credential_configuration_id", badge_instance)

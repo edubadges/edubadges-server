@@ -48,7 +48,7 @@ class ImageSerializer(serializers.Serializer):
     id = serializers.URLField()
 
 class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
-    OMIT_IF_NONE = ['inLanguage', 'ECTS', 'educationProgramIdentifier']
+    OMIT_IF_NONE = ['inLanguage', 'ECTS', 'educationProgramIdentifier', 'participationType']
 
     id = serializers.URLField()
     type = serializers.ListField(
@@ -73,6 +73,11 @@ class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     )
     educationProgramIdentifier = serializers.CharField(
             source='education_program_identifier',
+            required=False,
+            allow_null=True,
+    )
+    participationType = serializers.CharField(
+            source='participation',
             required=False,
             allow_null=True,
     )
