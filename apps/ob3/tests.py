@@ -15,6 +15,7 @@ class BadgeClassMock:
         self.name = "Mock Badge"
         self.issuer = IssuerMock()
         self.participation: Optional[str] = None
+        self.alignments = []
         self.extension_items = {}
 
     def image_url(self):
@@ -120,6 +121,29 @@ class TestCredentialsSerializers(SimpleTestCase):
 
         actual_data = self._serialize_it(badge_instance)
         self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["participationType"], "blended")
+
+    def test_aligments(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.badgeclass.alignments = [{ 
+                 "target_name":"interne geneeskunde",
+                 "target_url":"https://example.com/esco/1337",
+                 "target_code":"1337",
+                 "target_framework":"ESCO",
+                 "target_description":"# example cool",
+        }]
+        actual_data = self._serialize_it(badge_instance)
+        actual_data = actual_data["credential"]["credentialSubject"]["achievement"]
+        expected_alignment = {
+            "type": ["Alignment"],
+            "targetType": "ext:ESCOAlignment",
+            "targetName": "interne geneeskunde",
+            "targetDescription":"# example cool",
+            "targetUrl":"https://example.com/esco/1337",
+            "targetCode":"1337",
+        }
+
+        self.assertIn(expected_alignment, actual_data["alignment"])
+
 
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
        edu_credential = OfferRequest("offer_id", "credential_configuration_id", badge_instance)
