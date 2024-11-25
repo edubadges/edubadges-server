@@ -1,9 +1,11 @@
 import json
 import logging
+from json.decoder import JSONDecodeError
 
 from django import http
+from django.http import HttpResponse
 from django.utils.deprecation import MiddlewareMixin
-from json.decoder import JSONDecodeError
+
 from mainsite import settings
 
 logger = logging.getLogger('Badgr.Debug')
@@ -11,6 +13,7 @@ logger = logging.getLogger('Badgr.Debug')
 
 class MaintenanceMiddleware(MiddlewareMixin):
     """Serve a temporary redirect to a maintenance url in maintenance mode"""
+
     def process_request(self, request):
         if request.method == 'POST':
             if getattr(settings, 'MAINTENANCE_MODE', False) is True and hasattr(settings, 'MAINTENANCE_URL'):
@@ -24,7 +27,7 @@ class TrailingSlashMiddleware(MiddlewareMixin):
         exceptions = ['/staff', '/__debug__']
         if list(filter(request.path.startswith, exceptions)):
             if request.path[-1] != '/':
-                return http.HttpResponsePermanentRedirect(request.path+"/")
+                return http.HttpResponsePermanentRedirect(request.path + '/')
         else:
             if request.path != '/' and request.path[-1] == '/':
                 return http.HttpResponsePermanentRedirect(request.path[:-1])
@@ -32,19 +35,20 @@ class TrailingSlashMiddleware(MiddlewareMixin):
 
 
 class ExceptionHandlerMiddleware(object):
-
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        return self.get_response(request)
-
-    def process_exception(self, request, exception):
-        logger.exception(str(exception))
+        try:
+            response = self.get_response(request)
+        except Exception as e:
+            if e.args[1] and e.args[1] == 999:  # hasattr(e, 'code') and e.code == 999:
+                logger.exception('Exception: ' + str(e) + ' with traceback ' + str(e.__traceback__))
+                response = HttpResponse('Oops! Something went wrong.', status=500)
+        return response
 
 
 class RequestResponseLoggerMiddleware(MiddlewareMixin):
-
     def process_request(self, request):
         if request.method in ['POST', 'PUT', 'PATCH']:
             request.req_body = request.body  # for later retrieval
