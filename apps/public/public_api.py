@@ -15,6 +15,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import RedirectView
 from rest_framework import status, permissions
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -35,9 +36,10 @@ class AssertionValidate(BaseEntityDetailView):
     """
     Endpoint for validating a badge (GET)
     """
+
     model = BadgeInstance
     permission_classes = (permissions.AllowAny,)
-    http_method_names = ['get']
+    http_method_names = ["get"]
 
     def get(self, request, **kwargs):
         assertion = self.get_object(request, **kwargs)
@@ -53,7 +55,7 @@ class SlugToEntityIdRedirectMixin(object):
     def get_entity_id_by_slug(self, slug):
         try:
             object = self.model.cached.get(slug=slug)
-            return getattr(object, 'entity_id', None)
+            return getattr(object, "entity_id", None)
         except self.model.DoesNotExist:
             return None
 
@@ -63,14 +65,14 @@ class SlugToEntityIdRedirectMixin(object):
             entity_id = self.get_entity_id_by_slug(slug)
             if entity_id is None:
                 raise Http404
-            return reverse(pattern_name, kwargs={'entity_id': entity_id})
+            return reverse(pattern_name, kwargs={"entity_id": entity_id})
         except (Resolver404, NoReverseMatch):
             return None
 
     def get_slug_to_entity_id_redirect(self, slug):
         redirect_url = self.get_slug_to_entity_id_redirect_url(slug)
         if redirect_url is not None:
-            query = self.request.META.get('QUERY_STRING', '')
+            query = self.request.META.get("QUERY_STRING", "")
             if query:
                 redirect_url = "{}?{}".format(redirect_url, query)
             return redirect(redirect_url, permanent=True)
@@ -78,14 +80,15 @@ class SlugToEntityIdRedirectMixin(object):
             raise Http404
 
 
-class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMixin):
+class JSONComponentView(VersionedObjectMixin, GenericAPIView, SlugToEntityIdRedirectMixin):
     """
     Abstract Component Class
     """
+
     permission_classes = (permissions.AllowAny,)
     authentication_classes = ()
     html_renderer_class = None
-    template_name = 'public/bot_openbadge.html'
+    template_name = "public/bot_openbadge.html"
 
     def log(self, obj):
         pass
@@ -99,7 +102,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
             self.current_object = self.get_object(request, **kwargs)
         except Http404:
             if self.slugToEntityIdRedirect:
-                return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+                return self.get_slug_to_entity_id_redirect(kwargs.get("entity_id", None))
             else:
                 raise
 
@@ -125,8 +128,8 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         """
         bots get an stub that contains opengraph tags
         """
-        bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS', ['LinkedInBot'])
-        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+        bot_useragents = getattr(settings, "BADGR_PUBLIC_BOT_USERAGENTS", ["LinkedInBot"])
+        user_agent = self.request.headers.get("user-agent", "")
         if any(a in user_agent for a in bot_useragents):
             return True
         return False
@@ -135,19 +138,19 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         """
         some bots prefer a wide aspect ratio for the image
         """
-        bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS_WIDE', ['LinkedInBot'])
-        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+        bot_useragents = getattr(settings, "BADGR_PUBLIC_BOT_USERAGENTS_WIDE", ["LinkedInBot"])
+        user_agent = self.request.headers.get("user-agent", "")
         if any(a in user_agent for a in bot_useragents):
             return True
         return False
 
     def is_requesting_html(self):
-        if self.format_kwarg == 'json':
+        if self.format_kwarg == "json":
             return False
 
-        html_accepts = ['text/html']
+        html_accepts = ["text/html"]
 
-        http_accept = self.request.META.get('HTTP_ACCEPT', 'application/json')
+        http_accept = self.request.headers.get("accept", "application/json")
 
         if self.is_bot() or any(a in http_accept for a in html_accepts):
             return True
@@ -162,26 +165,25 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
 
         redirect = badgrapp.public_pages_redirect
         if not redirect:
-            redirect = 'https://{}/public/'.format(badgrapp.cors)
+            redirect = "https://{}/public/".format(badgrapp.cors)
         else:
-            if not redirect.endswith('/'):
-                redirect += '/'
+            if not redirect.endswith("/"):
+                redirect += "/"
 
         path = self.request.path
-        stripped_path = re.sub(r'^/public/', '', path)
-        query_string = self.request.META.get('QUERY_STRING', None)
-        ret = '{redirect}{path}{query}'.format(
-            redirect=redirect,
-            path=stripped_path,
-            query='?' + query_string if query_string else '')
+        stripped_path = re.sub(r"^/public/", "", path)
+        query_string = self.request.META.get("QUERY_STRING", None)
+        ret = "{redirect}{path}{query}".format(
+            redirect=redirect, path=stripped_path, query="?" + query_string if query_string else ""
+        )
         return ret
 
     @staticmethod
     def _get_request_obi_version(request):
-        return request.query_params.get('v', utils.CURRENT_OBI_VERSION)
+        return request.query_params.get("v", utils.CURRENT_OBI_VERSION)
 
 
-class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
+class ImagePropertyDetailView(GenericAPIView, SlugToEntityIdRedirectMixin):
     permission_classes = (permissions.AllowAny,)
 
     def get_object(self, entity_id):
@@ -193,11 +195,10 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
             return current_object
 
     def get(self, request, **kwargs):
-
-        entity_id = kwargs.get('entity_id')
+        entity_id = kwargs.get("entity_id")
         current_object = self.get_object(entity_id)
-        if current_object is None and self.slugToEntityIdRedirect and getattr(request, 'version', 'v1') == 'v2':
-            return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+        if current_object is None and self.slugToEntityIdRedirect and getattr(request, "version", "v1") == "v2":
+            return self.get_slug_to_entity_id_redirect(kwargs.get("entity_id", None))
         elif current_object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -211,15 +212,12 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
             if lang == "nl" and hasattr(current_object, self.prop_nl):
                 image_prop = getattr(current_object, self.prop_nl)
 
-        image_type = request.query_params.get('type', 'original')
-        if image_type not in ['original', 'png']:
+        image_type = request.query_params.get("type", "original")
+        if image_type not in ["original", "png"]:
             raise ValidationError("invalid image type: {}".format(image_type))
 
-        supported_fmts = {
-            'square': (1, 1),
-            'wide': (1.91, 1)
-        }
-        image_fmt = request.query_params.get('fmt', 'square').lower()
+        supported_fmts = {"square": (1, 1), "wide": (1.91, 1)}
+        image_fmt = request.query_params.get("fmt", "square").lower()
         if image_fmt not in list(supported_fmts.keys()):
             raise ValidationError("invalid image format: {}".format(image_fmt))
 
@@ -227,12 +225,12 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         filename, ext = os.path.splitext(image_prop.name)
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
-        version_suffix = getattr(settings, 'CAIROSVG_VERSION_SUFFIX', '1')
-        new_name = '{dirname}/converted{version}/{basename}{fmt_suffix}.png'.format(
+        version_suffix = getattr(settings, "CAIROSVG_VERSION_SUFFIX", "1")
+        new_name = "{dirname}/converted{version}/{basename}{fmt_suffix}.png".format(
             dirname=dirname,
             basename=basename,
             version=version_suffix,
-            fmt_suffix="-{}".format(image_fmt) if image_fmt != 'square' else ""
+            fmt_suffix="-{}".format(image_fmt) if image_fmt != "square" else "",
         )
         storage = DefaultStorage()
 
@@ -244,11 +242,11 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
             new_img.show()
             return new_img
 
-        if image_type == 'original' and image_fmt == 'square':
+        if image_type == "original" and image_fmt == "square":
             image_url = image_prop.url
-        elif ext == '.svg':
+        elif ext == ".svg":
             if not storage.exists(new_name):
-                with storage.open(image_prop.name, 'rb') as input_svg:
+                with storage.open(image_prop.name, "rb") as input_svg:
                     svg_buf = io.StringIO()
                     out_buf = io.StringIO()
                     cairosvg.svg2png(file_obj=input_svg, write_to=svg_buf)
@@ -256,18 +254,18 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
 
                     img = _fit_to_height(img, supported_fmts[image_fmt])
 
-                    img.save(out_buf, format='png')
+                    img.save(out_buf, format="png")
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
         else:
             if not storage.exists(new_name):
-                with storage.open(image_prop.name, 'rb') as input_svg:
+                with storage.open(image_prop.name, "rb") as input_svg:
                     out_buf = io.StringIO()
                     img = Image.open(input_svg)
 
                     img = _fit_to_height(img, supported_fmts[image_fmt])
 
-                    img.save(out_buf, format='png')
+                    img.save(out_buf, format="png")
                     storage.save(new_name, out_buf)
             image_url = storage.url(new_name)
 
@@ -280,8 +278,7 @@ class InstitutionJson(JSONComponentView):
 
     def get_context_data(self, **kwargs):
         image_url = "{}{}?type=png".format(
-            OriginSetting.HTTP,
-            reverse('institution_image', kwargs={'entity_id': self.current_object.entity_id})
+            OriginSetting.HTTP, reverse("institution_image", kwargs={"entity_id": self.current_object.entity_id})
         )
         if self.is_wide_bot():
             image_url = "{}&fmt=wide".format(image_url)
@@ -294,9 +291,9 @@ class InstitutionJson(JSONComponentView):
 
 class InstitutionImage(ImagePropertyDetailView):
     model = Institution
-    prop = 'image'
-    prop_en = 'image_english'
-    prop_nl = 'image_dutch'
+    prop = "image"
+    prop_en = "image_english"
+    prop_nl = "image_dutch"
 
     def log(self, obj):
         logger.event(badgrlog.InstitutionImageRetrievedEvent(obj, self.request))
@@ -304,9 +301,9 @@ class InstitutionImage(ImagePropertyDetailView):
 
 class FacultyImage(ImagePropertyDetailView):
     model = Faculty
-    prop = 'image'
-    prop_en = 'image_english'
-    prop_nl = 'image_dutch'
+    prop = "image"
+    prop_en = "image_english"
+    prop_nl = "image_dutch"
 
     def log(self, obj):
         logger.event(badgrlog.FacultyImageRetrievedEvent(obj, self.request))
@@ -320,20 +317,21 @@ class IssuerJson(JSONComponentView):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
 
     def get_json(self, request):
-        expands = request.GET.getlist('expand', [])
+        expands = request.GET.getlist("expand", [])
         json = super(IssuerJson, self).get_json(request)
         obi_version = self._get_request_obi_version(request)
 
-        if 'institution' in expands:
-            json['faculty'] = {'name': self.current_object.faculty.name,
-                               'institution': self.current_object.faculty.institution.get_json(obi_version=obi_version)}
+        if "institution" in expands:
+            json["faculty"] = {
+                "name": self.current_object.faculty.name,
+                "institution": self.current_object.faculty.institution.get_json(obi_version=obi_version),
+            }
 
         return json
 
     def get_context_data(self, **kwargs):
         image_url = "{}{}?type=png".format(
-            OriginSetting.HTTP,
-            reverse('issuer_image', kwargs={'entity_id': self.current_object.entity_id})
+            OriginSetting.HTTP, reverse("issuer_image", kwargs={"entity_id": self.current_object.entity_id})
         )
         if self.is_wide_bot():
             image_url = "{}&fmt=wide".format(image_url)
@@ -342,12 +340,11 @@ class IssuerJson(JSONComponentView):
             title=self.current_object.name,
             description=self.current_object.description,
             public_url=self.current_object.public_url,
-            image_url=image_url
+            image_url=image_url,
         )
 
 
 class IssuerPublicKeyJson(IssuerJson):
-
     def get(self, request, **kwargs):
         self.current_object = self.get_object(request, **kwargs)
         self.log(self.current_object)
@@ -356,9 +353,10 @@ class IssuerPublicKeyJson(IssuerJson):
             # if user agent matches a known bot, return a stub html with opengraph tags
             return render(request, self.template_name, context=self.get_context_data())
 
-        pubkey_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get('public_key_id'))
-        issuer_json = self.get_json(request=request, signed=True, public_key_issuer=pubkey_issuer,
-                                    expand_public_key=False)
+        pubkey_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get("public_key_id"))
+        issuer_json = self.get_json(
+            request=request, signed=True, public_key_issuer=pubkey_issuer, expand_public_key=False
+        )
         return Response(issuer_json)
 
 
@@ -377,9 +375,9 @@ class IssuerBadgesJson(JSONComponentView):
 
 class IssuerImage(ImagePropertyDetailView):
     model = Issuer
-    prop = 'image'
-    prop_en = 'image_english'
-    prop_nl = 'image_dutch'
+    prop = "image"
+    prop_en = "image_english"
+    prop_nl = "image_dutch"
 
     def log(self, obj):
         logger.event(badgrlog.IssuerImageRetrievedEvent(obj, self.request))
@@ -397,48 +395,47 @@ class BadgeClassJson(JSONComponentView):
         if badge_class.is_private:
             raise Http404
 
-        expands = request.GET.getlist('expand', [])
+        expands = request.GET.getlist("expand", [])
         json = super(BadgeClassJson, self).get_json(request)
         obi_version = self._get_request_obi_version(request)
-        expand_awards = 'awards' in expands
+        expand_awards = "awards" in expands
 
         if expand_awards:
-            json['award_allowed_institutions'] = [inst.name for inst in
-                                                  badge_class.award_allowed_institutions.all()]
-            json['formal'] = badge_class.formal
-            json['archived'] = badge_class.archived
-            json['self_enrollment_disabled'] = badge_class.self_enrollment_disabled
-            json['awardNonValidatedNameAllowed'] = badge_class.award_non_validated_name_allowed
-        if 'issuer' in expands:
-            json['issuer'] = badge_class.cached_issuer.get_json(obi_version=obi_version,
-                                                                expand_institution=True,
-                                                                expand_awards=expand_awards)
-        if 'endorsements' in expands:
-            json['endorsements'] = [self.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
-            json['endorsed'] = [endorsement.endorsee.entity_id for endorsement in badge_class.cached_endorsed()]
-        if 'micro' in expands:
-            json['participation'] = badge_class.participation
-            json['assessmentType'] = badge_class.assessment_type
-            json['assessmentIdVerified'] = badge_class.assessment_id_verified
-            json['assessmentSupervised'] = badge_class.assessment_supervised
-            json['qualityAssuranceDescription'] = badge_class.quality_assurance_description
-            json['qualityAssuranceName'] = badge_class.quality_assurance_name
-            json['qualityAssuranceUrl'] = badge_class.quality_assurance_url
-            json['participation'] = badge_class.participation
-            json['stackable'] = badge_class.stackable
-            json['gradeAchievedRequired'] = badge_class.grade_achieved_required
-            json['typeBadgeClass'] = badge_class.badge_class_type
+            json["award_allowed_institutions"] = [inst.name for inst in badge_class.award_allowed_institutions.all()]
+            json["formal"] = badge_class.formal
+            json["archived"] = badge_class.archived
+            json["self_enrollment_disabled"] = badge_class.self_enrollment_disabled
+            json["awardNonValidatedNameAllowed"] = badge_class.award_non_validated_name_allowed
+        if "issuer" in expands:
+            json["issuer"] = badge_class.cached_issuer.get_json(
+                obi_version=obi_version, expand_institution=True, expand_awards=expand_awards
+            )
+        if "endorsements" in expands:
+            json["endorsements"] = [self.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
+            json["endorsed"] = [endorsement.endorsee.entity_id for endorsement in badge_class.cached_endorsed()]
+        if "micro" in expands:
+            json["participation"] = badge_class.participation
+            json["assessmentType"] = badge_class.assessment_type
+            json["assessmentIdVerified"] = badge_class.assessment_id_verified
+            json["assessmentSupervised"] = badge_class.assessment_supervised
+            json["qualityAssuranceDescription"] = badge_class.quality_assurance_description
+            json["qualityAssuranceName"] = badge_class.quality_assurance_name
+            json["qualityAssuranceUrl"] = badge_class.quality_assurance_url
+            json["participation"] = badge_class.participation
+            json["stackable"] = badge_class.stackable
+            json["gradeAchievedRequired"] = badge_class.grade_achieved_required
+            json["typeBadgeClass"] = badge_class.badge_class_type
         return json
 
     @staticmethod
     def _image_urls(obj, name, container):
-        image_url = OriginSetting.HTTP + reverse(f"{name}_image", kwargs={'entity_id': obj.entity_id})
-        if hasattr(obj, 'image'):
-            container['image'] = image_url
-        if hasattr(obj, 'image_english') and obj.image_english:
-            container['imageEnglish'] = f"{image_url}?lang=en"
-        if hasattr(obj, 'imageDutch') and obj.image_dutch:
-            container['image_dutch'] = f"{image_url}?lang=nl"
+        image_url = OriginSetting.HTTP + reverse(f"{name}_image", kwargs={"entity_id": obj.entity_id})
+        if hasattr(obj, "image"):
+            container["image"] = image_url
+        if hasattr(obj, "image_english") and obj.image_english:
+            container["imageEnglish"] = f"{image_url}?lang=en"
+        if hasattr(obj, "imageDutch") and obj.image_dutch:
+            container["image_dutch"] = f"{image_url}?lang=nl"
 
     @staticmethod
     def endorsement_to_json(endorsement):
@@ -446,37 +443,42 @@ class BadgeClassJson(JSONComponentView):
         issuer = endorser.cached_issuer
         faculty = issuer.faculty
         institution = faculty.institution
-        to_json = {'claim': endorsement.claim,
-                   'description': endorsement.description,
-                   'status': endorsement.status,
-                   'endorser': {'name': endorser.name, 'description': endorser.description,
-                                'entityId': endorser.entity_id,
-                                'issuer': {'nameDutch': issuer.name_dutch, 'nameEnglish': issuer.name_english,
-                                           'entityId': issuer.entity_id,
-                                           'faculty': {'nameDutch': faculty.name_dutch,
-                                                       'nameEnglish': faculty.name_english,
-                                                       'onBehalfOf': faculty.on_behalf_of,
-                                                       'onBehalfOfUrl': faculty.on_behalf_of_url,
-                                                       'onBehalfOfDisplayName': faculty.on_behalf_of_display_name,
-                                                       'entityId': faculty.entity_id,
-                                                       'institution': {
-                                                           'nameDutch': institution.name_dutch,
-                                                           'nameEnglish': institution.name_english,
-                                                           'entityId': institution.entity_id
-                                                       }
-                                                       }
-                                           }
-                                },
-                   }
-        BadgeClassJson._image_urls(issuer, 'issuer', to_json['endorser']['issuer'])
-        BadgeClassJson._image_urls(institution, 'institution', to_json['endorser']['issuer']['faculty']['institution'])
-        BadgeClassJson._image_urls(endorser, 'badgeclass', to_json['endorser'])
+        to_json = {
+            "claim": endorsement.claim,
+            "description": endorsement.description,
+            "status": endorsement.status,
+            "endorser": {
+                "name": endorser.name,
+                "description": endorser.description,
+                "entityId": endorser.entity_id,
+                "issuer": {
+                    "nameDutch": issuer.name_dutch,
+                    "nameEnglish": issuer.name_english,
+                    "entityId": issuer.entity_id,
+                    "faculty": {
+                        "nameDutch": faculty.name_dutch,
+                        "nameEnglish": faculty.name_english,
+                        "onBehalfOf": faculty.on_behalf_of,
+                        "onBehalfOfUrl": faculty.on_behalf_of_url,
+                        "onBehalfOfDisplayName": faculty.on_behalf_of_display_name,
+                        "entityId": faculty.entity_id,
+                        "institution": {
+                            "nameDutch": institution.name_dutch,
+                            "nameEnglish": institution.name_english,
+                            "entityId": institution.entity_id,
+                        },
+                    },
+                },
+            },
+        }
+        BadgeClassJson._image_urls(issuer, "issuer", to_json["endorser"]["issuer"])
+        BadgeClassJson._image_urls(institution, "institution", to_json["endorser"]["issuer"]["faculty"]["institution"])
+        BadgeClassJson._image_urls(endorser, "badgeclass", to_json["endorser"])
         return to_json
 
     def get_context_data(self, **kwargs):
         image_url = "{}{}?type=png".format(
-            OriginSetting.HTTP,
-            reverse('badgeclass_image', kwargs={'entity_id': self.current_object.entity_id})
+            OriginSetting.HTTP, reverse("badgeclass_image", kwargs={"entity_id": self.current_object.entity_id})
         )
         if self.is_wide_bot():
             image_url = "{}&fmt=wide".format(image_url)
@@ -484,12 +486,11 @@ class BadgeClassJson(JSONComponentView):
             title=self.current_object.name,
             description=self.current_object.description,
             public_url=self.current_object.public_url,
-            image_url=image_url
+            image_url=image_url,
         )
 
 
 class BadgeClassPublicKeyJson(BadgeClassJson):
-
     def get(self, request, **kwargs):
         self.current_object = self.get_object(request, **kwargs)
         self.log(self.current_object)
@@ -497,14 +498,14 @@ class BadgeClassPublicKeyJson(BadgeClassJson):
             # if user agent matches a known bot, return a stub html with opengraph tags
             return render(request, self.template_name, context=self.get_context_data())
 
-        public_key_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get('public_key_id'))
+        public_key_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get("public_key_id"))
         json = self.current_object.get_json(signed=True, public_key_issuer=public_key_issuer)
         return Response(json)
 
 
 class BadgeClassImage(ImagePropertyDetailView):
     model = BadgeClass
-    prop = 'image'
+    prop = "image"
 
     def log(self, obj):
         logger.event(badgrlog.BadgeClassImageRetrievedEvent(obj, self.request))
@@ -516,10 +517,10 @@ class BadgeClassCriteria(RedirectView, SlugToEntityIdRedirectMixin):
 
     def get_redirect_url(self, *args, **kwargs):
         try:
-            badge_class = self.model.cached.get(entity_id=kwargs.get('entity_id'))
+            badge_class = self.model.cached.get(entity_id=kwargs.get("entity_id"))
         except self.model.DoesNotExist:
             if self.slugToEntityIdRedirect:
-                return self.get_slug_to_entity_id_redirect_url(kwargs.get('entity_id'))
+                return self.get_slug_to_entity_id_redirect_url(kwargs.get("entity_id"))
             else:
                 return None
         return badge_class.get_absolute_url()
@@ -530,6 +531,7 @@ class BadgeInstanceJson(JSONComponentView):
     ## You might see this screen because the badge you are looking for is <span style="color:red">*set to private*</span>.
     ## Ask the recipient to set the badge to public, then try again.
     """
+
     permission_classes = (permissions.AllowAny,)
     model = BadgeInstance
 
@@ -537,19 +539,19 @@ class BadgeInstanceJson(JSONComponentView):
         if self.object.signature:
             json = self.object.signature  # return signature in stead of json for signed badges
         else:
-            expands = request.GET.getlist('expand', [])
+            expands = request.GET.getlist("expand", [])
             json = super(BadgeInstanceJson, self).get_json(
                 request,
-                expand_badgeclass=('badge' in expands),
-                expand_issuer=('badge.issuer' in expands),
-                expand_user=('badge.user' in expands)
+                expand_badgeclass=("badge" in expands),
+                expand_issuer=("badge.issuer" in expands),
+                expand_user=("badge.user" in expands),
             )
         return json
 
     def get_context_data(self, **kwargs):
         image_url = "{}{}?type=png".format(
             OriginSetting.HTTP,
-            reverse('badgeclass_image', kwargs={'entity_id': self.current_object.cached_badgeclass.entity_id})
+            reverse("badgeclass_image", kwargs={"entity_id": self.current_object.cached_badgeclass.entity_id}),
         )
         if self.is_wide_bot():
             image_url = "{}&fmt=wide".format(image_url)
@@ -557,13 +559,13 @@ class BadgeInstanceJson(JSONComponentView):
             title=self.current_object.cached_badgeclass.name,
             description=self.current_object.cached_badgeclass.description,
             public_url=self.current_object.public_url,
-            image_url=image_url
+            image_url=image_url,
         )
 
 
 class BadgeInstanceImage(ImagePropertyDetailView):
     model = BadgeInstance
-    prop = 'image'
+    prop = "image"
 
     def log(self, badge_instance):
         logger.event(badgrlog.BadgeInstanceDownloadedEvent(badge_instance, self.request))
@@ -584,11 +586,11 @@ class BakedBadgeInstanceImage(VersionedObjectMixin, APIView, SlugToEntityIdRedir
             assertion = self.get_object(request, **kwargs)
         except Http404:
             if self.slugToEntityIdRedirect:
-                return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
+                return self.get_slug_to_entity_id_redirect(kwargs.get("entity_id", None))
             else:
                 raise
 
-        requested_version = request.query_params.get('v', utils.CURRENT_OBI_VERSION)
+        requested_version = request.query_params.get("v", utils.CURRENT_OBI_VERSION)
         if requested_version not in list(utils.OBI_VERSION_CONTEXT_IRIS.keys()):
             raise ValidationError("Invalid OpenBadges version")
 
@@ -601,25 +603,25 @@ class BakedBadgeInstanceImage(VersionedObjectMixin, APIView, SlugToEntityIdRedir
 
 class AssertionRecipientName(APIView):
     permission_classes = (permissions.AllowAny,)
-    http_method_names = ('get',)
+    http_method_names = ("get",)
 
     def get(self, request, *args, **kwargs):
-        identity = kwargs.get('identity', None)
-        salt = kwargs.get('salt', None)
+        identity = kwargs.get("identity", None)
+        salt = kwargs.get("salt", None)
         if not identity or not salt:
-            raise BadgrApiException400('Cannot query name: salt and identity needed', 0)
+            raise BadgrApiException400("Cannot query name: salt and identity needed", 0)
         instance = BadgeInstance.objects.get(salt=salt)
         if instance.public:
             if identity == instance.get_hashed_identity():
-                return Response({'name': instance.get_recipient_name()})
+                return Response({"name": instance.get_recipient_name()})
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class ValidatorVersion(APIView):
     permission_classes = (permissions.AllowAny,)
-    http_method_names = ('get',)
+    http_method_names = ("get",)
 
     @never_cache
     def get(self, request, *args, **kwargs):
-        response = requests.get(headers={'Accept': 'application/json'}, url=urljoin(settings.VALIDATOR_URL, 'git.info'))
+        response = requests.get(headers={"Accept": "application/json"}, url=urljoin(settings.VALIDATOR_URL, "git.info"))
         return Response(response.json(), status=status.HTTP_200_OK)

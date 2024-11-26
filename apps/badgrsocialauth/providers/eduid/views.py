@@ -48,7 +48,7 @@ def encode(username, password):  # client_id, secret
 
 def login(request):
     # the only thing set in state is the referer (frontend, or staff) , this is not the referer url.
-    referer = json.dumps(urlparse(request.META["HTTP_REFERER"]).path.split("/")[1:])
+    referer = json.dumps(urlparse(request.headers["referer"]).path.split("/")[1:])
     badgr_app_pk = request.session.get("badgr_app_pk", None)
     try:
         badgr_app_pk = int(badgr_app_pk)

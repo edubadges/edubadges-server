@@ -1,23 +1,43 @@
-from backpack.api import BackpackAssertionList, BackpackAssertionDetail, BackpackAssertionDetailImage, \
-    ShareBackpackAssertion, ImportedAssertionList, ImportedAssertionDetail, ImportedAssertionDelete, \
-    ImportedAssertionValidate
-from django.conf.urls import url
+from backpack.api import (
+    BackpackAssertionList,
+    BackpackAssertionDetail,
+    BackpackAssertionDetailImage,
+    ShareBackpackAssertion,
+    ImportedAssertionList,
+    ImportedAssertionDetail,
+    ImportedAssertionDelete,
+    ImportedAssertionValidate,
+)
+from django.urls import path
 
 urlpatterns = [
-
-    url(r'^badges$', BackpackAssertionList.as_view(), name='v1_api_localbadgeinstance_list'),
-    url(r'^badges/(?P<entity_id>[^/]+)$', BackpackAssertionDetail.as_view(), name='v1_api_localbadgeinstance_detail'),
-    url(r'^badges/(?P<entity_id>[^/]+)/image$', BackpackAssertionDetailImage.as_view(), name='v1_api_localbadgeinstance_image'),
-
+    path("badges", BackpackAssertionList.as_view(), name="v1_api_localbadgeinstance_list"),
+    path("badges/<str:entity_id>", BackpackAssertionDetail.as_view(), name="v1_api_localbadgeinstance_detail"),
+    path(
+        "badges/<str:entity_id>/image", BackpackAssertionDetailImage.as_view(), name="v1_api_localbadgeinstance_image"
+    ),
     # legacy v1 endpoints
-    url(r'^share/badge/(?P<entity_id>[^/]+)$', ShareBackpackAssertion.as_view(), name='v1_api_analytics_share_badge'),
-
+    path("share/badge/<str:entity_id>", ShareBackpackAssertion.as_view(), name="v1_api_analytics_share_badge"),
     # imported assertions
-    url(r'^imported/assertions$', ImportedAssertionList.as_view(), name='api_imported_assertions_list'),
-    url(r'^imported/assertions/detail/(?P<entity_id>[^/]+)$', ImportedAssertionDetail.as_view(), name='api_imported_assertion_detail'),
-    url(r'^imported/assertions/edit/(?P<entity_id>[^/]+)$', ImportedAssertionDetail.as_view(), name='api_imported_assertions_edit'),
-    url(r'^imported/assertions/delete/(?P<entity_id>[^/]+)$', ImportedAssertionDelete.as_view(), name='api_imported_assertions_delete'),
-    url(r'^imported/assertions/validate/(?P<entity_id>[^/]+)$', ImportedAssertionValidate.as_view(), name='imported_assertion_validate'),
-
+    path("imported/assertions", ImportedAssertionList.as_view(), name="api_imported_assertions_list"),
+    path(
+        "imported/assertions/detail/<str:entity_id>",
+        ImportedAssertionDetail.as_view(),
+        name="api_imported_assertion_detail",
+    ),
+    path(
+        "imported/assertions/edit/<str:entity_id>",
+        ImportedAssertionDetail.as_view(),
+        name="api_imported_assertions_edit",
+    ),
+    path(
+        "imported/assertions/delete/<str:entity_id>",
+        ImportedAssertionDelete.as_view(),
+        name="api_imported_assertions_delete",
+    ),
+    path(
+        "imported/assertions/validate/<str:entity_id>",
+        ImportedAssertionValidate.as_view(),
+        name="imported_assertion_validate",
+    ),
 ]
-

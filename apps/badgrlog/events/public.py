@@ -12,7 +12,7 @@ class BaseBadgeAssertionEvent(BaseBadgrEvent):
     def to_representation(self):
         return {
             'badgeInstance': self.badge_instance.json,
-            'referer': self.request.META.get('HTTP_REFERER')
+            'referer': self.request.headers.get('referer')
         }
 
 

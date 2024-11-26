@@ -73,10 +73,10 @@ class BadgrAppManager(Manager):
         existing_session_app_id = None
 
         if request:
-            if request.META.get('HTTP_ORIGIN'):
-                origin = request.META.get('HTTP_ORIGIN')
-            elif request.META.get('HTTP_REFERER'):
-                origin = request.META.get('HTTP_REFERER')
+            if request.headers.get('origin'):
+                origin = request.headers.get('origin')
+            elif request.headers.get('referer'):
+                origin = request.headers.get('referer')
             existing_session_app_id = request.session.get('badgr_app_pk', None)
 
         if origin:

@@ -42,7 +42,7 @@ def login(request):
     # state contains the data required for the redirect after the login via SURFconext,
     # it contains the user token, type of process and which badge_app
 
-    referer = request.META["HTTP_REFERER"].split("/")[3]
+    referer = request.headers["referer"].split("/")[3]
     badgr_app_pk = request.session.get("badgr_app_pk", None)
     try:
         badgr_app_pk = int(badgr_app_pk)

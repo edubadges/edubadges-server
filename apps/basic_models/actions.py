@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from django.utils.translation import ugettext_lazy as _lazy, ugettext as _
+from django.utils.translation import gettext_lazy as _lazy, gettext as _
 from django.contrib.admin.utils import model_ngettext as model_verbose_name
 
 

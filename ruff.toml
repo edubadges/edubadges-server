@@ -33,7 +33,7 @@ line-length = 120
 indent-width = 4
 
 # Assume Python 3.8
-target-version = "py38"
+target-version = "py39"
 
 [lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
@@ -51,7 +51,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [format]
 # Like Black, use double quotes for strings.
-quote-style = "single"
+quote-style = "double"
 
 # Like Black, indent with spaces, rather than tabs.
 indent-style = "space"

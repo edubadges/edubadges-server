@@ -295,14 +295,14 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'H',
             'interval': 1,
-            'backupCount': 30*24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log')
+            'backupCount': 30 * 24,  # 30 days times 24 hours
+            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
         },
         'badgr_debug_console': {
             'level': 'DEBUG',
             'formatter': 'default',
             'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler'
+            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
@@ -352,13 +352,6 @@ LOGGING = {
 #  Caching
 #
 ##
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': f"{os.environ.get('MEMCACHED_HOST', 'localhost')}:{os.environ.get('MEMCACHED_PORT', 11211)}",
-    }
-}
 
 ##
 #
@@ -604,6 +597,4 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
-API_PROXY = {
-    'HOST': OB3_AGENT_URL_UNIME
-}
+API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}

@@ -4,7 +4,7 @@ import json
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from pylti1p3.registration import Registration
 
 from entity.models import BaseVersionedEntity

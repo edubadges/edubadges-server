@@ -11,7 +11,7 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
 from django.contrib.admin import AdminSite, ModelAdmin, StackedInline
 from django.utils.module_loading import autodiscover_modules
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import gettext_lazy
 from mainsite.models import BadgrApp, EmailBlacklist, ApplicationInfo, AccessTokenProxy, LegacyTokenProxy, \
     SystemNotification
 from oauth2_provider.models import get_application_model, get_grant_model, get_access_token_model, \
@@ -21,8 +21,8 @@ badgrlogger = badgrlog.BadgrLogger()
 
 
 class BadgrAdminSite(OTPAdminSite):
-    site_header = ugettext_lazy('Badgr')
-    index_title = ugettext_lazy('Staff Dashboard')
+    site_header = gettext_lazy('Badgr')
+    index_title = gettext_lazy('Staff Dashboard')
     site_title = 'Badgr'
 
     # login_template = 'admin/superlogin.html' if settings.SUPERUSER_LOGIN_WITH_SURFCONEXT else None

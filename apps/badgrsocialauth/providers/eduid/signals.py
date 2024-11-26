@@ -15,18 +15,13 @@ class ValidatedNameAuditTrail(models.Model):
     new_validated_name = models.CharField(max_length=255, blank=True)
 
 
-# Signals doc: https://docs.djangoproject.com/en/3.2/topics/signals/
-val_name_audit_trail_signal = django.dispatch.Signal(
-    providing_args=["user", "old_validated_name", "new_validated_name"]
-)  # creates a custom signal and specifies the args required.
+val_name_audit_trail_signal = django.dispatch.Signal()
 
 logger = logging.getLogger(__name__)
 
 
 @receiver(val_name_audit_trail_signal)
-def new_val_name_audit_trail(
-    sender, user, old_validated_name, new_validated_name, **kwargs
-):
+def new_val_name_audit_trail(sender, user, old_validated_name, new_validated_name, **kwargs):
     try:
         if not old_validated_name == new_validated_name:
             if old_validated_name is None:
@@ -45,8 +40,6 @@ def new_val_name_audit_trail(
                     old_validated_name=old_validated_name,
                     new_validated_name=new_validated_name,
                 )
-            logger.info(
-                f"val_name_audit_trail created {audit_trail.id}  for user {audit_trail.user}"
-            )
+            logger.info(f'val_name_audit_trail created {audit_trail.id}  for user {audit_trail.user}')
     except Exception as e:
-        logger.error("val_name_audit_trail error: %s" % (e))
+        logger.error('val_name_audit_trail error: %s' % (e))

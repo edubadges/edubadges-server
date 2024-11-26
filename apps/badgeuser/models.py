@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.html import strip_tags
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token

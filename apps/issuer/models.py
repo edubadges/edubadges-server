@@ -976,9 +976,7 @@ class BadgeInstance(BaseAuditedModel,
     cached = CacheModelManager()
 
     class Meta:
-        index_together = (
-            ('recipient_identifier', 'badgeclass', 'revoked'),
-        )
+        indexes = [models.Index(fields=("recipient_identifier", "badgeclass", "revoked"))]
 
     def validate(self):
         data = {'profile': {'id': self.recipient_identifier}, 'data': self.get_json()}
