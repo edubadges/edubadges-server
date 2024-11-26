@@ -4,8 +4,8 @@ import threading
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from directaward.models import DirectAward, DirectAwardBundle
 from directaward.permissions import IsDirectAwardOwner
@@ -30,7 +30,7 @@ class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
     http_method_names = ["post"]
 
 
-class DirectAwardBundleView(GenericAPIView):
+class DirectAwardBundleView(APIView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     permission_map = {"POST": "may_award"}
 
@@ -85,7 +85,7 @@ class DirectAwardRevoke(BaseEntityDetailView):
                 "revocation_reason": serializers.CharField(),
                 "direct_awards": serializers.ListField(
                     child=inline_serializer(
-                        name="DirectAwardRevokeNestedInlineOneOffSerializer",
+                        name="NestedInlineOneOffSerializer",
                         fields={
                             "entity_id": serializers.CharField(),
                         },
@@ -155,7 +155,7 @@ class DirectAwardResend(BaseEntityDetailView):
             fields={
                 "direct_awards": serializers.ListField(
                     child=inline_serializer(
-                        name="DirectAwardResendNestedInlineOneOffSerializer",
+                        name="NestedInlineOneOffSerializer",
                         fields={
                             "entity_id": serializers.CharField(),
                         },
@@ -283,7 +283,7 @@ class DirectAwardDelete(BaseEntityDetailView):
                 "revocation_reason": serializers.CharField(),
                 "direct_awards": serializers.ListField(
                     child=inline_serializer(
-                        name="DirectAwardDeleteNestedInlineOneOffSerializer",
+                        name="NestedInlineOneOffSerializer",
                         fields={
                             "entity_id": serializers.CharField(),
                         },

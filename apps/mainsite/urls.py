@@ -92,9 +92,8 @@ urlpatterns = [
     #  include signing endpoints
     path("signing/", include(("signing.api_urls", "signing"), namespace="signing_apis")),
     # include staff endpoints
-    path("staff-membership/", include("staff.api_urls")),
-    # include prometheus urls
-    path('', include('django_prometheus.urls')),
+    path("staff-membership/", include("staff.api_urls")),  # include prometheus urls
+    path("", include("django_prometheus.urls")),
 ]
 
 # Test URLs to allow you to see these pages while DEBUG is True

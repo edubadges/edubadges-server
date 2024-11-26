@@ -1,4 +1,3 @@
-import json
 import os
 
 from mainsite import TOP_DIR
@@ -79,11 +78,9 @@ INSTALLED_APPS = [
     "notifications",
     # deprecated
     "composition",
-    "django_prometheus",
 ]
 
 MIDDLEWARE = [
-    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "lti13.middleware.SameSiteMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -100,7 +97,6 @@ MIDDLEWARE = [
     # 'mainsite.middleware.TrailingSlashMiddleware',
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "mainsite.urls"
@@ -358,10 +354,10 @@ LOGGING = {
 #
 ##
 
-
 CACHES = {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': os.environ.get('MEMCACHED', '0.0.0.0:11211'),
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": os.environ.get("MEMCACHED", "0.0.0.0:11211"),
     }
 }
 
@@ -609,12 +605,4 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
-<<<<<<< HEAD
 API_PROXY = {"HOST": OB3_AGENT_URL_UNIME}
-||||||| parent of 8f6a7e08 (Updating CACHES)
-API_PROXY = {
-    'HOST': OB3_AGENT_URL_UNIME
-}
-=======
-API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
->>>>>>> 8f6a7e08 (Updating CACHES)
