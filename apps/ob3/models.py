@@ -1,12 +1,34 @@
+# Description: This file contains the models for the badge-issuing service.
+
+from hashlib import sha256
+from typing import Optional
+
+def generate_sha256_hashstring(identifier: str, salt: Optional[str]=None):
+    """
+    Generate a SHA-256 hash string from an identifier and salt.
+    This is now exactly the same as the one in issuer/utils, but that's accidental
+    similarity. OBv3 can (will?) have its own variant of this function.
+
+    Args:
+        identifier: The identifier to hash
+        salt: An optional salt to add to the identifier
+
+    Returns:
+        A SHA-256 hash string
+    """
+    key = '{}{}'.format(identifier.lower(), salt if salt is not None else "")
+    return 'sha256$' + sha256(key.encode('utf-8')).hexdigest()
 # A plain old Python object (POPO) that represents an educational credential
 class OfferRequest:
     def __init__(self, offer_id, credential_configuration_id, badge_instance):
         self.offer_id = offer_id
         self.credential_configuration_id = credential_configuration_id
+
+        credential_subject = AchievementSubject.from_badge_instance(badge_instance)
         self.credential = Credential(
             issuer=badge_instance.badgeclass.issuer,
             valid_from = badge_instance.issued_on,
-            credential_subject= { "achievement": Achievement.from_badge_instance(badge_instance) }
+            credential_subject=credential_subject,
         )
 
         if badge_instance.expires_at:
@@ -20,7 +42,47 @@ class Credential:
 
         self.valid_until = kwargs.get('valid_until', None)
 
-class Achievement:
+class AchievementSubject:
+    def __init__(self, achievement, identifier=None):
+        self.type = ["AchievementSubject"]
+        self.achievement = achievement
+        self.identifier = identifier
+
+    @staticmethod
+    def from_badge_instance(badge_instance):
+        achievement = Achievement.from_badge_instance(badge_instance)
+        if badge_instance.recipient_identifier and badge_instance.salt:
+            identifier = IdentityObject.from_badge_instance(badge_instance)
+        else:
+            identifier = None
+
+        return AchievementSubject(
+                achievement=achievement,
+                identifier=identifier
+        )
+
+class IdentityObject:
+    """
+    Represents an identity object for a recipient.
+    The name is a bit misleading, as it's not an object in the sense of a Python object,
+    but contrary to all other "objects" in the OBv3 spec, it's what the spec calls it.
+    """
+    def __init__(self, recipient_identifier, salt, hasher=generate_sha256_hashstring):
+        self.identity_hash = hasher(
+                recipient_identifier,
+                salt
+        )
+        self.identity_type = "emailAddress"
+        self.hashed = True
+        self.salt = salt
+
+    @staticmethod
+    def from_badge_instance(badge_instance):
+        return IdentityObject(
+                badge_instance.recipient_identifier,
+                badge_instance.salt
+        )
+
     FIELDS = [
             'id',
             'criteria',
@@ -87,3 +149,4 @@ class Achievement:
             participation=badge_class.participation,
             alignment=badge_class.alignments, # NOTE singular and plural.
         )
+
