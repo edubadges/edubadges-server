@@ -155,6 +155,6 @@ class Achievement(StructFieldsMixin):
             ects=ects,
             education_program_identifier=education_program_identifier,
             participation=badge_class.participation,
-            alignment=badge_class.alignments, # NOTE singular and plural.
+            alignment=badge_class.alignment_items
         )
 
