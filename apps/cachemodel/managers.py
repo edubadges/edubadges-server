@@ -1,5 +1,6 @@
 from django.core.cache import cache
 from django.db import models
+
 from cachemodel import CACHE_FOREVER_TIMEOUT
 from cachemodel.utils import generate_cache_key
 
@@ -27,6 +28,7 @@ class CacheModelManager(models.Manager):
         raise DeprecationWarning("get_by() has been deprecated, use .get() instead.")
         raise NotImplementedError
 
+
 class CachedTableManager(models.Manager):
     def _pk_field_name(self):
         for field in self.model._meta.fields:
@@ -45,7 +47,7 @@ class CachedTableManager(models.Manager):
             key = getattr(obj, field_name, None)
             if key is not None:
                 table[key] = obj
-        cache.set(cache_key, table, CACHE_FOREVER_TIMEOUT);
+        cache.set(cache_key, table, CACHE_FOREVER_TIMEOUT)
         return table
 
     def _fetch_index(self, field_name):
@@ -60,7 +62,7 @@ class CachedTableManager(models.Manager):
             raise NotImplementedError("Multiple indices are not supported on CachedTable.")
 
         field, value = list(kwargs.items())[0]
-        if field == 'pk':
+        if field == "pk":
             field = self._pk_field_name()
         table = self._fetch_index(field)
         if value not in table:

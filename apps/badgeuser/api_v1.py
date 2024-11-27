@@ -5,8 +5,8 @@ import datetime
 
 from django.conf import settings
 from rest_framework import permissions, status
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from badgeuser.models import CachedEmailAddress
 from badgeuser.serializers import EmailSerializer
@@ -16,23 +16,23 @@ from mainsite.utils import EmailMessageMaker, send_mail
 RATE_LIMIT_DELTA = datetime.timedelta(minutes=5)
 
 
-class BadgeUserEmailList(APIView):
+class BadgeUserEmailList(GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, **kwargs):
         instances = request.user.cached_emails()
-        serializer = EmailSerializer(instances, many=True, context={'request': request})
+        serializer = EmailSerializer(instances, many=True, context={"request": request})
         return Response(serializer.data)
 
     def post(self, request, **kwargs):
-        serializer = EmailSerializer(data=request.data, context={'request': request})
+        serializer = EmailSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         try:  # check if email already exists
-            CachedEmailAddress.objects.get(email=request.data.get('email'), verified=1)
+            CachedEmailAddress.objects.get(email=request.data.get("email"), verified=1)
             raise BadgrApiException400("Could not register email address. Address already in use", 101)
         except CachedEmailAddress.DoesNotExist:
             try:
-                CachedEmailAddress.objects.get(email=request.data.get('email'), verified=0, user_id=request.user.pk)
+                CachedEmailAddress.objects.get(email=request.data.get("email"), verified=0, user_id=request.user.pk)
                 raise BadgrApiException400("You have already added this address. Verify it", 102)
             except CachedEmailAddress.DoesNotExist:
                 pass
@@ -42,7 +42,7 @@ class BadgeUserEmailList(APIView):
         return Response(email, status=status.HTTP_201_CREATED)
 
 
-class BadgeUserEmailView(APIView):
+class BadgeUserEmailView(GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_email(self, **kwargs):
@@ -62,7 +62,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         if email_address is None or email_address.user_id != self.request.user.id:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = EmailSerializer(email_address, context={'request': request})
+        serializer = EmailSerializer(email_address, context={"request": request})
         return Response(serializer.data)
 
     def delete(self, request, id, **kwargs):
@@ -89,10 +89,10 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         if email_address.verified:
-            if request.data.get('primary'):
+            if request.data.get("primary"):
                 email_address.set_as_primary()
                 email_address.publish()
-        elif request.data.get('resend'):
+        elif request.data.get("resend"):
             send_confirmation = False
             current_time = datetime.datetime.now()
             last_request_time = email_address.get_last_verification_sent_time()
@@ -114,24 +114,28 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                 remaining_sec = remaining_time_obj.seconds % 60
                 remaining_time_rep = "{} minutes and {} seconds".format(remaining_min, remaining_sec)
 
-                return Response("Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
-                                status=status.HTTP_429_TOO_MANY_REQUESTS)
+                return Response(
+                    "Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
         else:
             raise BadgrApiException400("Can't make unverified email address the primary email address", 105)
 
-        serializer = EmailSerializer(email_address, context={'request': request})
+        serializer = EmailSerializer(email_address, context={"request": request})
         serialized = serializer.data
         return Response(serialized, status=status.HTTP_200_OK)
 
 
-class FeedbackView(APIView):
+class FeedbackView(GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, **kwargs):
-        message = request.data['message']
+        message = request.data["message"]
         html_message = EmailMessageMaker.create_feedback_mail(request.user, message)
-        send_mail(subject='Feedback',
-                  message=message,
-                  html_message=html_message,
-                  recipient_list=[settings.REPORT_RECEIVER_EMAIL])
+        send_mail(
+            subject="Feedback",
+            message=message,
+            html_message=html_message,
+            recipient_list=[settings.REPORT_RECEIVER_EMAIL],
+        )
         return Response({}, status=status.HTTP_201_CREATED)

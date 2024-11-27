@@ -15,21 +15,20 @@ from staff.permissions import HasObjectPermission
 class BaseEntityView(APIView):
     create_event = None
     logger = None
-    permission_map = {'GET': 'may_read', 'POST': 'may_create',
-                      'PUT': 'may_update', 'DELETE': 'may_delete'}
+    permission_map = {"GET": "may_read", "POST": "may_create", "PUT": "may_update", "DELETE": "may_delete"}
 
     def get_context_data(self, **kwargs):
         return {
-            'request': self.request,
-            'kwargs': kwargs,
+            "request": self.request,
+            "kwargs": kwargs,
         }
 
     def get_serializer_class(self):
-        if self.request.version == 'v1' and hasattr(self, 'v1_serializer_class'):
+        if self.request.version == "v1" and hasattr(self, "v1_serializer_class"):
             return self.v1_serializer_class
         # elif self.request.version == 'v2' and hasattr(self, 'v2_serializer_class'):
         #     return self.v2_serializer_class
-        return getattr(self, 'serializer_class', None)
+        return getattr(self, "serializer_class", None)
 
     def get_logger(self):
         if self.logger:
@@ -38,7 +37,7 @@ class BaseEntityView(APIView):
         return self.logger
 
     def get_create_event(self):
-        return getattr(self, 'create_event', None)
+        return getattr(self, "create_event", None)
 
     def log_create(self, instance):
         event_cls = self.get_create_event()
@@ -49,7 +48,6 @@ class BaseEntityView(APIView):
 
 
 class BaseEntityListView(BaseEntityView):
-
     def get_objects(self, request, **kwargs):
         raise NotImplementedError
 
@@ -63,11 +61,11 @@ class BaseEntityListView(BaseEntityView):
         serializer = serializer_class(objects, many=True, context=context)
 
         headers = dict()
-        paginator = getattr(self, 'paginator', None)
-        if paginator and callable(getattr(paginator, 'get_link_header', None)):
+        paginator = getattr(self, "paginator", None)
+        if paginator and callable(getattr(paginator, "get_link_header", None)):
             link_header = paginator.get_link_header()
             if link_header:
-                headers['Link'] = link_header
+                headers["Link"] = link_header
 
         return Response(serializer.data, headers=headers)
 
@@ -86,7 +84,6 @@ class BaseEntityListView(BaseEntityView):
 
 
 class VersionedObjectMixin(object):
-
     def has_object_permissions(self, request, obj):
         for permission in self.get_permissions():
             if not permission.has_object_permission(request, self, obj):
@@ -94,9 +91,9 @@ class VersionedObjectMixin(object):
         return True
 
     def get_object(self, request, **kwargs):
-        identifier = kwargs.get('entity_id')
+        identifier = kwargs.get("entity_id")
         try:
-            self.object = self.model.cached.get(**{'entity_id': identifier})
+            self.object = self.model.cached.get(**{"entity_id": identifier})
         except self.model.DoesNotExist:
             pass
         else:
@@ -109,7 +106,6 @@ class VersionedObjectMixin(object):
 
 
 class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
-
     def get(self, request, **kwargs):
         """
         GET a single entity by its identifier
@@ -155,7 +151,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
 
 class BaseArchiveView(BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
-    http_method_names = ['delete']
+    http_method_names = ["delete"]
 
     def delete(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)

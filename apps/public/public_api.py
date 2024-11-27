@@ -601,7 +601,7 @@ class BakedBadgeInstanceImage(VersionedObjectMixin, APIView, SlugToEntityIdRedir
         return redirect(redirect_url, permanent=True)
 
 
-class AssertionRecipientName(APIView):
+class AssertionRecipientName(GenericAPIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ("get",)
 
@@ -617,7 +617,7 @@ class AssertionRecipientName(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class ValidatorVersion(APIView):
+class ValidatorVersion(GenericAPIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ("get",)
 
