@@ -18,6 +18,38 @@ def generate_sha256_hashstring(identifier: str, salt: Optional[str]=None):
     """
     key = '{}{}'.format(identifier.lower(), salt if salt is not None else "")
     return 'sha256$' + sha256(key.encode('utf-8')).hexdigest()
+
+# Mixin to provide dynamic field assignment to a class
+class StructFieldsMixin:
+    FIELDS = []
+
+    def __init__(self, **kwargs):
+        """
+        Initialize the course with dynamic field assignment.
+        Fields are validated against FIELDS class variable.
+
+        Args:
+            **kwargs: Keyword arguments corresponding to FIELDS
+
+        Raises:
+            ValueError: If any provided field is not in FIELDS or if any field
+                        is missing
+        """
+        # Check for invalid fields
+        invalid_fields = set(kwargs.keys()) - set(self.FIELDS)
+        if invalid_fields:
+            raise ValueError(f"Invalid fields provided: {invalid_fields}")
+
+        # Check for missing fields
+        missing_fields = set(self.FIELDS) - set(kwargs.keys())
+        if missing_fields:
+            raise ValueError(f"Missing required fields: {missing_fields}")
+
+        for field in self.FIELDS:
+            setattr(self, field, kwargs.get(field, None))
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
 # A plain old Python object (POPO) that represents an educational credential
 class OfferRequest:
     def __init__(self, offer_id, credential_configuration_id, badge_instance):
@@ -83,6 +115,7 @@ class IdentityObject:
                 badge_instance.salt
         )
 
+class Achievement(StructFieldsMixin):
     FIELDS = [
             'id',
             'criteria',
@@ -95,31 +128,6 @@ class IdentityObject:
             'participation',
             'alignment',
             ]
-
-    def __init__(self, **kwargs):
-        """
-        Initialize the course with dynamic field assignment.
-        Fields are validated against FIELDS class variable.
-
-        Args:
-            **kwargs: Keyword arguments corresponding to FIELDS
-
-        Raises:
-            ValueError: If any provided field is not in FIELDS or if any field
-                        is missing
-        """
-        # Check for invalid fields
-        invalid_fields = set(kwargs.keys()) - set(self.FIELDS)
-        if invalid_fields:
-            raise ValueError(f"Invalid fields provided: {invalid_fields}")
-
-        # Check for missing fields
-        missing_fields = set(self.FIELDS) - set(kwargs.keys())
-        if missing_fields:
-            raise ValueError(f"Missing required fields: {missing_fields}")
-
-        for field in self.FIELDS:
-            setattr(self, field, kwargs.get(field, None))
 
     @staticmethod
     def from_badge_instance(badge_instance):
