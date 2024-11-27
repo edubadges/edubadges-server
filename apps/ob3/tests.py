@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
@@ -15,7 +15,7 @@ class BadgeClassMock:
         self.name = "Mock Badge"
         self.issuer = IssuerMock()
         self.participation: Optional[str] = None
-        self.alignments = []
+        self.alignment_items: List[AligmentItemMock] = []
         self.extension_items = {}
 
     def image_url(self):
@@ -35,6 +35,14 @@ class IssuerMock:
     def __init__(self):
         self.id = "ISS1234"
         self.name = "Mock Issuer"
+
+class AligmentItemMock:
+    def __init__(self):
+        self.target_name = "interne geneeskunde"
+        self.target_url = "https://example.com/esco/1337"
+        self.target_code = "1337"
+        self.target_framework = "ESCO"
+        self.target_description = "# example cool"
 
 def mock_hasher(_id, _salt):
    return "mock_hash"
@@ -144,13 +152,7 @@ class TestCredentialsSerializers(SimpleTestCase):
 
     def test_aligments(self):
         badge_instance = BadgeInstanceMock()
-        badge_instance.badgeclass.alignments = [{ 
-                 "target_name":"interne geneeskunde",
-                 "target_url":"https://example.com/esco/1337",
-                 "target_code":"1337",
-                 "target_framework":"ESCO",
-                 "target_description":"# example cool",
-        }]
+        badge_instance.badgeclass.alignment_items = [AligmentItemMock()]
         actual_data = self._serialize_it(badge_instance)
         actual_data = actual_data["credential"]["credentialSubject"]["achievement"]
         expected_alignment = {

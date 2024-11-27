@@ -81,7 +81,7 @@ class AlignmentSerializer(serializers.Serializer):
 
         # TODO: decide on what to do if framework is missing
         # TODO: we should really make this an enum with allowed values instead
-        framework = instance.get("target_framework", "")
+        framework = instance.target_framework
         ret["targetType"] = f"ext:{framework}Alignment"
         return ret
 
