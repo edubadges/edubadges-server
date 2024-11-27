@@ -3,7 +3,7 @@ from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
 
-from .models import OfferRequest
+from .models import OfferRequest, IdentityObject
 from .serializers import OfferRequestSerializer
 
 from  mainsite.settings import UI_URL
@@ -24,6 +24,9 @@ class BadgeClassMock:
 class BadgeInstanceMock:
     def __init__(self):
         self.entity_id = "BADGE1234"
+        self.salt: Optional[str] = None
+        self.recipient_identifier: Optional[str] = None
+
         self.badgeclass = BadgeClassMock()
         self.issued_on: Optional[DateTime] = None
         self.expires_at: Optional[DateTime] = None
@@ -32,6 +35,9 @@ class IssuerMock:
     def __init__(self):
         self.id = "ISS1234"
         self.name = "Mock Issuer"
+
+def mock_hasher(_id, _salt):
+   return "mock_hash"
 
 class TestCredentialsSerializers(SimpleTestCase):
     def test_serializer_serializes_credential(self):
@@ -68,6 +74,20 @@ class TestCredentialsSerializers(SimpleTestCase):
 
         self.maxDiff = None # Debug full diff
         self.assertDictEqual(actual_data, expected_data)
+
+    def test_recipient(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.recipient_identifier = "1234abc123abc"
+        badge_instance.salt = "s@lt"
+        actual_data = self._serialize_it(badge_instance)
+        expected_identifier = {
+            "type": ["IdentityObject"],
+            "hashed": True,
+            "identityHash": "sha256$a2441d313d3d31514464ed6732d255df3391cbc85dd374d8a94b683248dcb7b8",
+            "identityType": "emailAddress",
+            "salt": "s@lt",
+        }
+        self.assertEqual(actual_data["credential"]["credentialSubject"]["identifier"], expected_identifier)
 
     def test_optional_valid_from_field_set(self):
         badge_instance = BadgeInstanceMock()
@@ -144,7 +164,25 @@ class TestCredentialsSerializers(SimpleTestCase):
 
         self.assertIn(expected_alignment, actual_data["alignment"])
 
-
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
        edu_credential = OfferRequest("offer_id", "credential_configuration_id", badge_instance)
        return dict(OfferRequestSerializer(edu_credential).data)
+
+class TestCredentialModels(SimpleTestCase):
+    def test_identity_object_adds_identity_hash_from_hasher(self):
+        subject = IdentityObject("1234abc123abc", "s@lt", hasher=mock_hasher)
+        self.assertEqual(subject.identity_hash, "mock_hash")
+
+    def test_identity_object_adds_algorithm_identifier(self):
+        subject = IdentityObject("1234abc123abc", "s@lt")
+        self.assertTrue(subject.identity_hash.startswith("sha256$"))
+
+    def test_identity_object_adds_salt(self):
+        subject_one = IdentityObject("1234abc123abc", "1")
+        subject_two = IdentityObject("1234abc123abc", "2")
+        self.assertNotEqual(subject_one.identity_hash, subject_two.identity_hash)
+
+    def test_identity_object_ignores_case_in_recipient_identifier(self):
+        subject_lower = IdentityObject("1234abc123abc", "s@lt")
+        subject_upper = IdentityObject("1234ABC123ABC", "s@lt")
+        self.assertEqual(subject_lower.identity_hash, subject_upper.identity_hash)

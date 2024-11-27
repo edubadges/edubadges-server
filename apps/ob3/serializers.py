@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from django.utils import timezone
+
 from rest_framework import serializers
 
 from apps.mainsite.settings import UI_URL
@@ -84,6 +85,24 @@ class AlignmentSerializer(serializers.Serializer):
         ret["targetType"] = f"ext:{framework}Alignment"
         return ret
 
+class IdentityObjectSerializer(serializers.Serializer):
+    type = serializers.ListField(
+            child=serializers.CharField(),
+            read_only=True,
+            default=["IdentityObject"]
+    )
+    identityHash = serializers.CharField(
+            source='identity_hash',
+            required=True,
+    )
+    hashed = serializers.BooleanField()
+    identityType = serializers.CharField(
+            source='identity_type',
+    )
+    salt = serializers.CharField(
+            required=False,
+            allow_null=True,
+    )
 
 class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     OMIT_IF_NONE = ['inLanguage', 'ECTS', 'educationProgramIdentifier', 'participationType', 'alignment']
@@ -130,13 +149,19 @@ class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
 
         return ret
 
-class AchievementSubjectSerializer(serializers.Serializer):
+class AchievementSubjectSerializer(OmitNoneFieldsMixin, serializers.Serializer):
+    OMIT_IF_NONE = ['identifier']
+
     type = serializers.ListField(
             child=serializers.CharField(),
             read_only=True,
             default=["AchievementSubject"]
     )
     achievement = AchievementSerializer()
+    identifier = IdentityObjectSerializer(
+            required=False,
+            allow_null=True,
+    )
 
 class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     OMIT_IF_NONE = ['validFrom', 'validUntil']
