@@ -781,14 +781,14 @@ class BadgeClass(
             """build a unique identity from alignment json"""
             return "&".join("{}={}".format(k, getattr(alignment, k)) for k in keys)
 
+        # HACKY, but force a save to self otherwise we can't create related objects here
+        if not self.pk:
+            self.save()
+
         existing_idx = {_obj_identity(a): a for a in self.alignment_items}
         new_idx = {_identity(a): a for a in value}
 
         with transaction.atomic():
-            # HACKY, but force a save to self otherwise we can't create related objects here
-            if not self.pk:
-                self.save()
-
             # add missing records
             for align in value:
                 if _identity(align) not in existing_idx:
@@ -1148,20 +1148,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
             if self.entity_id is None:
                 self.entity_id = generate_entity_uri()
 
-            if not self.image:
-                badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
-                new_image = io.BytesIO()
-                bake(
-                    image_file=self.cached_badgeclass.image.file,
-                    assertion_json_string=json_dumps(self.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2),
-                    output_file=new_image,
-                )
-                self.image.save(
-                    name="assertion-{id}{ext}".format(id=self.entity_id, ext=ext),
-                    content=ContentFile(new_image.read()),
-                    save=False,
-                )
-
         if self.revoked is False:
             self.revocation_reason = None
 
@@ -1382,9 +1368,9 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
 
         # TODO: extension manager not working anymore
         # "Manger isn't accessible from via BadgeInstance instances"
-        # if len(self.cached_extensions()) > 0:
-        #     for extension in self.cached_ex:tensions():
-        #         json[extension.name] = json_loads(extension.original_json)
+        if len(self.cached_extensions()) > 0:
+            for extension in self.cached_extensions():
+                json[extension.name] = json_loads(extension.original_json)
         if self.pk is None:
             for extension in self.badgeclass.badgeclassextension_set.all():
                 json[extension.name] = json_loads(extension.original_json)
