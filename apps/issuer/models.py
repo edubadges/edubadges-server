@@ -1382,7 +1382,9 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
 
         # TODO: extension manager not working anymore
         # "Manger isn't accessible from via BadgeInstance instances"
-
+        # if len(self.cached_extensions()) > 0:
+        #     for extension in self.cached_ex:tensions():
+        #         json[extension.name] = json_loads(extension.original_json)
         if self.pk is None:
             for extension in self.badgeclass.badgeclassextension_set.all():
                 json[extension.name] = json_loads(extension.original_json)
