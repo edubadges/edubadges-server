@@ -34,7 +34,7 @@ class DirectAwardSerializer(serializers.Serializer):
     def validate_eppn(self, eppn):
         eppn_reg_exp_format = self.context['request'].user.institution.eppn_reg_exp_format
         # For email identifier_type we don't validate eppn
-        eppn_required = self.root.initial_data["identifier_type"] == "eppn"
+        eppn_required = self.root.initial_data.get("identifier_type", "eppn") == "eppn"
         if eppn_reg_exp_format and eppn_required:
             eppn_re = re.compile(eppn_reg_exp_format, re.IGNORECASE)
             if not bool(eppn_re.match(eppn)):
