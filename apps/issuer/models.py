@@ -437,6 +437,7 @@ class Issuer(EntityUserProvisionmentMixin,
                                'on_behalf_of': self.faculty.on_behalf_of,
                                'on_behalf_of_url': self.faculty.on_behalf_of_url,
                                'on_behalf_of_display_name': self.faculty.on_behalf_of_display_name,
+                               'entityId': self.faculty.entity_id,
                                'institution': self.faculty.institution.get_json(obi_version=CURRENT_OBI_VERSION,
                                                                                 expand_awards=expand_awards)}
             image_url = OriginSetting.HTTP + reverse('faculty_image', kwargs={'entity_id': self.faculty.entity_id})
