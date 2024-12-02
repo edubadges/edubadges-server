@@ -1,6 +1,5 @@
 import uuid
 
-import json
 import requests
 import logging
 from django.http import Http404
@@ -9,10 +8,14 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from issuer.models import BadgeInstance
-from mainsite.settings import OB3_AGENT_URL_SPHEREON, OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_UNIME, UI_URL
+from pprint import pformat
 
-logger = logging.getLogger(__name__)
+from issuer.models import BadgeInstance
+from mainsite.settings import OB3_AGENT_URL_SPHEREON, OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_UNIME
+from .serializers import OfferRequestSerializer
+from .models import OfferRequest
+
+logger = logging.getLogger('django')
 
 class CredentialsView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -26,25 +29,26 @@ class CredentialsView(APIView):
         variant = request.data.get('variant')
 
         badge_instance = self.__badge_instance(badge_id, request.user)
-        credential = self.__credential(offer_id, badge_instance)
+        logger.debug(f"Badge instance: {pformat(badge_instance.__dict__)}")
+        credential_configuration_id = {
+            'sphereon': "OpenBadgeCredential",
+            'unime': "openbadge_credential"
+        }.get(variant) 
+        credential = OfferRequest(offer_id, credential_configuration_id, badge_instance)
+        serializer = OfferRequestSerializer(credential)
 
         if variant == 'sphereon':
-            credential.update({"credentialConfigurationId": "OpenBadgeCredential"})
-            logger.debug(f"Requesting badge w sphereon for {badge_instance.entity_id}")
-            open_id_credential_offer = self.__issue_sphereon_badge(credential)
-            # We get back a json object that wraps an openid-credential-offer:// uri
-            # Inside this, is a a parameter credential_offer_uri that contains the actual offer uri
-            # Which we can fetch to get the offer
-            offer = json.loads(open_id_credential_offer).get('uri')
-
+            offer = self.__issue_sphereon_badge(serializer.data)
+            logger.debug(f"Sphereon offer: {offer}")
         elif variant == 'unime':
-           credential.update({"credentialConfigurationId": "openbadge_credential"})
+            self.__issue_unime_badge(serializer.data)
+            offer = self.__get_unime_offer(offer_id)
+            logger.debug(f"Unime offer: {offer}")
 
-           logger.debug(f"Requesting badge w unime for {badge_instance.entity_id}")
-           self.__issue_unime_badge(credential)
-           offer = self.__get_offer(offer_id)
-        else:
-            raise Http404 # Should best be a 400 error, but that seems hard in Django?
+        offer = self.__issue_sphereon_badge(serializer.data)
+
+        logger.info(f"Issued credential for badge {badge_id} with offer_id {offer_id}")
+        logger.debug(f"Credential: {pformat(serializer.data)}")
 
         return Response({"offer": offer}, status=status.HTTP_201_CREATED)
 
@@ -65,69 +69,43 @@ class CredentialsView(APIView):
             },
             "credentialDataSupplierInput": credential
         }
-        resp = requests.post(json=offer_request_body,
-                      url=f"{OB3_AGENT_URL_SPHEREON}/edubadges/api/create-offer",
-                      headers={'Accept': 'application/json',
-                               "Authorization": f"Bearer {OB3_AGENT_AUTHZ_TOKEN_SPHEREON}"})
-        logger.info(f"Sphereon response: {resp.text}")
+        resp = requests.post(
+                timeout=5,
+                url=f"{OB3_AGENT_URL_SPHEREON}/edubadges/api/create-offer",
+                json=offer_request_body,
+                headers={'Accept': 'application/json',
+                         "Authorization": f"Bearer {OB3_AGENT_AUTHZ_TOKEN_SPHEREON}"}
+        )
+
         if resp.status_code >= 400:
             msg = f"Failed to issue badge:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
             raise BadRequest(msg)
 
-        return resp.text
+
+        # We get back a json object that wraps an openid-credential-offer:// uri
+        # Inside this, is a a parameter credential_offer_uri that contains the actual offer uri
+        # Which we can fetch to get the offer
+        json_resp = resp.json()
+        return json_resp.get('uri')
 
     def __issue_unime_badge(self, credential):
-        resp = requests.post(json=credential,
-                      url=f"{OB3_AGENT_URL_UNIME}/v0/credentials",
-                      headers={'Accept': 'application/json'})
-        logger.debug(f"Unime response: {resp.text}")
+        resp = requests.post(
+                timeout=5,
+                json=credential,
+                url=f"{OB3_AGENT_URL_UNIME}/v0/credentials",
+                headers={'Accept': 'application/json'}
+        )
 
         if resp.status_code >= 400:
             msg = f"Failed to issue badge:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
             raise BadRequest(msg)
 
-
-    def __get_offer(self, offer_id):
-        offer_id = {"offerId": offer_id}
-        response = requests.post(json=offer_id,
-                                 url=f"{OB3_AGENT_URL_UNIME}/v0/offers",
-                                 headers={'Accept': 'application/json'})
+    def __get_unime_offer(self, offer_id):
+        response = requests.post(
+                timeout=5,
+                url=f"{OB3_AGENT_URL_UNIME}/v0/offers",
+                json= { "offerId": offer_id },
+                headers={'Accept': 'application/json'}
+        )
 
         return response.text
-
-    def __credential(self, offer_id, badge_instance):
-        badgeclass = badge_instance.badgeclass
-
-        return {
-            "offerId": offer_id,
-            "credentialConfigurationId": None,
-            "credential": {
-                "issuer": {
-                    "id": f"{UI_URL}/public/issuers/{badgeclass.issuer.entity_id}",
-                    "type": [
-                        "Profile"
-                    ],
-                    "name": badgeclass.issuer.name_english
-                },
-                "credentialSubject": {
-                    "type": [
-                        "AchievementSubject"
-                    ],
-                    "achievement": {
-                        "id": f"{UI_URL}/public/assertions/{badge_instance.entity_id}",
-                        "type": [
-                            "Achievement"
-                        ],
-                        "criteria": {
-                            "narrative": badgeclass.criteria_text
-                        },
-                        "description": badgeclass.description,
-                        "name": badgeclass.name,
-                        "image": {
-                            "type":"Image",
-                            "id": badgeclass.image_url()
-                        }
-                    }
-                }
-            }
-        }
