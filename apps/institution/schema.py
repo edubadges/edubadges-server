@@ -114,6 +114,7 @@ class Query(object):
     current_institution = graphene.Field(InstitutionType)
     institutions = graphene.List(InstitutionType)
     public_institutions = graphene.List(InstitutionType)
+    public_faculty = graphene.Field(FacultyType, id=graphene.String())
     faculties = graphene.List(FacultyType)
     issuers = graphene.List(IssuerType)
     faculty = graphene.Field(FacultyType, id=graphene.String())
@@ -139,6 +140,11 @@ class Query(object):
 
     def resolve_public_institutions(self, info, **kwargs):
         return Institution.objects.filter(public_institution=True).all()
+
+    def resolve_public_faculty(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            return Faculty.objects.get(entity_id=id)
 
     def resolve_faculties(self, info, **kwargs):
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['may_read'])]
