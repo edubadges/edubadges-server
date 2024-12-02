@@ -194,6 +194,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                 content=ContentFile(new_image.read()),
                 save=False,
             )
+            new_instance.save()
 
             if evidence is not None:
                 from issuer.models import BadgeInstanceEvidence
