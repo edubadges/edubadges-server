@@ -12,4 +12,4 @@ jobs:
     runs-on: ubuntu-latest
     name: "trufflehog"
     steps:
-    - uses: trufflesecurity/trufflehog@v3.84
+    - uses: trufflesecurity/trufflehog@v3.84.2
