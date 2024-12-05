@@ -1,0 +1,20 @@
+name: "Trufflehog"
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [develop]
+    
+jobs:
+  trufflehog:
+    runs-on: ubuntu-latest
+    name: "trufflehog"
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.head_ref }} 
+    - name: trufflehog-actions-scan
+      uses: trufflesecurity/trufflehog@v3.84.2
