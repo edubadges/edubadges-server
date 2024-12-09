@@ -84,7 +84,8 @@ class AchievementSubject:
     def from_badge_instance(badge_instance):
         achievement = Achievement.from_badge_instance(badge_instance)
         if badge_instance.recipient_identifier and badge_instance.salt:
-            identifier = IdentityObject.from_badge_instance(badge_instance)
+            # Hardcoded to one element. The spec allows more, but we don't need it.
+            identifier = [IdentityObject.from_badge_instance(badge_instance)]
         else:
             identifier = None
 
