@@ -86,10 +86,9 @@ class AlignmentSerializer(serializers.Serializer):
         return ret
 
 class IdentityObjectSerializer(serializers.Serializer):
-    type = serializers.ListField(
-            child=serializers.CharField(),
+    type = serializers.CharField(
             read_only=True,
-            default=["IdentityObject"]
+            default="IdentityObject"
     )
     identityHash = serializers.CharField(
             source='identity_hash',
@@ -158,9 +157,11 @@ class AchievementSubjectSerializer(OmitNoneFieldsMixin, serializers.Serializer):
             default=["AchievementSubject"]
     )
     achievement = AchievementSerializer()
-    identifier = IdentityObjectSerializer(
-            required=False,
-            allow_null=True,
+    identifier = serializers.ListField(
+            child=IdentityObjectSerializer(
+                required=False,
+                allow_null=True,
+                )
     )
 
 class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
