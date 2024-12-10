@@ -1,3 +1,4 @@
+import json
 import os
 
 from mainsite import TOP_DIR
@@ -359,9 +360,19 @@ LOGGING = {
 
 
 CACHES = {
+<<<<<<< HEAD
     "default": {
         "BACKEND": "django_prometheus.cache.backends.memcached.PyMemcacheCache",
         "LOCATION": f"{os.environ.get('MEMCACHED_HOST', '127.0.0.1')}:{os.environ.get('MEMCACHED_PORT', 11211)}",
+||||||| parent of 8f6a7e08 (Updating CACHES)
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': f"{os.environ.get('MEMCACHED_HOST', 'localhost')}:{os.environ.get('MEMCACHED_PORT', 11211)}",
+=======
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': json.loads(os.environ.get('MEMCACHED', '["localhost:11211"]')),
+>>>>>>> 8f6a7e08 (Updating CACHES)
     }
 }
 
@@ -609,4 +620,12 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
+<<<<<<< HEAD
 API_PROXY = {"HOST": OB3_AGENT_URL_UNIME}
+||||||| parent of 8f6a7e08 (Updating CACHES)
+API_PROXY = {
+    'HOST': OB3_AGENT_URL_UNIME
+}
+=======
+API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
+>>>>>>> 8f6a7e08 (Updating CACHES)
