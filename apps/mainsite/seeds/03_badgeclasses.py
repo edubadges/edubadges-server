@@ -1,4 +1,5 @@
 import json
+from typing import List
 from django.conf import settings
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeClassExtension
@@ -119,3 +120,26 @@ for iss in Issuer.objects.filter(name_english="Political Science"):
 for iss in Issuer.objects.filter(name_english="Medicine"):
     [create_badge_class(bc, iss) for bc in
      ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]
+
+# Add assessment_type to half of the badges
+iterator = 0
+assessment_types: List[str] = ["testing", "application of a skill", "portfolio", "recognition of prior learning"]
+n_types = len(assessment_types)
+for bc in BadgeClass.objects.all()[::2]:
+    bc.assessment_type = assessment_types[iterator % n_types]
+    bc.save()
+    iterator += 1
+
+# For all assessment_type of "testing", add one of the supervision types
+iterator = 0
+supervision_types: List[str] = ["unsupervised with no identity verification", "supervised with identity verification", "supervised online", "onsite with identity verification"]
+n_types = len(supervision_types)
+for bc in BadgeClass.objects.filter(assessment_type="testing"):
+    bc.supervision_type = supervision_types[iterator % n_types]
+    bc.save()
+    iterator += 1
+
+# for half of supervision types that are not "unsupervised with no identity verification", set identity_checked to True
+for bc in BadgeClass.objects.exclude(supervision_type="unsupervised with no identity verification")[::2]:
+    bc.identity_checked = True
+    bc.save()
