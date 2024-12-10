@@ -91,7 +91,7 @@ def create_badge_class(name, issuer):
         issuer=issuer,
         description=badge_class_description,
         formal=True,
-        criteria_text="A lot",
+        criteria_text="In order to earn this badge, you must complete the course and show proficiency in things.",
         old_json="{}",
         image="uploads/badges/eduid.png",
     )
