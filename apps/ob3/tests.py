@@ -89,13 +89,14 @@ class TestCredentialsSerializers(SimpleTestCase):
         badge_instance.salt = "s@lt"
         actual_data = self._serialize_it(badge_instance)
         expected_identifier = {
-            "type": ["IdentityObject"],
+            "type": "IdentityObject",
             "hashed": True,
             "identityHash": "sha256$a2441d313d3d31514464ed6732d255df3391cbc85dd374d8a94b683248dcb7b8",
             "identityType": "emailAddress",
             "salt": "s@lt",
         }
-        self.assertEqual(actual_data["credential"]["credentialSubject"]["identifier"], expected_identifier)
+        self.assertEqual(len(actual_data["credential"]["credentialSubject"]["identifier"]), 1)
+        self.assertEqual(actual_data["credential"]["credentialSubject"]["identifier"][0], expected_identifier)
 
     def test_optional_valid_from_field_set(self):
         badge_instance = BadgeInstanceMock()
