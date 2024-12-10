@@ -64,8 +64,25 @@ badge_class_extensions = {
     }
 }
 
-badge_class_description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+# add some markdown to the description, make it multiline.
+badge_class_description = '''
+# Introduction to Lorem Ipsum
+Lorem ipsum dolor **sit amet**, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+## Subtitle
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+* Excepteur sint occaecat cupidatat non proident
+* Sunt in culpa qui officia deserunt mollit anim id est laborum
+
+### Subsubtitle
+
+1. Lorem ipsum dolor sit amet
+2. Consectetur adipiscing elit
+3. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+'''
 
 def create_badge_class(name, issuer):
     badge_class, _ = BadgeClass.objects.get_or_create(
