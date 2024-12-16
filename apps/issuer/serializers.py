@@ -248,7 +248,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         is_mbo = issuer.institution.institution_type == Institution.TYPE_MBO
         is_private = data.get("is_private", False)
         type_badge = data["badge_class_type"]
-        self.formal = type_badge in [BadgeClass.BADGE_CLASS_TYPE_REGULAR, BadgeClass.BADGE_CLASS_TYPE_MICRO] and not is_mbo
+        self.formal = type_badge in [BadgeClass.BADGE_CLASS_TYPE_REGULAR, BadgeClass.BADGE_CLASS_TYPE_MICRO]
         if is_mbo and not is_private:
             extensions += ["StudyLoadExtension"]
         if not is_private:
