@@ -630,8 +630,17 @@ class BadgeClass(EntityUserProvisionmentMixin,
         if not terms:
             raise ValueError(f"Institution {self.institution.identifier} has no terms. This is required.")
         if self.formal:
-            return [term for term in terms if term.terms_type == term.__class__.TYPE_FORMAL_BADGE][0]
-        return [term for term in terms if term.terms_type == term.__class__.TYPE_INFORMAL_BADGE][0]
+            formal_terms = [term for term in terms if term.terms_type == term.__class__.TYPE_FORMAL_BADGE]
+            if not formal_terms:
+                raise ValueError(f"Institution {self.institution.identifier} has no formal terms, "
+                                 f"but badge {self.name} is a formal badge. Formal terms are required.")
+            return formal_terms[0]
+        else:
+            informal_terms = [term for term in terms if term.terms_type == term.__class__.TYPE_INFORMAL_BADGE]
+            if not informal_terms:
+                raise ValueError(f"Institution {self.institution.identifier} has no informal terms, "
+                                 f"but badge {self.name} is a non-formal badge. Informal terms are required.")
+            return informal_terms[0]
 
     def terms_accepted(self, user):
         '''returns true if the user accepted the required terms'''
