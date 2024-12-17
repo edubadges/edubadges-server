@@ -21,7 +21,9 @@ class OmitNoneFieldsMixin:
 
     def to_representation(self, instance: Any) -> Dict[str, Any]:
         # Juggling to call the parent's to_representation method and not raise type errors
-        fallback_to_representation = lambda x: dict(x.__dict__)
+        def fallback_to_representation(x):
+            return dict(x.__dict__)
+
         representation = getattr(super(), 'to_representation', fallback_to_representation)(instance)
 
         for key in self.OMIT_IF_NONE:
