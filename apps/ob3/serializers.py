@@ -124,7 +124,7 @@ class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     ECTS = serializers.DecimalField(
             source='ects',
             decimal_places=1,
-            max_digits=3, # Up to 99,9 ECTS (in reality, it's up to 10.0, IIRC)
+            max_digits=4, # In reality there's a max at 240 for regular and 30 for microcredential. We don't handle that, yet
             coerce_to_string=False,
     )
     educationProgramIdentifier = serializers.CharField(
