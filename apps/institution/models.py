@@ -270,9 +270,10 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
             entityId=self.entity_id,
             description=self.description,
             description_english=self.description_english,
-            description_dutch=self.description_dutch,
-            image=image_url,
+            description_dutch=self.description_dutch
         ))
+        if self.image_english or self.image_dutch:
+            json['image'] = f"{image_url}"
         if self.image_english:
             json['image_english'] = f"{image_url}?lang=en"
         if self.image_dutch:
