@@ -121,6 +121,14 @@ for iss in Issuer.objects.filter(name_english="Medicine"):
     [create_badge_class(bc, iss) for bc in
      ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]
 
+# Faculty Medicine ## Alignments
+for bc in BadgeClass.objects.filter(issuer__name_english="Medicine"):
+    bc.alignment_items = [
+            { "target_name": "EQF", "target_url": "https://ec.europa.eu/ploteus/content/descriptors-page", "target_description": "European Qualifications Framework", "target_framework": "EQF", "target_code": "7" },
+            { "target_name": "ECTS", "target_url": "https://ec.europa.eu/education/resources-and-tools/european-credit-transfer-and-accumulation-system-ects_en", "target_description": "European Credit Transfer and Accumulation System", "target_framework": "ECTS", "target_code": "2.5" },
+    ]
+    bc.save()
+
 # Add quality assurance to half of the badges
 for bc in BadgeClass.objects.all()[::2]:
     bc.quality_assurance_description = "Quality assurance framework FAKE1.0"
