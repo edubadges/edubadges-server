@@ -127,14 +127,37 @@ class TestCredentialsSerializers(SimpleTestCase):
         actual_data = self._serialize_it(badge_instance)
         self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["inLanguage"], "en_EN")
 
-    def test_studyload_extension(self):
+    def test_ects_extension_int(self):
         badge_instance = BadgeInstanceMock()
         badge_instance.badgeclass.extension_items = {
-                "extensions:ECTSExtension": { "ECTS": 2.5 }
+                "extensions:ECTSExtension": { "ECTS": int(1) }
                 }
         actual_data = self._serialize_it(badge_instance)
-        # It must be serialized as a Number, not a string
+        self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["ECTS"], 1.0)
+
+    def test_ects_extension_float(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.badgeclass.extension_items = {
+                "extensions:ECTSExtension": { "ECTS": float(2.5) }
+                }
+        actual_data = self._serialize_it(badge_instance)
         self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["ECTS"], 2.5)
+
+    def test_ects_extension_one_place(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.badgeclass.extension_items = {
+                "extensions:ECTSExtension": { "ECTS": float(2.54321) }
+                }
+        actual_data = self._serialize_it(badge_instance)
+        self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["ECTS"], 2.5)
+
+    def test_ects_extension_max_999(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.badgeclass.extension_items = {
+                "extensions:ECTSExtension": { "ECTS": float(240.0) }
+                }
+        actual_data = self._serialize_it(badge_instance)
+        self.assertEqual(actual_data["credential"]["credentialSubject"]["achievement"]["ECTS"], 240)
 
     def test_education_program_identifier_extension(self):
         badge_instance = BadgeInstanceMock()

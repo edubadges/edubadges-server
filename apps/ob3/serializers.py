@@ -21,7 +21,9 @@ class OmitNoneFieldsMixin:
 
     def to_representation(self, instance: Any) -> Dict[str, Any]:
         # Juggling to call the parent's to_representation method and not raise type errors
-        fallback_to_representation = lambda x: dict(x.__dict__)
+        def fallback_to_representation(x):
+            return dict(x.__dict__)
+
         representation = getattr(super(), 'to_representation', fallback_to_representation)(instance)
 
         for key in self.OMIT_IF_NONE:
@@ -124,7 +126,7 @@ class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     ECTS = serializers.DecimalField(
             source='ects',
             decimal_places=1,
-            max_digits=3, # Up to 99,9 ECTS (in reality, it's up to 10.0, IIRC)
+            max_digits=4, # In reality there's a max at 240 for regular and 30 for microcredential. We don't handle that, yet
             coerce_to_string=False,
     )
     educationProgramIdentifier = serializers.CharField(
