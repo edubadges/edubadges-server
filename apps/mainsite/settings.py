@@ -78,7 +78,7 @@ INSTALLED_APPS = [
     "notifications",
     # deprecated
     "composition",
-    "django-prometheus",
+    "django_prometheus",
 ]
 
 MIDDLEWARE = [
