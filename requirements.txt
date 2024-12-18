@@ -134,3 +134,5 @@ django-otp==1.1.1
 
 #https://github.com/aiselis/django-api-proxy
 django-api-proxy==0.1.1
+
+django_prometheus==2.3.1

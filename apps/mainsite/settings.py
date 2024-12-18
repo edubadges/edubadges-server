@@ -78,9 +78,11 @@ INSTALLED_APPS = [
     "notifications",
     # deprecated
     "composition",
+    "django-prometheus",
 ]
 
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "lti13.middleware.SameSiteMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -97,6 +99,7 @@ MIDDLEWARE = [
     # 'mainsite.middleware.TrailingSlashMiddleware',
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "mainsite.urls"
@@ -356,7 +359,7 @@ LOGGING = {
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "BACKEND": "django_prometheus.cache.backends.memcached.PyMemcacheCache",
         "LOCATION": f"{os.environ.get('MEMCACHED_HOST', '127.0.0.1')}:{os.environ.get('MEMCACHED_PORT', 11211)}",
     }
 }
