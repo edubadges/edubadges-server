@@ -179,7 +179,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
 
         with transaction.atomic():
             new_instance.save()
-            if not self.image:
+            if not new_instance.image:
                 badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)
                 new_image = io.BytesIO()
                 bake(
