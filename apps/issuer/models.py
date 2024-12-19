@@ -1161,20 +1161,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
             if self.entity_id is None:
                 self.entity_id = generate_entity_uri()
 
-            if not self.image:
-                badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
-                new_image = io.BytesIO()
-                bake(
-                    image_file=self.cached_badgeclass.image.file,
-                    assertion_json_string=json_dumps(self.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2),
-                    output_file=new_image,
-                )
-                self.image.save(
-                    name="assertion-{id}{ext}".format(id=self.entity_id, ext=ext),
-                    content=ContentFile(new_image.read()),
-                    save=False,
-                )
-
         if self.revoked is False:
             self.revocation_reason = None
 

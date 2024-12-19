@@ -176,24 +176,25 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         new_instance = self.model(
             public=False, recipient_identifier=recipient_identifier, badgeclass=badgeclass, issuer=issuer, **kwargs
         )
-        new_instance.save()
 
         with transaction.atomic():
-            badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)
-            new_image = io.BytesIO()
-            bake(
-                image_file=new_instance.cached_badgeclass.image.file,
-                assertion_json_string=json_dumps(
-                    new_instance.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2
-                ),
-                output_file=new_image,
-            )
-            new_instance.image.save(
-                name="assertion-{id}{ext}".format(id=new_instance.entity_id, ext=ext),
-                content=ContentFile(new_image.read()),
-                save=False,
-            )
             new_instance.save()
+            if not self.image:
+                badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)
+                new_image = io.BytesIO()
+                bake(
+                    image_file=new_instance.cached_badgeclass.image.file,
+                    assertion_json_string=json_dumps(
+                        new_instance.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2
+                    ),
+                    output_file=new_image,
+                )
+                new_instance.image.save(
+                    name="assertion-{id}{ext}".format(id=new_instance.entity_id, ext=ext),
+                    content=ContentFile(new_image.read()),
+                    save=False,
+                )
+                new_instance.save()
 
             if evidence is not None:
                 from issuer.models import BadgeInstanceEvidence
