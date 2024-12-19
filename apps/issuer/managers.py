@@ -176,10 +176,9 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         new_instance = self.model(
             public=False, recipient_identifier=recipient_identifier, badgeclass=badgeclass, issuer=issuer, **kwargs
         )
+        new_instance.save()
 
         with transaction.atomic():
-            new_instance.save()
-
             badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)
             new_image = io.BytesIO()
             bake(
