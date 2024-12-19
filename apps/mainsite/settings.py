@@ -361,13 +361,6 @@ CACHES = {
     }
 }
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
-        "LOCATION": f"{os.environ.get('MEMCACHED_HOST', 'localhost')}:{os.environ.get('MEMCACHED_PORT', 11211)}",
-    }
-}
-
 ##
 #
 #  Maintenance Mode
