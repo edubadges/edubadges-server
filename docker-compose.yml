@@ -31,8 +31,7 @@ services:
       - EMAIL_HOST=mailhog
       - EMAIL_PORT=1025
       - LTI_FRONTEND_URL=localhost
-      - MEMCACHED_HOST=memcached
-      - MEMCACHED_PORT=11211
+      - MEMCACHED=memcached:11211
       - OIDC_RS_ENTITY_ID=test.edubadges.rs.nl
       - OIDC_RS_SECRET=${OIDC_RS_SECRET}
       - ROOT_INFO_SECRET_KEY=secret
