@@ -61,6 +61,9 @@ class BadgeClassTagType(DjangoObjectType):
         model = BadgeClassTag
         fields = ('id', 'name', 'archived')
 
+def terms_type():
+    from badgeuser.schema import TermsType
+    return TermsType
 
 class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
                       ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
@@ -77,6 +80,7 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
     public_faculties = graphene.List(FacultyType)
     staff = graphene.List(InstitutionStaffType)
     tags = graphene.List(BadgeClassTagType)
+    terms = graphene.List(terms_type())
     image = graphene.String()
     name = graphene.String()
     award_allowed_institutions = graphene.List(graphene.String)
@@ -108,12 +112,16 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
         institutions = Institution.objects.all() if self.award_allow_all_institutions else self.award_allowed_institutions.all()
         return [institution.identifier for institution in institutions]
 
+    def resolve_terms(self, info):
+        return self.cached_terms()
+
 
 class Query(object):
     public_institution = graphene.Field(InstitutionType, id=graphene.String())
     current_institution = graphene.Field(InstitutionType)
     institutions = graphene.List(InstitutionType)
     public_institutions = graphene.List(InstitutionType)
+    public_faculty = graphene.Field(FacultyType, id=graphene.String())
     faculties = graphene.List(FacultyType)
     issuers = graphene.List(IssuerType)
     faculty = graphene.Field(FacultyType, id=graphene.String())
@@ -139,6 +147,11 @@ class Query(object):
 
     def resolve_public_institutions(self, info, **kwargs):
         return Institution.objects.filter(public_institution=True).all()
+
+    def resolve_public_faculty(self, info, **kwargs):
+        id = kwargs.get('id')
+        if id is not None:
+            return Faculty.objects.get(entity_id=id)
 
     def resolve_faculties(self, info, **kwargs):
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ['may_read'])]

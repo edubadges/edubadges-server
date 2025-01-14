@@ -20,6 +20,7 @@ services:
       - BADGR_DB_PORT=3306
       - BADGR_DB_USER=badgr
       - DEBUG=1
+      - DJANGO_LOG_LEVEL=DEBUG
       - DEFAULT_DOMAIN=http://0.0.0.0:8000
       - DEFAULT_FROM_EMAIL=noreply@surf.nl
       - DOMAIN=0.0.0.0:8000
