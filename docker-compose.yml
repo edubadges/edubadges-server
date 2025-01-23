@@ -55,6 +55,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      memcached:
+        condition: service_started
     ports:
       - "8000:8000"
       
