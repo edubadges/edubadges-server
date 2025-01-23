@@ -59,11 +59,12 @@ class CredentialsView(APIView):
             raise Http404
 
     def __issue_sphereon_badge(self, credential):
+        random_offer_id = str(uuid.uuid4());
         offer_request_body = {
             "credentials": ["OpenBadgeCredential"],
             "grants": {
                 "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
-                    "pre-authorized_code": "This-is-sent-via-SMS",
+                    "pre-authorized_code": random_offer_id,
                     "user_pin_required": False
                 }
             },
