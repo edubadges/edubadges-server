@@ -13,7 +13,6 @@ def legacy_boolean_parsing(env_key, default_value):
 
 env_settings()
 
-
 SESSION_COOKIE_AGE = 60 * 60  # 1 hour session validity
 SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
 SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
@@ -326,11 +325,6 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
         'Badgr.Events': {
             'handlers': ['badgr_events'],
             'level': 'INFO',
@@ -338,11 +332,6 @@ LOGGING = {
         },
         'Badgr.Debug': {
             'handlers': ['badgr_debug', 'badgr_debug_syslog'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'apscheduler': {
-            'handlers': ['badgr_debug'],
             'level': 'DEBUG',
             'propagate': True,
         },
