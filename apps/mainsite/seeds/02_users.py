@@ -30,13 +30,13 @@ institutions = [
         'institution_type': 'HBO',
     },
     {
-        'name_english': 'university1',
+        'name_english': 'harvard-example.edu',
         'description_english': 'Harward Example',
         'description_dutch': 'Hardward Example',
         'institution_type': 'MBO',
     },
     {
-        'name_english': 'university2',
+        'name_english': 'yale-uni-example.edu',
         'description_english': 'Yale Uni Example',
         'description_dutch': 'Yale Uni Example',
         'institution_type': 'HBO',
@@ -151,16 +151,16 @@ institution_admins = [
         'email': 'jordan@harvard-example.edu',
         'first_name': 'Jordan',
         'last_name': 'Belfort',
-        'institution_name': 'university1',
+        'institution_name': 'harvard-example.edu',
         'uid': '86877d2f465c7ae597798bd2f929568904af023f',
     },
     # professor 2
     {
         'username': 'p2u1',
-        'email': 'steve.Wynn@las.vegas.com',
+        'email': 'S.Wynn@harvard-example.edu',
         'first_name': 'Steve',
         'last_name': 'Wynn',
-        'institution_name': 'university2',
+        'institution_name': 'harvard-example.edu',
         'uid': '19e584047361617f97a8b0cfa6a17555d68753c1',
     },
     # professor 3
@@ -171,6 +171,15 @@ institution_admins = [
         'last_name': 'Newton',
         'institution_name': 'university-example.org',
         'uid': '838b97344478a4086f07cf66b29d93730580a023',
+    },
+    # teacher 3
+    {
+        'username': 'bbernanke',
+        'email': 'B.S.Bernanke@yale-uni-example.edu',
+        'first_name': 'Ben',
+        'last_name': 'Bernake',
+        'institution_name': 'yale-uni-example.edu',
+        'uid': '4f516a9d3c32c0a19a4e9fe05b3185feef43a5ae',
     },
 ]
 
@@ -186,53 +195,39 @@ teachers = [
     },
     # professor 4
     {
-        'username': 'p4u1',
+        'username': 'g_ohm',
         'email': 'georg.ohm@university-example.org',
         'first_name': 'Georg',
         'last_name': 'Ohm',
         'institution_name': 'university-example.org',
-        'uid': '52622709ca4e5590a611d5f6f49f0712c7e513a8',
+        'uid': 'd2ba7c82a401a4c8f14b53d43af4d6c26712f971',
     },
     # professor 5
     {
-        'username': 'p5u1',
-        'email': 'professor5@university1.org',
+        'username': 'jrockefeller',
+        'email': 'John.D.Rockefeller@university-example.org',
         'first_name': 'John Davison',
         'last_name': 'Rockefeller',
         'institution_name': 'university-example.org',
-        'uid': 'aaf4dda63707f0b2a59fdfaee75df0ce7579bbe0',
+        'uid': '981c9a944fe8ed05a0c33d40dc4da134ed6c0d93',
     },
+    # teacher 1
     {
-        'username': 'p6u1',
-        'email': 'professor6@university1.org',
-        'first_name': 'professor6',
-        'last_name': 'university1',
-        'institution_name': 'university1',
-        'uid': '72ca9407474db806cfb457ac00a12dc601865591',
+        'username': 'jstiglitz',
+        'email': 'Joseph.Stiglitz@harvard-example.edu',
+        'first_name': 'Joseph',
+        'last_name': 'Stiglitzller',
+        'institution_name': 'harvard-example.edu',
+        'uid': 'f981043d36d8fc3188275cc9fc3bad3ee492ea58',
     },
+    # teacher 4
     {
-        'username': 'p7u1',
-        'email': 'professor7@university1.org',
-        'first_name': 'professor7',
-        'last_name': 'university1',
-        'institution_name': 'university1',
-        'uid': '02ffce96ae4a9c318ae074054429a8fed7784442',
-    },
-    {
-        'username': 'p8u1',
-        'email': 'professor8@university1.org',
-        'first_name': 'professor8',
-        'last_name': 'university1',
-        'institution_name': 'university1',
-        'uid': '9a988eab38ad87ee4398e0af6f5807d63255cf6a',
-    },
-    {
-        'username': 'p2u2',
-        'email': 'professor2@university2.org',
-        'first_name': 'professor2',
-        'last_name': 'university2',
-        'institution_name': 'university2',
-        'uid': '00020002',
+        'username': 'agreenspan',
+        'email': 'A.Greenspan@yale-uni-example.edu',
+        'first_name': 'Alan',
+        'last_name': 'Greenspan',
+        'institution_name': 'yale-uni-example.edu',
+        'uid': '72c5c72c5fb00b0718366b45f9fbe14ececd3d6e',
     },
 ]
 
