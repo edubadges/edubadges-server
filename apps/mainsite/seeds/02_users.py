@@ -24,12 +24,6 @@ institutions = [
         'institution_type': 'WO',
     },
     {
-        'name_english': 'diy.surfconext.nl',
-        'description_english': 'The university diy is also a good place to hang out',
-        'description_dutch': 'De university diy is ook een mooie plek',
-        'institution_type': 'HBO',
-    },
-    {
         'name_english': 'harvard-example.edu',
         'description_english': 'Harward Example',
         'description_dutch': 'Hardward Example',
@@ -42,6 +36,7 @@ institutions = [
         'institution_type': 'HBO',
     },
 ]
+
 for ins in institutions:
     institution, _ = Institution.objects.get_or_create(
         identifier=ins['name_english'],
@@ -136,15 +131,6 @@ institution_admins = [
         'institution_name': 'university-example.org',
         'uid': 'bf847baedbe7045394ea38de3c994f0332f2dfcb',
     },
-    # staff2
-    {
-        'username': 'anthony',
-        'email': 'Anthony_West@university-example.org',
-        'first_name': 'Anthony',
-        'last_name': 'West',
-        'institution_name': 'university-example.org',
-        'uid': '94d8812c425944e5b707ffd12bdf44f0ed71b809',
-    },
     # professor 1
     {
         'username': 'p1u1',
@@ -153,24 +139,6 @@ institution_admins = [
         'last_name': 'Belfort',
         'institution_name': 'harvard-example.edu',
         'uid': '86877d2f465c7ae597798bd2f929568904af023f',
-    },
-    # professor 2
-    {
-        'username': 'p2u1',
-        'email': 'S.Wynn@harvard-example.edu',
-        'first_name': 'Steve',
-        'last_name': 'Wynn',
-        'institution_name': 'harvard-example.edu',
-        'uid': '19e584047361617f97a8b0cfa6a17555d68753c1',
-    },
-    # professor 3
-    {
-        'username': 'p1u2',
-        'email': 'isaacnewton@university-example.org',
-        'first_name': 'Isaac',
-        'last_name': 'Newton',
-        'institution_name': 'university-example.org',
-        'uid': '838b97344478a4086f07cf66b29d93730580a023',
     },
     # teacher 3
     {
@@ -184,15 +152,6 @@ institution_admins = [
 ]
 
 teachers = [
-    # staff 2
-    {
-        'username': 'anthony',
-        'email': 'Anthony_West@university-example.org',
-        'first_name': 'Anthony',
-        'last_name': 'West',
-        'institution_name': 'university-example.org',
-        'uid': 'e1d42cb2da86d8763053ea7c9e29ad87fcbc73aa',
-    },
     # professor 4
     {
         'username': 'g_ohm',
@@ -201,15 +160,6 @@ teachers = [
         'last_name': 'Ohm',
         'institution_name': 'university-example.org',
         'uid': 'd2ba7c82a401a4c8f14b53d43af4d6c26712f971',
-    },
-    # professor 5
-    {
-        'username': 'jrockefeller',
-        'email': 'John.D.Rockefeller@university-example.org',
-        'first_name': 'John Davison',
-        'last_name': 'Rockefeller',
-        'institution_name': 'university-example.org',
-        'uid': '981c9a944fe8ed05a0c33d40dc4da134ed6c0d93',
     },
     # teacher 1
     {
