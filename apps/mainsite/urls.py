@@ -75,6 +75,9 @@ urlpatterns = [
     # include insights endpoints
     url(r'^insights/', include('insights.api_urls')),
 
+    # include queries endpoints
+    url(r'^queries/', include('queries.api_urls')),
+
     # ob3 poc, proxies impierce endpoints
     url(r'^ob3/', include('ob3.api_urls')),
 
