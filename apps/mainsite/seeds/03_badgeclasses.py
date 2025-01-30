@@ -1,4 +1,5 @@
 import json
+from typing import List
 from django.conf import settings
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeClassExtension
@@ -64,8 +65,25 @@ badge_class_extensions = {
     }
 }
 
-badge_class_description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+# add some markdown to the description, make it multiline.
+badge_class_description = '''
+# Introduction to Lorem Ipsum
+Lorem ipsum dolor **sit amet**, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+## Subtitle
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+* Excepteur sint occaecat cupidatat non proident
+* Sunt in culpa qui officia deserunt mollit anim id est laborum
+
+### Subsubtitle
+
+1. Lorem ipsum dolor sit amet
+2. Consectetur adipiscing elit
+3. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
+'''
 
 def create_badge_class(name, issuer):
     badge_class, _ = BadgeClass.objects.get_or_create(
@@ -73,7 +91,7 @@ def create_badge_class(name, issuer):
         issuer=issuer,
         description=badge_class_description,
         formal=True,
-        criteria_text="A lot",
+        criteria_text="In order to earn this badge, you must complete the course and show proficiency in things.",
         old_json="{}",
         image="uploads/badges/eduid.png",
     )
@@ -102,3 +120,39 @@ for iss in Issuer.objects.filter(name_english="Political Science"):
 for iss in Issuer.objects.filter(name_english="Medicine"):
     [create_badge_class(bc, iss) for bc in
      ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]
+
+# Faculty Medicine ## Alignments
+for bc in BadgeClass.objects.filter(issuer__name_english="Medicine"):
+    bc.alignment_items = [
+            { "target_name": "EQF", "target_url": "https://ec.europa.eu/ploteus/content/descriptors-page", "target_description": "European Qualifications Framework", "target_framework": "EQF", "target_code": "7" },
+            { "target_name": "ECTS", "target_url": "https://ec.europa.eu/education/resources-and-tools/european-credit-transfer-and-accumulation-system-ects_en", "target_description": "European Credit Transfer and Accumulation System", "target_framework": "ECTS", "target_code": "2.5" },
+    ]
+    bc.save()
+
+# Add quality assurance to half of the badges
+for bc in BadgeClass.objects.all()[::2]:
+    bc.quality_assurance_description = "Quality assurance framework FAKE1.0"
+    bc.quality_assurance_name = "FAKE1.0"
+    bc.quality_assurance_url = "https://example.com/qaf/FAKE1.0"
+    bc.save()
+
+# Add assessment_type to half of the badges
+iterator = 0
+assessment_types: List[str] = ["testing", "application of a skill", "portfolio", "recognition of prior learning"]
+n_types = len(assessment_types)
+for bc in BadgeClass.objects.all()[::2]:
+    bc.assessment_type = assessment_types[iterator % n_types]
+    bc.save()
+    iterator += 1
+
+iterator = 0
+
+# For half of the badges with assessment_type "testing", set assessment_supervised to True
+for bc in BadgeClass.objects.filter(assessment_type="testing")[::2]:
+    bc.assessment_supervised = True
+    bc.save()
+
+# for half of that are supervised, set identity_checked to True
+for bc in BadgeClass.objects.exclude(assessment_supervised=False)[::2]:
+    bc.identity_checked = True
+    bc.save()

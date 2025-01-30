@@ -6,9 +6,8 @@ set -x
 echo "Running migrations"
 python ./manage.py migrate
 
-# Reset (-c) and Seed the database
 echo "Seeding the database"
-python ./manage.py seed -c
+python ./manage.py seed
 
 # Run the server
 echo "Starting the server"
