@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'signing',
     'staff',
     'insights',
+    'queries',
     'lti13',
     'ob3',
     'notifications',
