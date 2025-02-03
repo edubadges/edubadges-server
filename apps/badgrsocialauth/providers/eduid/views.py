@@ -135,7 +135,21 @@ def callback(request):
     }
 
     if not social_account or not social_account.user.general_terms_accepted():
-        # Here we redirect to client
+        # Here we redirect to client, but we need to check if there is a validated account
+        headers = {
+            "Accept": "application/json, application/json;charset=UTF-8",
+            "Authorization": f"Bearer {access_token}",
+        }
+        response = requests.get(
+            f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers
+        )
+        if response.status_code != 200:
+            error = f"Server error: eduID eppn endpoint error ({response.status_code})"
+            logger.debug(error)
+            return render_authentication_error(request, EduIDProvider.id, error=error)
+        eppn_json = response.json()
+        validated_name = bool([info["validated_name"] for info in eppn_json if "validated_name" in info])
+        keyword_arguments["validated_name"] = validated_name
         keyword_arguments["re_sign"] = False if not social_account else True
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
