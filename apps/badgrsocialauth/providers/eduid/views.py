@@ -149,7 +149,12 @@ def callback(request):
             return render_authentication_error(request, EduIDProvider.id, error=error)
         eppn_json = response.json()
         validated_name = bool([info["validated_name"] for info in eppn_json if "validated_name" in info])
-        keyword_arguments["validated_name"] = validated_name
+        signup_redirect = badgr_app.signup_redirect
+        args = urllib.parse.urlencode(keyword_arguments)
+        if not validated_name:
+            validate_redirect = signup_redirect.replace("signup", "validate")
+            return HttpResponseRedirect(f"{validate_redirect}?{args}")
+
         keyword_arguments["re_sign"] = False if not social_account else True
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
