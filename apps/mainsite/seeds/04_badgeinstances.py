@@ -1,3 +1,4 @@
+import sys
 from django.conf import settings
 
 from badgeuser.models import BadgeUser
@@ -18,7 +19,10 @@ from mainsite.seeds.constants import ENROLLED_STUDENT_EMAIL, BADGE_CLASS_INTRODU
     REVOKED_STUDENT_EMAIL
 
 super_user = BadgeUser.objects.get(username=settings.SUPERUSER_NAME)
-badgr_app = BadgrApp.objects.get(id=1)
+badgr_app = BadgrApp.objects.first()
+if not badgr_app:
+    sys.stderr.write("No BadgrApp found. Did other seeds fail to run?")
+    sys.exit(1)
 
 def create_badge_instance(user, badge_class, revoked, acceptance="Unaccepted"):
     badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
