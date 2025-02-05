@@ -14,8 +14,11 @@ from .util import add_terms_institution
 
 
 setattr(settings, 'SUPPRESS_EMAILS', 1)
+badgr_app_id = getattr(settings, 'BADGR_APP_ID')
+
 
 main_badgr_app, _ = BadgrApp.objects.get_or_create(
+    id=badgr_app_id,
     is_active=1,
     cors=settings.UI_URL,
     email_confirmation_redirect="{}/login/".format(settings.UI_URL),
