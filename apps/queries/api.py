@@ -42,8 +42,7 @@ class DirectAwards(APIView):
 select da.created_at, da.resend_at, da.delete_at, da.recipient_email as recipientEmail, da.eppn, da.entity_id as entityId,
         bc.name, bc.entity_id as bc_entity_id,
         i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id, 
-        f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
-        ins.name_english as ins_name_english, ins.name_dutch  as ins_name_dutch, ins.entity_id as ins_entity_id
+        f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id
 from  directaward_directaward da
 inner join issuer_badgeclass bc on bc.id = da.badgeclass_id
 inner join issuer_issuer i on i.id = bc.issuer_id
@@ -60,17 +59,22 @@ class BadgeClasses(APIView):
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             cursor.execute("""
-select bc.created_at, bc.name, bc.image, bc.entity_id, bc.archived, bc.image, bc.entity_id as bc_entity_id,
-        bc.badge_class_type,  bc.image,
+select bc.created_at as createdAt, bc.name, bc.image, bc.archived, bc.entity_id as entityId,
+        bc.is_private as isPrivate, bc.is_micro_credentials as isMicroCredentials,
+        bc.badge_class_type as typeBadgeClass,
         i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id,
         i.image_dutch as i_image_dutch, i.image_english as i_image_english, 
         f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
-        f.on_behalf_of, f.on_behalf_of_display_name, f.image_dutch as f_image_dutch, f.image_english as f_image_english,
+        f.on_behalf_of as onBehalfOf, f.on_behalf_of_display_name as onBehalfOfDisplayName, 
+        f.image_dutch as f_image_dutch, f.image_english as f_image_english,
+        ins.entity_id as ins_entity_id, ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch,
+        ins.image_dutch as ins_image_dutch, ins.image_english as ins_image_english,
         (SELECT GROUP_CONCAT(DISTINCT isbt.name) FROM institution_badgeclasstag isbt
         INNER JOIN issuer_badgeclass_tags ibt ON ibt.badgeclasstag_id = isbt.id
         WHERE ibt.badgeclass_id = bc.id) AS tags,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as count_requested,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as count_direct_award,
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as selfRequestedAssertionsCount,
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as directAwardedAssertionsCount,
+        (select count(id) from lti_edu_studentsenrolled WHERE badge_class_id = bc.id AND badge_instance_id is null AND denied = 0) as pendingEnrollmentCount,
         (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1) as ins_staff,
         (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1) as fac_staff,
         (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1) as iss_staff,
@@ -111,21 +115,16 @@ class CatalogBadgeClasses(APIView):
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             cursor.execute("""
-select bc.created_at, bc.name, bc.image, bc.entity_id, bc.archived, bc.image, bc.entity_id as bc_entity_id,
-        bc.badge_class_type, bc.image, 
+select bc.created_at, bc.name, bc.image, bc.entity_id, bc.archived, bc.entity_id as entityId,
+        bc.badge_class_type,
         i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id,
         i.image_dutch as i_image_dutch, i.image_english as i_image_english, 
         f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
         f.on_behalf_of, f.on_behalf_of_display_name, f.image_dutch as f_image_dutch, f.image_english as f_image_english,
-        (SELECT GROUP_CONCAT(DISTINCT isbt.name) FROM institution_badgeclasstag isbt
-        INNER JOIN issuer_badgeclass_tags ibt ON ibt.badgeclasstag_id = isbt.id
-        WHERE ibt.badgeclass_id = bc.id) AS tags,
+        ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch, ins.entity_id as ins_entity_id,
+        ins.image_dutch as ins_image_dutch, ins.image_english as ins_image_english,
         (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as count_requested,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as count_direct_award,
-        (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = 2 and insst.may_award = 1) as ins_staff,
-        (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = 2 and facst.may_award = 1) as fac_staff,
-        (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = 2 and issst.may_award = 1) as iss_staff,
-        (select 1 from staff_badgeclassstaff bcst where bcst.badgeclass_id = bc.id and bcst.user_id = 2 and bcst.may_award = 1) as bc_staff
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as count_direct_award
 from  issuer_badgeclass bc
 inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
