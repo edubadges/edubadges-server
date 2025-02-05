@@ -1,4 +1,5 @@
 import traceback
+import sys
 
 from django.core.management.base import BaseCommand
 from django.db import connection
@@ -24,9 +25,10 @@ class Command(BaseCommand):
                 __import__("mainsite.seeds.01_setup")
                 print("\033[92mdone!\033[0m")
             except Exception as e:
-                print("\033[91mFAILED!\033[0m")
-                print(traceback.format_exc())
-                print(e)
+                sys.stderr.write("\033[91mFAILED!\033[0m")
+                sys.stderr.write(traceback.format_exc())
+                sys.stderr.write(f"{str(e)}\n")
+                sys.exit(1)
         else:
             print("Skipping setup seeds... ", end="")
 
