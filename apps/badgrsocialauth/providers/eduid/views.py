@@ -107,6 +107,7 @@ def callback(request):
         "{}/token".format(settings.EDUID_PROVIDER_URL),
         data=urllib.parse.urlencode(payload),
         headers=headers,
+        timeout=60
     )
     if response.status_code != 200:
         error = (
@@ -141,7 +142,7 @@ def callback(request):
             "Authorization": f"Bearer {access_token}",
         }
         response = requests.get(
-            f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers
+            f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers, timeout=60
         )
         if response.status_code != 200:
             error = f"Server error: eduID eppn endpoint error ({response.status_code})"
@@ -156,8 +157,6 @@ def callback(request):
             return HttpResponseRedirect(f"{validate_redirect}?{args}")
 
         keyword_arguments["re_sign"] = False if not social_account else True
-        signup_redirect = badgr_app.signup_redirect
-        args = urllib.parse.urlencode(keyword_arguments)
         return HttpResponseRedirect(f"{signup_redirect}?{args}")
 
     return after_terms_agreement(request, **keyword_arguments)
@@ -226,7 +225,7 @@ def after_terms_agreement(request, **kwargs):
         "Authorization": f"Bearer {access_token}",
     }
     response = requests.get(
-        f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers
+        f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers, timeout=60
     )
     if response.status_code != 200:
         error = f"Server error: eduID eppn endpoint error ({response.status_code})"
