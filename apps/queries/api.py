@@ -1,7 +1,5 @@
-from itertools import groupby
-
 from django.db import connection
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -112,15 +110,19 @@ class CurrentInstitution(APIView):
 
 class CatalogBadgeClasses(APIView):
 
+    permission_classes = (permissions.AllowAny,)
+
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             cursor.execute("""
-select bc.created_at, bc.name, bc.image, bc.entity_id, bc.archived, bc.entity_id as entityId,
-        bc.badge_class_type,
+select bc.created_at as createdAt, bc.name, bc.image, bc.archived, bc.entity_id as entityId,
+        bc.is_private as isPrivate, bc.is_micro_credentials as isMicroCredentials,
+        bc.badge_class_type as typeBadgeClass,
         i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id,
         i.image_dutch as i_image_dutch, i.image_english as i_image_english, 
         f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
-        f.on_behalf_of, f.on_behalf_of_display_name, f.image_dutch as f_image_dutch, f.image_english as f_image_english,
+        f.on_behalf_of as onBehalfOf, f.on_behalf_of_display_name as onBehalfOfDisplayName, 
+        f.image_dutch as f_image_dutch, f.image_english as f_image_english,
         ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch, ins.entity_id as ins_entity_id,
         ins.image_dutch as ins_image_dutch, ins.image_english as ins_image_english,
         (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as count_requested,
