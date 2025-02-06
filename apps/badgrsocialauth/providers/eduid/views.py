@@ -107,6 +107,7 @@ def callback(request):
         "{}/token".format(settings.EDUID_PROVIDER_URL),
         data=urllib.parse.urlencode(payload),
         headers=headers,
+        timeout=60
     )
     if response.status_code != 200:
         error = (
@@ -135,10 +136,27 @@ def callback(request):
     }
 
     if not social_account or not social_account.user.general_terms_accepted():
-        # Here we redirect to client
-        keyword_arguments["re_sign"] = False if not social_account else True
+        # Here we redirect to client, but we need to check if there is a validated account
+        headers = {
+            "Accept": "application/json, application/json;charset=UTF-8",
+            "Authorization": f"Bearer {access_token}",
+        }
+        response = requests.get(
+            f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers, timeout=60
+        )
+        if response.status_code != 200:
+            error = f"Server error: eduID eppn endpoint error ({response.status_code})"
+            logger.debug(error)
+            return render_authentication_error(request, EduIDProvider.id, error=error)
+        eppn_json = response.json()
+        validated_name = bool([info["validated_name"] for info in eppn_json if "validated_name" in info])
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
+        if not validated_name:
+            validate_redirect = signup_redirect.replace("signup", "validate")
+            return HttpResponseRedirect(f"{validate_redirect}?{args}")
+
+        keyword_arguments["re_sign"] = False if not social_account else True
         return HttpResponseRedirect(f"{signup_redirect}?{args}")
 
     return after_terms_agreement(request, **keyword_arguments)
@@ -207,7 +225,7 @@ def after_terms_agreement(request, **kwargs):
         "Authorization": f"Bearer {access_token}",
     }
     response = requests.get(
-        f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers
+        f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers, timeout=60
     )
     if response.status_code != 200:
         error = f"Server error: eduID eppn endpoint error ({response.status_code})"
