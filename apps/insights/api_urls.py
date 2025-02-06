@@ -17,6 +17,4 @@ urlpatterns = [
         name='api_institution_badges_overview'),
     url(r'^institution/issuer-members$', IssuerMembers.as_view(),
         name='api_institution_issuer_members'),
-
-
 ]

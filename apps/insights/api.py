@@ -279,8 +279,8 @@ class InstitutionBadgesOverview(APIView):
         with connection.cursor() as cursor:
             cursor.execute(f"""
 select b.id as badge_class_id, bi.award_type, b.name as badge_name,  b.badge_class_type, bi.public as public_badge,
-bi.revoked, i.name_english as issuer_name, f.name_english as issuergroup_name, ins.name_english as institution_name, 
-count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as total_da_count
+bi.revoked, i.name_english as issuer_name, f.name_english as issuergroup_name, ins.name_english as institution_name,
+ins.institution_type as institution_type, count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as total_da_count
 from issuer_badgeinstance bi
 inner join issuer_badgeclass b on b.id = bi.badgeclass_id
 inner join issuer_issuer i on i.id = b.issuer_id
@@ -321,6 +321,7 @@ where  status <>  'Deleted' and status <> 'Revoked' and status <> 'Scheduled' gr
                 total_da_count = direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked
                 results.append({
                     'Institution name': badge_instance['institution_name'],
+                    'Sector': badge_instance['institution_type'],
                     'Issuergroup name': badge_instance['issuergroup_name'],
                     'Issuer name': badge_instance['issuer_name'],
                     'BadgecClass name': badge_instance['badge_name'],
