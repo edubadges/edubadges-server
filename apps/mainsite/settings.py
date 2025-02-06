@@ -1,5 +1,5 @@
-import json
 import os
+from syslog import LOG_LOCAL6
 
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
@@ -12,6 +12,7 @@ def legacy_boolean_parsing(env_key, default_value):
 
 
 env_settings()
+
 
 SESSION_COOKIE_AGE = 60 * 60  # 1 hour session validity
 SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
@@ -277,36 +278,48 @@ if not os.path.exists(LOGS_DIR):
 
 LOG_STORAGE_DURATION = 30  # days
 
+handlers = {
+    'badgr_events': {
+        'level': 'INFO',
+        'formatter': 'json',
+        'class': 'logging.handlers.TimedRotatingFileHandler',
+        'when': 'H',
+        'interval': 1,
+        'backupCount': 30 * 24,  # 30 days times 24 hours
+        'filename': os.path.join(LOGS_DIR, 'badgr_events.log'),
+    },
+    'badgr_debug': {
+        'level': 'DEBUG',
+        'formatter': 'badgr',
+        'class': 'logging.handlers.TimedRotatingFileHandler',
+        'when': 'H',
+        'interval': 1,
+        'backupCount': 30 * 24,  # 30 days times 24 hours
+        'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
+    },
+    'badgr_debug_console': {
+        'level': 'DEBUG',
+        'formatter': 'default',
+        'filters': ['require_debug_true'],
+        'class': 'logging.StreamHandler',
+    },
+}
+
+if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
+    handlers = handlers | {
+        'badgr_debug_slog': {
+            'level': 'DEBUG',
+            'formatter': 'badgr',
+            'class': 'logging.handlers.SysLogHandler',
+            'address': '(195.169.124.131, 514)',
+            'facility': LOG_LOCAL6,
+        }
+    }
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {
-        'mail_admins': {'level': 'ERROR', 'filters': [], 'class': 'django.utils.log.AdminEmailHandler'},
-        'badgr_events': {
-            'level': 'INFO',
-            'formatter': 'json',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'H',
-            'interval': 1,
-            'backupCount': 30 * 24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_events.log'),
-        },
-        'badgr_debug': {
-            'level': 'INFO',
-            'formatter': 'badgr',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'H',
-            'interval': 1,
-            'backupCount': 30 * 24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
-        },
-        'badgr_debug_console': {
-            'level': 'DEBUG',
-            'formatter': 'default',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-        },
-    },
+    'handlers': handlers,
     'loggers': {
         'django': {
             'handlers': ['badgr_debug_console'],
