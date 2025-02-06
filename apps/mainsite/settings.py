@@ -307,7 +307,7 @@ handlers = {
 
 if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
     handlers = handlers | {
-        'badgr_debug_slog': {
+        'badgr_debug_syslog': {
             'level': 'DEBUG',
             'formatter': 'badgr',
             'class': 'logging.handlers.SysLogHandler',
@@ -337,8 +337,8 @@ LOGGING = {
             'propagate': False,
         },
         'Badgr.Debug': {
-            'handlers': ['badgr_debug'],
-            'level': 'INFO',
+            'handlers': ['badgr_debug', 'badgr_debug_syslog'],
+            'level': 'DEBUG',
             'propagate': True,
         },
         'apscheduler': {
