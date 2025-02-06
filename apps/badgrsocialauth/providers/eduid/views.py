@@ -84,7 +84,11 @@ def callback(request):
         )  # logging in while being authenticated breaks the login procedure
 
     # extract state of redirect
-    state = json.loads(request.GET.get("state"))
+    state_param = request.GET.get("state")
+    if not state_param:
+        error = request.GET.get("error_description", "Server error: eduID login failed")
+        return render_authentication_error(request, EduIDProvider.id, error=error)
+    state = json.loads(state_param)
     referer, badgr_app_pk = state
     code = request.GET.get("code", None)  # access codes to access user info endpoint
     if code is None:  # check if code is given
