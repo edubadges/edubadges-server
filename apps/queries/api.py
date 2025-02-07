@@ -121,12 +121,13 @@ select bc.created_at as createdAt, bc.name, bc.image, bc.archived, bc.entity_id 
         i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id,
         i.image_dutch as i_image_dutch, i.image_english as i_image_english, 
         f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
-        f.on_behalf_of as onBehalfOf, f.on_behalf_of_display_name as onBehalfOfDisplayName, 
         f.image_dutch as f_image_dutch, f.image_english as f_image_english,
+        f.on_behalf_of as onBehalfOf, f.faculty_type as facultyType,
         ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch, ins.entity_id as ins_entity_id,
         ins.image_dutch as ins_image_dutch, ins.image_english as ins_image_english,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as count_requested,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as count_direct_award
+        ins.institution_type as institutionType,
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as selfRequestedAssertionsCount,
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as directAwardedAssertionsCount
 from  issuer_badgeclass bc
 inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
