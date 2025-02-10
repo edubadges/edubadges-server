@@ -2,15 +2,19 @@ import json
 import logging
 
 from django import http
+from django.http.response import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from json.decoder import JSONDecodeError
 from mainsite import settings
+from rest_framework.exceptions import APIException
+
 
 logger = logging.getLogger('Badgr.Debug')
 
 
 class MaintenanceMiddleware(MiddlewareMixin):
     """Serve a temporary redirect to a maintenance url in maintenance mode"""
+
     def process_request(self, request):
         if request.method == 'POST':
             if getattr(settings, 'MAINTENANCE_MODE', False) is True and hasattr(settings, 'MAINTENANCE_URL'):
@@ -24,7 +28,7 @@ class TrailingSlashMiddleware(MiddlewareMixin):
         exceptions = ['/staff', '/__debug__']
         if list(filter(request.path.startswith, exceptions)):
             if request.path[-1] != '/':
-                return http.HttpResponsePermanentRedirect(request.path+"/")
+                return http.HttpResponsePermanentRedirect(request.path + "/")
         else:
             if request.path != '/' and request.path[-1] == '/':
                 return http.HttpResponsePermanentRedirect(request.path[:-1])
@@ -41,6 +45,12 @@ class ExceptionHandlerMiddleware(object):
 
     def process_exception(self, request, exception):
         logger.exception(str(exception))
+        # APIException are handled by various other handlers, and we don't want to swallow those
+        if "json" in request.content_type and not isinstance(exception, APIException):
+            # If we call self.get_response we come in an endless loop
+            response = JsonResponse({"error": str(exception)})
+            response.status_code = 400
+            return response
 
 
 class RequestResponseLoggerMiddleware(MiddlewareMixin):

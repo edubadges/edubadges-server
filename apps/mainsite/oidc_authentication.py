@@ -5,6 +5,7 @@ import urllib.request
 
 import requests
 from django.conf import settings
+from django.core.exceptions import BadRequest
 from rest_framework.authentication import BaseAuthentication
 
 from badgeuser.models import BadgeUser
@@ -38,9 +39,10 @@ class OIDCAuthentication(BaseAuthentication):
         payload = {'token': bearer_token}
         headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
         url = f"{settings.EDUID_PROVIDER_URL}/introspect"
+        auth = (settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET)
         response = requests.post(url,
                                  data=urllib.parse.urlencode(payload),
-                                 auth=(settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET),
+                                 auth=auth,
                                  headers=headers)
         if response.status_code != 200:
             logger.info(f"OIDCAuthentication bad response {response.status_code} {response.json()}")
@@ -56,11 +58,18 @@ class OIDCAuthentication(BaseAuthentication):
             user = BadgeUser.objects.get(email=introspect_json['email'], is_teacher=True)
         elif 'client_id' in introspect_json:
             client_id = introspect_json['client_id']
-            institution = Institution.objects.get(manage_client_id=client_id)
+            try:
+                institution = Institution.objects.get(manage_client_id=client_id)
+            except Institution.DoesNotExist:
+                raise BadRequest(f"Institution with manage_client_id {client_id} does not exists")
+
             logger.info(f"OIDCAuthentication institution {institution} client_id {client_id}")
 
             if institution and institution.sis_integration_enabled:
                 user = institution.sis_default_user
+            else:
+                raise BadRequest(f"Institution {institution.identifier} is not sis_integration_enabled")
+
         if user:
             request.sis_api_call = True
 

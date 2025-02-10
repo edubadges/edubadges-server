@@ -1,8 +1,9 @@
 import threading
 import re
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, BadRequest
 from django.db import IntegrityError, transaction
+from django.utils.functional import empty
 from rest_framework import serializers
 
 from directaward.models import DirectAward, DirectAwardBundle
@@ -70,16 +71,16 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     status = serializers.CharField(
         write_only=True, default="Active", required=False, allow_null=True
     )
-    identifier_type = serializers.CharField(
-        write_only=True, default="eppn", allow_null=False
-    )
-    scheduled_at = serializers.DateTimeField(
-        write_only=True, required=False, allow_null=True
-    )
+    identifier_type = serializers.CharField(write_only=True, default="eppn", allow_null=False)
+    scheduled_at = serializers.DateTimeField(write_only=True, required=False, allow_null=True)
+
     notify_recipients = serializers.BooleanField(write_only=True)
 
     def create(self, validated_data):
         badgeclass = validated_data["badgeclass"]
+        if badgeclass.direct_awarding_disabled:
+            raise BadgrValidationError(f"Direct awarding disabled for {badgeclass.name}", 100)
+
         scheduled_at = validated_data.get("scheduled_at")
         if scheduled_at:
             validated_data["status"] = DirectAwardBundle.STATUS_SCHEDULED
@@ -88,7 +89,8 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         direct_awards = validated_data.pop("direct_awards")
         user_permissions = badgeclass.get_permissions(validated_data["created_by"])
         if user_permissions["may_award"]:
-            successfull_direct_awards = []
+            successful_direct_awards = []
+            un_successful_direct_awards = []
             if hasattr(self.context["request"], "sis_api_call") and getattr(
                     self.context["request"], "sis_api_call"
             ):
@@ -117,7 +119,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                             badgeclass=badgeclass,
                             **direct_award,
                         )
-                        successfull_direct_awards.append(da_created)
+                        successful_direct_awards.append(da_created)
                         audit_trail_signal.send(
                             sender=self.__class__,
                             request=self.context["request"],
@@ -126,8 +128,12 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                             summary="Directawards created",
                             direct_award_id=da_created.entity_id,
                         )
-                    except IntegrityError:
-                        pass
+                    except IntegrityError as e:
+                        un_successful_direct_awards.append({"error": str(e), "email": direct_award["recipient_email"]})
+                if not successful_direct_awards:
+                    raise BadRequest(
+                        "No valid DirectAwards are created. All are duplicates of existing unclaimed Direct Awards")
+
             if notify_recipients and not scheduled_at:
 
                 def send_mail(awards):
@@ -135,7 +141,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                         da.notify_recipient()
 
                 thread = threading.Thread(
-                    target=send_mail, args=(successfull_direct_awards,)
+                    target=send_mail, args=(successful_direct_awards,)
                 )
                 thread.start()
             if batch_mode and not scheduled_at:
@@ -146,7 +152,10 @@ class DirectAwardBundleSerializer(serializers.Serializer):
             direct_award_bundle.badgeclass.remove_cached_data(
                 ["cached_direct_award_bundles"]
             )
+            if un_successful_direct_awards:
+                direct_award_bundle.un_successful_direct_award = un_successful_direct_awards
             return direct_award_bundle
+
         audit_trail_signal.send(
             sender=self.__class__,
             user=validated_data["created_by"],
@@ -156,3 +165,9 @@ class DirectAwardBundleSerializer(serializers.Serializer):
             direct_award_id=0,
         )
         raise BadgrValidationError("You don't have the necessary permissions", 100)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if hasattr(instance, 'un_successful_direct_award'):
+            data['un_successful_direct_award'] = instance.un_successful_direct_award
+        return data

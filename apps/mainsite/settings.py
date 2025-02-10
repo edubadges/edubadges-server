@@ -92,7 +92,7 @@ MIDDLEWARE = [
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'badgeuser.middleware.InactiveUserMiddleware',
+    # 'badgeuser.middleware.InactiveUserMiddleware',
     'mainsite.middleware.ExceptionHandlerMiddleware',
     'mainsite.middleware.RequestResponseLoggerMiddleware',
     # 'mainsite.middleware.MaintenanceMiddleware',
@@ -197,7 +197,7 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://connect.test.surfconext.nl/oidc')
-EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
+EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL_test2']
 # EDUID_REGISTRATION_URL = os.environ['EDUID_REGISTRATION_URL']
 EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
@@ -561,8 +561,8 @@ ALLOW_SEEDS = legacy_boolean_parsing('ALLOW_SEEDS', '0')
 EDU_ID_SECRET = os.environ['EDU_ID_SECRET']
 EDU_ID_CLIENT = os.environ.get('EDU_ID_CLIENT', 'edubadges')
 
-OIDC_RS_ENTITY_ID = os.environ.get('OIDC_RS_ENTITY_ID', 'edubadges')
-OIDC_RS_SECRET = os.environ['OIDC_RS_SECRET']
+OIDC_RS_ENTITY_ID = os.environ.get('OIDC_RS_ENTITY_ID_test2', 'edubadges')
+OIDC_RS_SECRET = os.environ['OIDC_RS_SECRET_test2']
 
 SURF_CONEXT_SECRET = os.environ.get('SURF_CONEXT_SECRET', 'secret')
 SURF_CONEXT_CLIENT = os.environ.get('SURF_CONEXT_CLIENT', 'test.edubadges.nl')

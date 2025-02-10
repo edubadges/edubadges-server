@@ -55,16 +55,15 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     delete_at = models.DateTimeField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
-        if (
-                self.__class__.objects.filter(
-                    eppn=self.eppn, badgeclass=self.badgeclass, status="Unaccepted",
-                    bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN
-                )
-                        .exclude(pk=self.pk)
-                        .exists()
-        ):
+        if (self.__class__.objects.filter(eppn=self.eppn, badgeclass=self.badgeclass, status="Unaccepted",
+                                          bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN
+                                          ).exclude(pk=self.pk).exists()
+        ) or self.__class__.objects.filter(recipient_email=self.recipient_email, badgeclass=self.badgeclass,
+                                           status="Unaccepted",
+                                           bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EMAIL
+                                           ).exclude(pk=self.pk).exists():
             raise IntegrityError(
-                "DirectAward with this eppn and status Unaccepted already exists in the same badgeclass."
+                "DirectAward with this eppn/email and status Unaccepted already exists for this badgeclass."
             )
         return super(DirectAward, self).validate_unique(exclude=exclude)
 

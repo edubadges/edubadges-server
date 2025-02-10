@@ -156,8 +156,8 @@ If you login to http://localhost:8000/staff/superuser then you'll have to provid
 ### Staff dashboard
 * `/staff/superlogin`
     * You can log in on the [staff dashboard](http://localhost:8000/staff/superlogin) with your superuser credentials (if you ran the seeds these will be username: superuser, password: secret).
-* `/docs`
-    * [API documentation](http://localhost:8000/docs)
+* `/api/schema/swagger-ui`
+    * [API documentation](http://localhost:8000/api/schema/swagger-ui/)
 
 ### Additional configuration options
 Set these values in your settings_local.py file to configure the application to your specific needs. Required options are listed in bold.
