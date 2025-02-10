@@ -312,7 +312,7 @@ if DOMAIN.startswith('app') or DOMAIN.startswith('prod'):
             'level': 'DEBUG',
             'formatter': 'badgr',
             'class': 'logging.handlers.SysLogHandler',
-            'address': '(195.169.124.131, 514)',
+            'address': '("195.169.124.131", 514)',
             'facility': LOG_LOCAL6,
         }
     }
