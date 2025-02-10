@@ -306,7 +306,7 @@ handlers = {
 
 debug_handlers = ['badgr_debug']
 
-if DOMAIN.startswith('app') or DOMAIN.startswith('prod'):
+if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
     handlers = handlers | {
         'badgr_debug_syslog': {
             'level': 'DEBUG',
