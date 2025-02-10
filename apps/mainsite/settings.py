@@ -304,9 +304,9 @@ handlers = {
     },
 }
 
-DEBUG_HANDLERS = ['badgr_debug']
+debug_handlers = ['badgr_debug']
 
-if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
+if DOMAIN.startswith('app') or DOMAIN.startswith('prod'):
     handlers = handlers | {
         'badgr_debug_syslog': {
             'level': 'DEBUG',
@@ -316,7 +316,7 @@ if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
             'facility': LOG_LOCAL6,
         }
     }
-    DEBUG_HANDLERS.extend('badgr_debug_syslog')
+    debug_handlers.append('badgr_debug_syslog')
 
 LOGGING = {
     'version': 1,
@@ -334,7 +334,7 @@ LOGGING = {
             'propagate': False,
         },
         'Badgr.Debug': {
-            'handlers': DEBUG_HANDLERS,
+            'handlers': debug_handlers,
             'level': 'DEBUG',
             'propagate': True,
         },
