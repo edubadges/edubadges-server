@@ -123,18 +123,18 @@ class DirectAwardRevoke(BaseEntityDetailView):
         successful_direct_awards = []
         for direct_award in direct_awards:
             try:
-                direct_award = DirectAward.objects.get(entity_id=direct_award["entity_id"])
-                if not direct_award.get_permissions(request.user)["may_award"]:
+                direct_award_db = DirectAward.objects.get(entity_id=direct_award["entity_id"])
+                if not direct_award_db.get_permissions(request.user)["may_award"]:
                     raise BadgrValidationError("No permissions", 100)
-                direct_award.revoke(revocation_reason)
-                successful_direct_awards.append(direct_award)
-                direct_award_remove_cache(direct_award)
+                direct_award_db.revoke(revocation_reason)
+                successful_direct_awards.append(direct_award_db)
+                direct_award_remove_cache(direct_award_db)
                 audit_trail_signal.send(
                     sender=request.user.__class__,
                     request=request,
                     user=request.user,
                     method="REVOKE",
-                    direct_award_id=direct_award.entity_id,
+                    direct_award_id=direct_award_db.entity_id,
                     summary=f"Directaward revoked with reason {revocation_reason}",
                 )
             except Exception as e:
@@ -143,23 +143,11 @@ class DirectAwardRevoke(BaseEntityDetailView):
                     request=request,
                     user=request.user,
                     method="REVOKE",
-                    direct_award_id=direct_award.entity_id,
+                    direct_award_id=direct_award["entity_id"],
                     summary=f"Direct award not revoked, error: {str(e)}",
                 )
                 un_successful_direct_awards.append(
-                    {"error": str(e), "eppn": direct_award["eppn"], "email": direct_award["recipient_email"]})
-        else:
-            audit_trail_signal.send(
-                sender=request.user.__class__,
-                request=request,
-                user=request.user,
-                method="REVOKE",
-                direct_award_id=direct_award.entity_id,
-                summary="No permission to revoke directaward",
-            )
-            un_successful_direct_awards.append(
-                {"error": "You do not have permission", "eppn": direct_award["eppn"],
-                 "email": direct_award["recipient_email"]})
+                    {"error": str(e), "eppn": direct_award.get("eppn"), "email": direct_award.get("recipient_email")})
         if not successful_direct_awards:
             raise BadRequest(
                 f"No valid DirectAwards are revoked. All of them were rejected: "
@@ -199,24 +187,24 @@ class DirectAwardResend(BaseEntityDetailView):
         un_successful_direct_awards = []
         for direct_award in direct_awards:
             try:
-                direct_award = DirectAward.objects.get(entity_id=direct_award["entity_id"])
-                if not direct_award.get_permissions(request.user)["may_award"]:
+                direct_award_db = DirectAward.objects.get(entity_id=direct_award["entity_id"])
+                if not direct_award_db.get_permissions(request.user)["may_award"]:
                     raise BadgrValidationError("No permissions", 100)
-                direct_award.resend_at = datetime.datetime.now()
-                direct_award.save()
-                direct_award_remove_cache(direct_award)
-                successful_direct_awards.append(direct_award)
+                direct_award_db.resend_at = datetime.datetime.now()
+                direct_award_db.save()
+                direct_award_remove_cache(direct_award_db)
+                successful_direct_awards.append(direct_award_db)
                 audit_trail_signal.send(
                     sender=request.user.__class__,
                     request=request,
                     user=request.user,
                     method="RESEND",
-                    direct_award_id=direct_award.entity_id,
+                    direct_award_id=direct_award_db.entity_id,
                     summary="Directaward resent",
                 )
             except Exception as e:
                 un_successful_direct_awards.append(
-                    {"error": str(e), "eppn": direct_award["eppn"], "email": direct_award["recipient_email"]})
+                    {"error": str(e), "eppn": direct_award.get("eppn"), "email": direct_award.get("recipient_email")})
 
         if not successful_direct_awards:
             raise BadRequest(
@@ -334,36 +322,35 @@ class DirectAwardDelete(BaseEntityDetailView):
         successful_direct_awards = []
         for direct_award in direct_awards:
             try:
-                direct_award = DirectAward.objects.get(entity_id=direct_award["entity_id"])
-                if not direct_award.get_permissions(request.user)["may_award"]:
+                direct_award_db = DirectAward.objects.get(entity_id=direct_award["entity_id"])
+                if not direct_award_db.get_permissions(request.user)["may_award"]:
                     raise BadgrValidationError("No permissions", 100)
-                if direct_award.status == DirectAward.STATUS_DELETED:
+                if direct_award_db.status == DirectAward.STATUS_DELETED:
                     un_successful_direct_awards.append(
-                        {"error": "DirectAward has already been deleted", "eppn": direct_award["eppn"],
-                         "email": direct_award["recipient_email"]})
+                        {"error": "DirectAward has already been deleted", "eppn": direct_award_db.eppn,
+                         "email": direct_award_db.recipient_email})
                 else:
-                    direct_award.delete_at = delete_at
-                    direct_award.status = DirectAward.STATUS_DELETED
-                    direct_award.revocation_reason = revocation_reason
-                    direct_award.save()
-                    successful_direct_awards.append(direct_award)
-                    direct_award.badgeclass.remove_cached_data(["cached_direct_awards"])
-                    direct_award.bundle.remove_cached_data(["cached_direct_awards"])
+                    direct_award_db.delete_at = delete_at
+                    direct_award_db.status = DirectAward.STATUS_DELETED
+                    direct_award_db.revocation_reason = revocation_reason
+                    direct_award_db.save()
+                    successful_direct_awards.append(direct_award_db)
+                    direct_award_remove_cache(direct_award_db)
                     html_message = EmailMessageMaker.create_direct_award_deleted_email(
-                        direct_award
+                        direct_award_db
                     )
                     send_mail(
                         subject="Awarded eduBadge has been deleted",
                         message=None,
                         html_message=html_message,
-                        recipient_list=[direct_award.recipient_email],
+                        recipient_list=[direct_award_db.recipient_email],
                     )
                     audit_trail_signal.send(
                         sender=request.user.__class__,
                         request=request,
                         user=request.user,
                         method="DELETE",
-                        direct_award_id=direct_award.entity_id,
+                        direct_award_id=direct_award_db.entity_id,
                         summary=f"Awarded eduBadge has been deleted with reason {revocation_reason}",
                     )
             except Exception as e:
@@ -372,11 +359,11 @@ class DirectAwardDelete(BaseEntityDetailView):
                     request=request,
                     user=request.user,
                     method="DELETE",
-                    direct_award_entity_id=direct_award.entity_id,
+                    direct_award_entity_id=direct_award["entity_id"],
                     summary=f"{e}",
                 )
                 un_successful_direct_awards.append(
-                    {"error": str(e), "eppn": direct_award["eppn"], "email": direct_award["recipient_email"]})
+                    {"error": str(e), "eppn": direct_award.get("eppn"), "email": direct_award.get("recipient_email")})
         if not successful_direct_awards:
             raise BadRequest(
                 f"No valid DirectAwards are deleted. All of them were rejected: "
