@@ -15,8 +15,6 @@ permissions_query = """
     (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1))
     or
     (exists (select 1 from staff_badgeclassstaff bcst where bcst.badgeclass_id = bc.id and bcst.user_id = %(u_id)s and bcst.may_award = 1))
-    or
-    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
 )
 """
 
