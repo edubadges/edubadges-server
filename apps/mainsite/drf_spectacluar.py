@@ -39,7 +39,7 @@ def _contains_excluded_keywords(path):
 
 def custom_postprocessing_hook(result, generator, request, public):
     result["security"] = [{"openId": []}],
-    url_ = os.environ['EDUID_PROVIDER_URL_test2']
+    url_ = os.environ['EDUID_PROVIDER_URL']
     result["components"]["securitySchemes"] = {
         "openId": {
             "type": "openIdConnect",
