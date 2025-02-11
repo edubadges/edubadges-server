@@ -1,15 +1,14 @@
-import threading
 import re
+import threading
 
 from django.core.exceptions import ValidationError, BadRequest
-from django.db import IntegrityError, transaction
-from django.utils.functional import empty
+from django.db import transaction
 from rest_framework import serializers
 
 from directaward.models import DirectAward, DirectAwardBundle
+from directaward.signals import audit_trail_signal
 from issuer.serializers import BadgeClassSlugRelatedField
 from mainsite.exceptions import BadgrValidationError
-from directaward.signals import audit_trail_signal
 
 
 class DirectAwardSerializer(serializers.Serializer):
@@ -63,14 +62,10 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     badgeclass = BadgeClassSlugRelatedField(slug_field="entity_id", required=False)
     direct_awards = DirectAwardSerializer(many=True, write_only=True)
     entity_id = serializers.CharField(read_only=True)
-    sis_user_id = serializers.CharField(
-        write_only=True, required=False, allow_null=True, allow_blank=True
-    )
-    batch_mode = serializers.BooleanField(write_only=True)
-    lti_import = serializers.BooleanField(write_only=True)
-    status = serializers.CharField(
-        write_only=True, default="Active", required=False, allow_null=True
-    )
+    sis_user_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    batch_mode = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
+    lti_import = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
+    status = serializers.CharField(write_only=True, default="Active", required=False, allow_null=True)
     identifier_type = serializers.CharField(write_only=True, default="eppn", allow_null=False)
     scheduled_at = serializers.DateTimeField(write_only=True, required=False, allow_null=True)
 
@@ -79,7 +74,9 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     def create(self, validated_data):
         badgeclass = validated_data["badgeclass"]
         if badgeclass.direct_awarding_disabled:
-            raise BadgrValidationError(f"Direct awarding disabled for {badgeclass.name}", 100)
+            raise BadRequest(f"Direct awarding disabled for {badgeclass.name}")
+        if badgeclass.is_private:
+            raise BadRequest(f" Badgeclass {badgeclass.name} is not published. Direct awarding not allowed")
 
         scheduled_at = validated_data.get("scheduled_at")
         if scheduled_at:
@@ -103,15 +100,14 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 direct_award_bundle = DirectAwardBundle.objects.create(
                     initial_total=direct_awards.__len__(), **validated_data
                 )
+                direct_award_bundle.badgeclass.remove_cached_data(["cached_direct_awards"])
+                direct_award_bundle.badgeclass.remove_cached_data(["cached_direct_award_bundles"])
+
                 eppn_required = validated_data.get("identifier_type", "eppn") == "eppn"
                 for direct_award in direct_awards:
                     # Not required and already validated
                     direct_award["eppn"] = direct_award["eppn"].lower() if eppn_required else None
-                    status = (
-                        DirectAward.STATUS_SCHEDULED
-                        if scheduled_at
-                        else DirectAward.STATUS_UNACCEPTED
-                    )
+                    status = (DirectAward.STATUS_SCHEDULED if scheduled_at else DirectAward.STATUS_UNACCEPTED)
                     direct_award["status"] = status
                     try:
                         da_created = DirectAward.objects.create(
@@ -128,11 +124,13 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                             summary="Directawards created",
                             direct_award_id=da_created.entity_id,
                         )
-                    except IntegrityError as e:
-                        un_successful_direct_awards.append({"error": str(e), "email": direct_award["recipient_email"]})
+                    except Exception as e:
+                        un_successful_direct_awards.append(
+                            {"error": str(e), "eppn": direct_award["eppn"], "email": direct_award["recipient_email"]})
                 if not successful_direct_awards:
                     raise BadRequest(
-                        "No valid DirectAwards are created. All are duplicates of existing unclaimed Direct Awards")
+                        f"No valid DirectAwards are created. All of them were rejected: "
+                        f"{str(un_successful_direct_awards)}")
 
             if notify_recipients and not scheduled_at:
 
@@ -148,10 +146,6 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 direct_award_bundle.notify_awarder()
             if batch_mode and scheduled_at:
                 direct_award_bundle.notify_awarder_for_scheduled()
-            direct_award_bundle.badgeclass.remove_cached_data(["cached_direct_awards"])
-            direct_award_bundle.badgeclass.remove_cached_data(
-                ["cached_direct_award_bundles"]
-            )
             if un_successful_direct_awards:
                 direct_award_bundle.un_successful_direct_award = un_successful_direct_awards
             return direct_award_bundle
