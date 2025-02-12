@@ -359,7 +359,7 @@ class DirectAwardDelete(BaseEntityDetailView):
                     request=request,
                     user=request.user,
                     method="DELETE",
-                    direct_award_entity_id=direct_award["entity_id"],
+                    direct_award_id=direct_award["entity_id"],
                     summary=f"{e}",
                 )
                 un_successful_direct_awards.append(
