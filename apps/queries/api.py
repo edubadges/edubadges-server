@@ -109,7 +109,6 @@ class CurrentInstitution(APIView):
 
 
 class CatalogBadgeClasses(APIView):
-
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, **kwargs):
@@ -135,6 +134,7 @@ inner join institution_institution ins on ins.id = f.institution_id
 where  bc.is_private = 0;
             """, {})
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
+
 
 class Issuers(APIView):
     permission_classes = (TeachPermission,)
@@ -171,6 +171,7 @@ where ins.id = %(ins_id)s and
 """, {"ins_id": request.user.institution.id, "u_id": request.user.id})
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
 
+
 class Faculties(APIView):
     permission_classes = (TeachPermission,)
 
@@ -200,3 +201,85 @@ where ins.id = %(ins_id)s and
 )
 """, {"ins_id": request.user.institution.id, "u_id": request.user.id})
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
+
+
+class Users(APIView):
+    permission_classes = (TeachPermission,)
+
+    permission_badge_class = "badge_class"
+    permission_issuer = "issuer"
+    permission_faculty = "faculty"
+    permission_institution = "institution"
+
+    admin = "admin"
+    editor = "editor"
+    awarder = "awarder"
+
+    @staticmethod
+    def _parse_unit(row, prefix):
+        return {
+            "name_english": row[f"{prefix}_name_english"],
+            "name_dutch": row[f"{prefix}_name_dutch"],
+            "entity_id": row[f"{prefix}_entity_id"]
+        }
+
+
+    def _permission(self, row):
+        categories = [
+            {"prefix":"ins", "permission": Users.permission_institution},
+            {"prefix": "f", "permission": Users.permission_faculty},
+            {"prefix": "i", "permission": Users.permission_issuer},
+            {"prefix": "bc", "permission": Users.permission_badge_class}
+        ]
+        for category in categories:
+            prefix = category["prefix"]
+            may_update = row[f"{prefix}_mayUpdate"]
+            may_award = row[f"{prefix}_mayAward"]
+            may_administrate = row[f"{prefix}_mayAdministrateUsers"]
+            if may_update or may_award or may_administrate:
+                return {
+                    "highest": True,
+                    "permission": category["permission"],
+                    "level": Users.admin if may_administrate else Users.editor if may_update else Users.awarder,
+                    "faculty": self._parse_unit(row, "f"),
+                    "issuer": self._parse_unit(row, "i")
+                }
+        return None
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+    select u.id, u.first_name, u.last_name, u.email, u.entity_id,
+        i.id as i_id, i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id,
+        f.id as f_id, f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
+        sta_ins.may_update as ins_mayUpdate, sta_ins.may_award as ins_mayAward,
+            sta_ins.may_administrate_users as ins_mayAdministrateUsers,
+        sta_fac.may_update as f_mayUpdate, sta_fac.may_award as f_mayAward, 
+            sta_fac.may_administrate_users as f_mayAdministrateUsers, sta_fac.faculty_id as sf_id,
+        sta_iss.may_update as i_mayUpdate, sta_iss.may_award as i_mayAward,
+            sta_iss.may_administrate_users as i_mayAdministrateUsers, sta_iss.issuer_id as si_id,
+        sta_bc.may_update as bc_mayUpdate, sta_bc.may_award as bc_mayAward,
+            sta_bc.may_administrate_users as bc_mayAdministrateUsers
+        from users u
+        inner join institution_institution ins on ins.id = u.institution_id
+        inner join institution_faculty f on f.institution_id = ins.id
+        inner join issuer_issuer i on i.faculty_id = f.id
+        left join staff_institutionstaff sta_ins on sta_ins.user_id = u.id
+        left join staff_facultystaff sta_fac on sta_fac.user_id = u.id
+        left join staff_issuerstaff sta_iss on sta_iss.user_id = u.id
+        left join staff_badgeclassstaff sta_bc on sta_bc.user_id = u.id
+        where u.institution_id = %(ins_id)s order by u.id;
+    """, {"ins_id": request.user.institution.id})
+            records = dict_fetch_all(cursor)
+            users_dict = {}
+            for row in records:
+                user_id = row["id"]
+                if user_id not in users_dict:
+                    users_dict[user_id] = {"id": user_id, "first_name": row["first_name"],
+                                           "last_name": row["last_name"], "email": row["email"],
+                                           "entity_id": row["entity_id"], "permissions": []}
+                permission = self._permission(row)
+                if permission:
+                    users_dict[user_id]["permissions"].append(permission)
+
+            return Response(users_dict.values(), status=status.HTTP_200_OK)
