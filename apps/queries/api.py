@@ -233,9 +233,9 @@ class Users(APIView):
         ]
         for category in categories:
             prefix = category["prefix"]
-            may_update = row[f"{prefix}_mayUpdate"]
-            may_award = row[f"{prefix}_mayAward"]
-            may_administrate = row[f"{prefix}_mayAdministrateUsers"]
+            may_update = row.get(f"{prefix}_mayUpdate")
+            may_award = row.get(f"{prefix}_mayAward")
+            may_administrate = row.get(f"{prefix}_mayAdmin")
             if may_update or may_award or may_administrate:
                 return {
                     "highest": True,
@@ -248,27 +248,37 @@ class Users(APIView):
 
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
+            # TODO refactor into 4 queries which will have less results or 1 query with subqueries on staff where user_id with inner joins in the subquery
+            # to avoid the left join's
             cursor.execute("""
     select u.id, u.first_name, u.last_name, u.email, u.entity_id,
         i.id as i_id, i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id,
         f.id as f_id, f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
+        bc.id as bc_id, bc.name as bc_name, bc.entity_id as bc_entity_id,
         sta_ins.may_update as ins_mayUpdate, sta_ins.may_award as ins_mayAward,
-            sta_ins.may_administrate_users as ins_mayAdministrateUsers,
+            sta_ins.may_administrate_users as ins_mayAdmin,
         sta_fac.may_update as f_mayUpdate, sta_fac.may_award as f_mayAward, 
-            sta_fac.may_administrate_users as f_mayAdministrateUsers, sta_fac.faculty_id as sf_id,
+            sta_fac.may_administrate_users as f_mayAdmin, sta_fac.faculty_id as sf_id,
         sta_iss.may_update as i_mayUpdate, sta_iss.may_award as i_mayAward,
-            sta_iss.may_administrate_users as i_mayAdministrateUsers, sta_iss.issuer_id as si_id,
+            sta_iss.may_administrate_users as i_mayAdmin, sta_iss.issuer_id as si_id,
         sta_bc.may_update as bc_mayUpdate, sta_bc.may_award as bc_mayAward,
-            sta_bc.may_administrate_users as bc_mayAdministrateUsers
+            sta_bc.may_administrate_users as bc_mayAdmin
         from users u
         inner join institution_institution ins on ins.id = u.institution_id
         inner join institution_faculty f on f.institution_id = ins.id
         inner join issuer_issuer i on i.faculty_id = f.id
-        left join staff_institutionstaff sta_ins on sta_ins.user_id = u.id
-        left join staff_facultystaff sta_fac on sta_fac.user_id = u.id
-        left join staff_issuerstaff sta_iss on sta_iss.user_id = u.id
-        left join staff_badgeclassstaff sta_bc on sta_bc.user_id = u.id
-        where u.institution_id = %(ins_id)s order by u.id;
+        inner join issuer_badgeclass bc on bc.issuer_id = i.id
+        left join staff_institutionstaff sta_ins on (sta_ins.user_id = u.id AND sta_ins.institution_id = ins.id)
+        left join staff_facultystaff sta_fac on (sta_fac.user_id = u.id and sta_fac.faculty_id = f.id)
+        left join staff_issuerstaff sta_iss on (sta_iss.user_id = u.id and sta_iss.issuer_id = i.id)
+        left join staff_badgeclassstaff sta_bc on (sta_bc.user_id = u.id AND sta_bc.badgeclass_id = bc.id)
+        where u.institution_id = %(ins_id)s  
+        and (
+            sta_ins.may_update is not null or sta_ins.may_award is not null or sta_ins.may_administrate_users is not null or 
+            sta_fac.may_update is not null or sta_fac.may_award is not null or sta_fac.may_administrate_users is not null or 
+            sta_iss.may_update is not null or sta_iss.may_award is not null or sta_iss.may_administrate_users is not null or
+            sta_bc.may_update is not null or sta_bc.may_award is not null or sta_bc.may_administrate_users is not null  
+        )
     """, {"ins_id": request.user.institution.id})
             records = dict_fetch_all(cursor)
             users_dict = {}
