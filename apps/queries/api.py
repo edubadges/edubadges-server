@@ -147,7 +147,14 @@ select i.image_dutch, i.image_english, i.name_dutch, i.name_english, i.archived,
     (select count(id) from issuer_badgeinstance WHERE issuer_id = i.id) as assertionCount, 
     (select count(id) from issuer_badgeclass WHERE issuer_id = i.id) as badgeclassCount,
     (select count(*) from lti_edu_studentsenrolled l inner join issuer_badgeclass ib on ib.id = l.badge_class_id 
-            WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL) as pendingEnrollmentCount
+            WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL) as pendingEnrollmentCount,
+     (
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = 1))
+    or
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_create = 1))
+    or
+    (exists (select 1 from users us where us.id = %(u_id)s  and us.is_superuser = 1))
+) as may_create       
 from  issuer_issuer i
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
@@ -159,7 +166,37 @@ where ins.id = %(ins_id)s and
     or
     (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1))
     or
-    (exists (select 1 from users us where us.id = 22 and us.is_superuser = 1))
+    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
+)
+""", {"ins_id": request.user.institution.id, "u_id": request.user.id})
+            return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
+
+class Faculties(APIView):
+    permission_classes = (TeachPermission,)
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+select f.name_english as name_english, f.name_dutch as name_dutch, f.entity_id as entityId, f.on_behalf_of as onBehalfOf,
+    f.image_dutch, f.image_english,
+    (select count(id) from issuer_issuer WHERE faculty_id = f.id) as issuerCount,
+    (select count(*) from lti_edu_studentsenrolled l inner join issuer_badgeclass ib on ib.id = l.badge_class_id
+            inner join issuer_issuer ii on ii.faculty_id = f.id 
+            WHERE ii.faculty_id = f.id and l.badge_instance_id IS NULL) as pendingEnrollmentCount,
+     (
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = 1))
+    or
+    (exists (select 1 from users us where us.id = %(u_id)s  and us.is_superuser = 1))
+    ) as may_create       
+from  institution_faculty f
+inner join institution_institution ins on ins.id = f.institution_id
+where ins.id = %(ins_id)s and 
+(
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1))
+    or
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1))
+    or
+    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
 )
 """, {"ins_id": request.user.institution.id, "u_id": request.user.id})
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
