@@ -4,13 +4,15 @@ import uuid
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
 
-from badgeuser.models import BadgeUser, TermsAgreement
+from badgeuser.models import BadgeUser, TermsAgreement, StudentAffiliation
 from institution.models import Institution
 from mainsite.seeds.constants import (
     ENROLLED_STUDENT_EMAIL,
     REVOKED_STUDENT_EMAIL,
     INSTITUTION_UNIVERSITY_EXAMPLE_ORG,
     AWARDED_STUDENT_EMAIL,
+    DEMO_STUDENT_EMAIL,
+    DEMO_STUDENT_EPPN,
 )
 from staff.models import InstitutionStaff
 from .util import add_terms_institution
@@ -186,10 +188,10 @@ teachers = [
 [create_teacher(**t) for t in teachers]
 
 # Users - Students
-extra_data = json.dumps({'eduid': str(uuid.uuid4())})
+default_extra_data = {'eduid': str(uuid.uuid4())}
 
 
-def create_student(username, first_name, last_name, email, uid):
+def create_student(username, first_name, last_name, email, uid, **kwargs):
     user, _ = BadgeUser.objects.get_or_create(
         username=username,
         email=email,
@@ -201,9 +203,14 @@ def create_student(username, first_name, last_name, email, uid):
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
     social_account, _ = SocialAccount.objects.get_or_create(provider='edu_id', uid=uid, user=user)
-    social_account.extra_data = extra_data
-    social_account.save()
 
+    extra_data = default_extra_data | kwargs.get('extra_data', {})
+    social_account.extra_data = json.dumps(extra_data)
+
+    if kwargs and kwargs.get('affiliation'):
+        StudentAffiliation.objects.get_or_create(user=user, **kwargs['affiliation'])
+
+    social_account.save()
 
 students = [
     {
@@ -233,6 +240,20 @@ students = [
         'last_name': 'Doolittle',
         'email': AWARDED_STUDENT_EMAIL,
         'uid': '78b9ec1bb8731ec04b42137faf6a3c7068c89212',
+    },
+    {
+        'username': 'petra',
+        'first_name': 'Petra',
+        'last_name': 'Penttilä',
+        'email': DEMO_STUDENT_EMAIL,
+        'uid': 'fc4f39e6-b8b5-4af0-a5a1-43d9876503ea',
+        'affiliation': {
+            'schac_home': 'university-example.org',
+            'eppn': DEMO_STUDENT_EPPN,
+        },
+        'extra_data': {
+            'eduid': '7bf2c4ae-f355-496d-8bc2-db550f1e2d7a'
+        }
     },
 ]
 

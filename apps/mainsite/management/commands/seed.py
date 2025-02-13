@@ -1,4 +1,5 @@
 import traceback
+import sys
 from os import listdir, environ
 from os.path import dirname, basename, isfile, join
 from django.utils import timezone
@@ -20,8 +21,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if settings.ALLOW_SEEDS:
-            # if options['clean']:
-            clear_data()
+            if options['clean']:
+                clear_data()
+
             run_seeds()
             if options['add_assertions']:
                 nr_of_assertions = options['add_assertions']
@@ -65,10 +67,10 @@ def run_seeds():
             __import__("mainsite.seeds." + seed)
             print("\033[92mdone!\033[0m")
         except Exception as e:
-            print("\033[91mFAILED!\033[0m")
-            print(traceback.format_exc())
-            print(e)
-            break
+            sys.stderr.write("\033[91mFAILED!\033[0m")
+            sys.stderr.write(traceback.format_exc())
+            sys.stderr.write(f"{str(e)}\n")
+            sys.exit(1)
 
 
 def run_scaled_seed(scale):
