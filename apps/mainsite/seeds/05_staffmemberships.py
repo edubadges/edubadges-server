@@ -2,8 +2,8 @@ from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
 
 from badgeuser.models import BadgeUser, TermsAgreement
-from institution.models import Faculty, Institution
-from issuer.models import BadgeClass, Issuer
+from institution.models import Faculty, FacultyStaff, Institution
+from issuer.models import BadgeClass, BadgeClassStaff, Issuer, IssuerStaff
 
 
 def accept_terms(user):
@@ -45,7 +45,7 @@ def create_facultystaff(username, email, first_name, last_name, institution_name
         first_name=first_name,
         is_teacher=True,
         invited=True,
-        is_superuser=True,
+        is_superuser=False,
     )
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
@@ -56,7 +56,10 @@ def create_facultystaff(username, email, first_name, last_name, institution_name
     user.institution = institution
     accept_terms(user)
     user.save()
-    faculty.create_staff_membership(user, perms)
+
+    # We cannot faculty.create_staff_membership() here, because this doesn't consider
+    # existing memberships. So we have to do it manually.
+    FacultyStaff.objects.get_or_create(user=user, faculty=faculty, **perms)
 
 
 def create_issuerstaff(
@@ -75,8 +78,10 @@ def create_issuerstaff(
     issuer = Issuer.objects.get(name_english=issuer_name, faculty=faculty)
     accept_terms(user)
     user.save()
-    issuer.create_staff_membership(user, perms)
 
+    # We cannot issuer.create_staff_membership() here, because this doesn't consider
+    # existing memberships. So we have to do it manually.
+    IssuerStaff.objects.get_or_create(user=user, issuer=issuer, **perms)
 
 def create_badgeclassstaff(
     username,
@@ -105,8 +110,10 @@ def create_badgeclassstaff(
     badgeclass = BadgeClass.objects.get(name=badgeclass_name, issuer=issuer)
     accept_terms(user)
     user.save()
-    badgeclass.create_staff_membership(user, perms)
 
+    # We cannot badgeclass.create_staff_membership() here, because this doesn't consider
+    # existing memberships. So we have to do it manually.
+    BadgeClassStaff.objects.get_or_create(user=user, badgeclass=badgeclass, **perms)
 
 issuer_group_staff = [
     # staff2
