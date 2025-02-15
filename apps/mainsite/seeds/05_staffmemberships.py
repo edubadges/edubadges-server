@@ -45,7 +45,7 @@ def create_facultystaff(username, email, first_name, last_name, institution_name
         first_name=first_name,
         is_teacher=True,
         invited=True,
-        is_superuser=True,
+        is_superuser=False,
     )
 
     EmailAddress.objects.get_or_create(verified=1, primary=1, email=email, user=user)
