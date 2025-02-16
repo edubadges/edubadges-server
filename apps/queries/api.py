@@ -271,6 +271,9 @@ class Users(APIView):
         with connection.cursor() as cursor:
             query_ = """
 SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id, 
+        institution.entity_id as institution_entity_id, 
+        institution.name_english as institution_name_english, 
+        institution.name_dutch as institution_name_dutch,
     ins.may_update as ins_may_update, ins.institution_id,
         ins.name_english as ins_ins_name_english, ins.name_dutch as ins_ins_name_dutch, ins.entity_id as ins_ins_entity_id,
     f.may_update as f_may_update, f.may_award as f_may_award, f.may_administrate_users as f_may_admin, f.faculty_id,
@@ -278,14 +281,14 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
         f.ins_entity_id as f_ins_entity_id, f.ins_name_dutch as f_ins_name_dutch, f.ins_name_english as f_ins_name_english,
     i.may_update as i_may_update, i.may_award as i_may_award, i.may_administrate_users as i_may_admin, i.issuer_id,
         i.entity_id as i_i_entity_id, i.name_dutch as i_i_name_dutch, i.name_english as i_i_name_english,
-        i.f_name_dutch as i_f_name_dutch, i.f_name_english as i_f_name_english, 
+        i.f_name_dutch as i_f_name_dutch, i.f_name_english as i_f_name_english, i.f_entity_id as i_f_entity_id, 
         i.ins_entity_id as i_ins_entity_id, i.ins_name_dutch as i_ins_name_dutch, i.ins_name_english as i_ins_name_english,
     bc.may_update as bc_may_update, bc.may_award as bc_may_award, bc.may_administrate_users as bc_may_admin, bc.badgeclass_id,
         bc.name as bc_bc_name_dutch, bc.name as bc_bc_name_english, bc.entity_id as bc_bc_entity_id, 
         bc.i_entity_id as bc_i_entity_id, bc.i_name_dutch as bc_i_name_dutch, bc.i_name_english as bc_i_name_english,
         bc.f_name_dutch as bc_f_name_dutch, bc.f_name_english as bc_f_name_english, bc.f_entity_id as bc_f_entity_id, 
         bc.ins_entity_id as bc_ins_entity_id, bc.ins_name_dutch as bc_ins_name_dutch, bc.ins_name_english as bc_ins_name_english
-    FROM users u
+    FROM users u INNER JOIN institution_institution institution ON u.institution_id = institution.id
     LEFT JOIN (
         SELECT st_in.may_update, st_in.user_id, st_in.institution_id, 
             ins.name_english, ins.name_dutch, ins.entity_id
@@ -333,7 +336,11 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
                 if user_id not in users_dict:
                     users_dict[user_id] = {"id": user_id, "first_name": r["first_name"],
                                            "last_name": r["last_name"], "email": r["email"],
-                                           "entity_id": r["entity_id"], "permissions": []}
+                                           "entity_id": r["entity_id"],
+                                           "institution_entity_id": r["institution_entity_id"],
+                                           "institution_name_english": r["institution_name_english"],
+                                           "institution_name_dutch": r["institution_name_dutch"],
+                                           "permissions": []}
                 user_permissions = self._permissions(r)
                 if user_permissions:
                     users_dict[user_id]["permissions"].extend(user_permissions)
