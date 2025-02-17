@@ -10,9 +10,6 @@ Pillow==10.3.0
 
 python-dateutil==2.8.1
 
-# reporting
-pandas==1.1.5
-
 # MySQL-python==1.2.5 # python3 incompatible
 mysqlclient==2.2.4
 
