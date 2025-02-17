@@ -323,7 +323,8 @@ class DirectAwardDelete(BaseEntityDetailView):
         for direct_award in direct_awards:
             try:
                 direct_award_db = DirectAward.objects.get(entity_id=direct_award["entity_id"])
-                if not direct_award_db.get_permissions(request.user)["may_award"]:
+                permissions = direct_award_db.get_permissions(request.user)
+                if not permissions["may_award"]:
                     raise BadgrValidationError("No permissions", 100)
                 if direct_award_db.status == DirectAward.STATUS_DELETED:
                     un_successful_direct_awards.append(
