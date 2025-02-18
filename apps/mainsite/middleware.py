@@ -1,6 +1,7 @@
 import json
 import logging
-
+import sys
+import traceback
 
 from django import http
 from django.http.response import JsonResponse
@@ -46,6 +47,7 @@ class ExceptionHandlerMiddleware(object):
 
     def process_exception(self, request, exception):
         logger.exception(exception)
+        traceback.print_exc()
         # APIException are handled by various other handlers, and we don't want to swallow those
         if "json" in request.content_type and not isinstance(exception, APIException):
             # If we call self.get_response we come in an endless loop
