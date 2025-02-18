@@ -1,24 +1,79 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [7.3.1] - 2025-01-27
-#### Full GitHub changelogs:
-  Backend: https://github.com/edubadges/edubadges-server/compare/v7.3.0...v7.3.1</br>
-  Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.3.0...v7.3.1
+## [7.4.0] - 2025-02-17
 
-- Merge pull request #166 from edubadges/feature/sphereon-random-offer-id  
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v7.3.1...v7.4.0</br>
+Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.3.1...v7.4.0
+
+- Removed panda code and dependency
+- Faculty staff no super_user
+- Merge pull request #171 from edubadges/feature/fix-duplicate-staff-seed
+- feat: Avoid duplicate staff membership errors when seeding
+- Merge pull request #170 from edubadges/feature/seed-richer-badges
+- Raw users query
+- fix: With persisted data, seeds might crash on previously added data
+- fix: Don't assume id 1 for badgrapp. When resetting db, it will increment
+- fix: Update memcached ENV var, it must be the host:port
+- WIP: let seed command fail with errors when it fails
+- feat: Add account and badge-instances for student19, demo user
+- feat: Add alignment items to several BadgeClasses
+- chore: Ensure we don't wipe the database between docker-runs.
+- feat: Add a longer, more representative text to criteria in badgeclass
+- feat: Add quality assurance to half of the seeded badge-classes
+- feat: Add some supervision attributes to the seeds
+- feat: Add markdown to badgeclass' description
+- New faculties query
+- WIP for Issuers query
+- Merge branch 'develop' into feature/api-errors-vDlEehUb
+- Reverted deletion of super user permission
+- Fixed typo for direct_award_audit_trail direct_award_audit_trail() missing 1 required positional argument: 'direct_award_id'
+- Fixes for key errors
+- Reverted test2
+- Added un_successful_direct_awards in response
+- Merge branch 'develop' into feature/api-errors-vDlEehUb
+- Ignore super users
+- WIP for https://trello.com/c/vDlEehUb/
+- WIP on catalog performance
+- WIP on catalog raw query
+- Daniel broke things...
+- Resolves 1014-uitbreiden-management-query
+- Merge pull request #168 from edubadges/feature/unvalidated-backpack-users-QBYKFZVm
+- Updated seed data
+- WIP on raw queries
+- Small changes after PR review
+- WIP for more raw queries
+- Redirect to validate name client side
+- WIP for QBYKFZVm
+- WIP for raw queries
+- PoC for raw queries instead of graphQL
+- Query edubadge account
+
+## [7.3.1] - 2025-01-27
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v7.3.0...v7.3.1</br>
+Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.3.0...v7.3.1
+
+- Merge pull request #166 from edubadges/feature/sphereon-random-offer-id
 - Merge pull request #165 from edubadges/feature/docker-compose-fix
 - Feat: Make the offer-id unpredictable for sphereon
 - Chore: Ensure memcached is started before running migrations etc.
 - Bugfix for Trello: 987
 
 ## [7.3.0] - 2024-12-18
+
 #### Full GitHub changelogs:
-  Backend: https://github.com/edubadges/edubadges-server/compare/v7.2.0...v7.3.0</br>
-  Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.2.0...v7.3.0
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v7.2.0...v7.3.0</br>
+Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.2.0...v7.3.0
 
 - Added the option to award edubadges to learners using their mailaddress. This mailaddress should match the one used for eduID.
 - Added an option to change the contact mailaddress of the institution.
@@ -30,6 +85,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed bug when claiming edubadges from other organisations.
 
 ## [7.2.0] - 2024-11-13
+
 - Bugfix for single value educationProgramIdentifier.
 - Merge pull request #158 from edubadges/revert-156-feature/eppn-email-956.
 - Updated graphene-django version to 3.2.2.
@@ -78,6 +134,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix unclosed quote in example env var file.
 
 ## [7.1.0] - 2024-10-10
+
 - Use of settings vars instead of looking up env vars again.
 - Added audit trail for changing validated name.
 - Fix for informal MicroCredential (#147).
@@ -93,6 +150,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bump cryptography from 42.0.4 to 43.0.1.
 
 ## [7.0.0] - 2024-08-14
+
 - fix: Add a type:image to the image payload in our credential request.
 - WIP for migration studyload to time-investment for non MBO badges.
 - Formal badges are regular badges.
@@ -152,6 +210,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bump djangorestframework from 3.14.0 to 3.15.2.
 
 ## [6.10.0] - 2024-02-23
+
 - Synced insights query with management query.
 - Upgraded to pillow 10.2.0.
 - Optimise management query.
@@ -176,6 +235,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added queries for re-use.
 
 ## [6.9.0] - 2023-10-23
+
 - Added micro-credentials count query.
 - Code warning resolved.
 - Updated mail template requested edubadge.
@@ -213,10 +273,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bump django from 3.2.19 to 3.2.20.
 
 ## [6.8.1] - 2023-06-29
+
 - Bugfix for new institution.
 - Do not display sis integration for new institutions.
 
 ## [6.8.0] - 2023-06-05
+
 - Bugfix for teacher security.
 - Date reminder.
 - Added SIS related fields to DirectAwardBundle.
@@ -241,6 +303,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bump requests from 2.24.0 to 2.31.0
 
 ## [6.7.0] - 2023-02-27
+
 - Issued_on date for assertion is direct_award created_at.
 - Revoked assertions are no longer claimed.
 - Updated mail templates.
@@ -249,8 +312,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bump django from 3.2.16 to 3.2.17 .
 - Insights type badgeClass.
 - Signal the UI for revalidation of the name.
- 
+
 ## [6.6.0] - 2023-01-16
+
 - Backward incompatibility bugfix for swagger.
 - Added help txt to regexp institution.
 - After upgrade to django 3.2.16 templates were broken.
@@ -265,6 +329,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bugfix for new backpack users.
 
 ## [6.5.0] - 2022-10-31
+
 - Exclude expired badge assertions in insights.
 - Exclude the free welcome badge in insights.
 - Insights: fixed null value due to missing language
@@ -287,6 +352,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Bump django-celery-results from 1.0.1 to 2.4.0.
 
 ## [6.4.0] - 2022-08-22
+
 - Validation error description.
 - Check the Eppn reg exp format.
 - Expose eppn_reg_exp_format in Institution.
@@ -295,6 +361,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - changed mailsubject for Direct Awards.
 
 ## [6.3.0] - 2022-07-18
+
 - Allow for issuer name changes after assertions have been created.
 - Evidence URL is only required when dictated by the badgeclass.
 - Refactored cache deletion endorsements.
@@ -307,9 +374,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Check permissions on endorsements.
 - Retrieve badge class endorsements in public assertion api.
 - Added support for endorsements.
-- New endpoint for 3rd parties to validate ownership of badges (OB 2.1). 
+- New endpoint for 3rd parties to validate ownership of badges (OB 2.1).
 
 ## [6.2.0] - 2022-05-16
+
 - Added extra edubadge type filter option in badgeclass overview screen.
 - Hide description in related educational framework behind a read more.
 - Added more languages of instruction options.
@@ -324,6 +392,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added alternative identifier for institutions.
 
 ## [6.1.0] - 2022-03-21
+
 - Small improvement to notifications mail.
 - Use the tight URL in notifications.
 - Bigfix for wrong url in notifications.
@@ -336,15 +405,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added on behalf fields for faculty.
 
 ## [6.0.0] - 2022-02-21
+
 - Changed subject of earned emails and several minor other email tekst.
 - Added issuing on behalf of issuer groups.
 - Added LTI functionality.
- 
+
 ## [5.4.0] - 2022-01-17
+
 - Bump Django from 2.2.24 to 2.2.26
 - Bump pillow from 8.3.2 to 9.0.0
 
 ## [5.3.0] - 2021-12-20
+
 - Minor changes to the information in the mail temlates.
 - Added remark to make your edubadges public in the confirmation mail.
 - First logout to prevent missing authCode.
@@ -355,6 +427,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Do not return archived issuers.
 
 ## [5.2.0] - 2021-11-15
+
 - New submodule commits.
 - Bugfix for non-unique deny reason enrolllment.
 - Check provisionments.
@@ -369,6 +442,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added public_institution to hide institutions from catalog.
 
 ## [5.1.0] - 2021-10-18
+
 - Validate imported badge.
 - Added import external open badge functionality.
 - New endpoint to delete users by institution admins.
@@ -391,8 +465,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated dependency Pillow.
 
 ## [5.0.0] - 2021-08-30
+
 - Added feedback option.
-- Overview of all open requested edubadges. 
+- Overview of all open requested edubadges.
 - Bugfic: multiple emails from same provider are allowed.
 - Use cron for scheduling.
 - Delete expired direct_awards.
@@ -405,15 +480,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Non-formal badges can be awarded to users with validated name.
 
 ## [4.2.0] - 2021-07-19
+
 - Updated dependency Django
 
 ## [4.1.0] - 2021-06-21
+
 - Added an option to the badgeclass to make Narrative and Evicence mandatory.
 - Expose new badgeclass attributes in graphql.
 - Always retrieve EPPN and Schac homes.
 - Updated dependencies Django and Pillow.
 
 ## [4.0.0] - 2021-05-31
+
 - Better error message if there are no terms.
 - UID has changed.
 - Added safe checks to str method.
@@ -426,8 +504,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added a new demo environment setting to test and experience the edubadges platform.
 - Fix the transparancy of composite images in watermark badgeclass image.
 
-
 ## [3.1.0] - 2021-05-03
+
 - Added multi-language support for images
 - Added badgeclass counter in catalog
 - Updated Django, Pillow
@@ -443,28 +521,33 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed issues with special characters in names
 
 ## [3.0.0] - 2021-03-15
+
 - Added multilanguage fields for Institution, Issuer Group & Issuer
 - Added public endpoints for catalog
 
 ## [2.1.3] - 2021-03-01
+
 - Bugfix eduID
 - Added usage reporting.
 
 ## [2.1.2] - 2021-02-15
+
 - Adds archiving option to Issuer Group
 - Adds swagger api documentation
 - Adds evidence and narrative to assertion data
 
 ## [2.1.1] - 2021-01-18
- - Added bilangual email (NL/EN).
- - Adds archiving option to Badgeclass and Issuer
+
+- Added bilangual email (NL/EN).
+- Adds archiving option to Badgeclass and Issuer
 
 ## [2.1.0] - 2020-12-28
- - Added endpoints for public institution page.
- - Added English and Dutch language options for description fields.
- - Added option to indicate if an institution supports formal, non-formal or both badgeclasses.
- - Extended logging.
- - Better handling of duplicate issuer names.
- - Added institution name to endpoints.
- - Updated cryptography from 2.3 to 3.2.
- - Several bug fixes.
+
+- Added endpoints for public institution page.
+- Added English and Dutch language options for description fields.
+- Added option to indicate if an institution supports formal, non-formal or both badgeclasses.
+- Extended logging.
+- Better handling of duplicate issuer names.
+- Added institution name to endpoints.
+- Updated cryptography from 2.3 to 3.2.
+- Several bug fixes.
