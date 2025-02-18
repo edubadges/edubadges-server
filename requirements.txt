@@ -18,8 +18,8 @@ django-storages==1.7
 python-resize-image==1.1.19
 
 # DOCS
-drf-spectacular==0.26.1
-drf_spectacular_sidecar==2023.4.1
+drf-spectacular==0.28.0
+drf_spectacular_sidecar==2025.2.1
 
 django-object-actions==2.0.0
 
