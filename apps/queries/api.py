@@ -215,17 +215,17 @@ class Users(APIView):
     permission_classes = (TeachPermission,)
 
     @staticmethod
-    def _remove_duplicate_permissions(user):
+    def _remove_duplicate_permissions(row):
         unique_permissions = []
         seen = set()
-        for permission in user["permissions"]:
+        for permission in row["permissions"]:
             key = (permission["permission"], permission["identifier"])  # Use tuple of attributes as key
             if key not in seen:
                 seen.add(key)
                 unique_permissions.append(permission)
         if unique_permissions:
             min(unique_permissions, key=lambda x: x["weight"])["highest"] = True
-        user["permissions"] = unique_permissions
+        row["permissions"] = unique_permissions
 
     @staticmethod
     def _parse_unit(row, source_prefix, unit_prefix):
