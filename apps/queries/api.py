@@ -108,12 +108,13 @@ class CurrentInstitution(APIView):
                 del current_institution[attr]
 
                 cursor.execute("""
-            select sta_ins.may_create as ins_may_create, facst.may_create as f_may_create
+            select sta_ins.may_create as ins_may_create, facst.may_create as f_may_create,
+                (select count(id) from institution_faculty where institution_id = %(insitution_id)s) as fac_count
                 from staff_institutionstaff sta_ins
                 left join users u on u.id = sta_ins.user_id
                 left join staff_facultystaff facst on facst.user_id = u.id
             where u.id = %(user_id)s 
-                        """, {"user_id": request.user.id})
+                        """, {"user_id": request.user.id, "insitution_id": request.user.institution.id})
             institution_permissions = dict_fetch_all(cursor)
             result = {"current_institution": current_institution,
                       "permissions": institution_permissions[0] if institution_permissions else {}}
