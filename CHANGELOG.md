@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [7.4.1] - 2025-02-18
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v7.4.0...v7.4.1</br>
+Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.0...v7.4.1
+
+- Bugfix for Gi19IFS8
+- Bugfix for Gi19IFS8
+- Merge branch 'master' into develop
+- Merge pull request #172 from edubadges/feature/users-performance
+- https://github.com/edubadges/edubadges-server/pull/172#discussion_r1958530038
+- Avoid confusing with parameter to make permissions unique
+- Inline var for debug
+- Updated changelog to release 7.4.0
+- WIP for /users
+- Merge branch 'develop' into feature/users-performance
+- Refactored users query
+- WIP for https://trello.com/b/eQ0oyJy4/do-edubadges
+
 ## [7.4.0] - 2025-02-17
 
 #### Full GitHub changelogs:
