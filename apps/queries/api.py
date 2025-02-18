@@ -324,10 +324,8 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
             INNER JOIN issuer_issuer iss_iss ON iss_iss.id = ib.issuer_id 
             INNER JOIN institution_faculty fac ON iss_iss.faculty_id = fac.id
             INNER JOIN institution_institution ins ON fac.institution_id = ins.id
-    ) bc ON (u.id = bc.user_id)"""
-            if filter_by_institution:
-                query_ += " where u.institution_id = %(ins_id)s"
-            cursor.execute(query_, {"ins_id": request.user.institution.id} if filter_by_institution else None)
+    ) bc ON (u.id = bc.user_id) where u.institution_id = IFNULL(%(ins_id)s, u.institution_id)"""
+            cursor.execute(query_, {"ins_id": request.user.institution.id if filter_by_institution else None})
             users = dict_fetch_all(cursor)
 
             users_dict = {}
