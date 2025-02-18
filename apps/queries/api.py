@@ -101,10 +101,22 @@ class CurrentInstitution(APIView):
     where ins.id = %(ins_id)s order by ins.id
                 """, {"ins_id": request.user.institution.id})
             records = dict_fetch_all(cursor)
-            result = records[0]
-            result["admins"] = [{"email": u["email"], "name": f"{u['first_name']} {u['last_name']}"} for u in records]
+            current_institution = records[0]
+            current_institution["admins"] = [{"email": u["email"], "name": f"{u['first_name']} {u['last_name']}"} for u
+                                             in records]
             for attr in ["email", "first_name", "last_name"]:
-                del result[attr]
+                del current_institution[attr]
+
+                cursor.execute("""
+            select sta_ins.may_create as ins_may_create, facst.may_create as f_may_create
+                from staff_institutionstaff sta_ins
+                left join users u on u.id = sta_ins.user_id
+                left join staff_facultystaff facst on facst.user_id = u.id
+            where u.id = %(user_id)s 
+                        """, {"user_id": request.user.id})
+            institution_permissions = dict_fetch_all(cursor)
+            result = {"current_institution": current_institution,
+                      "permissions": institution_permissions[0] if institution_permissions else {}}
             return Response(result, status=status.HTTP_200_OK)
 
 
