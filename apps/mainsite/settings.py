@@ -351,6 +351,9 @@ LOGGING = {
         },
         'loki': {
             '()': 'django_loki_reloaded.LokiFormatter',  # required
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] [%(funcName)s] %(message)s',
+            'dfmt': '%Y-%m-%d %H:%M:%S',
+            'style': '',
         },
     },
     'filters': {
