@@ -350,7 +350,7 @@ LOGGING = {
             'datefmt': '%Y-%m-%dT%H:%M:%S%z',
         },
         'loki': {
-            '()': 'django_loki.LokiFormatter',  # required
+            '()': 'django_loki_reloaded.LokiFormatter',  # required
         },
     },
     'filters': {
