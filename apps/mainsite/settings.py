@@ -1,5 +1,7 @@
 import os
 
+from django_loki_reloaded import LokiFormatter
+
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 
@@ -347,9 +349,7 @@ LOGGING = {
             'format': '%(asctime)s',
             'datefmt': '%Y-%m-%dT%H:%M:%S%z',
         },
-        'loki': {
-            'class': 'django_loki.LokiFormatter',  # required
-        },
+        'loki': {'class': LokiFormatter},
     },
     'filters': {
         'require_debug_true': {
