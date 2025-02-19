@@ -2,7 +2,7 @@ import datetime
 import threading
 
 from django.core.exceptions import BadRequest
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.response import Response
@@ -653,7 +653,15 @@ class DirectAwardAccept(BaseEntityDetailView):
     @extend_schema(
         methods=['POST'],
         description='Either accept or reject a direct award (claim)',
-        request={'application/json': {'accept': 'boolean'}},
+        parameters=[
+            OpenApiParameter(
+                name='accept', required=True, description='Either accept (true) or reject (false)', type=bool
+            ),
+        ],
+        request=inline_serializer(
+            name='DirectAwardAcceptRequest',
+            fields={'entity_id': serializers.CharField(), 'accept': serializers.BooleanField()},
+        ),
         responses={
             200: inline_serializer(
                 name='DirectAwardAcceptRejectedResponse',
@@ -685,13 +693,13 @@ class DirectAwardAccept(BaseEntityDetailView):
                 response=inline_serializer(
                     name='DirectAwardAcceptNotFoundResponse',
                     fields={
-                        'error': serializers.CharField(),
+                        'detail': serializers.CharField(),
                     },
                 ),
                 examples=[
                     OpenApiExample(
                         'Not Found',
-                        value={'error': 'Direct Award not found'},
+                        value={'detail': 'Not found.'},
                     )
                 ],
             ),
@@ -710,6 +718,16 @@ class DirectAwardAccept(BaseEntityDetailView):
                 ],
             ),
         },
+        examples=[
+            OpenApiExample(
+                'DirectAward Accept Request Example',
+                value={
+                    'entity_id': 'badge-001',
+                    'accept': True,
+                },
+                request_only=True,
+            ),
+        ],
     )
     def post(self, request, **kwargs):
         direct_award = self.get_object(request, **kwargs)
