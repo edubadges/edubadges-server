@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from directaward.models import DirectAward
-from mainsite.permissions import TeachPermission
+from mainsite.permissions import TeachPermission, AuthenticatedWithVerifiedEmail
 
 permissions_query = """
 (
@@ -87,9 +87,12 @@ where ins.id = %(ins_id)s ;
 
 
 class CurrentInstitution(APIView):
-    permission_classes = (TeachPermission,)
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
 
     def get(self, request, **kwargs):
+        if not request.user.institution:
+            return Response({"current_institution": {}, "permissions": {}}, status=status.HTTP_200_OK)
+
         with connection.cursor() as cursor:
             cursor.execute("""
     select ins.id, ins.name_english, ins.name_dutch, ins.description_english, ins.description_dutch,
@@ -99,8 +102,10 @@ class CurrentInstitution(APIView):
     left join staff_institutionstaff sta_ins on sta_ins.institution_id = ins.id
     left join users u on u.id =  sta_ins.user_id           
     where ins.id = %(ins_id)s order by ins.id
-                """, {"ins_id": request.user.institution.id})
+                """, {"ins_id": request.user.institution.id if request.user.institution else None})
             records = dict_fetch_all(cursor)
+            if not records:
+                return Response({"current_institution": {}, "permissions": {}}, status=status.HTTP_200_OK)
             current_institution = records[0]
             current_institution["admins"] = [{"email": u["email"], "name": f"{u['first_name']} {u['last_name']}"} for u
                                              in records]
