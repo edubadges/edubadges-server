@@ -29,6 +29,7 @@ def direct_award_remove_cache(direct_award):
     direct_award.badgeclass.remove_cached_data(['cached_direct_award_bundles'])
 
 
+# Several reusable, generic request and responses
 direct_awards_response = serializers.ListField(
     child=inline_serializer(
         name='DirectAwardsResponse',
@@ -57,7 +58,7 @@ direct_awards_request = {
     'lti_import': serializers.BooleanField(),
     'status': serializers.CharField(),
     'identifier_type': serializers.CharField(),
-    'scheduled_at': serializers.CharField(),
+    'scheduled_at': serializers.CharField(required=False, allow_null=True),
     'notify_recipients': serializers.BooleanField(),
 }
 
@@ -72,6 +73,28 @@ unsuccessful_response = serializers.ListField(
     )
 )
 
+permission_denied_response = OpenApiResponse(
+    response=inline_serializer(name='PermissionDeniedResponse', fields={'detail': serializers.CharField()}),
+    examples=[
+        OpenApiExample(name='Forbidden Response', value={'detail': 'Authentication credentials were not provided.'})
+    ],
+)
+
+not_found_response = OpenApiResponse(
+    response=inline_serializer(
+        name='DirectAwardNotFoundResponse',
+        fields={
+            'detail': serializers.CharField(),
+        },
+    ),
+    examples=[
+        OpenApiExample(
+            'Not Found',
+            value={'detail': 'Not found.'},
+        )
+    ],
+)
+
 
 @extend_schema(
     description='Create a direct award bundle',
@@ -82,30 +105,16 @@ unsuccessful_response = serializers.ListField(
             response=inline_serializer(
                 name='DirectAwardCreateBundleResponse',
                 fields={
+                    'badgeclass': serializers.CharField(),
                     'entity_id': serializers.CharField(),
-                    'status': serializers.CharField(),
-                    'created_at': serializers.CharField(),
-                    'direct_awards': direct_awards_response,
-                    'un_successful_direct_awards': unsuccessful_response,
                 },
             ),
             examples=[
                 OpenApiExample(
                     'Successful Response',
                     value={
+                        'badgeclass': 'etryui25asda',
                         'entity_id': 'bundle-456',
-                        'status': 'Scheduled',
-                        'created_at': '2025-01-01T12:00:00Z',
-                        'direct_awards': [
-                            {'eppn': 'user@example.edu', 'recipient_email': 'user@example.edu', 'status': 'Scheduled'}
-                        ],
-                        'un_successful_direct_awards': [
-                            {
-                                'error': 'DirectAward already exists',
-                                'eppn': 'user2@example.edu',
-                                'recipient_email': 'user2@example.edu',
-                            }
-                        ],
                     },
                     response_only=True,
                 ),
@@ -123,18 +132,7 @@ unsuccessful_response = serializers.ListField(
                 ),
             ],
         ),
-        403: OpenApiResponse(
-            response=inline_serializer(
-                name='DirectAwardCreateBundlePermissionDeniedResponse', fields={'error': serializers.CharField()}
-            ),
-            examples=[
-                OpenApiExample(
-                    'Return 403 permission denied',
-                    value={'error': 'Permission denied'},
-                    response_only=True,
-                ),
-            ],
-        ),
+        403: permission_denied_response,
     },
     examples=[
         OpenApiExample(
@@ -168,7 +166,7 @@ class DirectAwardBundleView(APIView):
     @extend_schema(
         description='Get direct award bundle information',
         methods=['GET'],
-        request={'application/json': {'entity_id': 'string'}},
+        request=inline_serializer(name='DirectAwardGetBundleRequest', fields={'entity_id': serializers.CharField()}),
         responses={
             200: OpenApiResponse(
                 response=inline_serializer(
@@ -244,19 +242,8 @@ class DirectAwardBundleView(APIView):
                     )
                 ],
             ),
-            403: OpenApiResponse(
-                response=inline_serializer(
-                    name='DirectAwardGetBundlePermissionDeniedResponse', fields={'detail': serializers.CharField()}
-                ),
-                examples=[
-                    OpenApiExample(
-                        name='Forbidden Response', value={'detail': 'Authentication credentials were not provided.'}
-                    )
-                ],
-            ),
-            404: OpenApiResponse(
-                description='Error: Not Found',
-            ),
+            403: permission_denied_response,
+            404: not_found_response,
         },
         examples=[
             OpenApiExample('Get Bundle Request Example', value={'entity_id': 'bundle-123'}, request_only=True),
@@ -364,7 +351,8 @@ class DirectAwardRevoke(BaseEntityDetailView):
                     )
                 ],
             ),
-            404: {'error': 'Direct Award Bundle not found'},
+            403: permission_denied_response,
+            404: not_found_response,
         },
         examples=[
             OpenApiExample(
@@ -483,7 +471,8 @@ class DirectAwardResend(BaseEntityDetailView):
                     )
                 ],
             ),
-            404: {'error': 'Direct Award Bundle not found'},
+            403: permission_denied_response,
+            404: not_found_response,
         },
         examples=[
             OpenApiExample(
@@ -585,20 +574,8 @@ class DirectAwardResend(BaseEntityDetailView):
                 ),
             ],
         ),
-        404: OpenApiResponse(
-            response=inline_serializer(
-                name='DirectAwardUpdateNotFoundResponse',
-                fields={
-                    'error': serializers.CharField(),
-                },
-            ),
-            examples=[
-                OpenApiExample(
-                    'Not Found',
-                    value={'error': 'Direct Award Bundle not found'},
-                ),
-            ],
-        ),
+        403: permission_denied_response,
+        404: not_found_response,
         422: OpenApiResponse(
             response=inline_serializer(
                 name='DirectAwardUpdateValidationErrorResponse',
@@ -689,20 +666,8 @@ class DirectAwardAccept(BaseEntityDetailView):
                     )
                 ],
             ),
-            404: OpenApiResponse(
-                response=inline_serializer(
-                    name='DirectAwardAcceptNotFoundResponse',
-                    fields={
-                        'detail': serializers.CharField(),
-                    },
-                ),
-                examples=[
-                    OpenApiExample(
-                        'Not Found',
-                        value={'detail': 'Not found.'},
-                    )
-                ],
-            ),
+            403: permission_denied_response,
+            404: not_found_response,
             422: OpenApiResponse(
                 response=inline_serializer(
                     name='DirectAwardUnprocessableEntityResponse',
@@ -837,7 +802,8 @@ class DirectAwardDelete(BaseEntityDetailView):
                     )
                 ],
             ),
-            404: {'error': 'Direct Award Bundle not found'},
+            403: permission_denied_response,
+            404: not_found_response,
         },
         examples=[
             OpenApiExample(
