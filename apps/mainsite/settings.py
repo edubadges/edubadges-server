@@ -315,7 +315,7 @@ if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
             'formatter': 'loki',  # Loki formatter. Required
             'timeout': 0.5,  # Post request timeout, default is 0.5. Optional
             'tags': {'badgr': 'debug'},  # Tags / Labels to attach to the log.
-            'url': 'http://slog.edubadges.nl:3100/loki/api/v1/push',  # Loki url.
+            'url': 'http://195.169.124.131:3100/loki/api/v1/push',  # Loki url.
         }
     }
     debug_handlers.append('badgr_debug_loki')
