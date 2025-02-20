@@ -313,8 +313,8 @@ if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
             'level': 'DEBUG',  # Log level. Required
             'class': 'django_loki_reloaded.LokiHandler',  # Required
             'formatter': 'loki',  # Loki formatter. Required
-            'timeout': 0.5,  # Post request timeout, default is 0.5. Optional
-            'tags': {'badgr': 'debug'},  # Tags / Labels to attach to the log.
+            'timeout': 1,  # Post request timeout, default is 0.5. Optional
+            'tags': {'job': 'badgr_debug'},  # Tags / Labels to attach to the log.
             'url': 'http://195.169.124.131:3100/loki/api/v1/push',  # Loki url.
         }
     }
