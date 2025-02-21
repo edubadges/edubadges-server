@@ -1,7 +1,5 @@
 import os
 
-from django_loki_reloaded import LokiFormatter  # noqa: F401
-
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 
@@ -278,6 +276,8 @@ if not os.path.exists(LOGS_DIR):
 
 LOG_STORAGE_DURATION = 30  # days
 
+LOKI_URL = 'https://195.169.124.131:3100/loki/api/v1/push'
+
 handlers = {
     'badgr_events': {
         'level': 'INFO',
@@ -311,10 +311,9 @@ if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
     handlers = handlers | {
         'badgr_debug_loki': {
             'level': 'DEBUG',  # Log level. Required
-            'class': 'django_loki_reloaded.LokiHandler',  # Required
-            'formatter': 'loki',  # Loki formatter. Required
+            'class': 'loki_logger_handler.loki_logger_handler',  # Required
             'timeout': 1,  # Post request timeout, default is 0.5. Optional
-            'tags': {'job': 'badgr_debug'},  # Tags / Labels to attach to the log.
+            'labels': {'job': 'badgr_debug'},  # Tags / Labels to attach to the log.
             'url': 'http://195.169.124.131:3100/loki/api/v1/push',  # Loki url.
         }
     }
