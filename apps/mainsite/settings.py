@@ -311,7 +311,7 @@ if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
     handlers = handlers | {
         'badgr_debug_loki': {
             'level': 'DEBUG',  # Log level. Required
-            'class': 'loki_logger_handler.loki_logger_handler',  # Required
+            'class': 'loki_logger_handler.loki_logger_handler.LokiLoggerHandler',  # Required
             'timeout': 1,  # Post request timeout, default is 0.5. Optional
             'labels': {'job': 'badgr_debug'},  # Tags / Labels to attach to the log.
             'url': 'http://195.169.124.131:3100/loki/api/v1/push',  # Loki url.
