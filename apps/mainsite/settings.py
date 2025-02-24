@@ -276,8 +276,6 @@ if not os.path.exists(LOGS_DIR):
 
 LOG_STORAGE_DURATION = 30  # days
 
-LOKI_URL = 'https://195.169.124.131:3100/loki/api/v1/push'
-
 handlers = {
     'badgr_events': {
         'level': 'INFO',
@@ -306,6 +304,8 @@ handlers = {
 }
 
 debug_handlers = ['badgr_debug']
+SERVER_NAME = os.environ['SERVER_NAME']
+LOKI_URL = 'http://195.169.124.131:3100/loki/api/v1/push'
 
 if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
     handlers = handlers | {
@@ -313,8 +313,12 @@ if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
             'level': 'DEBUG',  # Log level. Required
             'class': 'loki_logger_handler.loki_logger_handler.LokiLoggerHandler',  # Required
             'timeout': 1,  # Post request timeout, default is 0.5. Optional
-            'labels': {'job': 'badgr_debug'},  # Tags / Labels to attach to the log.
-            'url': 'http://195.169.124.131:3100/loki/api/v1/push',  # Loki url.
+            'labels': {
+                'job': 'badgr_debug',
+                'domain': DOMAIN,
+                'server': SERVER_NAME,
+            },  # Tags / Labels to attach to the log.
+            'url': LOKI_URL,  # Loki url.
         }
     }
     debug_handlers.append('badgr_debug_loki')
