@@ -13,11 +13,13 @@ class DirectAwardAdmin(admin.ModelAdmin):
     list_filter = ('created_at', 'badgeclass__name', 'badgeclass__issuer__faculty__institution__identifier')
     search_fields = ('recipient_email', 'eppn', 'badgeclass__name',)
 
+    @admin.display(
+        description='Institution',
+        ordering='badgeclass__issuer__faculty__institution__identifier',
+    )
     def institution_identifier(self, obj):
         return obj.badgeclass.issuer.faculty.institution.identifier
 
-    institution_identifier.admin_order_field = 'badgeclass__issuer__faculty__institution__identifier'
-    institution_identifier.short_description = 'Institution'
 
 
 class DirectAwardBundleAdmin(admin.ModelAdmin):
@@ -29,11 +31,13 @@ class DirectAwardBundleAdmin(admin.ModelAdmin):
     list_filter = ('created_at', 'badgeclass__issuer__faculty__institution__identifier')
     search_fields = ('badgeclass__name',)
 
+    @admin.display(
+        description='Institution',
+        ordering='badgeclass__issuer__faculty__institution__identifier',
+    )
     def institution_identifier(self, obj):
         return obj.badgeclass.issuer.faculty.institution.identifier
 
-    institution_identifier.admin_order_field = 'badgeclass__issuer__faculty__institution__identifier'
-    institution_identifier.short_description = 'Institution'
 
 
 badgr_admin.register(DirectAward, DirectAwardAdmin)

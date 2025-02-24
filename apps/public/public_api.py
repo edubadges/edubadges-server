@@ -126,7 +126,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         bots get an stub that contains opengraph tags
         """
         bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS', ['LinkedInBot'])
-        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+        user_agent = self.request.headers.get('user-agent', '')
         if any(a in user_agent for a in bot_useragents):
             return True
         return False
@@ -136,7 +136,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         some bots prefer a wide aspect ratio for the image
         """
         bot_useragents = getattr(settings, 'BADGR_PUBLIC_BOT_USERAGENTS_WIDE', ['LinkedInBot'])
-        user_agent = self.request.META.get('HTTP_USER_AGENT', '')
+        user_agent = self.request.headers.get('user-agent', '')
         if any(a in user_agent for a in bot_useragents):
             return True
         return False
@@ -147,7 +147,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
 
         html_accepts = ['text/html']
 
-        http_accept = self.request.META.get('HTTP_ACCEPT', 'application/json')
+        http_accept = self.request.headers.get('accept', 'application/json')
 
         if self.is_bot() or any(a in http_accept for a in html_accepts):
             return True

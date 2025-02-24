@@ -2,7 +2,7 @@ import base64
 import datetime
 import re
 from itertools import chain
-from django.db.models import Q
+
 from allauth.account.models import EmailAddress, EmailConfirmation
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -11,9 +11,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.html import strip_tags
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
@@ -54,23 +55,26 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     def _validate_unique(self, exclude=None):
         """Custom uniqueness validation of the provisionment, used before save"""
-        if UserProvisionment.objects.filter(
-                type=self.type,
-                rejected=False,
-                for_teacher=self.for_teacher,
-                email=self.email).exclude(pk=self.pk).exists():
+        if (
+            UserProvisionment.objects.filter(
+                type=self.type, rejected=False, for_teacher=self.for_teacher, email=self.email
+            )
+            .exclude(pk=self.pk)
+            .exists()
+        ):
             raise BadgrValidationError('There may be only one invite per email address.', 501)
         return super(UserProvisionment, self).validate_unique(exclude=exclude)
 
     def _validate_staff_collision(self):
         """validate to see if there is a existing staff membership that conflicts for the entity of this invite"""
         if self.user and self.entity.get_all_staff_memberships_in_current_branch(self.user):
-            raise BadgrValidationError('Cannot invite user for this entity. There is a conflicting staff membership.',
-                                       502)
+            raise BadgrValidationError(
+                'Cannot invite user for this entity. There is a conflicting staff membership.', 502
+            )
 
     def _validate_invite_collision(self):
         """validate to see if the there is another invite that collides with this one
-         (i.e. if both are created the staff memberships will collide"""
+        (i.e. if both are created the staff memberships will collide"""
         all_entities_in_same_branch = self.entity.get_all_entities_in_branch()
         all_invites_for_same_user = UserProvisionment.objects.filter(email=self.email)
         for invite in all_invites_for_same_user:
@@ -81,7 +85,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return self.entity.get_permissions(user)
 
     def match_user(self, user):
-        '''Sets given user as the matched user'''
+        """Sets given user as the matched user"""
         try:
             entity_institution = self.entity.institution
         except AttributeError:
@@ -120,8 +124,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             login_link = BadgrApp.objects.get(pk=1).email_confirmation_redirect
             html_message = EmailMessageMaker.create_user_invited_email(provisionment=self, login_link=login_link)
             subject = 'You have been invited to accept a new role for the {entity_type} {entity_name}'.format(
-                entity_type=self.entity.__class__.__name__.lower(),
-                entity_name=self.entity.name
+                entity_type=self.entity.__class__.__name__.lower(), entity_name=self.entity.name
             )
             if not self.user:
                 plain_text = strip_tags(html_message)
@@ -130,7 +133,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                 self.user.email_user(subject=subject, html_message=html_message)
 
     def perform_provisioning(self):
-        '''Actually create the objects that form the provisionment'''
+        """Actually create the objects that form the provisionment"""
         permissions = self.data
         prov = self.entity.create_staff_membership(self.user, permissions)
         self.delete()
@@ -172,11 +175,11 @@ class CachedEmailAddress(EmailAddress, CacheModel):
 
     class Meta:
         proxy = True
-        verbose_name = _("email address")
-        verbose_name_plural = _("email addresses")
+        verbose_name = _('email address')
+        verbose_name_plural = _('email addresses')
 
     def generate_forgot_password_time_cache_key(self):
-        return "{}_forgot_request_date".format(self.email)
+        return '{}_forgot_request_date'.format(self.email)
 
     def get_last_forgot_password_sent_time(self):
         cached_time = cache.get(self.generate_forgot_password_time_cache_key())
@@ -186,7 +189,7 @@ class CachedEmailAddress(EmailAddress, CacheModel):
         cache.set(self.generate_forgot_password_time_cache_key(), new_datetime)
 
     def generate_verification_time_cache_key(self):
-        return "{}_verification_request_date".format(self.email)
+        return '{}_verification_request_date'.format(self.email)
 
     def get_last_verification_sent_time(self):
         cached_time = cache.get(self.generate_verification_time_cache_key())
@@ -228,22 +231,18 @@ class CachedEmailAddress(EmailAddress, CacheModel):
         return self.emailaddressvariant_set.all()
 
     def add_variant(self, email_variation):
-        existing_variants = EmailAddressVariant.objects.filter(
-            canonical_email=self, email=email_variation
-        )
+        existing_variants = EmailAddressVariant.objects.filter(canonical_email=self, email=email_variation)
         if email_variation not in [e.email for e in existing_variants.all()]:
-            return EmailAddressVariant.objects.create(
-                canonical_email=self, email=email_variation
-            )
+            return EmailAddressVariant.objects.create(canonical_email=self, email=email_variation)
         else:
-            raise ValidationError("Email variant {} already exists".format(email_variation))
+            raise ValidationError('Email variant {} already exists'.format(email_variation))
 
 
 class ProxyEmailConfirmation(EmailConfirmation):
     class Meta:
         proxy = True
-        verbose_name = _("email confirmation")
-        verbose_name_plural = _("email confirmations")
+        verbose_name = _('email confirmation')
+        verbose_name_plural = _('email confirmations')
 
 
 class EmailAddressVariant(models.Model):
@@ -275,10 +274,10 @@ class EmailAddressVariant(models.Model):
             try:
                 self.canonical_email = CachedEmailAddress.cached.get(email=self.email)
             except CachedEmailAddress.DoesNotExist:
-                fail("Canonical Email Address not found")
+                fail('Canonical Email Address not found')
 
         if not self.canonical_email.email.lower() == self.email.lower():
-            fail("New EmailAddressVariant does not match stored email address.")
+            fail('New EmailAddressVariant does not match stored email address.')
 
         return True
 
@@ -345,8 +344,7 @@ class UserCachedObjectGetterMixin(object):
 
     @cached_method(auto_publish=True)
     def cached_token(self):
-        user_token, created = \
-            Token.objects.get_or_create(user=self)
+        user_token, created = Token.objects.get_or_create(user=self)
         return user_token.key
 
     @cached_method(auto_publish=True)
@@ -448,8 +446,9 @@ class UserPermissionsMixin(object):
                     else:  # has been awarded
                         if not enrollment.assertion_is_revoked():
                             if raise_exception:
-                                raise BadgrApiException400('May not enroll: you already have been awarded this badge',
-                                                           202)
+                                raise BadgrApiException400(
+                                    'May not enroll: you already have been awarded this badge', 202
+                                )
                             return False
                 return True  # all have been awarded and revoked
         else:  # no eduID
@@ -462,6 +461,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     """
     A full-featured user model that can be an Earner, Issuer, or Consumer of Open Badges
     """
+
     entity_class_name = 'BadgeUser'
     is_teacher = models.BooleanField(default=False)
     invited = models.BooleanField(default=False)
@@ -481,8 +481,9 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     )
 
     # canvas LTI id
-    lti_id = models.CharField(unique=True, max_length=50, default=None, null=True, blank=True,
-                              help_text='LTI user id, unique per user')
+    lti_id = models.CharField(
+        unique=True, max_length=50, default=None, null=True, blank=True, help_text='LTI user id, unique per user'
+    )
     marketing_opt_in = models.BooleanField(default=False)
 
     objects = BadgeUserManager()
@@ -493,15 +494,16 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         verbose_name = _('badge user')
         verbose_name_plural = _('badge users')
         db_table = 'users'
-        permissions = (('view_issuer_tab', 'User can view Issuer tab in front end'),
-                       ('view_management_tab', 'User can view Management dashboard'),
-                       ('has_faculty_scope', 'User has faculty scope'),
-                       ('has_institution_scope', 'User has institution scope'),
-                       ('ui_issuer_add', 'User can add issuer in front end'),
-                       )
+        permissions = (
+            ('view_issuer_tab', 'User can view Issuer tab in front end'),
+            ('view_management_tab', 'User can view Management dashboard'),
+            ('has_faculty_scope', 'User has faculty scope'),
+            ('has_institution_scope', 'User has institution scope'),
+            ('ui_issuer_add', 'User can add issuer in front end'),
+        )
 
     def __unicode__(self):
-        return "{} <{}>".format(self.get_full_name(), self.email)
+        return '{} <{}>'.format(self.get_full_name(), self.email)
 
     @property
     def email_items(self):
@@ -515,24 +517,21 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         :return: None
         """
         if len(value) < 1:
-            raise ValidationError("Must have at least 1 email")
+            raise ValidationError('Must have at least 1 email')
 
         new_email_idx = {d['email']: d for d in value}
 
         primary_count = sum(1 if d.get('primary', False) else 0 for d in value)
         if primary_count != 1:
-            raise ValidationError("Must have exactly 1 primary email")
+            raise ValidationError('Must have exactly 1 primary email')
 
         with transaction.atomic():
             # add or update existing items
             for email_data in value:
                 primary = email_data.get('primary', False)
                 emailaddress, created = CachedEmailAddress.cached.get_or_create(
-                    email=email_data['email'],
-                    defaults={
-                        'user': self,
-                        'primary': primary
-                    })
+                    email=email_data['email'], defaults={'user': self, 'primary': primary}
+                )
                 if created:
                     # new email address send a confirmation
                     emailaddress.send_confirmation()
@@ -586,7 +585,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def get_full_name(self):
         if self.first_name and self.last_name:
-            return "%s %s" % (self.first_name, self.last_name)
+            return '%s %s' % (self.first_name, self.last_name)
         else:
             return ''
 
@@ -652,9 +651,11 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         except CachedEmailAddress.DoesNotExist:
             return False
 
-        if email != canonical_email.email \
-                and email not in [e.email for e in canonical_email.cached_variants()] \
-                and EmailAddressVariant(email=email, canonical_email=canonical_email).is_valid():
+        if (
+            email != canonical_email.email
+            and email not in [e.email for e in canonical_email.cached_variants()]
+            and EmailAddressVariant(email=email, canonical_email=canonical_email).is_valid()
+        ):
             return True
         return False
 
@@ -685,6 +686,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def get_recipient_identifier(self):
         from allauth.socialaccount.models import SocialAccount
+
         try:
             account = SocialAccount.objects.get(user=self.pk)
             return account.uid
@@ -693,6 +695,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def get_social_account(self):
         from allauth.socialaccount.models import SocialAccount
+
         try:
             account = SocialAccount.objects.get(user=self.pk)
             return account
@@ -720,8 +723,11 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
         if getattr(settings, 'BADGEUSER_SKIP_LAST_LOGIN_TIME', True):
             # skip saving last_login to the database
-            if 'update_fields' in kwargs and kwargs['update_fields'] is not None and 'last_login' in kwargs[
-                'update_fields']:
+            if (
+                'update_fields' in kwargs
+                and kwargs['update_fields'] is not None
+                and 'last_login' in kwargs['update_fields']
+            ):
                 kwargs['update_fields'].remove('last_login')
                 if len(kwargs['update_fields']) < 1:
                     # nothing to do, abort so we dont call .publish()
@@ -730,7 +736,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
 
 class BadgrAccessTokenManager(models.Manager):
-
     def generate_new_token_for_user(self, user, scope='r:profile', application=None, expires=None, refresh_token=False):
         with transaction.atomic():
             if application is None:
@@ -744,15 +749,12 @@ class BadgrAccessTokenManager(models.Manager):
 
             if expires is None:
                 access_token_expires_seconds = getattr(settings, 'OAUTH2_PROVIDER', {}).get(
-                    'ACCESS_TOKEN_EXPIRE_SECONDS', 86400)
+                    'ACCESS_TOKEN_EXPIRE_SECONDS', 86400
+                )
                 expires = timezone.now() + datetime.timedelta(seconds=access_token_expires_seconds)
 
             accesstoken = self.create(
-                application=application,
-                user=user,
-                expires=expires,
-                token=generate_token(),
-                scope=scope
+                application=application, user=user, expires=expires, token=generate_token(), scope=scope
             )
 
         return accesstoken
@@ -766,7 +768,7 @@ class BadgrAccessTokenManager(models.Manager):
         id = re.sub(r'^{}'.format(self.model.fake_entity_id_prefix), '', decoded)
         try:
             pk = int(id)
-        except ValueError as e:
+        except ValueError:
             pass
         else:
             try:
@@ -780,7 +782,7 @@ class BadgrAccessTokenManager(models.Manager):
 
 class BadgrAccessToken(AccessToken, CacheModel):
     objects = BadgrAccessTokenManager()
-    fake_entity_id_prefix = "BadgrAccessToken.id="
+    fake_entity_id_prefix = 'BadgrAccessToken.id='
 
     class Meta:
         proxy = True
@@ -788,7 +790,7 @@ class BadgrAccessToken(AccessToken, CacheModel):
     @property
     def entity_id(self):
         # fake an entityId for this non-entity
-        digest = "{}{}".format(self.fake_entity_id_prefix, self.pk)
+        digest = '{}{}'.format(self.fake_entity_id_prefix, self.pk)
         b64_string = base64.urlsafe_b64encode(digest)
         b64_trimmed = re.sub(r'=+$', '', b64_string)
         return b64_trimmed
@@ -813,19 +815,18 @@ class TermsUrl(CacheModel):
     url = models.URLField(max_length=200, null=True)
     LANGUAGE_ENGLISH = 'en'
     LANGUAGE_DUTCH = 'nl'
-    LANGUAGE_CHOICES = (
-        (LANGUAGE_ENGLISH, 'en'),
-        (LANGUAGE_DUTCH, 'nl')
+    LANGUAGE_CHOICES = ((LANGUAGE_ENGLISH, 'en'), (LANGUAGE_DUTCH, 'nl'))
+    language = models.CharField(
+        max_length=255, choices=LANGUAGE_CHOICES, default=LANGUAGE_ENGLISH, blank=False, null=False
     )
-    language = models.CharField(max_length=255, choices=LANGUAGE_CHOICES, default=LANGUAGE_ENGLISH, blank=False,
-                                null=False)
     excerpt = models.BooleanField(default=False)
 
 
 class Terms(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     version = models.PositiveIntegerField(default=1)
-    institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE, related_name='terms',
-                                    null=True, blank=True)
+    institution = models.ForeignKey(
+        'institution.Institution', on_delete=models.CASCADE, related_name='terms', null=True, blank=True
+    )
 
     TYPE_FORMAL_BADGE = 'formal_badge'
     TYPE_INFORMAL_BADGE = 'informal_badge'
@@ -839,7 +840,7 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         # (TYPE_GENERAL_PRIVACY_STATEMENT, 'general_privacy_statement'),
         (TYPE_SERVICE_AGREEMENT_STUDENT, 'service_agreement_student'),
         (TYPE_SERVICE_AGREEMENT_EMPLOYEE, 'service_agreement_employee'),
-        (TYPE_TERMS_OF_SERVICE, 'terms_of_service')
+        (TYPE_TERMS_OF_SERVICE, 'terms_of_service'),
     )
     terms_type = models.CharField(max_length=254, choices=TYPE_CHOICES, default=TYPE_TERMS_OF_SERVICE)
 
@@ -849,11 +850,15 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     @classmethod
     def get_general_terms(cls, user):
         if user.is_student:
-            return list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_STUDENT,
-                                                             Terms.TYPE_TERMS_OF_SERVICE)))
+            return list(
+                Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_STUDENT, Terms.TYPE_TERMS_OF_SERVICE))
+            )
         elif user.is_teacher:
-            return list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE,
-                                                             Terms.TYPE_TERMS_OF_SERVICE)))
+            return list(
+                Terms.objects.filter(
+                    terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE, Terms.TYPE_TERMS_OF_SERVICE)
+                )
+            )
         raise BadgrValidationError('Cannot get general terms user is neither teacher nor student', 0)
 
     def has_been_accepted_by(self, user):
@@ -863,8 +868,8 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return False
 
     def accept(self, user):
-        ''' make user accept terms
-            returns: TermsAgreement'''
+        """make user accept terms
+        returns: TermsAgreement"""
         # must work for updating increment and for accepting the first time
         terms_agreement, created = TermsAgreement.objects.get_or_create(user=user, terms=self)
         terms_agreement.agreed_version = self.version

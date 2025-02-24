@@ -1,5 +1,5 @@
 # Django stuff
-Django==3.2.25
+Django==4.2.16
 semver==2.6.0
 pytz==2022.2.1
 
@@ -18,16 +18,14 @@ django-storages==1.7
 python-resize-image==1.1.19
 
 # DOCS
-drf-spectacular==0.26.1
+drf-spectacular==0.27.2
 drf_spectacular_sidecar==2023.4.1
 
-django-object-actions==2.0.0
+django-object-actions==4.3.0
 
 pymemcache==4.0.0 
 
-# djangorestframework==3.15.2
-# Can't upgrade because Django < 4.2 no longer supported
-djangorestframework==3.15.1
+djangorestframework==3.15.2
 
 # Django Allauth
 django-allauth==0.51.0
@@ -49,7 +47,7 @@ django-autoslug==1.9.8
 # wsgiref==0.1.2 # python3 incompatible
 sqlparse==0.5.0
 netaddr
-django-extensions==2.0.7
+django-extensions==3.2.3
 
 # Utilities for working with badges
 jsonschema==2.6.0
@@ -80,9 +78,9 @@ python-json-logger==0.1.2
 
 # SSL Support
 cffi==1.14.5
-cryptography==43.0.1
+cryptography==44.0.0
 enum34==1.1.6
-idna==2.5
+idna==3.10
 ipaddress==1.0.16
 pyasn1==0.1.9
 pycparser==2.14
@@ -114,7 +112,7 @@ django_mock_queries==2.1.5
 git+https://github.com/edubadges/pylti1.3@master#egg=PyLTI1p3
 
 # after python3 upgrade
-social-auth-app-django==3.1.0
+social-auth-app-django==5.4.2
 urllib3==1.26.19
 
 # graphql
@@ -127,7 +125,9 @@ premailer==3.7.0
 # 2FA support
 django-otp==1.1.1
 
-pycryptodome==3.19.1
+pycryptodome==3.21.0
 
 #https://github.com/aiselis/django-api-proxy
 django-api-proxy==0.1.1
+
+django-upgrade==1.23.1

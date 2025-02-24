@@ -1,11 +1,18 @@
 # encoding: utf-8
+import io
 import json
+import os
 import urllib.parse
+from json import dumps as json_dumps
+
 import dateutil.parser
-from django.conf import settings
+from django.core.files.base import ContentFile
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
 from django.urls import resolve, Resolver404
+from openbadges_bakery import bake
+
+from issuer.utils import UNVERSIONED_BAKED_VERSION
 from mainsite.utils import fetch_remote_file_to_storage, list_of, OriginSetting
 
 
@@ -14,7 +21,7 @@ def resolve_source_url_referencing_local_object(source_url):
         try:
             match = resolve(urllib.parse.urlparse(source_url).path)
             return match
-        except Resolver404 as e:
+        except Resolver404:
             pass
 
 
@@ -29,7 +36,6 @@ class BaseOpenBadgeObjectManager(models.Manager):
 
 
 class IssuerManager(BaseOpenBadgeObjectManager):
-
     @transaction.atomic
     def get_or_create_from_ob2(self, issuer_obo, source=None, original_json=None):
         source_url = issuer_obo.get('id')
@@ -40,9 +46,9 @@ class IssuerManager(BaseOpenBadgeObjectManager):
         image_url = issuer_obo.get('image', None)
         image = None
         if image_url:
-           if isinstance(image_url, dict):
-               image_url = image_url.get('id')
-           image = _fetch_image_and_get_file(image_url, upload_to='remote/issuer')
+            if isinstance(image_url, dict):
+                image_url = image_url.get('id')
+            image = _fetch_image_and_get_file(image_url, upload_to='remote/issuer')
         return self.get_or_create(
             source_url=source_url,
             defaults=dict(
@@ -52,13 +58,12 @@ class IssuerManager(BaseOpenBadgeObjectManager):
                 url=issuer_obo.get('url', None),
                 email=issuer_obo.get('email', None),
                 image=image,
-                original_json=original_json
-            )
+                original_json=original_json,
+            ),
         )
 
 
 class BadgeClassManager(BaseOpenBadgeObjectManager):
-
     @transaction.atomic
     def create(self, **kwargs):
         new_kwargs = {key: value for (key, value) in kwargs.items() if key != 'award_allowed_institutions'}
@@ -95,8 +100,8 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
                 description=badgeclass_obo.get('description', None),
                 image=image,
                 criteria_text=criteria_text,
-                original_json=original_json
-            )
+                original_json=original_json,
+            ),
         )
 
 
@@ -109,7 +114,6 @@ def _fetch_image_and_get_file(url, upload_to=''):
 
 
 class BadgeInstanceManager(BaseOpenBadgeObjectManager):
-
     @transaction.atomic
     def get_or_create_from_ob2(self, badgeclass, assertion_obo, recipient_identifier, source=None, original_json=None):
         source_url = assertion_obo.get('id')
@@ -142,25 +146,20 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                 image=image,
                 acceptance=self.model.ACCEPTANCE_ACCEPTED,
                 narrative=assertion_obo.get('narrative', None),
-                issued_on=issued_on
-            )
+                issued_on=issued_on,
+            ),
         )
         if created:
             evidence = list_of(assertion_obo.get('evidence', None))
             if evidence:
                 from issuer.models import BadgeInstanceEvidence
+
                 for evidence_item in evidence:
                     BadgeInstanceEvidence.objects.create_from_ob2(badgeinstance, evidence_item)
 
         return badgeinstance, created
 
-    def create(self,
-        evidence=None,
-        extensions=None,
-        allow_uppercase=False,
-        **kwargs
-    ):
-
+    def create(self, evidence=None, extensions=None, allow_uppercase=False, **kwargs):
         """
         Convenience method to award a badge to a recipient_id
         :param allow_uppercase: bool
@@ -175,30 +174,42 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
 
         # self.model would be a BadgeInstance
         new_instance = self.model(
-            public=False,
-            recipient_identifier=recipient_identifier,
-            badgeclass=badgeclass,
-            issuer=issuer,
-            **kwargs
+            public=False, recipient_identifier=recipient_identifier, badgeclass=badgeclass, issuer=issuer, **kwargs
         )
 
         with transaction.atomic():
             new_instance.save()
 
+            badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)
+            new_image = io.BytesIO()
+            bake(
+                image_file=new_instance.cached_badgeclass.image.file,
+                assertion_json_string=json_dumps(
+                    new_instance.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2
+                ),
+                output_file=new_image,
+            )
+            new_instance.image.save(
+                name='assertion-{id}{ext}'.format(id=new_instance.entity_id, ext=ext),
+                content=ContentFile(new_image.read()),
+                save=False,
+            )
+            new_instance.save()
+
             if evidence is not None:
                 from issuer.models import BadgeInstanceEvidence
+
                 for evidence_obj in evidence:
-                    BadgeInstanceEvidence.objects.create(badgeinstance=new_instance,
-                                                         evidence_url=evidence_obj.get('evidence_url'),
-                                                         narrative=evidence_obj.get('narrative'),
-                                                         name=evidence_obj.get('name'),
-                                                         description=evidence_obj.get('description'))
+                    BadgeInstanceEvidence.objects.create(
+                        badgeinstance=new_instance,
+                        evidence_url=evidence_obj.get('evidence_url'),
+                        narrative=evidence_obj.get('narrative'),
+                        name=evidence_obj.get('name'),
+                        description=evidence_obj.get('description'),
+                    )
             if extensions is not None:
                 for name, ext in list(extensions.items()):
-                    new_instance.badgeinstanceextension_set.create(
-                        name=name,
-                        original_json=json.dumps(ext)
-                    )
+                    new_instance.badgeinstanceextension_set.create(name=name, original_json=json.dumps(ext))
 
         return new_instance
 
@@ -212,6 +223,5 @@ class BadgeInstanceEvidenceManager(models.Manager):
             narrative=evidence_obo.get('narrative', None),
             name=evidence_obo.get('name', None),
             description=evidence_obo.get('description', None),
-            original_json=json.dumps(evidence_obo)
+            original_json=json.dumps(evidence_obo),
         )
-

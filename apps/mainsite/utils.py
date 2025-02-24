@@ -41,7 +41,7 @@ slugify = get_callable(slugify_function_path)
 def client_ip_from_request(request):
     """Returns the IP of the request, accounting for the possibility of being behind a proxy.
     """
-    ip = request.META.get("HTTP_X_FORWARDED_FOR", None)
+    ip = request.headers.get("x-forwarded-for", None)
     if ip:
         # X_FORWARDED_FOR returns client1, proxy1, proxy2,...
         ip = ip.split(", ")[0]
