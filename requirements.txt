@@ -131,3 +131,5 @@ pycryptodome==3.19.1
 
 #https://github.com/aiselis/django-api-proxy
 django-api-proxy==0.1.1
+
+loki-logger-handler==1.1.1
