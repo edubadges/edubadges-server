@@ -131,3 +131,4 @@ pycryptodome==3.21.0
 django-api-proxy==0.1.1
 
 django-upgrade==1.23.1
+django-prometheus==2.3.1

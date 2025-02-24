@@ -27,7 +27,6 @@ urlpatterns = [
     path('impersonate/<str:id>', ImpersonateUser.as_view(), name='impersonate_user'),
 ]
 
-
 for provider in providers.registry.get_list():
     try:
         prov_mod = importlib.import_module(provider.get_package() + '.urls')

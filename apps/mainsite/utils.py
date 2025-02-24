@@ -32,26 +32,24 @@ from django.utils.html import format_html
 from premailer import transform
 from resizeimage.resizeimage import resize_contain
 
-slugify_function_path = \
-    getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
+slugify_function_path = getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
 
 slugify = get_callable(slugify_function_path)
 
 
 def client_ip_from_request(request):
-    """Returns the IP of the request, accounting for the possibility of being behind a proxy.
-    """
-    ip = request.headers.get("x-forwarded-for", None)
+    """Returns the IP of the request, accounting for the possibility of being behind a proxy."""
+    ip = request.headers.get('x-forwarded-for', None)
     if ip:
         # X_FORWARDED_FOR returns client1, proxy1, proxy2,...
-        ip = ip.split(", ")[0]
+        ip = ip.split(', ')[0]
     else:
-        ip = request.META.get("REMOTE_ADDR", "")
+        ip = request.META.get('REMOTE_ADDR', '')
     return ip
 
 
 class OriginSettingsObject(object):
-    DefaultOrigin = "http://localhost:8000"
+    DefaultOrigin = 'http://localhost:8000'
 
     @property
     def DEFAULT_HTTP_PROTOCOL(self):
@@ -103,9 +101,8 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
     if r.status_code == 200:
         name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
         storage_name = '{upload_to}/cached/{filename}{ext}'.format(
-            upload_to=upload_to,
-            filename=hashlib.md5(remote_url.encode()).hexdigest(),
-            ext=ext)
+            upload_to=upload_to, filename=hashlib.md5(remote_url.encode()).hexdigest(), ext=ext
+        )
         if not store.exists(storage_name):
             buf = io.BytesIO(r.content)
             store.save(storage_name, buf)
@@ -140,15 +137,14 @@ def list_of(value):
 
 def open_mail_in_browser(html):
     tmp = tempfile.NamedTemporaryFile(delete=False)
-    path = tmp.name + ".html"
-    f = open(path, "w")
+    path = tmp.name + '.html'
+    f = open(path, 'w')
     f.write(html)
     f.close()
-    webbrowser.open("file://" + path)
+    webbrowser.open('file://' + path)
 
 
 class EmailMessageMaker:
-
     @staticmethod
     def _create_example_image(badgeclass):
         path = badgeclass.image.path
@@ -158,9 +154,9 @@ class EmailMessageMaker:
                 encoded = base64.b64encode(svg).decode()
                 return 'data:image/svg+xml;base64,{}'.format(encoded)
         else:
-            background = Image.open(badgeclass.image.path).convert("RGBA")
+            background = Image.open(badgeclass.image.path).convert('RGBA')
 
-        overlay = Image.open(finders.find('images/example_overlay.png')).convert("RGBA")
+        overlay = Image.open(finders.find('images/example_overlay.png')).convert('RGBA')
         if overlay.width != background.width:
             width_ratio = background.width / overlay.width
             new_background_height = background.height * width_ratio
@@ -169,46 +165,54 @@ class EmailMessageMaker:
         position = (0, background.height // 4)
         background.paste(overlay, position, overlay)
         buffered = BytesIO()
-        background.save(buffered, format="PNG")
+        background.save(buffered, format='PNG')
         encoded_string = base64.b64encode(buffered.getvalue()).decode()
         return 'data:image/png;base64,{}'.format(encoded_string)
 
     @staticmethod
     def create_enrollment_denied_email(enrollment):
         template = 'email/enrollment_denied.html'
-        email_vars = {'public_badge_url': enrollment.badge_class.public_url,
-                      'badgeclass_name': enrollment.badge_class.name,
-                      'recipient_name': enrollment.user.full_name,
-                      'deny_reason': enrollment.deny_reason}
+        email_vars = {
+            'public_badge_url': enrollment.badge_class.public_url,
+            'badgeclass_name': enrollment.badge_class.name,
+            'recipient_name': enrollment.user.full_name,
+            'deny_reason': enrollment.deny_reason,
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
     def create_assertion_revoked_email(badge_instance):
         template = 'email/assertion_revoked.html'
-        email_vars = {'public_badge_url': badge_instance.badgeclass.public_url,
-                      'badgeclass_name': badge_instance.badgeclass.name,
-                      'recipient_name': badge_instance.user.full_name,
-                      'ui_url': urllib.parse.urljoin(settings.UI_URL, 'archived'),
-                      'revocation_reason': badge_instance.revocation_reason}
+        email_vars = {
+            'public_badge_url': badge_instance.badgeclass.public_url,
+            'badgeclass_name': badge_instance.badgeclass.name,
+            'recipient_name': badge_instance.user.full_name,
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, 'archived'),
+            'revocation_reason': badge_instance.revocation_reason,
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
     def create_direct_award_deleted_email(direct_award):
         template = 'email/awarded_badge_deleted.html'
-        email_vars = {'public_badge_url': direct_award.badgeclass.public_url,
-                      'badgeclass_name': direct_award.badgeclass.name,
-                      'recipient_name': direct_award.recipient_email,
-                      'ui_url': urllib.parse.urljoin(settings.UI_URL, 'archived'),
-                      'revocation_reason': direct_award.revocation_reason}
+        email_vars = {
+            'public_badge_url': direct_award.badgeclass.public_url,
+            'badgeclass_name': direct_award.badgeclass.name,
+            'recipient_name': direct_award.recipient_email,
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, 'archived'),
+            'revocation_reason': direct_award.revocation_reason,
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
     def create_staff_rights_changed_email(staff_membership):
         template = 'email/staff_rights_changed.html'
-        email_vars = {'recipient_name': staff_membership.user.full_name,
-                      'entity_type': staff_membership.object.__class__.__name__.lower(),
-                      'entity_type_dutch': staff_membership.object.DUTCH_NAME.lower(),
-                      'entity_name': staff_membership.object.name}
+        email_vars = {
+            'recipient_name': staff_membership.user.full_name,
+            'entity_type': staff_membership.object.__class__.__name__.lower(),
+            'entity_type_dutch': staff_membership.object.DUTCH_NAME.lower(),
+            'entity_name': staff_membership.object.name,
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
@@ -219,44 +223,52 @@ class EmailMessageMaker:
         if provisionment.user:
             invitee_name = provisionment.user.full_name
             invitee_name_dutch = provisionment.user.full_name
-        email_vars = {'login_link': login_link,
-                      'invited_by_name': provisionment.created_by.full_name,
-                      'invitee_name': invitee_name,
-                      'invitee_name_dutch': invitee_name_dutch,
-                      'entity_type': provisionment.entity.__class__.__name__.lower(),
-                      'entity_type_dutch': provisionment.entity.DUTCH_NAME.lower(),
-                      'entity_name': provisionment.entity.name,
-                      'support_email_address': 'support@edubadges.nl'}
+        email_vars = {
+            'login_link': login_link,
+            'invited_by_name': provisionment.created_by.full_name,
+            'invitee_name': invitee_name,
+            'invitee_name_dutch': invitee_name_dutch,
+            'entity_type': provisionment.entity.__class__.__name__.lower(),
+            'entity_type_dutch': provisionment.entity.DUTCH_NAME.lower(),
+            'entity_name': provisionment.entity.name,
+            'support_email_address': 'support@edubadges.nl',
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
     def create_student_badge_request_email(user, badge_class):
         template = 'email/requested_badge.html'
-        email_vars = {'public_badge_url': badge_class.public_url,
-                      'badge_name': badge_class.name,
-                      'user_name': user.get_full_name()}
+        email_vars = {
+            'public_badge_url': badge_class.public_url,
+            'badge_name': badge_class.name,
+            'user_name': user.get_full_name(),
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
     def create_endorsement_requested_mail(current_user, user, endorsement):
         template = 'email/notification_endorsement.html'
-        email_vars = {'endorsement': endorsement,
-                      'ui_url': urllib.parse.urljoin(settings.UI_URL,
-                                                     f"badgeclass/{endorsement.endorser.entity_id}/endorsed"),
-                      'ui_url_notifications': urllib.parse.urljoin(settings.UI_URL, 'notifications'),
-                      'user': user,
-                      'current_user': current_user}
+        email_vars = {
+            'endorsement': endorsement,
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, f'badgeclass/{endorsement.endorser.entity_id}/endorsed'),
+            'ui_url_notifications': urllib.parse.urljoin(settings.UI_URL, 'notifications'),
+            'user': user,
+            'current_user': current_user,
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
     def reject_approve_endorsement_mail(user, endorsement, accepted):
         template = 'email/accepted_rejected_endorsement.html'
-        email_vars = {'endorsement': endorsement,
-                      'action_en': 'accepted' if accepted else 'rejected',
-                      'action_nl': 'geaccepteerd' if accepted else 'afgewezen',
-                      'ui_url': urllib.parse.urljoin(settings.UI_URL,
-                                                     f"badgeclass/{endorsement.endorsee.entity_id}/endorsements"),
-                      'user': user}
+        email_vars = {
+            'endorsement': endorsement,
+            'action_en': 'accepted' if accepted else 'rejected',
+            'action_nl': 'geaccepteerd' if accepted else 'afgewezen',
+            'ui_url': urllib.parse.urljoin(
+                settings.UI_URL, f'badgeclass/{endorsement.endorsee.entity_id}/endorsements'
+            ),
+            'user': user,
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
@@ -266,11 +278,13 @@ class EmailMessageMaker:
         entity_type = entity.__class__.__name__.lower()
         entity_type_dutch = entity.DUTCH_NAME.lower()
         determiner = 'an' if entity_type[0] in 'aeiou' else 'a'
-        email_vars = {'staff_page_url': new_staff_membership.staff_page_url,
-                      'entity_type': entity_type,
-                      'entity_type_dutch': entity_type_dutch,
-                      'entity_name': entity.name,
-                      'determiner': determiner}
+        email_vars = {
+            'staff_page_url': new_staff_membership.staff_page_url,
+            'entity_type': entity_type,
+            'entity_type_dutch': entity_type_dutch,
+            'entity_name': entity.name,
+            'determiner': determiner,
+        }
         return render_to_string(template, email_vars)
 
     @staticmethod
@@ -294,11 +308,11 @@ class EmailMessageMaker:
         template = 'email/notification_badge.html'
         email_vars = {
             'user_email': student.email,
-            'ui_url': urllib.parse.urljoin(settings.UI_URL, f"badgeclass/{badge_class.entity_id}/enrollments"),
+            'ui_url': urllib.parse.urljoin(settings.UI_URL, f'badgeclass/{badge_class.entity_id}/enrollments'),
             'ui_url_notifications': urllib.parse.urljoin(settings.UI_URL, 'notifications'),
             'badgeclass_name': badge_class.name,
             'enrollment_evidence_description': created_enrollment.narrative,
-            'enrollment_evidence_url': created_enrollment.evidence_url
+            'enrollment_evidence_url': created_enrollment.evidence_url,
         }
         return render_to_string(template, email_vars)
 
@@ -369,7 +383,7 @@ class EmailMessageMaker:
         email_vars = {
             'direct_award_count': direct_award_bundle.direct_award_scheduled_count,
             'direct_award_bundle_url': direct_award_bundle.url,
-            'scheduled_at': direct_award_bundle.scheduled_at.strftime("%Y-%m-%d %H:%M"),
+            'scheduled_at': direct_award_bundle.scheduled_at.strftime('%Y-%m-%d %H:%M'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
         }
@@ -382,17 +396,14 @@ class EmailMessageMaker:
             'current_user': current_user,
             'date': datetime.now(),
             'environment': settings.DOMAIN,
-            'message': message
+            'message': message,
         }
         return render_to_string(template, email_vars)
 
     @staticmethod
     def create_email_validation_mail(code, user, badge, issuer):
         template = 'email/email_validation.html'
-        email_vars = {'code': code,
-                      'user': user,
-                      'badge': badge,
-                      'issuer': issuer}
+        email_vars = {'code': code, 'user': user, 'badge': badge, 'issuer': issuer}
         return render_to_string(template, email_vars)
 
 
@@ -402,7 +413,7 @@ def send_mail(subject, message, recipient_list=None, html_message=None, bcc=None
     if html_message:
         html_with_inline_css = transform(html_message)
         msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=None, to=recipient_list, bcc=bcc)
-        msg.content_subtype = "html"
+        msg.content_subtype = 'html'
         msg.send()
     else:
         mail.send_mail(subject, message, from_email=None, recipient_list=recipient_list, html_message=html_message)
@@ -446,11 +457,11 @@ def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
 
 
 def add_watermark(uploaded_image, is_svg):
-    text = "DEMO"
+    text = 'DEMO'
     angle = 45
     opacity = 0.85
     absolute = pathlib.Path().absolute()
-    font = f"{absolute}/apps/mainsite/arial.ttf"
+    font = f'{absolute}/apps/mainsite/arial.ttf'
 
     if is_svg:
         svg_buf = io.BytesIO()
@@ -469,9 +480,9 @@ def add_watermark(uploaded_image, is_svg):
     n_width = right - left
     n_height = bottom - top
     draw = ImageDraw.Draw(watermark, 'RGBA')
-    draw.text(((watermark.size[0] - n_width) / 2,
-               (watermark.size[1] - n_height) / 2),
-              text, font=n_font, fill=(220, 12, 12))
+    draw.text(
+        ((watermark.size[0] - n_width) / 2, (watermark.size[1] - n_height) / 2), text, font=n_font, fill=(220, 12, 12)
+    )
     watermark = watermark.rotate(angle, Image.BICUBIC)
     alpha = watermark.split()[3]
     alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
@@ -482,11 +493,9 @@ def add_watermark(uploaded_image, is_svg):
     new_image.save(byte_string, 'PNG')
     image_name = uploaded_image.name
     if is_svg:
-        pattern = re.compile(r"\.svg", re.IGNORECASE)
+        pattern = re.compile(r'\.svg', re.IGNORECASE)
         image_name = pattern.sub('.png', image_name)
-    return InMemoryUploadedFile(byte_string, None,
-                                image_name, 'image/png',
-                                byte_string.getvalue().__len__(), None)
+    return InMemoryUploadedFile(byte_string, None, image_name, 'image/png', byte_string.getvalue().__len__(), None)
 
 
 def resize_image(uploaded_image):
@@ -494,34 +503,28 @@ def resize_image(uploaded_image):
         f = open(uploaded_image.name, 'rb')
         image = Image.open(f)
         if _decompression_bomb_check(image):
-            raise ValidationError("Invalid image")
-    except IOError as e:
+            raise ValidationError('Invalid image')
+    except IOError:
         return uploaded_image
     if image.format == 'PNG':
         max_square = getattr(settings, 'IMAGE_FIELD_MAX_PX', 400)
-        smaller_than_canvas = (image.width < max_square and image.height < max_square)
+        smaller_than_canvas = image.width < max_square and image.height < max_square
         if smaller_than_canvas:
-            max_square = (image.width
-                          if image.width > image.height
-                          else image.height)
+            max_square = image.width if image.width > image.height else image.height
         new_image = resize_contain(image, (max_square, max_square))
         byte_string = io.BytesIO()
         new_image.save(byte_string, 'PNG')
-        return InMemoryUploadedFile(byte_string, None,
-                                    uploaded_image.name, 'image/png',
-                                    byte_string.getvalue().__len__(), None)
+        return InMemoryUploadedFile(
+            byte_string, None, uploaded_image.name, 'image/png', byte_string.getvalue().__len__(), None
+        )
 
 
 def scrub_svg_image(uploaded_image):
-    MALICIOUS_SVG_TAGS = [
-        "script"
-    ]
-    MALICIOUS_SVG_ATTRIBUTES = [
-        "onload"
-    ]
-    SVG_NAMESPACE = "http://www.w3.org/2000/svg"
+    MALICIOUS_SVG_TAGS = ['script']
+    MALICIOUS_SVG_ATTRIBUTES = ['onload']
+    SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
     uploaded_image.file.seek(0)
-    ET.register_namespace("", SVG_NAMESPACE)
+    ET.register_namespace('', SVG_NAMESPACE)
     tree = ET.parse(uploaded_image.file)
     root = tree.getroot()
 

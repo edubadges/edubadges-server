@@ -1,4 +1,3 @@
-import json
 import os
 
 from mainsite import TOP_DIR
@@ -83,6 +82,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'lti13.middleware.SameSiteMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -99,6 +99,7 @@ MIDDLEWARE = [
     # 'mainsite.middleware.TrailingSlashMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'mainsite.urls'
@@ -358,7 +359,7 @@ LOGGING = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'BACKEND': 'django_prometheus.cache.backends.memcached.PyMemcacheCache',
         'LOCATION': os.environ.get('MEMCACHED', '0.0.0.0:11211'),
     }
 }
@@ -536,7 +537,7 @@ GRAPHENE = {'SCHEMA': 'apps.mainsite.schema.schema'}
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django_prometheus.db.backends.mysql',
         'NAME': os.environ['BADGR_DB_NAME'],
         'USER': os.environ['BADGR_DB_USER'],
         'PASSWORD': os.environ['BADGR_DB_PASSWORD'],
