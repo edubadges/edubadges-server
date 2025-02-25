@@ -1,5 +1,4 @@
 # Created by wiggins@concentricsky.com on 8/27/15.
-from mainsite.utils import client_ip_from_request
 
 from .base import BaseBadgrEvent
 
@@ -10,10 +9,7 @@ class BaseBadgeAssertionEvent(BaseBadgrEvent):
         self.request = request
 
     def to_representation(self):
-        return {
-            'badgeInstance': self.badge_instance.json,
-            'referer': self.request.META.get('HTTP_REFERER')
-        }
+        return {'badgeInstance': self.badge_instance.json, 'referer': self.request.headers.get('referer')}
 
 
 class BadgeAssertionCheckedEvent(BaseBadgeAssertionEvent):

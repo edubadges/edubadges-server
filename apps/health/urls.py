@@ -1,7 +1,7 @@
-from django.conf.urls import url
+from django.urls import path
 
 from .views import health
 
 urlpatterns = [
-    url(r'^$', health, name='server_health'),
+    path('', health, name='server_health'),
 ]
