@@ -278,45 +278,61 @@ if not os.path.exists(LOGS_DIR):
 
 LOG_STORAGE_DURATION = 30  # days
 
+handlers = {
+    'badgr_events': {
+        'level': 'INFO',
+        'formatter': 'json',
+        'class': 'logging.handlers.TimedRotatingFileHandler',
+        'when': 'H',
+        'interval': 1,
+        'backupCount': 30 * 24,  # 30 days times 24 hours
+        'filename': os.path.join(LOGS_DIR, 'badgr_events.log'),
+    },
+    'badgr_debug': {
+        'level': 'DEBUG',
+        'formatter': 'badgr',
+        'class': 'logging.handlers.TimedRotatingFileHandler',
+        'when': 'H',
+        'interval': 1,
+        'backupCount': 30 * 24,  # 30 days times 24 hours
+        'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
+    },
+    'badgr_debug_console': {
+        'level': 'DEBUG',
+        'formatter': 'default',
+        'filters': ['require_debug_true'],
+        'class': 'logging.StreamHandler',
+    },
+}
+
+debug_handlers = ['badgr_debug']
+SERVER_NAME = os.environ['SERVER_NAME']
+LOKI_URL = 'http://195.169.124.131:3100/loki/api/v1/push'
+
+if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
+    handlers = handlers | {
+        'badgr_debug_loki': {
+            'level': 'DEBUG',  # Log level. Required
+            'class': 'loki_logger_handler.loki_logger_handler.LokiLoggerHandler',  # Required
+            'timeout': 1,  # Post request timeout, default is 0.5. Optional
+            'labels': {
+                'job': 'badgr_debug',
+                'domain': DOMAIN,
+                'server': SERVER_NAME,
+            },  # Tags / Labels to attach to the log.
+            'url': LOKI_URL,  # Loki url.
+        }
+    }
+    debug_handlers.append('badgr_debug_loki')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {
-        'mail_admins': {'level': 'ERROR', 'filters': [], 'class': 'django.utils.log.AdminEmailHandler'},
-        'badgr_events': {
-            'level': 'INFO',
-            'formatter': 'json',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'H',
-            'interval': 1,
-            'backupCount': 30 * 24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_events.log'),
-        },
-        'badgr_debug': {
-            'level': 'INFO',
-            'formatter': 'badgr',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'H',
-            'interval': 1,
-            'backupCount': 30 * 24,  # 30 days times 24 hours
-            'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
-        },
-        'badgr_debug_console': {
-            'level': 'DEBUG',
-            'formatter': 'default',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-        },
-    },
+    'handlers': handlers,
     'loggers': {
         'django': {
             'handlers': ['badgr_debug_console'],
             'level': 'DEBUG',
-            'propagate': True,
-        },
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
             'propagate': True,
         },
         'Badgr.Events': {
@@ -325,12 +341,7 @@ LOGGING = {
             'propagate': False,
         },
         'Badgr.Debug': {
-            'handlers': ['badgr_debug'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'apscheduler': {
-            'handlers': ['badgr_debug'],
+            'handlers': debug_handlers,
             'level': 'DEBUG',
             'propagate': True,
         },
@@ -342,6 +353,12 @@ LOGGING = {
             '()': 'mainsite.formatters.JsonFormatter',
             'format': '%(asctime)s',
             'datefmt': '%Y-%m-%dT%H:%M:%S%z',
+        },
+        'loki': {
+            '()': 'django_loki_reloaded.LokiFormatter',  # required
+            'format': '[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] [%(funcName)s] %(message)s',
+            'dfmt': '%Y-%m-%d %H:%M:%S',
+            'style': '',
         },
     },
     'filters': {
