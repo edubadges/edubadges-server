@@ -1070,7 +1070,10 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     def validate(self):
         data = {'profile': {'id': self.recipient_identifier}, 'data': self.get_json()}
         response = requests.post(
-            json=data, url=urljoin(settings.VALIDATOR_URL, 'results'), headers={'Accept': 'application/json'}
+            json=data,
+            url=urljoin(settings.VALIDATOR_URL, 'results'),
+            headers={'Accept': 'application/json'},
+            timeout=60,
         )
         return response.json()
 

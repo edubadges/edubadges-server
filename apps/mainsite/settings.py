@@ -359,6 +359,7 @@ LOGGING = {
 
 CACHES = {
     'default': {
+        # using django_prometheus to monitor cache: https://github.com/korfuri/django-prometheus/blob/master/README.md#monitoring-your-caches
         'BACKEND': 'django_prometheus.cache.backends.memcached.PyMemcacheCache',
         'LOCATION': os.environ.get('MEMCACHED', '0.0.0.0:11211'),
     }
@@ -537,6 +538,7 @@ GRAPHENE = {'SCHEMA': 'apps.mainsite.schema.schema'}
 # Database
 DATABASES = {
     'default': {
+        # Use of django_prometheus to monitor db: https://github.com/korfuri/django-prometheus/blob/master/README.md#monitoring-your-databases
         'ENGINE': 'django_prometheus.db.backends.mysql',
         'NAME': os.environ['BADGR_DB_NAME'],
         'USER': os.environ['BADGR_DB_USER'],

@@ -39,7 +39,7 @@ class OIDCAuthentication(BaseAuthentication):
         headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
         url = f'{settings.EDUID_PROVIDER_URL}/introspect'
         auth = (settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET)
-        response = requests.post(url, data=urllib.parse.urlencode(payload), auth=auth, headers=headers)
+        response = requests.post(url, data=urllib.parse.urlencode(payload), auth=auth, headers=headers, timeout=60)
         if response.status_code != 200:
             logger.info(f'OIDCAuthentication bad response {response.status_code} {response.json()}')
             return None
