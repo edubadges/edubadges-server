@@ -3,6 +3,8 @@ import os
 included_endpoint_prefixes = [
     '/directaward/create',
     '/directaward/bundle',
+    '/directaward/edit',
+    '/directaward/accept',
     '/directaward/delete-direct-awards',
     '/directaward/resend-direct-awards',
     '/directaward/revoke-direct-awards',
@@ -16,8 +18,8 @@ included_endpoint_prefixes = [
     '/public/issuers',
     '/public/badges',
     '/public/assertions',
-    '/public/validator'
-    '/public/institution'
+    '/public/validator',
+    '/public/institution',
 ]
 
 excluded_keywords = ['pubkey', 'baked', 'image']
@@ -38,17 +40,14 @@ def _contains_excluded_keywords(path):
 
 
 def custom_postprocessing_hook(result, generator, request, public):
-    result["security"] = [{"openId": []}],
+    result['security'] = ([{'openId': []}],)
     url_ = os.environ['EDUID_PROVIDER_URL']
-    result["components"]["securitySchemes"] = {
-        "openId": {
-            "type": "openIdConnect",
-            "openIdConnectUrl": f"{url_}/.well-known/openid-configuration"
-        }
+    result['components']['securitySchemes'] = {
+        'openId': {'type': 'openIdConnect', 'openIdConnectUrl': f'{url_}/.well-known/openid-configuration'}
     }
-    for path, details in result["paths"].items():
+    for path, details in result['paths'].items():
         for method, conf in details.items():
-            conf["security"] = [{"openId": ["openid"]}]
+            conf['security'] = [{'openId': ['openid']}]
     return result
 
 
