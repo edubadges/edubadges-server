@@ -101,7 +101,7 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
     if r.status_code == 200:
         name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
         storage_name = '{upload_to}/cached/{filename}{ext}'.format(
-            upload_to=upload_to, filename=hashlib.md5(remote_url.encode()).hexdigest(), ext=ext
+            upload_to=upload_to, filename=hashlib.md5(remote_url.encode(), usedforsecurity=False).hexdigest(), ext=ext
         )
         if not store.exists(storage_name):
             buf = io.BytesIO(r.content)
