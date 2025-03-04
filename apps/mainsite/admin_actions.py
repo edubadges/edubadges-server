@@ -1,5 +1,3 @@
-# Created by wiggins@concentricsky.com on 10/8/15.
-
 from django.contrib import messages
 from django.contrib.admin import helpers
 from django.contrib.admin.utils import get_deleted_objects, model_ngettext
@@ -9,7 +7,6 @@ from django.db import router
 from django.template.response import TemplateResponse
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy, gettext as _
-
 
 def delete_selected(modeladmin, request, queryset):
     """

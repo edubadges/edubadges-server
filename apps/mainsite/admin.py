@@ -1,4 +1,3 @@
-# Created by wiggins@concentricsky.com on 10/8/15.
 from allauth.socialaccount.models import SocialToken, SocialAccount
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin, StackedInline
