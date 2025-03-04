@@ -48,7 +48,7 @@ class DirectAwardSerializer(serializers.Serializer):
             sender=self.__class__,
             user=validated_data["created_by"],
             method="UPDATE",
-            summary="Directaward updated",
+            summary="Directaward update",
             request=self.context["request"],
             direct_award_id=validated_data["entity_id"],
         )
