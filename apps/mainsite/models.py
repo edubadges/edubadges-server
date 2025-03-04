@@ -5,8 +5,6 @@ import urllib.parse
 from datetime import datetime, timedelta
 from hashlib import sha1
 
-from cachemodel.models import CacheModel
-from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models, transaction
@@ -16,16 +14,21 @@ from django.utils.deconstruct import deconstructible
 from oauth2_provider.models import AccessToken
 from rest_framework.authtoken.models import Token
 
+from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
+from cachemodel.models import CacheModel
+
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
 class BaseAuditedModel(CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True,
-                                   related_name="+")
+    created_by = models.ForeignKey(
+        'badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name='+'
+    )
     updated_at = models.DateTimeField(auto_now=True)
-    updated_by = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True,
-                                   related_name="+")
+    updated_by = models.ForeignKey(
+        'badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name='+'
+    )
 
     class Meta:
         abstract = True
@@ -33,6 +36,7 @@ class BaseAuditedModel(CacheModel):
     @property
     def cached_creator(self):
         from badgeuser.models import BadgeUser
+
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
@@ -53,11 +57,14 @@ class EmailBlacklist(models.Model):
         email_encoded = base64.b64encode(email.encode('utf-8'))
         hashed = hmac.new(secret_key.encode('utf-8'), email_encoded + bytes(str(timestamp), 'utf-8'), sha1)
 
-        return reverse('unsubscribe', kwargs={
-            'email_encoded': email_encoded,
-            'expiration': timestamp,
-            'signature': hashed.hexdigest(),
-        })
+        return reverse(
+            'unsubscribe',
+            kwargs={
+                'email_encoded': email_encoded,
+                'expiration': timestamp,
+                'signature': hashed.hexdigest(),
+            },
+        )
 
     @staticmethod
     def verify_email_signature(email_encoded, expiration, signature):
@@ -73,10 +80,10 @@ class BadgrAppManager(Manager):
         existing_session_app_id = None
 
         if request:
-            if request.META.get('HTTP_ORIGIN'):
-                origin = request.META.get('HTTP_ORIGIN')
-            elif request.META.get('HTTP_REFERER'):
-                origin = request.META.get('HTTP_REFERER')
+            if request.headers.get('origin'):
+                origin = request.headers.get('origin')
+            elif request.headers.get('referer'):
+                origin = request.headers.get('referer')
             existing_session_app_id = request.session.get('badgr_app_pk', None)
 
         if origin:
@@ -93,7 +100,7 @@ class BadgrAppManager(Manager):
                 pass
         badgr_app_id = getattr(settings, 'BADGR_APP_ID', None)
         if raise_exception and not badgr_app_id:
-            raise ImproperlyConfigured("Must specify a BADGR_APP_ID")
+            raise ImproperlyConfigured('Must specify a BADGR_APP_ID')
         return self.get(id=badgr_app_id)
 
 
@@ -110,8 +117,9 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, CacheModel):
     oauth_authorization_redirect = models.URLField(null=True)
     use_auth_code_exchange = models.BooleanField(default=False)
     is_demo_environment = models.BooleanField(default=False, blank=True, null=True)
-    oauth_application = models.ForeignKey("oauth2_provider.Application", on_delete=models.PROTECT, null=True,
-                                          blank=True)
+    oauth_application = models.ForeignKey(
+        'oauth2_provider.Application', on_delete=models.PROTECT, null=True, blank=True
+    )
 
     objects = BadgrAppManager()
 
@@ -121,7 +129,7 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, CacheModel):
 
 @deconstructible
 class DefinedScopesValidator(object):
-    message = "Does not match defined scopes"
+    message = 'Does not match defined scopes'
     code = 'invalid'
 
     def __call__(self, value):
@@ -172,7 +180,7 @@ class AccessTokenProxy(AccessToken):
     @property
     def obscured_token(self):
         if self.token:
-            return "{}***".format(self.token[:4])
+            return '{}***'.format(self.token[:4])
 
 
 class LegacyTokenProxy(Token):
@@ -190,7 +198,7 @@ class LegacyTokenProxy(Token):
     @property
     def obscured_token(self):
         if self.key:
-            return "{}***".format(self.key[:4])
+            return '{}***'.format(self.key[:4])
 
 
 class ArchiveMixin(CacheModel):
@@ -216,7 +224,8 @@ class ArchiveMixin(CacheModel):
         publish_parent = kwargs.pop('publish_parent', True)
         if not self.may_archive:
             raise ProtectedError(
-                "{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
+                '{} may only be deleted if there are no awarded Assertions.'.format(self.__class__.__name__), self
+            )
         if hasattr(self, 'children'):
             for child in self.children:
                 child.archive(publish_parent=False)
@@ -244,5 +253,6 @@ class SystemNotification(models.Model):
         (NOTIFICATION_TYPE_WARNING, 'warning'),
         (NOTIFICATION_TYPE_INFO, 'info'),
     )
-    notification_type = models.CharField(max_length=254, choices=NOTIFICATION_TYPE_CHOICES, blank=False, null=False,
-                                         default=NOTIFICATION_TYPE_INFO)
+    notification_type = models.CharField(
+        max_length=254, choices=NOTIFICATION_TYPE_CHOICES, blank=False, null=False, default=NOTIFICATION_TYPE_INFO
+    )

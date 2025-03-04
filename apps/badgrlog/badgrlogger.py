@@ -1,5 +1,3 @@
-# Created by wiggins@concentricsky.com on 8/27/15.
-
 import logging
 
 from .events.base import BaseBadgrEvent

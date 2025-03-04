@@ -866,7 +866,7 @@ class DirectAwardDelete(BaseEntityDetailView):
                     user=request.user,
                     method='DELETE',
                     direct_award_id=direct_award['entity_id'],
-                    summary=f'{e}',
+                    summary=f'Exception: {e}',
                 )
                 un_successful_direct_awards.append(
                     {'error': str(e), 'eppn': direct_award.get('eppn'), 'email': direct_award.get('recipient_email')}

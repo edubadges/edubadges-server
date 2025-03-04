@@ -1,6 +1,3 @@
-# Created by wiggins@concentricsky.com on 8/24/15.
-
-
 import os
 
 from celery import Celery
