@@ -3,7 +3,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 from directaward.api import (
     DirectAwardBundleList,
-    DirectAwardDetail,
     DirectAwardAccept,
     DirectAwardRevoke,
     DirectAwardResend,
