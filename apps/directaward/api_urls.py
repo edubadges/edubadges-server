@@ -13,7 +13,6 @@ from directaward.api import (
 
 urlpatterns = [
     path('create', csrf_exempt(DirectAwardBundleList.as_view()), name='direct_award_bundle_list'),
-    path('edit/<str:entity_id>', DirectAwardDetail.as_view(), name='direct_award_detail'),
     path('bundle/<str:entity_id>', DirectAwardBundleView.as_view(), name='direct_award_detail'),
     path('accept/<str:entity_id>', DirectAwardAccept.as_view(), name='direct_award_accept'),
     path('revoke-direct-awards', DirectAwardRevoke.as_view(), name='direct_award_revoke'),
