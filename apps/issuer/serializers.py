@@ -230,6 +230,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                                                validators=[URLValidator()])
     quality_assurance_description = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
     grade_achieved_required = serializers.BooleanField(required=False, default=False)
+    eqf_nlqf_level_verified = serializers.BooleanField(required=False, default=False)
     stackable = serializers.BooleanField(required=False, default=False)
 
     alignments = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
@@ -340,7 +341,7 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                         'evidence_student_required', 'award_non_validated_name_allowed',
                         'direct_awarding_disabled', 'self_enrollment_disabled',
                         'alignment_items', 'expiration_period', 'self_enrollment_disabled',
-                        'stackable', 'grade_achieved_required']
+                        'stackable', 'grade_achieved_required', 'eqf_nlqf_level_verified']
         # Because of new required fields there are invalid badge_classes that are allowed to update
         upgrade_keys = ['quality_assurance_description', 'quality_assurance_name', 'quality_assurance_url',
                         'assessment_type', 'assessment_supervised', 'assessment_id_verified', 'participation']

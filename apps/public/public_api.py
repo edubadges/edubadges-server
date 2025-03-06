@@ -424,6 +424,7 @@ class BadgeClassJson(JSONComponentView):
             json['participation'] = badge_class.participation
             json['stackable'] = badge_class.stackable
             json['gradeAchievedRequired'] = badge_class.grade_achieved_required
+            json['eqfNlqfLevelVerified'] = badge_class.eqf_nlqf_level_verified
             json['typeBadgeClass'] = badge_class.badge_class_type
         return json
 

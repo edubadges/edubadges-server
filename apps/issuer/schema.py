@@ -201,7 +201,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
                   'participation', 'type_badge_class',
                   'assessment_type', 'assessment_id_verified', 'assessment_supervised',
                   'quality_assurance_name', 'quality_assurance_url', 'quality_assurance_description',
-                  'grade_achieved_required', 'stackable')
+                  'grade_achieved_required', 'eqf_nlqf_level_verified', 'stackable')
 
     direct_awards = graphene.List(DirectAwardType)
     direct_award_bundles = graphene.List(DirectAwardBundleType)

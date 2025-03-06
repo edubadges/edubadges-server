@@ -557,6 +557,7 @@ class BadgeClass(
     quality_assurance_description = models.TextField(blank=True, null=True, default=None)
     grade_achieved_required = models.BooleanField(default=False)
     stackable = models.BooleanField(default=False)
+    eqf_nlqf_level_verified = models.BooleanField(default=False)
 
     BADGE_CLASS_TYPE_MICRO = 'micro_credential'
     BADGE_CLASS_TYPE_REGULAR = 'regular'
@@ -1297,6 +1298,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
             json['badge'] = badge_class.get_json(obi_version=obi_version, include_extra=include_extra)
             json['badge']['stackable'] = badge_class.stackable
             json['badge']['gradeAchievedRequired'] = badge_class.grade_achieved_required
+            json['badge']['eqfNlqfLevelVerified'] = badge_class.eqf_nlqf_level_verified
             json['badge']['typeBadgeClass'] = badge_class.badge_class_type
             json['badge']['participation'] = badge_class.participation
             json['badge']['assessmentType'] = badge_class.assessment_type

@@ -306,8 +306,8 @@ handlers = {
 }
 
 debug_handlers = ['badgr_debug']
-SERVER_NAME = os.environ['SERVER_NAME']
-LOKI_URL = os.environ['LOKI_API_URL']
+SERVER_NAME = os.environ.get('SERVER_NAME', 'localhost')
+LOKI_URL = os.environ.get('LOKI_API_URL', 'https://localhost')
 
 # Only ACC and PROD are connected to our central logging and monitoring server
 if DOMAIN.startswith('acc') or DOMAIN.startswith('prod'):
