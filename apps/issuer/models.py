@@ -795,13 +795,13 @@ class BadgeClass(
             """build a unique identity from alignment json"""
             return '&'.join('{}={}'.format(k, getattr(alignment, k)) for k in keys)
 
-        existing_idx = {_obj_identity(a): a for a in self.alignment_items}
-        new_idx = {_identity(a): a for a in value}
-
         with transaction.atomic():
             # HACKY, but force a save to self otherwise we can't create related objects here
             if not self.pk:
                 self.save()
+
+            existing_idx = {_obj_identity(a): a for a in self.alignment_items}
+            new_idx = {_identity(a): a for a in value}
 
             # add missing records
             for align in value:
