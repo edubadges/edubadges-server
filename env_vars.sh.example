@@ -33,8 +33,8 @@ export UI_URL="http://localhost:4000"
 export UNSUBSCRIBE_SECRET_KEY="secret"
 export LC_ALL="en_US.UTF-8"
 export LANG="en_US.UTF-8"
-export MEMCACHED_HOST="127.0.0.1"
-export MEMCACHED_PORT="11211"
+export MEMCACHED="127.0.0.1:11211"
+export LOKI_API_URL="https://localhost"
 
 # Only needed when wallet import is used
 export OB3_AGENT_URL_SPHEREON="http://localhost:5000"

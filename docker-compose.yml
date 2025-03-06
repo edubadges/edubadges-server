@@ -48,6 +48,7 @@ services:
       - OB3_AGENT_URL_UNIME=https://agent.poc9.eduwallet.nl
       - OB3_AGENT_URL_SPHEREON=http://veramo-agent:3000
       - OB3_AGENT_AUTHZ_TOKEN_SPHEREON=${OB3_AGENT_AUTHZ_TOKEN_SPHEREON}
+      - LOKI_API_URL=http://localhost
     networks:
       - shared-network
       - edubadges-server
