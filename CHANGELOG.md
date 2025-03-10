@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [8.0.0] - 2025-03-10
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v7.4.2...v8.0.0</br>
+Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.2...v8.0.0
+
+- 1XcPzMWl Optie wel tonen EQF/NLQF
+- Annotated ValidatorVersion get with method_decorator
+- Moved setting up alignment items to after save() of BadgeClass to avoid primary key error in Django 4.2
+- Added LOKI_API_URL env var
+- Remove directaward detail import
+- Removed directaward edit functionality
+- Removed unnecessary loki log formatter
+- Update to django 4.2.17
+- Merge branch 'develop' into feature/django_update_2
+- Removed all created by wiggins comments.
+- Delete access token when user logs out
+- Increased token expiration to 8 hours
+- Made access token valid for 2 hours instead of 24 hours. Best practice is to have acceptable short-lived access tokens.
+- Added usedforsecurity=False to make explicit that MD5 is not used for security related operations.
+- Processed review comments from Ber and Bandit code scanning
+- Added django-prometheus dependency and adjusted settings.py
+- Upgrade to Django 4.2 and also updating some other dependencies
+- Removed djanga loki reloaded
+- Use of loki_logger_handler
+- Updated loki handler tags
+- Fixed Loki handler class
+- Import LokiFormatter
+- Using loki log handler instead of syslog
+- Updated openapi spec for direct award API
+- Extending several schemas, adding accept and edit DA to swagger operation list
+- Domain should start with acc, and not app for additional syslog log handler
+- Quote'd Slog IP
+- Fixed variable name
+- Added DEBUG_HANDLERS var
+- Cleaned up logging
+- Added syslog log handler to loggers
+- Updating log handlers
+
 ## [7.4.2] - 2025-02-19
 
 #### Full GitHub changelogs:
@@ -12,9 +52,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 Backend: https://github.com/edubadges/edubadges-server/compare/v7.4.1...v7.4.2</br>
 Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.1...v7.4.2
 
- - Fix for undefined name institution
- - Update CHANGELOG.md
-
+- Fix for undefined name institution
+- Update CHANGELOG.md
 
 ## [7.4.1] - 2025-02-18
 
