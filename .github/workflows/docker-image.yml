@@ -1,5 +1,9 @@
 name: Docker Image CI
 
+permissions:
+  id-token: write
+  attestations: write
+
 on:
   push:
     branches: [ "develop" ]
@@ -33,6 +37,6 @@ jobs:
     - name: Generate artifact attestation
       uses: actions/attest-build-provenance@v2
       with:
-        subject-name: index.docker.io/my-docker-hub-namespace/my-docker-hub-repository
+        subject-name: '${{ github.workspace }}/edubadges-server'
         subject-digest: ${{ steps.push.outputs.digest }}
         push-to-registry: true
