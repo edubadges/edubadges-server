@@ -149,7 +149,7 @@ from  issuer_badgeclass bc
 inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
-where  bc.is_private = 0;
+where  bc.is_private = 0 and (f.visibility_type <> 'TEST' OR f.visibility_type IS NULL);
             """, {})
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
 
