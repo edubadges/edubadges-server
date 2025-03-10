@@ -39,4 +39,4 @@ jobs:
       with:
         subject-name: ${{ secrets.DOCKER_USERNAME }}/edubadges-server
         subject-digest: ${{ steps.push.outputs.digest }}
-        push-to-registry: true
+#        push-to-registry: true
