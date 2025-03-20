@@ -96,7 +96,7 @@ class CurrentInstitution(APIView):
         with connection.cursor() as cursor:
             cursor.execute("""
     select ins.id, ins.name_english, ins.name_dutch, ins.description_english, ins.description_dutch,
-            ins.created_at, ins.image_english, ins.image_dutch, ins.brin, ins.grading_table,
+            ins.created_at, ins.image_english, ins.image_dutch, ins.brin, ins.grading_table, ins.eppn_reg_exp_format,
             u.email, u.first_name, u.last_name
     from institution_institution ins
     left join staff_institutionstaff sta_ins on sta_ins.institution_id = ins.id
