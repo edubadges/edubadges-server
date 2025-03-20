@@ -46,7 +46,7 @@ class ExceptionHandlerMiddleware(object):
         return self.get_response(request)
 
     def process_exception(self, request, exception):
-        logger.exception(exception)
+        logger.exception(exception, exc_info=True)
         traceback.print_exc()
         # APIException are handled by various other handlers, and we don't want to swallow those
         if "json" in request.content_type and not isinstance(exception, APIException):
