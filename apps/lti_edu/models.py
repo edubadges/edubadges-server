@@ -19,7 +19,7 @@ class StudentsEnrolled(BaseVersionedEntity, models.Model):
     badge_instance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE, null=True)
     date_awarded = models.DateTimeField(default=None, blank=True, null=True)
     denied = models.BooleanField(default=False)
-    deny_reason = models.CharField(max_length=255, blank=True, null=True)
+    deny_reason = models.TextField(blank=True, null=True, default=None)
     evidence_url = models.CharField(max_length=512, blank=True, null=True, default=None)
     narrative = models.TextField(blank=True, null=True, default=None)
 
