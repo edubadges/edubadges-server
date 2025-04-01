@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [8.1.0] - 2025-04-01
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.0.1...v8.1.0</br>
+Frontend: https://github.com/edubadges/edubadges-ui/compare/v8.0.0...v8.1.0
+
+- Added full_name for UserType
+- Log stacktraces in case of errors
+- Increase size deny_reason https://trello.com/c/QwnKTq4l/1056-1406-data-too-long-for-column-denyreason-at-row-1
+- Added ins.eppn_reg_exp_format to current institution
+- Fix for py1gdK6N https://trello.com/c/py1gdK6N/1057-open-aanvragen-telling-foutief-bij-issuergroep
+- Added EXTENSIONS_ROOT_URL to docker compose
+
 ## [8.0.1] - 2025-03-11
 
 #### Full GitHub changelogs:
