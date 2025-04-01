@@ -41,7 +41,7 @@ class BadgeUserType(DjangoObjectType):
     class Meta:
         model = BadgeUser
         fields = ('id', 'first_name', 'last_name', 'email', 'date_joined', 'entity_id', 'userprovisionments',
-                  'validated_name')
+                  'validated_name', 'full_name')
 
     direct_awards = graphene.List(DirectAwardType)
     institution = graphene.Field('institution.schema.InstitutionType')
@@ -55,6 +55,7 @@ class BadgeUserType(DjangoObjectType):
     schac_homes = graphene.List(graphene.String)
     eppns = graphene.List(graphene.String)
     has_issued_direct_award_bundle = graphene.Boolean()
+    full_name = graphene.String()
 
     def resolve_institution_staff(self, info):
         return self.cached_institution_staff()

@@ -96,7 +96,7 @@ class CurrentInstitution(APIView):
         with connection.cursor() as cursor:
             cursor.execute("""
     select ins.id, ins.name_english, ins.name_dutch, ins.description_english, ins.description_dutch,
-            ins.created_at, ins.image_english, ins.image_dutch, ins.brin, ins.grading_table,
+            ins.created_at, ins.image_english, ins.image_dutch, ins.brin, ins.grading_table, ins.eppn_reg_exp_format,
             u.email, u.first_name, u.last_name
     from institution_institution ins
     left join staff_institutionstaff sta_ins on sta_ins.institution_id = ins.id
@@ -165,7 +165,7 @@ select i.image_dutch, i.image_english, i.name_dutch, i.name_english, i.archived,
     (select count(id) from issuer_badgeinstance WHERE issuer_id = i.id) as assertionCount, 
     (select count(id) from issuer_badgeclass WHERE issuer_id = i.id) as badgeclassCount,
     (select count(*) from lti_edu_studentsenrolled l inner join issuer_badgeclass ib on ib.id = l.badge_class_id 
-            WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL) as pendingEnrollmentCount,
+            WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL AND l.denied = 0) as pendingEnrollmentCount,
      (
     (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = 1))
     or
@@ -199,9 +199,10 @@ class Faculties(APIView):
 select f.name_english as name_english, f.name_dutch as name_dutch, f.entity_id as entityId, f.on_behalf_of as onBehalfOf,
     f.image_dutch, f.image_english,
     (select count(id) from issuer_issuer WHERE faculty_id = f.id) as issuerCount,
-    (select count(*) from lti_edu_studentsenrolled l inner join issuer_badgeclass ib on ib.id = l.badge_class_id
-            inner join issuer_issuer ii on ii.faculty_id = f.id 
-            WHERE ii.faculty_id = f.id and l.badge_instance_id IS NULL) as pendingEnrollmentCount,
+    (select count(*) from lti_edu_studentsenrolled l 
+            inner join issuer_badgeclass ib on ib.id = l.badge_class_id
+            inner join issuer_issuer ii on ii.id = ib.issuer_id 
+            WHERE ii.faculty_id = f.id and l.badge_instance_id IS NULL AND l.denied = 0) as pendingEnrollmentCount,
      (
     (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = 1))
     or
