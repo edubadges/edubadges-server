@@ -3,7 +3,7 @@ services:
   badgr:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dev.Dockerfile
     container_name: badgr
     command: "./docker/entrypoint.sh"
     volumes:

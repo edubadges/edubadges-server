@@ -17,21 +17,11 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-RUN set -ex \
-    && python -m venv /env \
-    && /env/bin/pip install --upgrade pip \
-    && /env/bin/pip install --no-cache-dir -r /app/requirements.txt \
-    && /env/bin/pip install gunicorn
-
-COPY docker/entrypoint-k8s.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENV VIRTUAL_ENV=/env
-ENV PATH=/env/bin:$PATH
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 
-ENTRYPOINT ["sh", "/entrypoint.sh"]
-
-CMD ["gunicorn", "--bind", ":8000", "--log-level", "debug", "--workers", "3", "--pythonpath", "/app/apps", "wsgi:application"]
+# Run the specified command within the container
+CMD ["sh", "/docker/entrypoint.sh"]
