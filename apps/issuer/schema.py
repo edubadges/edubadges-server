@@ -322,7 +322,7 @@ class Query(object):
     def resolve_issuer(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
-            issuer = Issuer.objects.get(entity_id=id, archived=False)
+            issuer = Issuer.objects.get(entity_id=id)
             if issuer.has_permissions(info.context.user, ['may_read']):
                 return issuer
 
