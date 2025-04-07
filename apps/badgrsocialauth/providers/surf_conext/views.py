@@ -97,7 +97,12 @@ def callback(request):
     if request.user.is_authenticated:
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
 
-    process, auth_token, badgr_app_pk, referer = json.loads(request.GET.get('state'))
+    state = request.GET.get('state')
+    if state is None:
+        error = 'Server error: No state found in callback'
+        return render_authentication_error(request, SurfConextProvider.id, error=error)
+
+    process, auth_token, badgr_app_pk, referer = json.loads(state)
 
     code = request.GET.get('code', None)
     if code is None:
