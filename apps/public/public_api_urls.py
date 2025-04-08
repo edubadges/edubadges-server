@@ -40,17 +40,17 @@ json_patterns = [
     ),
     re_path(
         r'^issuers/(?P<entity_id>[^/.]+)/badges$',
-        xframe_options_exempt(IssuerBadgesJson.as_view(slugToEntityIdRedirect=True)),
+        xframe_options_exempt(IssuerBadgesJson.as_view(slugToEntityIdRedirect=False)),
         name='issuer_badges_json',
     ),
     re_path(
         r'^badges/(?P<entity_id>[^/.]+)$',
-        xframe_options_exempt(BadgeClassJson.as_view(slugToEntityIdRedirect=True)),
+        xframe_options_exempt(BadgeClassJson.as_view(slugToEntityIdRedirect=False)),
         name='badgeclass_json',
     ),
     re_path(
         r'^badges/(?P<entity_id>[^/.]+)/pubkey/(?P<public_key_id>[^/.]+)$',
-        xframe_options_exempt(BadgeClassPublicKeyJson.as_view(slugToEntityIdRedirect=True)),
+        xframe_options_exempt(BadgeClassPublicKeyJson.as_view(slugToEntityIdRedirect=False)),
         name='badgeclass_public_key_json',
     ),
     re_path(
