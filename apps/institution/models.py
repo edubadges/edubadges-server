@@ -391,44 +391,43 @@ class Faculty(EntityUserProvisionmentMixin,
 
     def validate_unique(self, exclude=None):
         if not self.archived:
-            if not self.archived:
-                if self.name_dutch and self.name_english:
-                    query = Q(name_english=self.name_english) | Q(name_dutch=self.name_dutch)
-                elif self.name_english:
-                    query = Q(name_english=self.name_english)
-                elif self.name_dutch:
-                    query = Q(name_english=self.name_english)
-                else:
+            if self.name_dutch and self.name_english:
+                query = Q(name_english=self.name_english) | Q(name_dutch=self.name_dutch)
+            elif self.name_english:
+                query = Q(name_english=self.name_english)
+            elif self.name_dutch:
+                query = Q(name_dutch=self.name_dutch)
+            else:
+                raise BadgrValidationMultipleFieldError([
+                    ['name_english', 'Either Dutch or English name is required', 913],
+                    ['name_dutch', 'Either Dutch or English name is required', 913]
+                ])
+            faculty_same_name = self.__class__.objects \
+                .filter(query,
+                        institution=self.institution,
+                        archived=False) \
+                .exclude(pk=self.pk).first()
+            if faculty_same_name:
+                name_english_the_same = faculty_same_name.name_english == self.name_english and bool(
+                    faculty_same_name.name_english)
+                name_dutch_the_same = faculty_same_name.name_dutch == self.name_dutch and bool(
+                    faculty_same_name.name_dutch)
+                both_the_same = name_english_the_same and name_dutch_the_same
+                if both_the_same:
                     raise BadgrValidationMultipleFieldError([
-                        ['name_english', 'Either Dutch or English name is required', 913],
-                        ['name_dutch', 'Either Dutch or English name is required', 913]
+                        ['name_english',
+                         "There is already a Faculty with this English name inside this institution", 917],
+                        ['name_dutch', "There is already a Faculty with this Dutch name inside this institution",
+                         916]
                     ])
-                faculty_same_name = self.__class__.objects \
-                    .filter(query,
-                            institution=self.institution,
-                            archived=False) \
-                    .exclude(pk=self.pk).first()
-                if faculty_same_name:
-                    name_english_the_same = faculty_same_name.name_english == self.name_english and bool(
-                        faculty_same_name.name_english)
-                    name_dutch_the_same = faculty_same_name.name_dutch == self.name_dutch and bool(
-                        faculty_same_name.name_dutch)
-                    both_the_same = name_english_the_same and name_dutch_the_same
-                    if both_the_same:
-                        raise BadgrValidationMultipleFieldError([
-                            ['name_english',
-                             "There is already a Faculty with this English name inside this institution", 917],
-                            ['name_dutch', "There is already a Faculty with this Dutch name inside this institution",
-                             916]
-                        ])
-                    elif name_dutch_the_same:
-                        raise BadgrValidationFieldError('name_dutch',
-                                                        "There is already a Faculty with this Dutch name inside this institution",
-                                                        916)
-                    elif name_english_the_same:
-                        raise BadgrValidationFieldError('name_english',
-                                                        "There is already a Faculty with this English name inside this institution",
-                                                        917)
+                elif name_dutch_the_same:
+                    raise BadgrValidationFieldError('name_dutch',
+                                                    "There is already a Faculty with this Dutch name inside this institution",
+                                                    916)
+                elif name_english_the_same:
+                    raise BadgrValidationFieldError('name_english',
+                                                    "There is already a Faculty with this English name inside this institution",
+                                                    917)
         return super(Faculty, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):

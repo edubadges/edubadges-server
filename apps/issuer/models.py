@@ -209,7 +209,7 @@ class Issuer(
             elif self.name_english:
                 query = Q(name_english=self.name_english)
             elif self.name_dutch:
-                query = Q(name_english=self.name_english)
+                query = Q(name_dutch=self.name_dutch)
             else:
                 raise BadgrValidationMultipleFieldError(
                     [
