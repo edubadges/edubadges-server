@@ -197,7 +197,7 @@ class Faculties(APIView):
         with connection.cursor() as cursor:
             cursor.execute(f"""
 select f.name_english as name_english, f.name_dutch as name_dutch, f.entity_id as entityId, f.on_behalf_of as onBehalfOf,
-    f.image_dutch, f.image_english,
+    f.image_dutch, f.image_english, f.archived,
         (select count(id) from issuer_issuer WHERE faculty_id = f.id) as issuerCount,
     (select count(*) from lti_edu_studentsenrolled l 
             inner join issuer_badgeclass ib on ib.id = l.badge_class_id
