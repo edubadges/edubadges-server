@@ -131,7 +131,7 @@ class Query(object):
 
     def resolve_issuers(self, info, **kwargs):
         user = info.context.user
-        return [iss for iss in Issuer.objects.filter(faculty__institution=user.institution, archived=False) if
+        return [iss for iss in Issuer.objects.filter(faculty__institution=user.institution) if
                 iss.has_permissions(user, ['may_update'])]
 
     def resolve_institutions(self, info, **kwargs):

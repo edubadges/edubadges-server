@@ -227,7 +227,7 @@ class Institution(EntityUserProvisionmentMixin, PermissionedModelMixin,
 
     @cached_method(auto_publish=True)
     def cached_faculties(self):
-        return list(self.faculty_set.filter(archived=False))
+        return list(self.faculty_set.all())
 
     @cached_method(auto_publish=True)
     def cached_issuers(self):
@@ -464,7 +464,7 @@ class Faculty(EntityUserProvisionmentMixin,
 
     @cached_method(auto_publish=True)
     def cached_issuers(self):
-        return list(self.issuer_set.filter(archived=False))
+        return list(self.issuer_set.all())
 
     @cached_method(auto_publish=True)
     def cached_pending_enrollments(self):
