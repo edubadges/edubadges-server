@@ -15,7 +15,7 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
     class Meta:
         model = Faculty
         fields = ('name_english', 'name_dutch', 'entity_id', 'institution', 'created_at', 'description_english',
-                  'description_dutch', 'content_type_id', 'on_behalf_of', 'on_behalf_of_url',
+                  'description_dutch', 'content_type_id', 'on_behalf_of', 'on_behalf_of_url', 'archived',
                   'on_behalf_of_display_name', 'faculty_type', 'image_english', 'image_dutch',
                   'linkedin_org_identifier', 'visibility_type')
 
@@ -26,6 +26,7 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
     staff = graphene.List(FacultyStaffType)
     name = graphene.String()
     image = graphene.String()
+    has_assertions = graphene.Boolean()
     has_unrevoked_assertions = graphene.Boolean()
 
     def resolve_image_english(self, info):
@@ -55,6 +56,8 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
     def resolve_has_unrevoked_assertions(self, info):
         return any([assertion.revoked is False for assertion in self.assertions])
 
+    def resolve_has_assertions(self, info):
+        return bool(self.assertions)
 
 class BadgeClassTagType(DjangoObjectType):
     class Meta:

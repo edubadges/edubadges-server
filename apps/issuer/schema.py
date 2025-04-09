@@ -91,6 +91,9 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     image = graphene.String()
     description = graphene.String()
     url = graphene.String()
+    has_unrevoked_assertions = graphene.Boolean()
+    has_assertions = graphene.Boolean()
+
 
     def resolve_image_english(self, info):
         return generate_image_url(self.image_english)
@@ -128,6 +131,11 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     def resolve_pending_enrollment_count(self, info):
         return self.cached_pending_enrollments().__len__()
 
+    def resolve_has_unrevoked_assertions(self, info):
+        return any([assertion.revoked is False for assertion in self.assertions])
+
+    def resolve_has_assertions(self, info):
+        return bool(self.assertions)
 
 def badge_user_type():
     from badgeuser.schema import BadgeUserType
