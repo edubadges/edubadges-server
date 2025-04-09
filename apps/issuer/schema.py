@@ -316,8 +316,7 @@ class Query(object):
     badge_classes_count = graphene.Int()
 
     def resolve_issuers(self, info, **kwargs):
-        return [issuer for issuer in Issuer.objects.filter(archived=False)
-                if issuer.has_permissions(info.context.user, ['may_read'])]
+        return [issuer for issuer in Issuer.objects.all() if issuer.has_permissions(info.context.user, ['may_read'])]
 
     def resolve_issuer(self, info, **kwargs):
         id = kwargs.get('id')
