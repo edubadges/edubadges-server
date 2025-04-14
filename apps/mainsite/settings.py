@@ -581,7 +581,7 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Email
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = legacy_boolean_parsing('EMAIL_USE_TLS', '1')
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
