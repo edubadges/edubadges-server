@@ -1,0 +1,163 @@
+{% extends 'email/base.html' %}
+{% block style %}
+<style>
+    .main{
+        text-align:center;
+        font-family: "Proxima Nova", sans-serif;
+        line-height: 18px;
+        font-size: 14px;
+        color: #353535;
+    }
+    .head{
+        width: 600px;
+        height: 100px;
+        margin: auto;
+    }
+    .title{
+        color: grey;
+        font-size:20px;
+        line-height: 50px;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    .message_container{
+        width: 280px;
+        margin: auto;
+        margin-top: 40px;
+        overflow: auto;
+    }
+    .text_header{
+        font-size: 14px;
+        line-height: 30px;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+    .button {
+        font-family: "Proxima Nova", sans-serif;
+        border-radius: 5px;
+        color: white;
+        background-color: #772583;
+        text-decoration: none;
+        display: inline-block;
+        cursor:pointer;
+        font-size: 12px;
+        font-weight: bold;
+        width: 100%;
+        margin-top: 30px;
+        margin: 15px 0;
+        padding: 14px 0px;
+    }
+
+    .example_container{
+        box-shadow: 1px 3px #b9b9b9;
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 10px;
+        border-color: #b9b9b9;
+        overflow: auto;
+    }
+    .issuer_image{
+        display: inline-block;
+        height: 50px;
+        width: 50px;
+        float: left;
+        margin: 15px 0px 0px 10px;
+    }
+    .badgeclass_image{
+        width: available;
+    }
+    .issuer_container {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+    .issuer_description{
+        text-align: left;
+        padding: 10px 0px 10px 10px;
+        float: left;
+    }
+    .issuer_description p {
+        margin: 0px;
+    }
+    .issuer_description p:nth-of-type(1){
+        color: #772583;
+        font-weight: bold;
+    }
+    .issuer_description p:nth-of-type(3){
+        color: grey;
+    }
+    .badge_name {
+        font-size: 23px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    .footer {
+        margin-bottom: 25px;
+    }
+    .footer a:link, .footer a:visited  {
+        color: grey;
+    }
+    .footer a:hover, .footer a:active {
+        color: #772583;
+    }
+</style>
+{% endblock %}
+
+{% block title %}
+<title>Je hebt een edubadge ontvangen. You received an edubadge. Claim it now.</title>
+{% endblock %}
+
+{% block content %}
+
+<div><p>For the English version, see below.</p></div>
+
+<p class="title">De {{institution_name}} heeft je de volgende edubadge gestuurd.</br> Claim deze voor {{claim_date}} !</p>
+<div class="message_container">
+    <p class="text text_header">Hoe krijg ik de edubadge in mijn bezit?</p>
+    <p class="text"></p>Om je edubadge in je bezit te krijgen, moet je je edubadge claimen. Dit doe je in je backpack.
+        <br><br>Heb je nog geen backpack? Kijk dan in de handleiding hoe je een backpack aanmaakt.
+        <br><br><a target="_blank" href="https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/142573610/Ontvanger+student+lerende">Handleiding edubadges</a>
+        <br><br><b>Let op! Je kunt tot {{claim_date}} je edubadge claimen</b>
+
+    <a class="button" target="_blank" rel="noopener noreferrer" href="{{ui_url}}">
+        Claim deze edubadge in je backpack</a>
+
+    <div class="example_container">
+        <img class="badgeclass_image" src={{badgeclass_image}}>
+        <p class="text badge_name">{{badgeclass_name}}</p>
+        <div class="issuer_container">
+            <img class="issuer_image" src={{issuer_image}}>
+            <div class="issuer_description">
+                <p>Uitgegeven door</p>
+                <p>{{issuer_name}}</p>
+                <p>({{faculty_name}})</p>
+                <p>{{institution_name}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<p class="title">The {{institution_name}} has send you the following edubadge. Claim it before {{claim_date}} !</p>
+<div class="message_container">
+    <p class="text text_header">How do I obtain the edubadge?</p>
+    <p class="text"></p>To obtain your edubadge, you need to claim it. You can do this in your backpack
+        <br><br>Don’t have a backpack yet? Check the manual to learn how to create one.
+        <br><br><a target="_blank" href="https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/142573610/Ontvanger+student+lerende">Manual edubadges</a>
+        <br><br><b>Please note! You can claim your edubadge until {{claim_date}}</b>
+
+    <a class="button" target="_blank" rel="noopener noreferrer" href="{{ui_url}}">
+        Claim this edubadge in your backpack</a>
+
+    <div class="example_container">
+        <img class="badgeclass_image" src={{badgeclass_image}}>
+        <p class="text badge_name">{{badgeclass_name}}</p>
+        <div class="issuer_container">
+            <img class="issuer_image" src={{issuer_image}}>
+            <div class="issuer_description">
+                <p>Issued by</p>
+                <p>{{institution_name}}</p>
+                <p>{{issuer_name}}</p>
+                <p>({{faculty_name}})</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
