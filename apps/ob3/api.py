@@ -84,7 +84,7 @@ class CredentialsView(APIView):
         return response.text
 
     def __issue_unime_badge(self, credential):
-        url = f"{OB3_AGENT_URL_UNIME}/v0/credentials"
+        url = OB3_AGENT_URL_UNIME
         headers = { 'Accept': 'application/json' }
         payload = credential
 
@@ -102,7 +102,7 @@ class CredentialsView(APIView):
             raise BadRequest(msg)
 
     def __get_unime_offer(self, offer_id):
-        url = f"{OB3_AGENT_URL_UNIME}/v0/offers"
+        url = f"{OB3_AGENT_URL_UNIME}"
         headers = { 'Accept': 'application/json' }
         payload = { "offerId": offer_id }
 
