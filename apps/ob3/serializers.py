@@ -185,15 +185,6 @@ class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     )
     credentialSubject = AchievementSubjectSerializer(source='credential_subject')
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        # TODO: Decide how to handle public vs private assertions: the latter won't resolve
-        # TODO: DRY the id-to-url conversion
-        """Convert the id to a URL"""
-        ret['id'] = f"{UI_URL}/public/assertions/{ret['id']}"
-
-        return ret
-
 class SphereonOfferRequestSerializer(serializers.Serializer):
     credential_configuration_ids = serializers.ListField()
     grants = serializers.DictField()

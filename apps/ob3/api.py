@@ -13,8 +13,8 @@ from pprint import pformat
 
 from issuer.models import BadgeInstance
 from mainsite.settings import OB3_AGENT_URL_SPHEREON, OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_UNIME
-from .serializers import ImpierceOfferRequestSerializer
-from .models import ImpierceOfferRequest
+from .serializers import ImpierceOfferRequestSerializer, SphereonOfferRequestSerializer
+from .models import ImpierceOfferRequest, SphereonOfferRequest
 
 logger = logging.getLogger('django')
 
@@ -33,9 +33,25 @@ class CredentialsView(APIView):
         badge_instance = self.__badge_instance(badge_id, request.user)
         logger.debug(f"Badge instance: {pformat(badge_instance.__dict__)}")
 
-        if variant == 'unime':
+        if variant == 'authorization':
+            credential = SphereonOfferRequest(
+                    offer_id,
+                    "OpenBadgeCredential",
+                    badge_instance,
+                    request.user.entity_id, # TODO: how do we get an eduId?
+                    request.user.email,
+                    request.user.email, # TODO: how do we get an eppn?
+                    request.user.last_name,
+                    request.user.first_name,
+            )
+            serializer = SphereonOfferRequestSerializer(credential)
+            logger.debug(f"Credential: {pformat(serializer.data)}")
+            offer = self.__issue_sphereon_badge(serializer.data)
+            logger.debug(f"Sphereon offer: {offer}")
+        elif variant == 'preauthorized':
             credential = ImpierceOfferRequest(offer_id, "openbadge_credential", badge_instance)
             serializer = ImpierceOfferRequestSerializer(credential)
+            logger.debug(f"Credential: {pformat(serializer.data)}")
             self.__issue_unime_badge(serializer.data)
             offer = self.__get_unime_offer(offer_id)
             logger.debug(f"Unime offer: {offer}")
@@ -43,8 +59,6 @@ class CredentialsView(APIView):
             raise BadRequest("variant not supported. We only support unime")
 
         logger.info(f"Issued credential for badge {badge_id} with offer_id {offer_id}")
-        logger.debug(f"Credential: {pformat(serializer.data)}")
-
         return Response({"offer": offer}, status=status.HTTP_201_CREATED)
 
     def __badge_instance(self, badge_id, user):
@@ -53,39 +67,24 @@ class CredentialsView(APIView):
         except ObjectDoesNotExist:
             raise Http404
 
-    def __issue_sphereon_badge(self, credential):
-        random_offer_id = str(uuid.uuid4());
-        offer_request_body = {
-            "credentials": ["OpenBadgeCredential"],
-            "grants": {
-                "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
-                    "pre-authorized_code": random_offer_id,
-                    "user_pin_required": False
-                }
-            },
-            "credentialDataSupplierInput": credential
-        }
-        resp = requests.post(
+    def __issue_sphereon_badge(self, credential_offer_request):
+        logger.debug(f"Requesting credential issuance: {OB3_AGENT_URL_SPHEREON} {credential_offer_request}")
+        response = requests.post(
                 timeout=5,
-                url=f"{OB3_AGENT_URL_SPHEREON}/edubadges/api/create-offer",
-                json=offer_request_body,
+                url=OB3_AGENT_URL_SPHEREON,
+                json=credential_offer_request,
                 headers={'Accept': 'application/json',
                          "Authorization": f"Bearer {OB3_AGENT_AUTHZ_TOKEN_SPHEREON}"}
         )
 
-        if resp.status_code >= 400:
-            msg = f"Failed to issue badge:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
+        if response.status_code >= 400:
+            msg = f"Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}"
             raise BadRequest(msg)
 
-
-        # We get back a json object that wraps an openid-credential-offer:// uri
-        # Inside this, is a a parameter credential_offer_uri that contains the actual offer uri
-        # Which we can fetch to get the offer
-        json_resp = resp.json()
-        return json_resp.get('uri')
+        return response.text
 
     def __issue_unime_badge(self, credential):
-        url = f"{OB3_AGENT_URL_UNIME}/v0/credentials"
+        url = OB3_AGENT_URL_UNIME
         headers = { 'Accept': 'application/json' }
         payload = credential
 
@@ -103,7 +102,7 @@ class CredentialsView(APIView):
             raise BadRequest(msg)
 
     def __get_unime_offer(self, offer_id):
-        url = f"{OB3_AGENT_URL_UNIME}/v0/offers"
+        url = f"{OB3_AGENT_URL_UNIME}"
         headers = { 'Accept': 'application/json' }
         payload = { "offerId": offer_id }
 

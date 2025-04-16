@@ -43,5 +43,5 @@ export MEMCACHED="127.0.0.1:11211"
 export LOKI_API_URL="https://localhost"
 
 # Only needed when wallet import is used and only in a non-docker compose setup.
-export OB3_AGENT_URL_SPHEREON="http://localhost:5000"
-export OB3_AGENT_URL_UNIME="http://localhost:6000"
+export OB3_AGENT_URL_SPHEREON="http://localhost:5000/oid4vci/admin/credentials"
+export OB3_AGENT_URL_UNIME="http://localhost:6000/v0/credentials"
