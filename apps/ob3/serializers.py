@@ -184,7 +184,19 @@ class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     )
     credentialSubject = AchievementSubjectSerializer(source='credential_subject')
 
-class OfferRequestSerializer(serializers.Serializer):
+class SphereonOfferRequestSerializer(serializers.Serializer):
+    credential_configuration_ids = serializers.ListField()
+    grants = serializers.DictField()
+
+    credentialData = CredentialSerializer(source='credential')
+
+    eduId = serializers.CharField(source='edu_id')
+    email = serializers.EmailField()
+    eppn = serializers.EmailField()
+    familyName = serializers.CharField(source='family_name')
+    givenName = serializers.CharField(source='given_name')
+
+class ImpierceOfferRequestSerializer(serializers.Serializer):
     offerId = serializers.CharField(source='offer_id')
     credentialConfigurationId = serializers.CharField(source='credential_configuration_id')
     credential = CredentialSerializer()
