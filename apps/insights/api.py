@@ -60,14 +60,16 @@ class InsightsView(APIView):
                     'badgeclass__badge_class_type',
                     'issuer_id', "public", "revoked",
                     "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
-                    "issuer__faculty__name_english", "issuer__faculty__name_dutch") \
+                    "issuer__faculty__name_english", "issuer__faculty__name_dutch", "issuer__faculty__faculty_type",
+                    "issuer__faculty__institution__institution_type") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
             .values('year', 'month', 'nbr', 'award_type', 'badgeclass_id', 'badgeclass__name', 'badgeclass__archived',
                     'badgeclass__badge_class_type', 'issuer_id',
                     "public", "revoked", "issuer__name_dutch", "issuer__name_english", 'issuer__faculty_id',
-                    "issuer__faculty__name_dutch", "issuer__faculty__name_english") \
+                    "issuer__faculty__name_dutch", "issuer__faculty__name_english", "issuer__faculty__faculty_type",
+                    "issuer__faculty__institution__institution_type") \
             .exclude(expires_at__lte=today) \
             .order_by('year', 'month')
         if not total:
@@ -86,7 +88,9 @@ class InsightsView(APIView):
                     'badgeclass__badge_class_type',
                     "badgeclass__issuer__name_dutch", "badgeclass__issuer__name_english",
                     'badgeclass__issuer__faculty_id',
-                    "badgeclass__issuer__faculty__name_english", "badgeclass__issuer__faculty__name_dutch") \
+                    "badgeclass__issuer__faculty__name_english", "badgeclass__issuer__faculty__name_dutch",
+                    "badgeclass__issuer__faculty__faculty_type",
+                    "badgeclass__issuer__faculty__institution__institution_type") \
             .annotate(year=ExtractYear('created_at')) \
             .annotate(month=ExtractMonth('created_at')) \
             .annotate(nbr=Count('month')) \
@@ -94,7 +98,9 @@ class InsightsView(APIView):
                     'badgeclass__issuer__id', 'badgeclass__badge_class_type',
                     "badgeclass__issuer__name_dutch", "badgeclass__issuer__name_english",
                     'badgeclass__issuer__faculty_id',
-                    "badgeclass__issuer__faculty__name_dutch", "badgeclass__issuer__faculty__name_english") \
+                    "badgeclass__issuer__faculty__name_dutch", "badgeclass__issuer__faculty__name_english",
+                    "badgeclass__issuer__faculty__faculty_type",
+                    "badgeclass__issuer__faculty__institution__institution_type") \
             .order_by('year', 'month') \
             .exclude(status='Deleted').exclude(status='Revoked').exclude(status='Scheduled')
 
@@ -114,7 +120,9 @@ class InsightsView(APIView):
             .values('denied', 'badge_class_id', 'badge_class__name', 'badge_class__issuer__id',
                     "badge_class__issuer__name_dutch", "badge_class__issuer__name_english",
                     'badge_class__issuer__faculty_id', 'badge_class__badge_class_type',
-                    "badge_class__issuer__faculty__name_dutch", "badge_class__issuer__faculty__name_english") \
+                    "badge_class__issuer__faculty__name_dutch", "badge_class__issuer__faculty__name_english",
+                    "badge_class__issuer__faculty__faculty_type",
+                    "badge_class__issuer__faculty__institution__institution_type") \
             .annotate(year=ExtractYear('date_created')) \
             .annotate(month=ExtractMonth('date_created')) \
             .annotate(nbr=Count('month')) \
@@ -122,7 +130,9 @@ class InsightsView(APIView):
                     'badge_class__issuer__id', 'badge_class__badge_class_type',
                     "badge_class__issuer__name_dutch", "badge_class__issuer__name_english",
                     'badge_class__issuer__faculty_id',
-                    "badge_class__issuer__faculty__name_dutch", "badge_class__issuer__faculty__name_english") \
+                    "badge_class__issuer__faculty__name_dutch", "badge_class__issuer__faculty__name_english",
+                    "badge_class__issuer__faculty__faculty_type",
+                    "badge_class__issuer__faculty__institution__institution_type") \
             .order_by('year', 'month')
 
         if not total:
