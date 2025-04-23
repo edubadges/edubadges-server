@@ -38,6 +38,7 @@ class DirectAwards(APIView):
         with connection.cursor() as cursor:
             cursor.execute(f"""
 select da.created_at, da.resend_at, da.delete_at, da.recipient_email as recipientEmail, da.eppn, da.entity_id as entityId,
+        da.expiration_date,
         bc.name, bc.entity_id as bc_entity_id,
         i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id, 
         f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id
