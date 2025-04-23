@@ -1,6 +1,6 @@
 import re
 import threading
-
+import datetime
 from django.core.exceptions import ValidationError, BadRequest
 from django.db import transaction
 from rest_framework import serializers
@@ -8,6 +8,7 @@ from rest_framework import serializers
 from directaward.models import DirectAward, DirectAwardBundle
 from directaward.signals import audit_trail_signal
 from issuer.serializers import BadgeClassSlugRelatedField
+from mainsite import settings
 from mainsite.exceptions import BadgrValidationError
 
 
@@ -104,11 +105,15 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 direct_award_bundle.badgeclass.remove_cached_data(["cached_direct_award_bundles"])
 
                 eppn_required = validated_data.get("identifier_type", "eppn") == "eppn"
+                now = datetime.datetime.now(datetime.timezone.utc)
+                expiration_date = now + datetime.timedelta(days=settings.EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS)
                 for direct_award in direct_awards:
                     # Not required and already validated
                     direct_award["eppn"] = direct_award["eppn"].lower() if eppn_required else None
                     status = (DirectAward.STATUS_SCHEDULED if scheduled_at else DirectAward.STATUS_UNACCEPTED)
                     direct_award["status"] = status
+
+                    direct_award["expiration_date"] = expiration_date
                     try:
                         da_created = DirectAward.objects.create(
                             bundle=direct_award_bundle,
