@@ -728,7 +728,7 @@ class DirectAwardDelete(BaseEntityDetailView):
         revocation_reason = request.data.get('revocation_reason', None)
         if not direct_awards:
             raise BadgrValidationFieldError('direct_awards', 'This field is required', 999)
-        delete_at = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=settings.DIRECT_AWARDS_DELETION_THRESHOLD_DAYS)
+        delete_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=settings.DIRECT_AWARDS_DELETION_THRESHOLD_DAYS)
         un_successful_direct_awards = []
         successful_direct_awards = []
         for direct_award in direct_awards:

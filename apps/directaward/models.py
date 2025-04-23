@@ -28,7 +28,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     narrative = models.TextField(blank=True, null=True, default=None)
     name = models.CharField(max_length=255, blank=True, null=True, default=None)
     description = models.TextField(blank=True, null=True, default=None)
-    warning_email_send = models.BooleanField(default=False)
+    reminders = models.IntegerField(default=0, blank=False, null=False)
     grade_achieved = models.CharField(
         max_length=254, blank=True, null=True, default=None
     )
@@ -53,6 +53,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     )
     resend_at = models.DateTimeField(blank=True, null=True, default=None)
     delete_at = models.DateTimeField(blank=True, null=True, default=None)
+    expiration_date = models.DateTimeField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
         if (self.__class__.objects.filter(eppn=self.eppn, badgeclass=self.badgeclass, status="Unaccepted",
@@ -131,17 +132,13 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     def notify_recipient(self):
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
-        try:
-            EmailBlacklist.objects.get(email=self.recipient_email)
-        except EmailBlacklist.DoesNotExist:
-            # Allow sending, as this email is not blacklisted.
-            plain_text = strip_tags(html_message)
-            send_mail(
-                subject="Je hebt een edubadge ontvangen. You received an edubadge. Claim it now!",
-                message=plain_text,
-                html_message=html_message,
-                recipient_list=[self.recipient_email],
-            )
+        plain_text = strip_tags(html_message)
+        send_mail(
+            subject="Je hebt een edubadge ontvangen. You received an edubadge. Claim it now!",
+            message=plain_text,
+            html_message=html_message,
+            recipient_list=[self.recipient_email],
+        )
 
 
 class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
