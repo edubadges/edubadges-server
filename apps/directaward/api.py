@@ -415,6 +415,123 @@ class DirectAwardRevoke(BaseEntityDetailView):
         )
 
 
+class DirectAwardResend(BaseEntityDetailView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ['post']
+    permission_map = {'POST': 'may_award'}
+
+    @extend_schema(
+        description='Resend direct awards',
+        methods=['POST'],
+        request=inline_serializer(
+            name='DirectAwardResendRequest',
+            fields={
+                'direct_awards': serializers.ListField(
+                    child=inline_serializer(
+                        name='NestedInlineOneOffSerializer',
+                        fields={
+                            'entity_id': serializers.CharField(),
+                        },
+                        allow_null=False,
+                    )
+                )
+            },
+        ),
+        responses={
+            200: OpenApiResponse(
+                response=inline_serializer(
+                    name='DirectAwardResendResponse',
+                    fields={'result': serializers.CharField(), 'un_successful_direct_awards': unsuccessful_response},
+                ),
+                examples=[
+                    OpenApiExample(
+                        'DirectAward Resend Partial Response',
+                        value={
+                            'result': 'ok',
+                            'un_successful_direct_awards': [
+                                {
+                                    'error': 'DirectAward already exists',
+                                    'eppn': 'user2@example.edu',
+                                    'recipient_email': 'user2@example.edu',
+                                }
+                            ],
+                        },
+                    ),
+                    OpenApiExample(
+                        'DirectAward Resend Successful Response',
+                        value={'result': 'ok', 'un_successful_direct_awards': []},
+                    ),
+                ],
+            ),
+            400: OpenApiResponse(
+                response=inline_serializer(name='DirectAwardNoValidResend', fields={'error': serializers.CharField()}),
+                examples=[
+                    OpenApiExample(
+                        'DirectAward Resend No Valid Response',
+                        value={'error': 'No valid DirectAwards are revoked. All of them were rejected:'},
+                    )
+                ],
+            ),
+            403: permission_denied_response,
+            404: not_found_response,
+        },
+        examples=[
+            OpenApiExample(
+                'Resend Request Example',
+                value={
+                    'revocation_reason': 'Violation of terms',
+                    'direct_awards': [{'entity_id': 'da-001'}],
+                },
+                request_only=True,
+            ),
+        ],
+    )
+    def post(self, request, **kwargs):
+        direct_awards = request.data.get('direct_awards', None)
+        if not direct_awards:
+            raise BadgrValidationFieldError('direct_awards', 'This field is required', 999)
+        successful_direct_awards = []
+        un_successful_direct_awards = []
+        for direct_award in direct_awards:
+            try:
+                direct_award_db = DirectAward.objects.get(entity_id=direct_award['entity_id'])
+                if not direct_award_db.get_permissions(request.user)['may_award']:
+                    raise BadgrValidationError('No permissions', 100)
+                direct_award_db.resend_at = datetime.datetime.now()
+                direct_award_db.save()
+                direct_award_remove_cache(direct_award_db)
+                successful_direct_awards.append(direct_award_db)
+                audit_trail_signal.send(
+                    sender=request.user.__class__,
+                    request=request,
+                    user=request.user,
+                    method='RESEND',
+                    direct_award_id=direct_award_db.entity_id,
+                    badgeclass_id=direct_award_db.badgeclass_id,
+                    summary='Directaward resent',
+                )
+            except Exception as e:
+                un_successful_direct_awards.append(
+                    {'error': str(e), 'eppn': direct_award.get('eppn'), 'email': direct_award.get('recipient_email')}
+                )
+
+        if not successful_direct_awards:
+            raise BadRequest(
+                f'No valid DirectAwards are resend. All of them were rejected: {str(un_successful_direct_awards)}'
+            )
+
+        def resend_mails(awards):
+            for da in awards:
+                da.notify_recipient()
+
+        thread = threading.Thread(target=resend_mails, args=(successful_direct_awards,))
+        thread.start()
+
+        return Response(
+            {'result': 'ok', 'un_successful_direct_awards': un_successful_direct_awards}, status=status.HTTP_200_OK
+        )
+
+
 class DirectAwardAccept(BaseEntityDetailView):
     model = DirectAward  # used by .get_object()
     permission_classes = (AuthenticatedWithVerifiedEmail, IsDirectAwardOwner)
