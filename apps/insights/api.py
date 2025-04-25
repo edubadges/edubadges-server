@@ -388,8 +388,8 @@ class InstitutionBadgesOverview(APIView):
 select b.id as badge_class_id, bi.award_type, b.name as badge_name,  b.badge_class_type, bi.public as public_badge,
 bi.revoked, i.name_english as issuer_name, f.name_english as issuergroup_name, ins.name_english as institution_name,
 ins.institution_type as institution_type, count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as total_da_count,
-(SELECT count(1) FROM directaward_directawardaudittrail trail WHERE trail.action = 'CREATE' and trail.badgeclass_id = b.id and trail.user_agent_info like "Java-http-client%%") as awarded_via_sis,
-(SELECT count(1) FROM directaward_directawardaudittrail trail WHERE trail.action = 'CREATE' and trail.badgeclass_id = b.id and not trail.user_agent_info like "Java-http-client%%") as awarded_via_ui
+(SELECT count(1) FROM directaward_directawardaudittrail trail WHERE trail.action = 'ACCEPT' and trail.badgeclass_id = b.id and trail.user_agent_info like "Java-http-client%%") as awarded_via_sis,
+(SELECT count(1) FROM directaward_directawardaudittrail trail WHERE trail.action = 'ACCEPT' and trail.badgeclass_id = b.id and not trail.user_agent_info like "Java-http-client%%") as awarded_via_ui
 from issuer_badgeinstance bi
 inner join issuer_badgeclass b on b.id = bi.badgeclass_id
 inner join issuer_issuer i on i.id = b.issuer_id
