@@ -9,6 +9,7 @@ from json import loads as json_loads
 from urllib.parse import urljoin
 
 import requests
+from auditlog.registry import auditlog
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -1594,3 +1595,8 @@ class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, CacheModel)
     def save(self, *args, **kwargs):
         self.validate_unique()
         return super(BadgeInstanceCollection, self).save(*args, **kwargs)
+
+
+auditlog.register(Issuer)
+auditlog.register(BadgeClass)
+auditlog.register(BadgeInstance)
