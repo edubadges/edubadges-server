@@ -252,4 +252,5 @@ class DirectAwardAuditTrail(models.Model):
     user_agent_info = models.CharField(max_length=255, blank=True)
     action = models.CharField(max_length=40)
     change_summary = models.CharField(max_length=199, blank=True)
-    direct_award_entity_id = models.CharField(max_length=255, blank=True)
+    direct_award_id = models.CharField(max_length=255, blank=True)
+    badgeclass_id = models.CharField(max_length=255, blank=True)

@@ -22,7 +22,7 @@ def get_client_ip(request):
 
 
 @receiver(audit_trail_signal)
-def direct_award_audit_trail(sender, user, request, direct_award_id, method, summary, **kwargs):
+def direct_award_audit_trail(sender, user, request, direct_award_id, badgeclass_id, method, summary, **kwargs):
     try:
         user_agent_info = (request.headers.get('user-agent', '<unknown>')[:255],)
         audit_trail = DirectAwardAuditTrail.objects.create(
@@ -31,10 +31,11 @@ def direct_award_audit_trail(sender, user, request, direct_award_id, method, sum
             login_IP=get_client_ip(request),
             action=method,
             change_summary=summary,
-            direct_award_entity_id=direct_award_id,
+            direct_award_id=direct_award_id,
+            badgeclass_id=badgeclass_id,
         )
         logger.info(
-            f'direct_award_audit_trail created {audit_trail.id}  for user {audit_trail.user} and directaward {audit_trail.direct_award_entity_id}'
+            f'direct_award_audit_trail created {audit_trail.id}  for user {audit_trail.user} and directaward {audit_trail.direct_award_id}'
         )
     except Exception as e:
         logger.error('direct_award_audit_trail request: %s, error: %s' % (request, e))
