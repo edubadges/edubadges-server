@@ -9,62 +9,60 @@ from cachemodel.decorators import cached_method
 from cachemodel.models import CacheModel
 from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationError
-from mainsite.models import BaseAuditedModel, EmailBlacklist
+from mainsite.models import BaseAuditedModel
 from mainsite.utils import send_mail, EmailMessageMaker
 
 
 class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     recipient_email = models.EmailField()
     eppn = models.CharField(max_length=254, blank=True, null=True, default=None)
-    badgeclass = models.ForeignKey("issuer.BadgeClass", on_delete=models.CASCADE)
-    bundle = models.ForeignKey(
-        "directaward.DirectAwardBundle", null=True, on_delete=models.CASCADE
-    )
+    badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
+    bundle = models.ForeignKey('directaward.DirectAwardBundle', null=True, on_delete=models.CASCADE)
 
     # To create BadgeInstanceEvidence after claim from student
-    evidence_url = models.CharField(
-        max_length=2083, blank=True, null=True, default=None
-    )
+    evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
     narrative = models.TextField(blank=True, null=True, default=None)
     name = models.CharField(max_length=255, blank=True, null=True, default=None)
     description = models.TextField(blank=True, null=True, default=None)
     reminders = models.IntegerField(default=0, blank=False, null=False)
-    grade_achieved = models.CharField(
-        max_length=254, blank=True, null=True, default=None
-    )
+    grade_achieved = models.CharField(max_length=254, blank=True, null=True, default=None)
 
-    STATUS_UNACCEPTED = "Unaccepted"
-    STATUS_REVOKED = "Revoked"
-    STATUS_REJECTED = "Rejected"
-    STATUS_SCHEDULED = "Scheduled"
-    STATUS_DELETED = "Deleted"
+    STATUS_UNACCEPTED = 'Unaccepted'
+    STATUS_REVOKED = 'Revoked'
+    STATUS_REJECTED = 'Rejected'
+    STATUS_SCHEDULED = 'Scheduled'
+    STATUS_DELETED = 'Deleted'
     STATUS_CHOICES = (
-        (STATUS_UNACCEPTED, "Unaccepted"),
-        (STATUS_REVOKED, "Revoked"),
-        (STATUS_REJECTED, "Rejected"),
-        (STATUS_SCHEDULED, "Scheduled"),
-        (STATUS_DELETED, "Deleted"),
+        (STATUS_UNACCEPTED, 'Unaccepted'),
+        (STATUS_REVOKED, 'Revoked'),
+        (STATUS_REJECTED, 'Rejected'),
+        (STATUS_SCHEDULED, 'Scheduled'),
+        (STATUS_DELETED, 'Deleted'),
     )
-    status = models.CharField(
-        max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED
-    )
-    revocation_reason = models.CharField(
-        max_length=255, blank=True, null=True, default=None
-    )
+    status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED)
+    revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
     resend_at = models.DateTimeField(blank=True, null=True, default=None)
     delete_at = models.DateTimeField(blank=True, null=True, default=None)
     expiration_date = models.DateTimeField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
-        if (self.__class__.objects.filter(eppn=self.eppn, badgeclass=self.badgeclass, status="Unaccepted",
-                                          bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN
-                                          ).exclude(pk=self.pk).exists()
-        ) or self.__class__.objects.filter(recipient_email=self.recipient_email, badgeclass=self.badgeclass,
-                                           status="Unaccepted",
-                                           bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EMAIL
-                                           ).exclude(pk=self.pk).exists():
+        if (
+            self.__class__.objects.filter(
+                eppn=self.eppn,
+                badgeclass=self.badgeclass,
+                status='Unaccepted',
+                bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN,
+            )
+            .exclude(pk=self.pk)
+            .exists()
+        ) or self.__class__.objects.filter(
+            recipient_email=self.recipient_email,
+            badgeclass=self.badgeclass,
+            status='Unaccepted',
+            bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EMAIL,
+        ).exclude(pk=self.pk).exists():
             raise IntegrityError(
-                "DirectAward with this eppn/email and status Unaccepted already exists for this badgeclass."
+                'DirectAward with this eppn/email and status Unaccepted already exists for this badgeclass.'
             )
         return super(DirectAward, self).validate_unique(exclude=exclude)
 
@@ -74,9 +72,9 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     def revoke(self, revocation_reason):
         if self.status == DirectAward.STATUS_REVOKED:
-            raise BadgrValidationError("DirectAward is already revoked", 999)
+            raise BadgrValidationError('DirectAward is already revoked', 999)
         if not revocation_reason:
-            raise BadgrValidationError("revocation_reason is required", 999)
+            raise BadgrValidationError('revocation_reason is required', 999)
         self.status = DirectAward.STATUS_REVOKED
         self.revocation_reason = revocation_reason
         self.save()
@@ -85,22 +83,26 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         """Accept the direct award and make an assertion out of it"""
         from issuer.models import BadgeInstance
 
-        if self.eppn not in recipient.eppns and self.recipient_email != recipient.email and self.bundle.identifier_type != DirectAwardBundle.IDENTIFIER_EMAIL:
-            raise BadgrValidationError("Cannot award, eppn / email does not match", 999)
+        if (
+            self.eppn not in recipient.eppns
+            and self.recipient_email != recipient.email
+            and self.bundle.identifier_type != DirectAwardBundle.IDENTIFIER_EMAIL
+        ):
+            raise BadgrValidationError('Cannot award, eppn / email does not match', 999)
 
         if not recipient.validated_name:
             raise BadgrValidationError(
-                "Cannot award, you do not have a validated name",
+                'Cannot award, you do not have a validated name',
                 999,
             )
         evidence = None
         if self.evidence_url or self.narrative:
             evidence = [
                 {
-                    "evidence_url": self.evidence_url,
-                    "narrative": self.narrative,
-                    "description": self.description,
-                    "name": self.name,
+                    'evidence_url': self.evidence_url,
+                    'narrative': self.narrative,
+                    'description': self.description,
+                    'name': self.name,
                 }
             ]
         assertion = self.badgeclass.issue(
@@ -117,10 +119,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             grade_achieved=self.grade_achieved,
         )
         # delete any pending enrollments for this badgeclass and user
-        recipient.cached_pending_enrollments().filter(
-            badge_class=self.badgeclass
-        ).delete()
-        recipient.remove_cached_data(["cached_pending_enrollments"])
+        recipient.cached_pending_enrollments().filter(badge_class=self.badgeclass).delete()
+        recipient.remove_cached_data(['cached_pending_enrollments'])
         return assertion
 
     def get_permissions(self, user):
@@ -134,7 +134,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(
-            subject="Je hebt een edubadge ontvangen. You received an edubadge. Claim it now!",
+            subject='Je hebt een edubadge ontvangen. You received an edubadge. Claim it now!',
             message=plain_text,
             html_message=html_message,
             recipient_list=[self.recipient_email],
@@ -143,73 +143,62 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
 class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     initial_total = models.IntegerField()
-    badgeclass = models.ForeignKey("issuer.BadgeClass", on_delete=models.CASCADE)
+    badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     lti_import = models.BooleanField(default=False)
     sis_import = models.BooleanField(default=False)
     sis_user_id = models.CharField(max_length=254, blank=True, null=True)
     sis_client_id = models.CharField(max_length=254, blank=True, null=True)
 
-    STATUS_SCHEDULED = "Scheduled"
-    STATUS_ACTIVE = "Active"
+    STATUS_SCHEDULED = 'Scheduled'
+    STATUS_ACTIVE = 'Active'
     STATUS_CHOICES = (
-        (STATUS_SCHEDULED, "Scheduled"),
-        (STATUS_ACTIVE, "Active"),
+        (STATUS_SCHEDULED, 'Scheduled'),
+        (STATUS_ACTIVE, 'Active'),
     )
-    status = models.CharField(
-        max_length=254, choices=STATUS_CHOICES, default=STATUS_ACTIVE
-    )
-    IDENTIFIER_EPPN = "eppn"
-    IDENTIFIER_EMAIL = "email"
+    status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_ACTIVE)
+    IDENTIFIER_EPPN = 'eppn'
+    IDENTIFIER_EMAIL = 'email'
     IDENTIFIER_TYPES = (
-        (IDENTIFIER_EPPN, "eppn"),
-        (IDENTIFIER_EMAIL, "email"),
+        (IDENTIFIER_EPPN, 'eppn'),
+        (IDENTIFIER_EMAIL, 'email'),
     )
-    identifier_type = models.CharField(
-        max_length=254, choices=IDENTIFIER_TYPES, default=IDENTIFIER_EPPN
-    )
+    identifier_type = models.CharField(max_length=254, choices=IDENTIFIER_TYPES, default=IDENTIFIER_EPPN)
     scheduled_at = models.DateTimeField(blank=True, null=True, default=None)
 
     @property
     def assertion_count(self):
         from issuer.models import BadgeInstance
 
-        return BadgeInstance.objects.filter(
-            direct_award_bundle=self, revoked=False
-        ).count()
+        return BadgeInstance.objects.filter(direct_award_bundle=self, revoked=False).count()
 
     @property
     def direct_award_count(self):
-        return DirectAward.objects.filter(bundle=self, status="Unaccepted").count()
+        return DirectAward.objects.filter(bundle=self, status='Unaccepted').count()
 
     @property
     def direct_award_rejected_count(self):
-        return DirectAward.objects.filter(bundle=self, status="Rejected").count()
+        return DirectAward.objects.filter(bundle=self, status='Rejected').count()
 
     @property
     def direct_award_scheduled_count(self):
-        return DirectAward.objects.filter(bundle=self, status="Scheduled").count()
+        return DirectAward.objects.filter(bundle=self, status='Scheduled').count()
 
     @property
     def direct_award_deleted_count(self):
-        return DirectAward.objects.filter(bundle=self, status="Deleted").count()
+        return DirectAward.objects.filter(bundle=self, status='Deleted').count()
 
     @property
     def direct_award_revoked_count(self):
         from issuer.models import BadgeInstance
 
-        revoked_count = BadgeInstance.objects.filter(
-            direct_award_bundle=self, revoked=True
-        ).count()
-        return (
-                revoked_count
-                + DirectAward.objects.filter(bundle=self, status="Revoked").count()
-        )
+        revoked_count = BadgeInstance.objects.filter(direct_award_bundle=self, revoked=True).count()
+        return revoked_count + DirectAward.objects.filter(bundle=self, status='Revoked').count()
 
     @property
     def url(self):
         return urllib.parse.urljoin(
             settings.UI_URL,
-            "badgeclass/{}/direct-awards-bundles".format(self.badgeclass.entity_id),
+            'badgeclass/{}/direct-awards-bundles'.format(self.badgeclass.entity_id),
         )
 
     @cached_method()
@@ -224,7 +213,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(
-            subject="Je hebt een edubadge ontvangen. You received an edubadge. Claim it now!",
+            subject='Je hebt een edubadge ontvangen. You received an edubadge. Claim it now!',
             message=plain_text,
             html_message=html_message,
             bcc=self.recipient_emails,
@@ -234,7 +223,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         html_message = EmailMessageMaker.create_direct_award_bundle_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(
-            subject="You have awarded Edubadges!",
+            subject='You have awarded Edubadges!',
             message=plain_text,
             html_message=html_message,
             recipient_list=[self.created_by.email],
@@ -243,7 +232,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     def notify_awarder_for_scheduled(self):
         html_message = EmailMessageMaker.create_scheduled_direct_award_bundle_mail(self)
         send_mail(
-            subject="You have scheduled to award Edubadges!",
+            subject='You have scheduled to award Edubadges!',
             message=None,
             html_message=html_message,
             recipient_list=[self.created_by.email],
@@ -259,4 +248,5 @@ class DirectAwardAuditTrail(models.Model):
     user_agent_info = models.CharField(max_length=255, blank=True)
     action = models.CharField(max_length=40)
     change_summary = models.CharField(max_length=199, blank=True)
-    direct_award_entity_id = models.CharField(max_length=255, blank=True)
+    direct_award_id = models.CharField(max_length=255, blank=True)
+    badgeclass_id = models.CharField(max_length=255, blank=True)

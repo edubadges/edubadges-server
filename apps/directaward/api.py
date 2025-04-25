@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from directaward.models import DirectAward, DirectAwardBundle
 from directaward.permissions import IsDirectAwardOwner
-from directaward.serializer import DirectAwardSerializer, DirectAwardBundleSerializer
+from directaward.serializer import DirectAwardBundleSerializer
 from directaward.signals import audit_trail_signal
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from mainsite import settings
@@ -20,7 +20,6 @@ from mainsite.exceptions import (
 )
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import EmailMessageMaker, send_mail
-from staff.permissions import HasObjectPermission
 
 
 def direct_award_remove_cache(direct_award):
@@ -391,6 +390,7 @@ class DirectAwardRevoke(BaseEntityDetailView):
                     user=request.user,
                     method='REVOKE',
                     direct_award_id=direct_award_db.entity_id,
+                    badgeclass_id=direct_award_db.badgeclass_id,
                     summary=f'Directaward revoked with reason {revocation_reason}',
                 )
             except Exception as e:
@@ -400,6 +400,7 @@ class DirectAwardRevoke(BaseEntityDetailView):
                     user=request.user,
                     method='REVOKE',
                     direct_award_id=direct_award['entity_id'],
+                    badgeclass_id=0,
                     summary=f'Direct award not revoked, error: {str(e)}',
                 )
                 un_successful_direct_awards.append(
@@ -506,6 +507,7 @@ class DirectAwardResend(BaseEntityDetailView):
                     user=request.user,
                     method='RESEND',
                     direct_award_id=direct_award_db.entity_id,
+                    badgeclass_id=direct_award_db.badgeclass_id,
                     summary='Directaward resent',
                 )
             except Exception as e:
@@ -528,6 +530,7 @@ class DirectAwardResend(BaseEntityDetailView):
         return Response(
             {'result': 'ok', 'un_successful_direct_awards': un_successful_direct_awards}, status=status.HTTP_200_OK
         )
+
 
 class DirectAwardAccept(BaseEntityDetailView):
     model = DirectAward  # used by .get_object()
@@ -620,6 +623,7 @@ class DirectAwardAccept(BaseEntityDetailView):
                     user=request.user,
                     method='ACCEPT',
                     direct_award_id=direct_award.entity_id,
+                    badgeclass_id=direct_award.badgeclass_id,
                     summary='Cannot award as eppn does not match or not member of institution',
                 )
                 raise err
@@ -644,6 +648,7 @@ class DirectAwardAccept(BaseEntityDetailView):
                 user=request.user,
                 method='ACCEPT',
                 direct_award_id=direct_award.entity_id,
+                badgeclass_id=direct_award.badgeclass_id,
                 summary='Rejected directaward',
             )
             return Response({'rejected': True}, status=status.HTTP_200_OK)
@@ -728,7 +733,9 @@ class DirectAwardDelete(BaseEntityDetailView):
         revocation_reason = request.data.get('revocation_reason', None)
         if not direct_awards:
             raise BadgrValidationFieldError('direct_awards', 'This field is required', 999)
-        delete_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=settings.DIRECT_AWARDS_DELETION_THRESHOLD_DAYS)
+        delete_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
+            days=settings.DIRECT_AWARDS_DELETION_THRESHOLD_DAYS
+        )
         un_successful_direct_awards = []
         successful_direct_awards = []
         for direct_award in direct_awards:
@@ -764,6 +771,7 @@ class DirectAwardDelete(BaseEntityDetailView):
                         user=request.user,
                         method='DELETE',
                         direct_award_id=direct_award_db.entity_id,
+                        badgeclass_id=direct_award_db.badgeclass_id,
                         summary=f'Awarded eduBadge has been deleted with reason {revocation_reason}',
                     )
             except Exception as e:
@@ -773,6 +781,7 @@ class DirectAwardDelete(BaseEntityDetailView):
                     user=request.user,
                     method='DELETE',
                     direct_award_id=direct_award['entity_id'],
+                    badgeclass_id=0,
                     summary=f'Exception: {e}',
                 )
                 un_successful_direct_awards.append(
