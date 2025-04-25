@@ -635,6 +635,7 @@ class DirectAwardAccept(BaseEntityDetailView):
                 user=request.user,
                 method='ACCEPT',
                 direct_award_id=direct_award.entity_id,
+                badgeclass_id=direct_award.badgeclass_id,
                 summary='Accepted directaward',
             )
             return Response({'entity_id': assertion.entity_id}, status=status.HTTP_201_CREATED)
