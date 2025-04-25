@@ -1,5 +1,6 @@
 import urllib
 
+from auditlog.registry import auditlog
 from django.conf import settings
 from django.db import models
 from django.forms.models import model_to_dict
@@ -14,6 +15,7 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
     """
     Abstract base class used for inheritance in all the Staff Many2Many relationship models
     """
+
     user = models.ForeignKey('badgeuser.BadgeUser', on_delete=models.CASCADE)
     may_create = models.BooleanField(default=False)
     may_read = models.BooleanField(default=False)
@@ -29,39 +31,56 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
     @classmethod
     def empty_permissions(cls):
         """convenience class method to represent NO permissions"""
-        return {'may_create': False,
-                'may_read': False,
-                'may_update': False,
-                'may_delete': False,
-                'may_award': False,
-                'may_sign': False,
-                'may_administrate_users': False}
+        return {
+            'may_create': False,
+            'may_read': False,
+            'may_update': False,
+            'may_delete': False,
+            'may_award': False,
+            'may_sign': False,
+            'may_administrate_users': False,
+        }
 
     @classmethod
     def full_permissions(cls):
         """convenience class method to represent FULL permissions"""
-        return {'may_create': True,
-                'may_read': True,
-                'may_update': True,
-                'may_delete': True,
-                'may_award': True,
-                'may_sign': True,
-                'may_administrate_users': True}
+        return {
+            'may_create': True,
+            'may_read': True,
+            'may_update': True,
+            'may_delete': True,
+            'may_award': True,
+            'may_sign': True,
+            'may_administrate_users': True,
+        }
 
     @property
     def permissions(self):
-        return model_to_dict(self, fields = ['may_create',
-                                             'may_read',
-                                             'may_update',
-                                             'may_delete',
-                                             'may_award',
-                                             'may_sign',
-                                             'may_administrate_users'])
+        return model_to_dict(
+            self,
+            fields=[
+                'may_create',
+                'may_read',
+                'may_update',
+                'may_delete',
+                'may_award',
+                'may_sign',
+                'may_administrate_users',
+            ],
+        )
+
     @property
     def has_a_permission(self):
         """check to see if at least one permission set to True"""
-        return self.may_create or self.may_read or self.may_update or self.may_delete \
-               or self.may_award or self.may_sign or self.may_administrate_users
+        return (
+            self.may_create
+            or self.may_read
+            or self.may_update
+            or self.may_delete
+            or self.may_award
+            or self.may_sign
+            or self.may_administrate_users
+        )
 
     def has_permissions(self, permissions):
         """
@@ -90,9 +109,9 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
 
     def _user_has_other_membership_in_branch(self, user):
         """check to see if given user already has another staff membership in the current branch"""
-        user_staff_memberships_in_branch = self.object.get_all_staff_memberships_in_current_branch(user,
-                                                                                                   check_parents=True,
-                                                                                                   check_children=False)
+        user_staff_memberships_in_branch = self.object.get_all_staff_memberships_in_current_branch(
+            user, check_parents=True, check_children=False
+        )
         return bool([staff for staff in user_staff_memberships_in_branch if staff.user == user and staff != self])
 
     def save(self, *args, **kwargs):
@@ -112,20 +131,22 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
     @property
     def cached_user(self):
         from badgeuser.models import BadgeUser
+
         return BadgeUser.cached.get(pk=self.user_id)
 
     @property
     def staff_page_url(self):
         entity = self.object
-        return urllib.parse.urljoin(settings.UI_URL, 'manage/'+
-                                    entity.__class__.__name__+'/'+
-                                    entity.entity_id+'/user-management')
+        return urllib.parse.urljoin(
+            settings.UI_URL, 'manage/' + entity.__class__.__name__ + '/' + entity.entity_id + '/user-management'
+        )
 
 
 class InstitutionStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Institution and users, with permissions added to the relationship
     """
+
     institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE)
 
     class Meta:
@@ -138,8 +159,11 @@ class InstitutionStaff(PermissionedRelationshipBase):
         return self.institution
 
     def _is_last_staff_membership(self):
-        there_are_other_staffs = bool(InstitutionStaff.objects.filter(institution=self.institution,
-                                                                      may_administrate_users=True).exclude(pk=self.pk))
+        there_are_other_staffs = bool(
+            InstitutionStaff.objects.filter(institution=self.institution, may_administrate_users=True).exclude(
+                pk=self.pk
+            )
+        )
         return not there_are_other_staffs
 
     def delete(self, *args, **kwargs):
@@ -156,6 +180,7 @@ class FacultyStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Faculty and users, with permissions added to the relationship
     """
+
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.CASCADE)
 
     class Meta:
@@ -170,6 +195,7 @@ class IssuerStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Issuer and users, with permissions added to the relationship
     """
+
     issuer = models.ForeignKey('issuer.Issuer', on_delete=models.CASCADE)
 
     class Meta:
@@ -190,7 +216,6 @@ class IssuerStaff(PermissionedRelationshipBase):
 
 
 class BadgeClassStaff(PermissionedRelationshipBase):
-
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
 
     class Meta:
@@ -199,3 +224,9 @@ class BadgeClassStaff(PermissionedRelationshipBase):
     @property
     def object(self):
         return self.badgeclass
+
+
+auditlog.register(InstitutionStaff)
+auditlog.register(FacultyStaff)
+auditlog.register(IssuerStaff)
+auditlog.register(BadgeClassStaff)
