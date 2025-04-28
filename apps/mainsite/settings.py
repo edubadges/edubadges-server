@@ -629,4 +629,6 @@ SPECTACULAR_SETTINGS = {
     ],
 }
 
+AUDITLOG_EXCLUDE_TRACKING_FIELDS = ('created_at', 'updated_at', 'source')
+
 API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
