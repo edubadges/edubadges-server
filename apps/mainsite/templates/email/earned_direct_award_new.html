@@ -103,7 +103,7 @@
 {% endblock %}
 
 {% block title %}
-<title>Je hebt een edubadge ontvangen. You received an edubadge. Claim it now.</title>
+<title>Je hebt een edubadge ontvangen. You received an edubadge. Claim before {{da_enddate}}.</title>
 {% endblock %}
 
 {% block content %}
@@ -135,7 +135,7 @@
         </div>
     </div>
 </div>
-<p class="title">The {{institution_name}} has send you the following edubadge. Claim it before {{da_enddate}} !</p>
+<p class="title">The {{institution_name}} has send you the following edubadge.<br> Claim it before {{da_enddate}} !</p>
 <div class="message_container">
     <p class="text text_header">How do I obtain the edubadge?</p>
     <p class="text"></p>To obtain your edubadge, you need to claim it. You can do this in your backpack
