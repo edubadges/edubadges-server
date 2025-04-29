@@ -40,7 +40,6 @@ class Command(BaseCommand):
             reminder_cutoff = now + timedelta(days=days)
             direct_awards = DirectAward.objects.filter(expiration_date__lt=reminder_cutoff,
                                                        reminders=index,
-                                                       expiration_date__isnull=False,
                                                        status=unaccepted).all()
             logger.info(f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}")
 
