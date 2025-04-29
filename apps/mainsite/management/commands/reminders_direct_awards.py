@@ -1,6 +1,7 @@
 import logging
-import datetime
 
+from datetime import timedelta
+from django.utils import timezone
 from mainsite import settings
 from django.core.management.base import BaseCommand
 from django.db import connections
@@ -26,7 +27,7 @@ class Command(BaseCommand):
         logger = logging.getLogger('Badgr.Debug')
         logger.info("Running reminders_direct_awards")
 
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = timezone.now()
 
         # We store the reminder number (first reminders sent = 1) to ensure we don't spam the user
         threshold_days = settings.EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS.split(",")
@@ -36,8 +37,8 @@ class Command(BaseCommand):
         index = len(threshold_days) - 1
         unaccepted = 'Unaccepted'
         for days in threshold_days:
-            reminder_date = now - datetime.timedelta(days=days)
-            direct_awards = DirectAward.objects.filter(created_at__lt=reminder_date,
+            reminder_cutoff = now + timedelta(days=days)
+            direct_awards = DirectAward.objects.filter(expiration_date__lt=reminder_cutoff,
                                                        reminders=index,
                                                        expiration_date__isnull=False,
                                                        status=unaccepted).all()
