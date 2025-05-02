@@ -1,3 +1,5 @@
+from auditlog.mixins import LogAccessMixin
+from django.http import Http404
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework import status
@@ -8,8 +10,12 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP
 import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, BaseArchiveView
 from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceCollection
-from issuer.serializers import IssuerSerializer, BadgeClassSerializer, BadgeInstanceSerializer, \
-    BadgeInstanceCollectionSerializer
+from issuer.serializers import (
+    IssuerSerializer,
+    BadgeClassSerializer,
+    BadgeInstanceSerializer,
+    BadgeInstanceCollectionSerializer,
+)
 from mainsite.exceptions import BadgrApiException400, BadgrValidationFieldError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from signing import tsob
@@ -24,6 +30,7 @@ class BadgeClassList(VersionedObjectMixin, BaseEntityListView):
     """
     POST to create a new BadgeClass
     """
+
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     v1_serializer_class = BadgeClassSerializer
     http_method_names = ['post']
@@ -33,6 +40,7 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
     """
     POST to create a new Issuer
     """
+
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     v1_serializer_class = IssuerSerializer
     http_method_names = ['post']
@@ -67,11 +75,17 @@ class IssuerDeleteView(BaseArchiveView):
     v1_serializer_class = IssuerSerializer
 
 
-class BadgeClassDetail(BaseEntityDetailView):
+class BadgeClassDetail(LogAccessMixin, BaseEntityDetailView):
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeClassSerializer
     http_method_names = ['put']
+
+    def get_object(self, request, **kwargs):
+        try:
+            return BadgeClass.objects.get(id=kwargs.get('id'))
+        except BadgeClass.DoesNotExist:
+            raise Http404
 
 
 class IssuerDetail(BaseEntityDetailView):
@@ -122,12 +136,14 @@ class BatchSignAssertions(BaseEntityListView):
             assertion_instance = BadgeInstance.objects.get(entity_id=ass_slug)
             if not user.may_sign_assertion(assertion_instance):
                 raise ValidationError('You do not have permission to sign this badge.')
-            if not user in [staff.user for staff in assertion_instance.issuer.current_signers]:
+            if user not in [staff.user for staff in assertion_instance.issuer.current_signers]:
                 raise ValidationError('You are not a signer for this issuer: {}'.format(assertion_instance.issuer.name))
             if assertion_instance.signature:
                 raise ValidationError(
                     'Cannot sign Assertion for Badgeclass {} with recipient identifier {}. Assertion already signed.'.format(
-                        assertion_instance.badgeclass.name, assertion_instance.recipient_identifier))
+                        assertion_instance.badgeclass.name, assertion_instance.recipient_identifier
+                    )
+                )
             assertion_instances.append(assertion_instance)
 
             timestamp = AssertionTimeStamp.objects.get(badge_instance=assertion_instance)
@@ -140,16 +156,14 @@ class BatchSignAssertions(BaseEntityListView):
         except ValueError as e:
             raise ValidationError(str(e))
         try:
-            signed_badges = tsob.sign_badges(batch_of_assertion_json,
-                                             private_key,
-                                             user.current_symmetric_key,
-                                             password)
+            signed_badges = tsob.sign_badges(batch_of_assertion_json, private_key, user.current_symmetric_key, password)
         except ValueError as e:
             raise ValidationError(str(e))
         for signed_badge in signed_badges:
             signature = signed_badge['signature']
-            matching_assertion = [ass for ass in assertion_instances if
-                                  ass.identifier == signed_badge['plain_badge']['id']]
+            matching_assertion = [
+                ass for ass in assertion_instances if ass.identifier == signed_badge['plain_badge']['id']
+            ]
             if len(matching_assertion) > 1:
                 raise ValidationError('Signing failed: Signed json could not be matched to a BadgeInstance')
             matching_assertion = matching_assertion[0]
@@ -200,20 +214,21 @@ class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class BadgeInstanceRevoke(BaseEntityDetailView):
+class BadgeInstanceRevoke(LogAccessMixin, BaseEntityDetailView):
     """
     Endpoint for revoking a badge (DELETE)
     """
+
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ['post']
     permission_map = {'POST': 'may_award'}
 
     @extend_schema(
         request=inline_serializer(
-            name="BadgeInstanceRevokeSerializer",
+            name='BadgeInstanceRevokeSerializer',
             fields={
-                "revocation_reason": serializers.CharField(),
-                "assertions": serializers.ListField(
+                'revocation_reason': serializers.CharField(),
+                'assertions': serializers.ListField(
                     child=inline_serializer(
                         name='NestedInlineOneOffSerializer',
                         fields={
@@ -221,24 +236,24 @@ class BadgeInstanceRevoke(BaseEntityDetailView):
                         },
                         allow_null=False,
                     )
-                )
+                ),
             },
         ),
     )
     def post(self, request, **kwargs):
         revocation_reason = request.data.get('revocation_reason', None)
         if not revocation_reason:
-            raise BadgrValidationFieldError('revocation_reason', "This field is required", 999)
+            raise BadgrValidationFieldError('revocation_reason', 'This field is required', 999)
         assertions = request.data.get('assertions', None)
         if not assertions:
-            raise BadgrValidationFieldError('assertions', "This field is required", 999)
+            raise BadgrValidationFieldError('assertions', 'This field is required', 999)
         for assertion in assertions:
             badgeinstance = BadgeInstance.objects.get(entity_id=assertion['entity_id'])
             if badgeinstance.get_permissions(request.user)['may_award']:
                 badgeinstance.revoke(revocation_reason)
             else:
-                raise BadgrApiException400("You do not have permission", 100)
-        return Response({"result": "ok"}, status=status.HTTP_200_OK)
+                raise BadgrApiException400('You do not have permission', 100)
+        return Response({'result': 'ok'}, status=status.HTTP_200_OK)
 
 
 class BadgeInstanceCollectionDetail(BaseEntityDetailView):

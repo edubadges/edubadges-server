@@ -1,4 +1,5 @@
 # encoding: utf-8
+from auditlog.mixins import LogAccessMixin
 from django.db.models import ProtectedError
 from django.http import Http404
 from rest_framework.response import Response
@@ -15,8 +16,7 @@ from staff.permissions import HasObjectPermission
 class BaseEntityView(APIView):
     create_event = None
     logger = None
-    permission_map = {'GET': 'may_read', 'POST': 'may_create',
-                      'PUT': 'may_update', 'DELETE': 'may_delete'}
+    permission_map = {'GET': 'may_read', 'POST': 'may_create', 'PUT': 'may_update', 'DELETE': 'may_delete'}
 
     def get_context_data(self, **kwargs):
         return {
@@ -49,7 +49,6 @@ class BaseEntityView(APIView):
 
 
 class BaseEntityListView(BaseEntityView):
-
     def get_objects(self, request, **kwargs):
         raise NotImplementedError
 
@@ -86,7 +85,6 @@ class BaseEntityListView(BaseEntityView):
 
 
 class VersionedObjectMixin(object):
-
     def has_object_permissions(self, request, obj):
         for permission in self.get_permissions():
             if not permission.has_object_permission(request, self, obj):
@@ -109,7 +107,6 @@ class VersionedObjectMixin(object):
 
 
 class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
-
     def get(self, request, **kwargs):
         """
         GET a single entity by its identifier
@@ -153,7 +150,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         return Response(status=HTTP_204_NO_CONTENT)
 
 
-class BaseArchiveView(BaseEntityDetailView):
+class BaseArchiveView(LogAccessMixin, BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
     http_method_names = ['delete']
 

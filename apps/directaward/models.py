@@ -1,7 +1,6 @@
 import urllib
 import uuid
 
-from auditlog.registry import auditlog
 from django.conf import settings
 from django.db import models, IntegrityError
 from django.utils.html import strip_tags
@@ -238,9 +237,6 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             html_message=html_message,
             recipient_list=[self.created_by.email],
         )
-
-
-auditlog.register(DirectAward)
 
 
 class DirectAwardAuditTrail(models.Model):
