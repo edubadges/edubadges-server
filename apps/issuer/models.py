@@ -1212,7 +1212,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
             self.user.publish()
         self.publish_delete('entity_id', 'revoked')
 
-    def revoke(self, revocation_reason):
+    def revoke(self, revocation_reason, user):
         if self.revoked:
             raise ValidationError('Assertion is already revoked')
 
@@ -1220,6 +1220,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
             raise ValidationError('revocation_reason is required')
 
         self.revoked = True
+        self.updated_by = user
         self.revocation_reason = revocation_reason
         self.image.delete()
         self.save()

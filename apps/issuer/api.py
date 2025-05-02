@@ -1,5 +1,4 @@
 from auditlog.mixins import LogAccessMixin
-from django.http import Http404
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework import status
@@ -75,17 +74,11 @@ class IssuerDeleteView(BaseArchiveView):
     v1_serializer_class = IssuerSerializer
 
 
-class BadgeClassDetail(LogAccessMixin, BaseEntityDetailView):
+class BadgeClassDetail(BaseEntityDetailView):
     model = BadgeClass
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = BadgeClassSerializer
     http_method_names = ['put']
-
-    def get_object(self, request, **kwargs):
-        try:
-            return BadgeClass.objects.get(id=kwargs.get('id'))
-        except BadgeClass.DoesNotExist:
-            raise Http404
 
 
 class IssuerDetail(BaseEntityDetailView):
@@ -250,7 +243,7 @@ class BadgeInstanceRevoke(LogAccessMixin, BaseEntityDetailView):
         for assertion in assertions:
             badgeinstance = BadgeInstance.objects.get(entity_id=assertion['entity_id'])
             if badgeinstance.get_permissions(request.user)['may_award']:
-                badgeinstance.revoke(revocation_reason)
+                badgeinstance.revoke(revocation_reason, request.user)
             else:
                 raise BadgrApiException400('You do not have permission', 100)
         return Response({'result': 'ok'}, status=status.HTTP_200_OK)
