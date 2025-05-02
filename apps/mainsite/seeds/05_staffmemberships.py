@@ -83,6 +83,7 @@ def create_issuerstaff(
     # existing memberships. So we have to do it manually.
     IssuerStaff.objects.get_or_create(user=user, issuer=issuer, **perms)
 
+
 def create_badgeclassstaff(
     username,
     email,
@@ -115,6 +116,7 @@ def create_badgeclassstaff(
     # existing memberships. So we have to do it manually.
     BadgeClassStaff.objects.get_or_create(user=user, badgeclass=badgeclass, **perms)
 
+
 issuer_group_staff = [
     # staff2
     {
@@ -136,6 +138,26 @@ issuer_group_staff = [
         'faculty_name': 'Medicine',
         'uid': '802d1a5325b08dca8ce30fe7e92a69187abb8ead',
         'perms': award_perms,
+    },
+    # t eacher 7
+    {
+        'username': 'teacher7',
+        'email': 'teacher7@harvard-example.edu',
+        'first_name': 'Teacher7',
+        'last_name': 'East',
+        'institution_name': 'harvard-example.edu',
+        'faculty_name': 'Medicine',
+        'uid': 'c39bc64457075f9953c4608c2bd57f28bed6d2aa',
+    },
+    # teacher 8
+    {
+        'username': 'teacher8',
+        'email': 'teacher8@yale-uni-example.edu',
+        'first_name': 'Teacher8',
+        'last_name': 'West',
+        'institution_name': 'yale-uni-example.edu',
+        'faculty_name': 'Medicine',
+        'uid': '20c67628b85c421edfb2ca95c92654455cd69aa5',
     },
 ]
 
@@ -162,6 +184,28 @@ issuer_staff = [
         'issuer_name': 'Medicine',
         'uid': 'a400fdc5edda4ab3c99400506610c1bb062bedb8',
         'perms': award_perms,
+    },
+    # teacher 11
+    {
+        'username': 'teacher11',
+        'email': 'teacher11@harvard-example.edu',
+        'first_name': 'Teacher11',
+        'last_name': 'North',
+        'institution_name': 'harvard-example.edu',
+        'faculty_name': 'Medicine',
+        'issuer_name': 'Medicine',
+        'uid': 'c3df59f7a8d884c5db8852aa5b60a813eb6a4183',
+    },
+    # teacher 12
+    {
+        'username': 'teacher12',
+        'email': 'teacher12@yale-uni-example.edu',
+        'first_name': 'Teacher12',
+        'last_name': 'South',
+        'institution_name': 'yale-uni-example.edu',
+        'faculty_name': 'Medicine',
+        'issuer_name': 'Medicine',
+        'uid': '00b953fcc7849c084761b3a9163a475c9c700d88',
     },
 ]
 
