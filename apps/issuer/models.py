@@ -1599,4 +1599,3 @@ class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, CacheModel)
 
 auditlog.register(Issuer)
 auditlog.register(BadgeClass)
-auditlog.register(BadgeInstance)

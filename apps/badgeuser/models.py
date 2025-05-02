@@ -902,4 +902,4 @@ class ImportBadgeAllowedUrl(models.Model):
     url = models.URLField()
 
 
-auditlog.register(BadgeUser)
+auditlog.register(BadgeUser, exclude_fields=['last_login', 'password'])
