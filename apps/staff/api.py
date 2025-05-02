@@ -1,4 +1,3 @@
-from auditlog.mixins import LogAccessMixin
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
 
@@ -20,7 +19,7 @@ from staff.serializers import (
 logger = badgrlog.BadgrLogger()
 
 
-class StaffListViewBase(LogAccessMixin, VersionedObjectMixin, BaseEntityListView):
+class StaffListViewBase(VersionedObjectMixin, BaseEntityListView):
     http_method_names = ['post']
     permission_map = {'POST': 'may_administrate_users'}
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
@@ -33,7 +32,7 @@ class StaffListViewBase(LogAccessMixin, VersionedObjectMixin, BaseEntityListView
         return super(StaffListViewBase, self).post(request, **kwargs)
 
 
-class StaffDetailViewBase(LogAccessMixin, BaseEntityDetailView):
+class StaffDetailViewBase(BaseEntityDetailView):
     """
     PUT to edit staffmembership
     DELETE to delete staffmembership
