@@ -103,7 +103,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                     direct_award['eppn'] = direct_award['eppn'].lower() if eppn_required else None
                     status = DirectAward.STATUS_SCHEDULED if scheduled_at else DirectAward.STATUS_UNACCEPTED
                     direct_award['status'] = status
-
+                    direct_award['created_by'] = validated_data['created_by']
                     direct_award['expiration_date'] = expiration_date
                     try:
                         da_created = DirectAward.objects.create(

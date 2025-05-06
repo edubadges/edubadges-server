@@ -4,6 +4,7 @@ import re
 from itertools import chain
 
 from allauth.account.models import EmailAddress, EmailConfirmation
+from auditlog.registry import auditlog
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -899,3 +900,6 @@ class StudentAffiliation(models.Model):
 
 class ImportBadgeAllowedUrl(models.Model):
     url = models.URLField()
+
+
+auditlog.register(BadgeUser, exclude_fields=['last_login', 'password'])

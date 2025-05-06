@@ -24,11 +24,14 @@ from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.models import BadgrApp
-from mainsite.serializers import StripTagsCharField, MarkdownCharField, OriginalJsonSerializerMixin, \
-    BaseSlugRelatedField
+from mainsite.serializers import (
+    StripTagsCharField,
+    MarkdownCharField,
+    OriginalJsonSerializerMixin,
+    BaseSlugRelatedField,
+)
 from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
 from mainsite.validators import BadgeExtensionValidator
-from . import utils
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceCollection
 
 
@@ -78,10 +81,9 @@ class ExtensionsSaverMixin(object):
             self.add_extensions(instance, add_these_extensions, extension_items)
 
 
-class IssuerSerializer(OriginalJsonSerializerMixin,
-                       ExtensionsSaverMixin,
-                       InternalValueErrorOverrideMixin,
-                       serializers.Serializer):
+class IssuerSerializer(
+    OriginalJsonSerializerMixin, ExtensionsSaverMixin, InternalValueErrorOverrideMixin, serializers.Serializer
+):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name_english = StripTagsCharField(max_length=1024, required=False, allow_null=True, allow_blank=True)
@@ -143,8 +145,9 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
         representation['json'] = obj.get_json(obi_version='1_1', use_canonical_id=True)
 
         if self.context.get('embed_badgeclasses', False):
-            representation['badgeclasses'] = BadgeClassSerializer(obj.badgeclasses.all(), many=True,
-                                                                  context=self.context).data
+            representation['badgeclasses'] = BadgeClassSerializer(
+                obj.badgeclasses.all(), many=True, context=self.context
+            ).data
         if not representation['image_english']:
             representation['image_english'] = obj.institution.image_url()
         if not representation['image_dutch']:
@@ -162,10 +165,12 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
             errors = OrderedDict(chain(errors.items(), e.items()))
         if not data.get('description_dutch', False) and not data.get('description_english', False):
             e = OrderedDict(
-                [('description_dutch', [ErrorDetail('Dutch or English description is required', code=913)])])
+                [('description_dutch', [ErrorDetail('Dutch or English description is required', code=913)])]
+            )
             errors = OrderedDict(chain(errors.items(), e.items()))
             e = OrderedDict(
-                [('description_english', [ErrorDetail('English or Dutch description is required', code=925)])])
+                [('description_english', [ErrorDetail('English or Dutch description is required', code=925)])]
+            )
             errors = OrderedDict(chain(errors.items(), e.items()))
         if not data.get('url_dutch', False) and not data.get('url_english', False):
             e = OrderedDict([('url_dutch', [ErrorDetail('Dutch or English url is required', code=915)])])
@@ -177,9 +182,9 @@ class IssuerSerializer(OriginalJsonSerializerMixin,
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
             original_json = extension_items[extension_name]
-            extension = IssuerExtension(name=extension_name,
-                                        original_json=json.dumps(original_json),
-                                        issuer_id=instance.pk)
+            extension = IssuerExtension(
+                name=extension_name, original_json=json.dumps(original_json), issuer_id=instance.pk
+            )
             extension.save()
 
 
@@ -196,12 +201,13 @@ class AlignmentItemSerializer(serializers.Serializer):
     def validate_target_url(self, target_url):
         if not self.root.initial_data.get('isMicroCredentials', True):
             if not target_url or len(target_url.strip()) == 0:
-                raise ValidationError(detail="This field may not be blank.", code='blank')
+                raise ValidationError(detail='This field may not be blank.', code='blank')
         return target_url
 
 
-class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
-                           InternalValueErrorOverrideMixin, serializers.Serializer):
+class BadgeClassSerializer(
+    OriginalJsonSerializerMixin, ExtensionsSaverMixin, InternalValueErrorOverrideMixin, serializers.Serializer
+):
     created_at = serializers.DateTimeField(read_only=True)
     created_by = BadgeUserIdentifierField()
     name = StripTagsCharField(max_length=255)
@@ -226,8 +232,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     assessment_id_verified = serializers.BooleanField(required=False, default=False)
     assessment_supervised = serializers.BooleanField(required=False, default=False)
     quality_assurance_name = StripTagsCharField(required=False, allow_blank=True, allow_null=True)
-    quality_assurance_url = StripTagsCharField(required=False, allow_blank=True, allow_null=True,
-                                               validators=[URLValidator()])
+    quality_assurance_url = StripTagsCharField(
+        required=False, allow_blank=True, allow_null=True, validators=[URLValidator()]
+    )
     quality_assurance_description = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
     grade_achieved_required = serializers.BooleanField(required=False, default=False)
     eqf_nlqf_level_verified = serializers.BooleanField(required=False, default=False)
@@ -243,33 +250,38 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         """
         For each type of badge there are different required fields
         """
-        issuer = data["issuer"]
-        required_fields = ["name"]
-        extensions = ["LanguageExtension"]
+        issuer = data['issuer']
+        required_fields = ['name']
+        extensions = ['LanguageExtension']
         is_mbo = issuer.institution.institution_type == Institution.TYPE_MBO
-        is_private = data.get("is_private", False)
-        type_badge = data["badge_class_type"]
+        is_private = data.get('is_private', False)
+        type_badge = data['badge_class_type']
         self.formal = type_badge == BadgeClass.BADGE_CLASS_TYPE_REGULAR
         if is_mbo and not is_private and type_badge != BadgeClass.BADGE_CLASS_TYPE_CURRICULAR:
-            extensions += ["StudyLoadExtension"]
+            extensions += ['StudyLoadExtension']
         if not is_private:
-            required_fields += ["description", "criteria_text"]
+            required_fields += ['description', 'criteria_text']
             if type_badge == BadgeClass.BADGE_CLASS_TYPE_MICRO:
-                required_fields += ["participation", "assessment_type", "quality_assurance_name",
-                                    "quality_assurance_url", "quality_assurance_description"]
-                extensions += ["LearningOutcomeExtension", "EQFExtension"]
+                required_fields += [
+                    'participation',
+                    'assessment_type',
+                    'quality_assurance_name',
+                    'quality_assurance_url',
+                    'quality_assurance_description',
+                ]
+                extensions += ['LearningOutcomeExtension', 'EQFExtension']
             elif type_badge == BadgeClass.BADGE_CLASS_TYPE_REGULAR:
-                required_fields += ["criteria_text"]
-                extensions += ["LearningOutcomeExtension", "EQFExtension", "EducationProgramIdentifierExtension"]
+                required_fields += ['criteria_text']
+                extensions += ['LearningOutcomeExtension', 'EQFExtension', 'EducationProgramIdentifierExtension']
 
         errors = OrderedDict()
         for field_name in required_fields:
             if data.get(field_name) is None:
-                errors[field_name] = ErrorDetail("This field may not be blank.", code="blank")
-        extension_items = data.get("extension_items", [])
+                errors[field_name] = ErrorDetail('This field may not be blank.', code='blank')
+        extension_items = data.get('extension_items', [])
         for extension in extensions:
-            if not extension_items.get(f"extensions:{extension}"):
-                errors[f"extensions.{extension}"] = ErrorDetail("This field may not be blank.", code="blank")
+            if not extension_items.get(f'extensions:{extension}'):
+                errors[f'extensions.{extension}'] = ErrorDetail('This field may not be blank.', code='blank')
         if errors:
             raise ValidationError(errors)
 
@@ -285,8 +297,9 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
 
     def to_representation(self, instance):
         representation = super(BadgeClassSerializer, self).to_representation(instance)
-        representation['issuer'] = OriginSetting.HTTP + reverse('issuer_json',
-                                                                kwargs={'entity_id': instance.cached_issuer.entity_id})
+        representation['issuer'] = OriginSetting.HTTP + reverse(
+            'issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id}
+        )
         representation['json'] = instance.get_json(obi_version='1_1', use_canonical_id=True)
         return representation
 
@@ -318,33 +331,51 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
     def validate_extensions(self, extensions):
         if extensions:
             for ext_name, ext in extensions.items():
-                if "@context" in ext and not ext['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
+                if '@context' in ext and not ext['@context'].startswith(settings.EXTENSIONS_ROOT_URL):
                     raise BadgrValidationError(
-                        error_code=999,
-                        error_message=f"extensions @context invalid {ext['@context']}")
+                        error_code=999, error_message=f'extensions @context invalid {ext["@context"]}'
+                    )
         return extensions
 
     def add_extensions(self, instance, add_these_extensions, extension_items):
         for extension_name in add_these_extensions:
             original_json = extension_items[extension_name]
-            extension = BadgeClassExtension(name=extension_name,
-                                            original_json=json.dumps(original_json),
-                                            badgeclass_id=instance.pk)
+            extension = BadgeClassExtension(
+                name=extension_name, original_json=json.dumps(original_json), badgeclass_id=instance.pk
+            )
             extension.save()
 
     def update(self, instance, validated_data):
-        has_unrevoked_assertions = instance.assertions and len(
-            [ass for ass in instance.assertions if not ass.revoked]) > 0
+        has_unrevoked_assertions = (
+            instance.assertions and len([ass for ass in instance.assertions if not ass.revoked]) > 0
+        )
         if not has_unrevoked_assertions:
             self.save_extensions(validated_data, instance)
-        allowed_keys = ['narrative_required', 'evidence_required', 'narrative_student_required',
-                        'evidence_student_required', 'award_non_validated_name_allowed',
-                        'direct_awarding_disabled', 'self_enrollment_disabled',
-                        'alignment_items', 'expiration_period', 'self_enrollment_disabled',
-                        'stackable', 'grade_achieved_required', 'eqf_nlqf_level_verified']
+        allowed_keys = [
+            'narrative_required',
+            'evidence_required',
+            'narrative_student_required',
+            'evidence_student_required',
+            'award_non_validated_name_allowed',
+            'direct_awarding_disabled',
+            'self_enrollment_disabled',
+            'alignment_items',
+            'expiration_period',
+            'self_enrollment_disabled',
+            'stackable',
+            'grade_achieved_required',
+            'eqf_nlqf_level_verified',
+        ]
         # Because of new required fields there are invalid badge_classes that are allowed to update
-        upgrade_keys = ['quality_assurance_description', 'quality_assurance_name', 'quality_assurance_url',
-                        'assessment_type', 'assessment_supervised', 'assessment_id_verified', 'participation']
+        upgrade_keys = [
+            'quality_assurance_description',
+            'quality_assurance_name',
+            'quality_assurance_url',
+            'assessment_type',
+            'assessment_supervised',
+            'assessment_id_verified',
+            'participation',
+        ]
         many_to_many_keys = ['award_allowed_institutions', 'tags']
         for key, value in validated_data.items():
             if key not in many_to_many_keys and (not has_unrevoked_assertions or key in allowed_keys):
@@ -352,7 +383,11 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             if key in upgrade_keys and getattr(instance, key) is None:
                 setattr(instance, key, value)
             if key == 'extension_items':
-                has_existing_lo = [ext for ext in list(instance.badgeclassextension_set.all()) if ext.name == 'extensions:LearningOutcomeExtension']
+                has_existing_lo = [
+                    ext
+                    for ext in list(instance.badgeclassextension_set.all())
+                    if ext.name == 'extensions:LearningOutcomeExtension'
+                ]
                 has_new_lo = validated_data.get('extension_items').get('extensions:LearningOutcomeExtension', False)
                 # Corner case where previously LO was not required and now is
                 if not has_existing_lo and has_new_lo:
@@ -366,19 +401,20 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
                 badge_class.issuer.remove_cached_data(['cached_badgeclasses'])
             instance.save()
         except IntegrityError:
-            raise BadgrValidationFieldError('name',
-                                            "There is already a Badgeclass with this name inside this Issuer",
-                                            911)
+            raise BadgrValidationFieldError(
+                'name', 'There is already a Badgeclass with this name inside this Issuer', 911
+            )
         return instance
 
     def validate_alignments(self, alignments):
         alignment_max = 8
         if alignments.__len__() >= alignment_max:
-            raise BadgrValidationFieldError('alignments',
-                                            "There are too many Related educational framework objects, the maximum is {}.".format(
-                                                str(alignment_max),
-                                                922)
-                                            )
+            raise BadgrValidationFieldError(
+                'alignments',
+                'There are too many Related educational framework objects, the maximum is {}.'.format(
+                    str(alignment_max),
+                ),
+            )
         return alignments
 
     def to_internal_value_error_override(self, data):
@@ -387,8 +423,17 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
         errors = OrderedDict()
         if data.get('name') == settings.EDUID_BADGE_CLASS_NAME:
             e = OrderedDict(
-                [('name', [ErrorDetail(f"{settings.EDUID_BADGE_CLASS_NAME} is a reserved name for badgeclasses",
-                                       code=907)])])
+                [
+                    (
+                        'name',
+                        [
+                            ErrorDetail(
+                                f'{settings.EDUID_BADGE_CLASS_NAME} is a reserved name for badgeclasses', code=907
+                            )
+                        ],
+                    )
+                ]
+            )
             errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 
@@ -399,27 +444,29 @@ class BadgeClassSerializer(OriginalJsonSerializerMixin, ExtensionsSaverMixin,
             institution = validated_data['issuer'].faculty.institution
             if is_micro_micro_credential and not institution.micro_credentials_enabled:
                 raise BadgrValidationError(
-                    "Cannot create a micro_credential badgeclass for an institution not configured for ",
-                    217)
+                    'Cannot create a micro_credential badgeclass for an institution not configured for ', 217
+                )
             if validated_data['formal'] and not institution.grondslag_formeel and not is_micro_micro_credential:
                 raise BadgrValidationError(
-                    "Cannot create a formal badgeclass for an institution without the judicial basis for formal badges",
-                    215)
+                    'Cannot create a formal badgeclass for an institution without the judicial basis for formal badges',
+                    215,
+                )
             if not validated_data['formal'] and not institution.grondslag_informeel and not is_micro_micro_credential:
                 raise BadgrValidationError(
-                    "Cannot create an informal badgeclass for an institution without the judicial basis for informal badges",
-                    216)
+                    'Cannot create an informal badgeclass for an institution without the judicial basis for informal badges',
+                    216,
+                )
             try:
-                tags = validated_data.get("tags", [])
-                if "tags" in validated_data:
-                    del validated_data["tags"]
+                tags = validated_data.get('tags', [])
+                if 'tags' in validated_data:
+                    del validated_data['tags']
                 new_badgeclass = BadgeClass.objects.create(**validated_data)
                 new_badgeclass.tags.set(tags)
                 new_badgeclass.save()
             except IntegrityError:
-                raise BadgrValidationFieldError('name',
-                                                "There is already a Badgeclass with this name inside this Issuer",
-                                                911)
+                raise BadgrValidationFieldError(
+                    'name', 'There is already a Badgeclass with this name inside this Issuer', 911
+                )
             return new_badgeclass
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
@@ -433,9 +480,7 @@ class EvidenceItemSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if not (attrs.get('evidence_url', None) or attrs.get('narrative', None)):
-            raise BadgrValidationFieldError('narrative',
-                                            "Either url or narrative is required",
-                                            910)
+            raise BadgrValidationFieldError('narrative', 'Either url or narrative is required', 910)
         return attrs
 
 
@@ -458,9 +503,9 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
     def validate(self, data):
         badgeclass = self.context['request'].data.get('badgeclass')
         if badgeclass.narrative_required and not data.get('narrative'):
-            raise BadgrValidationError(error_code=999, error_message="Narrative is required")
-        if badgeclass.evidence_required and not data.get("evidence_items"):
-            raise BadgrValidationError(error_code=999, error_message="Evidence is required")
+            raise BadgrValidationError(error_code=999, error_message='Narrative is required')
+        if badgeclass.evidence_required and not data.get('evidence_items'):
+            raise BadgrValidationError(error_code=999, error_message='Evidence is required')
         if data.get('email') and not data.get('recipient_identifier'):
             data['recipient_identifier'] = data.get('email')
 
@@ -475,33 +520,36 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         return data
 
     def validate_narrative(self, data):
-        if data is None or data == "":
+        if data is None or data == '':
             return None
         else:
             return data
 
     def to_representation(self, instance):
         representation = super(BadgeInstanceSerializer, self).to_representation(instance)
-        representation['json'] = instance.get_json(obi_version="1_1", use_canonical_id=True)
+        representation['json'] = instance.get_json(obi_version='1_1', use_canonical_id=True)
         if self.context.get('include_issuer', False):
             representation['issuer'] = IssuerSerializer(instance.cached_badgeclass.cached_issuer).data
         else:
-            representation['issuer'] = OriginSetting.HTTP + reverse('issuer_json', kwargs={
-                'entity_id': instance.cached_issuer.entity_id})
+            representation['issuer'] = OriginSetting.HTTP + reverse(
+                'issuer_json', kwargs={'entity_id': instance.cached_issuer.entity_id}
+            )
         if self.context.get('include_badge_class', False):
-            representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass,
-                                                                 context=self.context).data
+            representation['badge_class'] = BadgeClassSerializer(instance.cached_badgeclass, context=self.context).data
         else:
-            representation['badge_class'] = OriginSetting.HTTP + reverse('badgeclass_json', kwargs={
-                'entity_id': instance.cached_badgeclass.entity_id})
+            representation['badge_class'] = OriginSetting.HTTP + reverse(
+                'badgeclass_json', kwargs={'entity_id': instance.cached_badgeclass.entity_id}
+            )
 
-        representation['public_url'] = OriginSetting.HTTP + reverse('badgeinstance_json',
-                                                                    kwargs={'entity_id': instance.entity_id})
+        representation['public_url'] = OriginSetting.HTTP + reverse(
+            'badgeinstance_json', kwargs={'entity_id': instance.entity_id}
+        )
 
         if apps.is_installed('badgebook'):
             try:
                 from badgebook.models import BadgeObjectiveAward
                 from badgebook.serializers import BadgeObjectiveAwardSerializer
+
                 try:
                     award = BadgeObjectiveAward.cached.get(badge_instance_id=instance.id)
                 except BadgeObjectiveAward.DoesNotExist:
@@ -520,10 +568,14 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         """
         badgeclass = self.context['request'].data.get('badgeclass')
         enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_entity_id'))
+        da = badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns)
+
         expires_at = None
         if badgeclass.expiration_period:
-            expires_at = datetime.datetime.now().replace(microsecond=0, second=0, minute=0,
-                                                         hour=0) + badgeclass.expiration_period
+            expires_at = (
+                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+                + badgeclass.expiration_period
+            )
         if enrollment.badge_instance:
             raise BadgrValidationError("Can't award enrollment, it has already been awarded", 213)
         if self.context['request'].data.get('issue_signed', False):
@@ -549,7 +601,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 extensions=validated_data.get('extension_items', None),
                 evidence=validated_data.get('evidence_items', None),
                 narrative=validated_data.get('narrative', None),
-                grade_achieved=validated_data.get('grade_achieved', None)
+                grade_achieved=validated_data.get('grade_achieved', None),
             )
 
         enrollment.date_awarded = timezone.now()
@@ -573,9 +625,11 @@ class BadgeInstanceCollectionSerializer(serializers.Serializer):
         model = BadgeInstanceCollection
 
     def create(self, validated_data):
-        instance = BadgeInstanceCollection.objects.create(name=validated_data['name'],
-                                                          description=validated_data.get('description'),
-                                                          public=validated_data.get('public', False))
+        instance = BadgeInstanceCollection.objects.create(
+            name=validated_data['name'],
+            description=validated_data.get('description'),
+            public=validated_data.get('public', False),
+        )
         instance.user = self.context['request'].user
         instance.badge_instances.set(validated_data.get('badge_instances', []))
         instance.save()
@@ -591,5 +645,5 @@ class BadgeInstanceCollectionSerializer(serializers.Serializer):
         user = self.context['request'].user
         for bc in badge_instances:
             if bc.user != user:
-                raise IntegrityError("BadgeInstance must be owned by the current user.")
+                raise IntegrityError('BadgeInstance must be owned by the current user.')
         return badge_instances

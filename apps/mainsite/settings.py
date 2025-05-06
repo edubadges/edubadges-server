@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'notifications',
     # deprecated
     'composition',
+    'auditlog',
 ]
 
 MIDDLEWARE = [
@@ -203,7 +204,9 @@ EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
-EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS = str(os.environ.get('EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS', '42, 62'))
+EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS = str(
+    os.environ.get('EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS', '42, 62')
+)
 EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 82))
 DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 30))
 
@@ -625,5 +628,7 @@ SPECTACULAR_SETTINGS = {
         'mainsite.drf_spectacluar.custom_postprocessing_hook',
     ],
 }
+
+AUDITLOG_DISABLE_REMOTE_ADDR = True
 
 API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
