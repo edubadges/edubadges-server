@@ -17,6 +17,9 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
+COPY ./docker/entrypoint-dev.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -24,4 +27,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # Run the specified command within the container
-CMD ["sh", "/docker/entrypoint.sh"]
+CMD ["sh", "/entrypoint.sh"]

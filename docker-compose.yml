@@ -3,9 +3,9 @@ services:
   badgr:
     build:
       context: .
-      dockerfile: dev.Dockerfile
+      dockerfile: ./docker/dev.Dockerfile
     container_name: badgr
-    command: "./docker/entrypoint.sh"
+    command: "./docker/entrypoint-dev.sh"
     volumes:
       - .:/app
     working_dir: /app
