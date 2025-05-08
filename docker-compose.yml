@@ -25,7 +25,6 @@ services:
       - DEFAULT_FROM_EMAIL=noreply@surf.nl
       - DOMAIN=0.0.0.0:8000
       - EDUID_PROVIDER_URL=https://connect.test.surfconext.nl/oidc
-      - EDUID_REGISTRATION_URL=https://login.test.eduid.nl/register
       - EDU_ID_CLIENT=edubadges
       - EDU_ID_SECRET=${EDU_ID_SECRET}
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
