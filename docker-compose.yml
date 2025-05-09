@@ -27,6 +27,7 @@ services:
       - EDUID_PROVIDER_URL=https://connect.test.surfconext.nl/oidc
       - EDU_ID_CLIENT=ewi.backpack.edubadges
       - EDU_ID_SECRET=${EDU_ID_SECRET}
+      - EDUID_IDENTIFIER=sub
       - EMAIL_HOST=mailhog
       - EMAIL_PORT=1025
       - LTI_FRONTEND_URL=localhost
