@@ -336,6 +336,12 @@ if DOMAIN.startswith('acc') or DOMAIN.startswith('www'):
     }
     debug_handlers.append('badgr_debug_loki')
 
+# Dev and Test use console logging and never loki or file-logging
+# Django appears to have no common way to determine if it is running in dev/test mode, so we
+# hack around this by checking if the server name is localhost.
+if SERVER_NAME == 'localhost':
+    debug_handlers = ['badgr_debug_console']
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
