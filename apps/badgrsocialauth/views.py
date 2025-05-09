@@ -50,7 +50,7 @@ class BadgrSocialLogin(RedirectView):
             raise ValidationError('Unable to save BadgrApp in session')
 
         try:
-            redirect_url = reverse('{}_login'.format(self.request.GET.get('provider')))
+            redirect_url = reverse('{}_login'.format(provider_name))
         except NoReverseMatch:
             raise ValidationError('No {} provider found'.format(provider_name))
         authcode = self.request.GET.get('authCode', None)

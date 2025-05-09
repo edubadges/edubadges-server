@@ -103,19 +103,19 @@ def callback(request):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cache-Control': 'no-cache',
     }
-    token_url = f'{settings.EDUID_PROVIDER_URL}/token'
-    response = requests.post(
-        token_url,
+    token_response = requests.post(
+        '{}/token'.format(settings.EDUID_PROVIDER_URL),
         data=urllib.parse.urlencode(payload),
         headers=headers,
         timeout=60,
     )
-    if response.status_code != 200:
-        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % response.status_code
+    logger.debug(f'Token response: {token_response}')
+    if token_response.status_code != 200:
+        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % token_response.status_code
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
 
-    token_json = response.json()
+    token_json = token_response.json()
     id_token = token_json['id_token']
     access_token = token_json['access_token']
     payload = jwt.get_unverified_claims(id_token)
@@ -163,7 +163,7 @@ def after_terms_agreement(request, **kwargs):
     """
     this is the second part of the callback, after consent has been given, or is user already exists
     """
-    badgr_app_pk, _login_type = json.loads(kwargs['state'])
+    badgr_app_pk, _login_type, _referer = json.loads(kwargs['state'])
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
@@ -300,7 +300,6 @@ def print_logout_message(sender, user, request, **kwargs):
 
 def print_login_message(sender, user, request, **kwargs):
     print('user logged in')
-
 
 user_logged_out.connect(print_logout_message)
 user_logged_in.connect(print_login_message)
