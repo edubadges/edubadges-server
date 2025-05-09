@@ -205,6 +205,17 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://connect.test.surfconext.nl/oidc')
+
+## 
+# EduId, in both provider and EDUID_xxx (or EDU_ID) is a confusing name, because it's really surfconext but the surfconext setup for the students.
+# A better name would be something like OIDC_STUDENT_xxx but that would be a big change as we'd need to rename socialauth providers, 
+# urls, views, and database migrations.
+
+# Determines the subclass of the oidc client to use. Can be 'eduid' or 'surfconext'.
+# When "eduid" is used, we *must* set the EDUID_API_BASE_URL, as this is used to build the URL
+# that mimics the "userinfo" endpoint of the oidc client but has "validated name" information.
+# For surfconext, the userinfo endpoint is determined from the SURFCONEXT_DOMAIN_URL.
+EDUID_OIDC_PROVIDER_NAME = 'surfconext'
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')

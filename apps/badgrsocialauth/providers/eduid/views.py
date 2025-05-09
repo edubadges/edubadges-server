@@ -27,9 +27,9 @@ from badgrsocialauth.utils import (
 from issuer.models import BadgeClass, BadgeInstance
 from mainsite.models import BadgrApp
 from .provider import EduIDProvider
+from .oidc_client import OidcClient
 
 logger = logging.getLogger('Badgr.Debug')
-
 
 def encode(username, password):  # client_id, secret
     """Returns an HTTP basic authentication encrypted string given a valid
@@ -119,6 +119,15 @@ def callback(request):
     id_token = token_json['id_token']
     access_token = token_json['access_token']
     payload = jwt.get_unverified_claims(id_token)
+    logger.debug(f'Payload from eduID: {json.dumps(payload)}')
+
+    # TODO: move to a polymorphic class model like with UserInfo
+    edu_id_identifier = payload.get(settings.EDUID_IDENTIFIER, None)
+    if not edu_id_identifier:
+        error = 'Server error: No eduID identifier found in payload'
+        logger.debug(f'Trying to find {settings.EDUID_IDENTIFIER} in payload: {json.dumps(payload)}')
+        logger.error(error)
+        return render_authentication_error(request, EduIDProvider.id, error=error)
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
 
@@ -133,23 +142,21 @@ def callback(request):
         'role': 'student',
     }
 
+    # TODO: find a way to determine if we get data from EduID IDP or from one of our EWI IDPs
+    oidc_client = OidcClient.get_client_from_settings()
     if not social_account or not social_account.user.general_terms_accepted():
-        # Here we redirect to client, but we need to check if there is a validated account
-        headers = {
-            'Accept': 'application/json, application/json;charset=UTF-8',
-            'Authorization': f'Bearer {access_token}',
-        }
-        eduid_url = f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links'
-        response = requests.get(eduid_url, headers=headers, timeout=60)
-        if response.status_code != 200:
-            error = f'Server error: eduID eppn endpoint error ({response.status_code})'
+        try:
+            user_info = oidc_client.get_userinfo(access_token)
+
+        except Exception as e:
+            error = f'Server error: {e}'
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error=error)
-        eppn_json = response.json()
-        validated_name = bool([info['validated_name'] for info in eppn_json if 'validated_name' in info])
+
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
-        if not validated_name:
+
+        if not user_info.has_validated_name():
             validate_redirect = signup_redirect.replace('signup', 'validate')
             return HttpResponseRedirect(f'{validate_redirect}?{args}')
 
@@ -211,44 +218,38 @@ def after_terms_agreement(request, **kwargs):
         logger.info(f'Stored validated name {payload["given_name"]} {payload["family_name"]}')
 
     access_token = kwargs.get('access_token', None)
-    headers = {
-        'Accept': 'application/json, application/json;charset=UTF-8',
-        'Authorization': f'Bearer {access_token}',
-    }
-    response = requests.get(f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links', headers=headers, timeout=60)
-    if response.status_code != 200:
-        error = f'Server error: eduID eppn endpoint error ({response.status_code})'
+    
+    oidc_client = OidcClient.get_client_from_settings()
+    try:
+        userinfo = oidc_client.get_userinfo(access_token)
+    except Exception as e:
+        error = f'Server error: {e}'
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
-    eppn_json = response.json()
+
     request.user.clear_affiliations()
-    for info in eppn_json: 
-        if 'eppn' in info and 'schac_home_organization' in info: # Is ingeschreven bij instituut
+    if userinfo.eppn() and userinfo.schac_home_organization():  # Is ingeschreven bij instituut
             request.user.add_affiliations(
                 [
                     {
-                        'eppn': info['eppn'].lower(),
-                        'schac_home': info['schac_home_organization'],
+                        'eppn': userinfo.eppn(),
+                        'schac_home': userinfo.schac_home_organization(),
                     }
                 ]
             )
-            logger.info(f'Stored affiliations {info["eppn"]} {info["schac_home_organization"]}')
-    validated_names = [info['validated_name'] for info in eppn_json if 'validated_name' in info]
-    if request.user.validated_name and len(validated_names) == 0: # Validated name was set above, but the myconext endpoint does not return any validated names
+            logger.info(f'Stored affiliations {userinfo.eppn()} {userinfo.schac_home_organization()}')
+
+    if request.user.validated_name and not userinfo.has_validated_name():
         ret = HttpResponseRedirect(ret.url + '&revalidate-name=true')
-    if len(validated_names) > 0:
-        # Use the preferred linked account for the validated_name.
-        preferred_validated_name = [info['validated_name'] for info in eppn_json if info['preferred']]
-        if not preferred_validated_name:
-            # This should never happen as it would be a bug in eduID, but let's be defensive
-            preferred_validated_name = [validated_names[0]]
+
+    if userinfo.has_validated_name():
         val_name_audit_trail_signal.send(
             sender=request.user.__class__,
             user=request.user,
             old_validated_name=request.user.validated_name,
-            new_validated_name=preferred_validated_name[0],
+            new_validated_name=userinfo.validated_name()
         )
-        request.user.validated_name = validated_names[0] # Override with validated name from myconext endpoint
+        request.user.validated_name = userinfo.validated_name()
     else:
         val_name_audit_trail_signal.send(
             sender=request.user.__class__,
