@@ -125,7 +125,7 @@ class EduIdUserInfo(UserInfo):
         self._schac_home_organization = [info['schac_home_organization'] for info in eppn_json if 'schac_home_organization' in info]
 
     def validated_names(self):
-        return self.validated_names
+        return self._validated_names
 
     def eppn(self):
         return self._eppn[0] if self._eppn else None
