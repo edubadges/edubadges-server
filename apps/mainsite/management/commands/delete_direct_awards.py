@@ -29,6 +29,9 @@ class Command(BaseCommand):
 
         for direct_award in direct_awards:
             _remove_cached_direct_awards(direct_award)
+            bundle = direct_award.bundle
+            bundle.direct_award_removed_count = bundle.direct_award_removed_count + 1
+            bundle.save()
             direct_award.delete()
 
         logger.info(f"Deleted {len(direct_awards)} direct_awards")

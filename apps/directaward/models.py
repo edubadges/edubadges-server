@@ -148,6 +148,10 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     sis_import = models.BooleanField(default=False)
     sis_user_id = models.CharField(max_length=254, blank=True, null=True)
     sis_client_id = models.CharField(max_length=254, blank=True, null=True)
+    # This is the number of DA's that are removed, because they were not claimed on time
+    direct_award_expired_count = models.IntegerField(default=0)
+    # This is the number of DA's that are removed directly by the institution staff
+    direct_award_removed_count = models.IntegerField(default=0)
 
     STATUS_SCHEDULED = 'Scheduled'
     STATUS_ACTIVE = 'Active'

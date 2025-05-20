@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 
 from badgeuser.models import BadgeUser, StudentAffiliation
 from badgrsocialauth.permissions import IsSuperUser
-from directaward.models import DirectAward
+from directaward.models import DirectAward, DirectAwardBundle
 from institution.models import Faculty, Institution
 from issuer.models import BadgeInstance, Issuer, BadgeClass
 from lti_edu.models import StudentsEnrolled
@@ -165,6 +165,60 @@ class InsightsView(APIView):
                 badgeclass__issuer__faculty__institution=surf_institution
             )
 
+        direct_award_bundles_query_set = (
+            DirectAwardBundle.objects.values(
+                'direct_award_expired_count',
+                'badgeclass_id',
+                'badgeclass__name',
+                'badgeclass__archived',
+                'badgeclass__issuer__id',
+                'badgeclass__badge_class_type',
+                'badgeclass__issuer__name_dutch',
+                'badgeclass__issuer__name_english',
+                'badgeclass__issuer__faculty_id',
+                'badgeclass__issuer__faculty__name_english',
+                'badgeclass__issuer__faculty__name_dutch',
+                'badgeclass__issuer__faculty__faculty_type',
+                'badgeclass__issuer__faculty__institution__institution_type',
+            )
+            .annotate(year=ExtractYear('created_at'))
+            .annotate(month=ExtractMonth('created_at'))
+            .annotate(nbr=Count('month'))
+            .values(
+                'month',
+                'year',
+                'nbr',
+                'direct_award_expired_count',
+                'badgeclass_id',
+                'badgeclass__name',
+                'badgeclass__archived',
+                'badgeclass__issuer__id',
+                'badgeclass__badge_class_type',
+                'badgeclass__issuer__name_dutch',
+                'badgeclass__issuer__name_english',
+                'badgeclass__issuer__faculty_id',
+                'badgeclass__issuer__faculty__name_dutch',
+                'badgeclass__issuer__faculty__name_english',
+                'badgeclass__issuer__faculty__faculty_type',
+                'badgeclass__issuer__faculty__institution__institution_type',
+            )
+            .order_by('year', 'month')
+            .exclude(direct_award_expired_count=0)
+        )
+
+        if not total:
+            direct_award_bundles_query_set = direct_award_bundles_query_set.filter(created_at__gte=start_of_year).filter(
+                created_at__lt=end_of_year
+            )
+        if filter_by_institution:
+            direct_award_bundles_query_set = direct_award_bundles_query_set.filter(
+                badgeclass__issuer__faculty__institution=institution
+            )
+        if not filter_by_institution and not include_surf:
+            direct_award_bundles_query_set = direct_award_bundles_query_set.exclude(
+                badgeclass__issuer__faculty__institution=surf_institution
+            )
+
         enrollments_query_set = (
             StudentsEnrolled.objects.filter(Q(badge_instance_id__isnull=True) | Q(denied=True))
             .values(
@@ -218,6 +272,7 @@ class InsightsView(APIView):
         assertions = list(assertions_query_set.all())
         direct_awards = list(direct_awards_query_set.all())
         enrollments = list(enrollments_query_set.all())
+        direct_award_bundles = list(direct_award_bundles_query_set.all())
 
         badge_user_query = BadgeUser.objects.filter(is_teacher=True)
         if filter_by_institution:
@@ -258,6 +313,7 @@ class InsightsView(APIView):
             'assertions': assertions,
             'direct_awards': direct_awards,
             'enrollments': enrollments,
+            'direct_award_bundles': direct_award_bundles,
             'users_count': users_count,
             'faculties_count': faculties_count,
             'issuers_count': issuer_count,
