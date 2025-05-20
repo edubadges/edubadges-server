@@ -62,6 +62,9 @@ class Command(BaseCommand):
         for direct_award in direct_awards:
             html_message = EmailMessageMaker.direct_award_expired_student_mail(direct_award)
             _remove_cached_direct_awards(direct_award)
+            bundle = direct_award.bundle
+            bundle.direct_award_expired_count = bundle.direct_award_expired_count + 1
+            bundle.save()
             direct_award.delete()
             send_mail(subject='Your edubadge has been deleted',
                       message=None,
