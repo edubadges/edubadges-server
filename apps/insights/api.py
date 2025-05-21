@@ -1,5 +1,5 @@
 from datetime import datetime
-from datetime import timedelta
+from datetime import timezone
 from itertools import groupby
 
 from django.conf import settings
@@ -34,16 +34,6 @@ class InsightsView(APIView):
 
     def post(self, request, **kwargs):
         surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
-        current_date = timezone.now().date()
-        year = request.data.get('year', current_date.year)
-        total = isinstance(year, str)
-        if not total:
-            start_of_year = current_date.replace(year=year, month=1, day=1)
-            if start_of_year.isoweekday() > 1:
-                start_of_year = start_of_year + timedelta(days=(7 + 1) - start_of_year.isoweekday())
-            end_of_year = current_date.replace(year=year, month=12, day=31)
-            if end_of_year.isoweekday() > 1:
-                end_of_year = end_of_year + timedelta(days=(7 + 1) - end_of_year.isoweekday())
         # Superusers may select an institution
         institution_id = request.data.get('institution_id')
         filter_by_institution = True
@@ -55,7 +45,7 @@ class InsightsView(APIView):
         else:
             institution = request.user.institution
         include_surf = request.data.get('include_surf', True)
-        today = datetime.utcnow()
+        today = datetime.now(timezone.utc)
         assertions_query_set = (
             BadgeInstance.objects.values(
                 'award_type',
@@ -100,10 +90,6 @@ class InsightsView(APIView):
             .exclude(expires_at__lte=today)
             .order_by('year', 'month')
         )
-        if not total:
-            assertions_query_set = assertions_query_set.filter(created_at__gte=start_of_year).filter(
-                created_at__lt=end_of_year
-            )
         if filter_by_institution:
             assertions_query_set = assertions_query_set.filter(issuer__faculty__institution=institution)
         if not filter_by_institution and not include_surf:
@@ -152,10 +138,6 @@ class InsightsView(APIView):
             .exclude(status='Scheduled')
         )
 
-        if not total:
-            direct_awards_query_set = direct_awards_query_set.filter(created_at__gte=start_of_year).filter(
-                created_at__lt=end_of_year
-            )
         if filter_by_institution:
             direct_awards_query_set = direct_awards_query_set.filter(
                 badgeclass__issuer__faculty__institution=institution
@@ -206,10 +188,6 @@ class InsightsView(APIView):
             .exclude(direct_award_expired_count=0)
         )
 
-        if not total:
-            direct_award_bundles_query_set = direct_award_bundles_query_set.filter(created_at__gte=start_of_year).filter(
-                created_at__lt=end_of_year
-            )
         if filter_by_institution:
             direct_award_bundles_query_set = direct_award_bundles_query_set.filter(
                 badgeclass__issuer__faculty__institution=institution
@@ -258,10 +236,6 @@ class InsightsView(APIView):
             .order_by('year', 'month')
         )
 
-        if not total:
-            enrollments_query_set = enrollments_query_set.filter(date_created__gte=start_of_year).filter(
-                date_created__lt=end_of_year
-            )
         if filter_by_institution:
             enrollments_query_set = enrollments_query_set.filter(badge_class__issuer__faculty__institution=institution)
         if not filter_by_institution and not include_surf:
