@@ -3,8 +3,8 @@ from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
 
-from .models import OfferRequest, IdentityObject
-from .serializers import OfferRequestSerializer
+from .models import ImpierceOfferRequest, IdentityObject
+from .serializers import ImpierceOfferRequestSerializer
 
 from  mainsite.settings import UI_URL
 
@@ -191,8 +191,8 @@ class TestCredentialsSerializers(SimpleTestCase):
         self.assertIn(expected_alignment, actual_data["alignment"])
 
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
-       edu_credential = OfferRequest("offer_id", "credential_configuration_id", badge_instance)
-       return dict(OfferRequestSerializer(edu_credential).data)
+       edu_credential = ImpierceOfferRequest("offer_id", "credential_configuration_id", badge_instance)
+       return dict(ImpierceOfferRequestSerializer(edu_credential).data)
 
 class TestCredentialModels(SimpleTestCase):
     def test_identity_object_adds_identity_hash_from_hasher(self):
