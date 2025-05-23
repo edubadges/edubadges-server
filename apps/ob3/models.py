@@ -64,7 +64,10 @@ class OfferRequest:
         )
 
         if badge_instance.expires_at:
+            self.expires_at = badge_instance.expires_at
             self.credential.valid_until = badge_instance.expires_at
+        else:
+            self.expires_at = "never"
 
 class Credential:
     def __init__(self, issuer, valid_from, credential_subject, **kwargs):
