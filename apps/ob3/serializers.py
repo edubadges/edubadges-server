@@ -199,4 +199,8 @@ class SphereonOfferRequestSerializer(serializers.Serializer):
 class ImpierceOfferRequestSerializer(serializers.Serializer):
     offerId = serializers.CharField(source='offer_id')
     credentialConfigurationId = serializers.CharField(source='credential_configuration_id')
+    expires_at = serializers.DateTimeField(
+            required=True,
+            default_timezone=timezone.utc
+    )
     credential = CredentialSerializer()
