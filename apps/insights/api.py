@@ -441,6 +441,15 @@ from directaward_directaward da where status <> 'Deleted' and status <> 'Revoked
             )
             da_overview = dict_fetch_all(cursor)
 
+            cursor.execute(
+                """
+            select sum(direct_award_expired_count) as expired_count, badgeclass_id from directaward_directawardbundle 
+            where direct_award_expired_count > 0 group by badgeclass_id;
+                """,
+                [],
+            )
+            da_expired = dict_fetch_all(cursor)
+
             # Now group by badgeclass_id and create final reporting dict
             def key_func(k):
                 return str(k['badge_class_id'])
@@ -466,8 +475,11 @@ from directaward_directaward da where status <> 'Deleted' and status <> 'Revoked
                 direct_awards_rejected_or_unaccepted = sum(
                     [da['da_count'] for da in da_overview if str(da['badgeclass_id']) == str(key)]
                 )
+                direct_awards_expired = sum(
+                    [da['expired_count'] for da in da_expired if str(da['badgeclass_id']) == str(key)]
+                )
                 total_da_count = (
-                    direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked
+                    direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked +  direct_awards_expired
                 )
                 results.append(
                     {
@@ -491,6 +503,7 @@ from directaward_directaward da where status <> 'Deleted' and status <> 'Revoked
                             (total_da_count - direct_awards_assertions_revoked), direct_awards_accepted
                         ),
                         'Total DA send': total_da_count,
+                        'Expired DA': direct_awards_expired,
                         'Awarded via UI': badge_instance['awarded_via_ui'],
                         'Awarded via SIS': badge_instance['awarded_via_sis'],
                     }
