@@ -53,7 +53,7 @@ class TestCredentialsSerializers(SimpleTestCase):
         actual_data = self._serialize_it(badge_instance)
         expected_data = {
             "offerId": "offer_id",
-            "expiresAt": "never",
+            "expires_at": "never",
             "credentialConfigurationId": "credential_configuration_id",
             "credential": {
                 "id": f"{UI_URL}/public/assertions/BADGE1234",
@@ -125,14 +125,14 @@ class TestCredentialsSerializers(SimpleTestCase):
         badge_instance.expires_at = DateTime.fromisoformat("2020-01-01:01:13:37")
         actual_data = self._serialize_it(badge_instance)
 
-        self.assertEqual(actual_data["expiresAt"], "2020-01-01T01:13:37Z")
+        self.assertEqual(actual_data["expires_at"], "2020-01-01T01:13:37Z")
 
     def test_impierce_offer_request_expires_at_notset(self):
         badge_instance = BadgeInstanceMock()
         badge_instance.expires_at = None
         actual_data = self._serialize_it(badge_instance)
 
-        self.assertEqual(actual_data["expiresAt"], "never")
+        self.assertEqual(actual_data["expires_at"], "never")
 
     def test_education_language_extension(self):
         badge_instance = BadgeInstanceMock()
