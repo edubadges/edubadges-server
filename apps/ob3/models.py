@@ -51,13 +51,14 @@ class StructFieldsMixin:
             setattr(self, key, value)
 
 # A plain old Python object (POPO) that represents an educational credential
-class OfferRequest:
+class ImpierceOfferRequest:
     def __init__(self, offer_id, credential_configuration_id, badge_instance):
         self.offer_id = offer_id
         self.credential_configuration_id = credential_configuration_id
 
         credential_subject = AchievementSubject.from_badge_instance(badge_instance)
         self.credential = Credential(
+            entity_id=badge_instance.entity_id,
             issuer=badge_instance.badgeclass.issuer,
             valid_from = badge_instance.issued_on,
             credential_subject=credential_subject,
@@ -69,8 +70,32 @@ class OfferRequest:
         else:
             self.expires_at = "never"
 
+class SphereonOfferRequest:
+    def __init__(self, offer_id, credential_configuration_id, badge_instance, edu_id, email, eppn, family_name, given_name):
+        self.credential_configuration_ids = [credential_configuration_id]
+        self.grants = {
+            "authorization_code": {
+                "issuer_state": offer_id,
+            }
+        }
+        credential_subject = AchievementSubject.from_badge_instance(badge_instance)
+        self.credential = Credential(
+            entity_id=badge_instance.entity_id,
+            issuer=badge_instance.badgeclass.issuer,
+            valid_from=badge_instance.issued_on,
+            credential_subject=credential_subject,
+        )
+        # TODO: Sphereon doesn't seem to support expiration dates yet, so we don't set it here.
+
+        self.edu_id = edu_id
+        self.email = email
+        self.eppn = eppn
+        self.family_name = family_name
+        self.given_name = given_name
+
 class Credential:
-    def __init__(self, issuer, valid_from, credential_subject, **kwargs):
+    def __init__(self, entity_id, issuer, valid_from, credential_subject, **kwargs):
+        self.id = entity_id
         self.issuer = issuer
         self.valid_from = valid_from
         self.credential_subject = credential_subject
