@@ -58,6 +58,7 @@ class ImpierceOfferRequest:
 
         credential_subject = AchievementSubject.from_badge_instance(badge_instance)
         self.credential = Credential(
+            entity_id=badge_instance.entity_id,
             issuer=badge_instance.badgeclass.issuer,
             valid_from = badge_instance.issued_on,
             credential_subject=credential_subject,
@@ -79,6 +80,7 @@ class SphereonOfferRequest:
         }
         credential_subject = AchievementSubject.from_badge_instance(badge_instance)
         self.credential = Credential(
+            entity_id=badge_instance.entity_id,
             issuer=badge_instance.badgeclass.issuer,
             valid_from=badge_instance.issued_on,
             credential_subject=credential_subject,
@@ -92,7 +94,8 @@ class SphereonOfferRequest:
         self.given_name = given_name
 
 class Credential:
-    def __init__(self, issuer, valid_from, credential_subject, **kwargs):
+    def __init__(self, entity_id, issuer, valid_from, credential_subject, **kwargs):
+        self.id = entity_id
         self.issuer = issuer
         self.valid_from = valid_from
         self.credential_subject = credential_subject

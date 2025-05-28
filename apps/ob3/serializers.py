@@ -169,6 +169,7 @@ class AchievementSubjectSerializer(OmitNoneFieldsMixin, serializers.Serializer):
 class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     OMIT_IF_NONE = ['validFrom', 'validUntil']
 
+    id = serializers.URLField()
     issuer = IssuerSerializer()
     validFrom = serializers.DateTimeField(
             source='valid_from',
@@ -183,6 +184,15 @@ class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
             default_timezone=timezone.utc
     )
     credentialSubject = AchievementSubjectSerializer(source='credential_subject')
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # TODO: Decide how to handle public vs private assertions: the latter won't resolve
+        # TODO: DRY the id-to-url conversion
+        """Convert the id to a URL"""
+        ret['id'] = f"{UI_URL}/public/assertions/{ret['id']}"
+
+        return ret
 
 class SphereonOfferRequestSerializer(serializers.Serializer):
     credential_configuration_ids = serializers.ListField()
@@ -199,7 +209,8 @@ class SphereonOfferRequestSerializer(serializers.Serializer):
 class ImpierceOfferRequestSerializer(serializers.Serializer):
     offerId = serializers.CharField(source='offer_id')
     credentialConfigurationId = serializers.CharField(source='credential_configuration_id')
-    expires_at = serializers.DateTimeField(
+    expiresAt = serializers.DateTimeField(
+            source='expires_at',
             required=True,
             default_timezone=timezone.utc
     )
