@@ -80,6 +80,7 @@ class SphereonOfferRequest:
         }
         credential_subject = AchievementSubject.from_badge_instance(badge_instance)
         self.credential = Credential(
+            entity_id=badge_instance.entity_id,
             issuer=badge_instance.badgeclass.issuer,
             valid_from=badge_instance.issued_on,
             credential_subject=credential_subject,
