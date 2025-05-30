@@ -13,8 +13,8 @@ from pprint import pformat
 
 from issuer.models import BadgeInstance
 from mainsite.settings import OB3_AGENT_URL_SPHEREON, OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_UNIME
-from .serializers import OfferRequestSerializer
-from .models import OfferRequest
+from .serializers import ImpierceOfferRequestSerializer
+from .models import ImpierceOfferRequest
 
 logger = logging.getLogger('django')
 
@@ -32,20 +32,15 @@ class CredentialsView(APIView):
 
         badge_instance = self.__badge_instance(badge_id, request.user)
         logger.debug(f"Badge instance: {pformat(badge_instance.__dict__)}")
-        credential_configuration_id = {
-            'sphereon': "OpenBadgeCredential",
-            'unime': "openbadge_credential"
-        }.get(variant) 
-        credential = OfferRequest(offer_id, credential_configuration_id, badge_instance)
-        serializer = OfferRequestSerializer(credential)
 
-        if variant == 'sphereon':
-            offer = self.__issue_sphereon_badge(serializer.data)
-            logger.debug(f"Sphereon offer: {offer}")
-        elif variant == 'unime':
+        if variant == 'unime':
+            credential = ImpierceOfferRequest(offer_id, "openbadge_credential", badge_instance)
+            serializer = ImpierceOfferRequestSerializer(credential)
             self.__issue_unime_badge(serializer.data)
             offer = self.__get_unime_offer(offer_id)
             logger.debug(f"Unime offer: {offer}")
+        else:
+            raise BadRequest("variant not supported. We only support unime")
 
         logger.info(f"Issued credential for badge {badge_id} with offer_id {offer_id}")
         logger.debug(f"Credential: {pformat(serializer.data)}")
