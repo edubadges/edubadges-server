@@ -65,7 +65,7 @@ class ImpierceOfferRequest:
         )
 
         if badge_instance.expires_at:
-            self.expires_at = badge_instance.expires_at
+            self.expires_at = badge_instance.expires_at.strftime("%Y-%m-%dT%H:%M:%SZ")
             self.credential.valid_until = badge_instance.expires_at
         else:
             self.expires_at = "never"
