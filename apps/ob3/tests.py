@@ -3,8 +3,8 @@ from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
 
-from .models import OfferRequest, IdentityObject
-from .serializers import OfferRequestSerializer
+from .models import ImpierceOfferRequest as OfferRequest, IdentityObject
+from .serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
 
 from  mainsite.settings import UI_URL
 
@@ -206,6 +206,7 @@ class TestCredentialsSerializers(SimpleTestCase):
         self.assertIn(expected_alignment, actual_data["alignment"])
 
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
+       # TODO: We should test both impierce and sphereon models and serializers
        edu_credential = OfferRequest("offer_id", "credential_configuration_id", badge_instance)
        return dict(OfferRequestSerializer(edu_credential).data)
 
