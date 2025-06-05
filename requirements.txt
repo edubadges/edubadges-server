@@ -1,5 +1,5 @@
 # Django stuff
-Django==4.2.17
+Django==4.2.21
 semver==2.6.0
 pytz==2022.2.1
 
@@ -78,7 +78,7 @@ python-json-logger==0.1.2
 
 # SSL Support
 cffi==1.14.5
-cryptography==44.0.0
+cryptography==44.0.1
 enum34==1.1.6
 idna==3.10
 ipaddress==1.0.16
@@ -133,3 +133,5 @@ django-api-proxy==0.1.1
 django-upgrade==1.23.1
 django-prometheus==2.3.1
 loki-logger-handler==1.1.1
+
+django-auditlog==3.0.0

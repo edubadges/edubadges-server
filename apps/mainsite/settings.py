@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'notifications',
     # deprecated
     'composition',
+    'auditlog',
 ]
 
 MIDDLEWARE = [
@@ -203,7 +204,12 @@ EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
 EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
+EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS = str(
+    os.environ.get('EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS', '42, 62')
+)
+EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 82))
 DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 30))
+
 OB3_AGENT_URL_SPHEREON = os.environ.get('OB3_AGENT_URL_SPHEREON', '')
 OB3_AGENT_AUTHZ_TOKEN_SPHEREON = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_SPHEREON', '')
 OB3_AGENT_URL_UNIME = os.environ.get('OB3_AGENT_URL_UNIME', '')
@@ -565,7 +571,7 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Email
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = legacy_boolean_parsing('EMAIL_USE_TLS', '1')
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
@@ -622,5 +628,7 @@ SPECTACULAR_SETTINGS = {
         'mainsite.drf_spectacluar.custom_postprocessing_hook',
     ],
 }
+
+AUDITLOG_DISABLE_REMOTE_ADDR = True
 
 API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}

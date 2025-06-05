@@ -3,6 +3,7 @@ Utility functions and constants that might be used across the project.
 """
 
 import base64
+import datetime
 import hashlib
 import io
 import math
@@ -13,7 +14,6 @@ import tempfile
 import urllib.parse
 import uuid
 import webbrowser
-from datetime import datetime
 from io import BytesIO
 from xml.etree import cElementTree as ET
 
@@ -290,7 +290,7 @@ class EmailMessageMaker:
     @staticmethod
     def create_direct_award_student_mail(direct_award):
         badgeclass = direct_award.badgeclass
-        template = 'email/earned_direct_award.html'
+        template = 'email/earned_direct_award_new.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
         email_vars = {
             'badgeclass_image': badgeclass_image,
@@ -300,6 +300,8 @@ class EmailMessageMaker:
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
+            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y')
         }
         return render_to_string(template, email_vars)
 
@@ -319,7 +321,7 @@ class EmailMessageMaker:
     @staticmethod
     def direct_award_reminder_student_mail(direct_award):
         badgeclass = direct_award.badgeclass
-        template = 'email/reminder_direct_award.html'
+        template = 'email/reminder_direct_award_new.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
         email_vars = {
             'badgeclass_image': badgeclass_image,
@@ -329,13 +331,15 @@ class EmailMessageMaker:
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
+            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y')
         }
         return render_to_string(template, email_vars)
 
     @staticmethod
     def direct_award_expired_student_mail(direct_award):
         badgeclass = direct_award.badgeclass
-        template = 'email/expired_direct_award.html'
+        template = 'email/expired_direct_award_new.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
         email_vars = {
             'badgeclass_image': badgeclass_image,
@@ -345,6 +349,8 @@ class EmailMessageMaker:
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
+            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'da_enddate': direct_award.expiration_date
         }
         return render_to_string(template, email_vars)
 
@@ -394,7 +400,7 @@ class EmailMessageMaker:
         template = 'email/feedback.html'
         email_vars = {
             'current_user': current_user,
-            'date': datetime.now(),
+            'date': datetime.datetime.now(datetime.timezone.utc),
             'environment': settings.DOMAIN,
             'message': message,
         }

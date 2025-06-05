@@ -38,6 +38,7 @@ class DirectAwards(APIView):
         with connection.cursor() as cursor:
             cursor.execute(f"""
 select da.created_at, da.resend_at, da.delete_at, da.recipient_email as recipientEmail, da.eppn, da.entity_id as entityId,
+        da.expiration_date,
         bc.name, bc.entity_id as bc_entity_id,
         i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id, 
         f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id
@@ -197,8 +198,8 @@ class Faculties(APIView):
         with connection.cursor() as cursor:
             cursor.execute(f"""
 select f.name_english as name_english, f.name_dutch as name_dutch, f.entity_id as entityId, f.on_behalf_of as onBehalfOf,
-    f.image_dutch, f.image_english,
-    (select count(id) from issuer_issuer WHERE faculty_id = f.id) as issuerCount,
+    f.image_dutch, f.image_english, f.archived,
+        (select count(id) from issuer_issuer WHERE faculty_id = f.id) as issuerCount,
     (select count(*) from lti_edu_studentsenrolled l 
             inner join issuer_badgeclass ib on ib.id = l.badge_class_id
             inner join issuer_issuer ii on ii.id = ib.issuer_id 
@@ -230,56 +231,59 @@ user_categories = [
 ]
 
 
+def remove_duplicate_permissions(row):
+    unique_permissions = []
+    seen = set()
+    for permission in row["permissions"]:
+        key = (permission["permission"], permission["identifier"])  # Use tuple of attributes as key
+        if key not in seen:
+            seen.add(key)
+            unique_permissions.append(permission)
+    if unique_permissions:
+        min(unique_permissions, key=lambda x: x["weight"])["highest"] = True
+    row["permissions"] = unique_permissions
+
+
+def parse_unit(row, source_prefix, unit_prefix, use_prefix):
+    prefix = f"{source_prefix}_{unit_prefix}" if use_prefix else f"{unit_prefix}"
+    return {
+        "name_english": row.get(f"{prefix}_name_english"),
+        "name_dutch": row.get(f"{prefix}_name_dutch"),
+        "entity_id": row.get(f"{prefix}_entity_id")
+    }
+
+
+def permissions(row, use_prefix=True):
+    all_permissions = []
+    for category in user_categories:
+        prefix = category["prefix"]
+        may_update = row.get(f"{prefix}_may_update")
+        may_award = row.get(f"{prefix}_may_award")
+        may_administrate = row.get(f"{prefix}_may_admin")
+        if may_update or may_award or may_administrate:
+            permission_type = category["permission"]
+            permission_ = {
+                "permission": permission_type,
+                "weight": category["weight"],
+                "level": "admin" if may_administrate else "editor" if may_update else "awarder",
+                "identifier": row.get(category["identifier"]),
+                "institution": parse_unit(row, prefix, "ins", use_prefix)
+            }
+            if use_prefix:
+                if prefix != "ins":
+                    permission_["faculty"] = parse_unit(row, prefix, "f", use_prefix)
+                    if prefix != "f":
+                        permission_["issuer"] = parse_unit(row, prefix, "i", use_prefix)
+                        if prefix != "i":
+                            permission_["badge_class"] = parse_unit(row, prefix, "bc", use_prefix)
+            else:
+                permission_[permission_type] = parse_unit(row, None, prefix, False)
+            all_permissions.append(permission_)
+    return all_permissions
+
+
 class Users(APIView):
     permission_classes = (TeachPermission,)
-
-    @staticmethod
-    def _remove_duplicate_permissions(row):
-        unique_permissions = []
-        seen = set()
-        for permission in row["permissions"]:
-            key = (permission["permission"], permission["identifier"])  # Use tuple of attributes as key
-            if key not in seen:
-                seen.add(key)
-                unique_permissions.append(permission)
-        if unique_permissions:
-            min(unique_permissions, key=lambda x: x["weight"])["highest"] = True
-        row["permissions"] = unique_permissions
-
-    @staticmethod
-    def _parse_unit(row, source_prefix, unit_prefix):
-        return {
-            "name_english": row.get(f"{source_prefix}_{unit_prefix}_name_english"),
-            "name_dutch": row.get(f"{source_prefix}_{unit_prefix}_name_dutch"),
-            "entity_id": row.get(f"{source_prefix}_{unit_prefix}_entity_id")
-        }
-
-    @staticmethod
-    def _permissions(row):
-        all_permissions = []
-        for category in user_categories:
-            prefix = category["prefix"]
-            may_update = row.get(f"{prefix}_may_update")
-            may_award = row.get(f"{prefix}_may_award")
-            may_administrate = row.get(f"{prefix}_may_admin")
-            if may_update or may_award or may_administrate:
-                permission_type = category["permission"]
-                permission_ = {
-                    "permission": permission_type,
-                    "weight": category["weight"],
-                    "level": "admin" if may_administrate else "editor" if may_update else "awarder",
-                    "identifier": row.get(category["identifier"]),
-                    "institution": Users._parse_unit(row, prefix, "ins")
-                }
-                if prefix != "ins":
-                    permission_["faculty"] = Users._parse_unit(row, prefix, "f")
-                    if prefix != "f":
-                        permission_["issuer"] = Users._parse_unit(row, prefix, "i")
-                        if prefix != "i":
-                            permission_["badge_class"] = Users._parse_unit(row, prefix, "bc")
-
-                all_permissions.append(permission_)
-        return all_permissions
 
     def get(self, request, **kwargs):
         all_institutions = request.GET.get("all")
@@ -358,12 +362,55 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
                                            "institution_name_english": r["institution_name_english"],
                                            "institution_name_dutch": r["institution_name_dutch"],
                                            "permissions": []}
-                user_permissions = self._permissions(r)
+                user_permissions = permissions(r)
                 if user_permissions:
                     users_dict[user_id]["permissions"].extend(user_permissions)
 
             users_with_permissions = list(users_dict.values())
             for u in users_with_permissions:
-                self._remove_duplicate_permissions(u)
+                remove_duplicate_permissions(u)
 
             return Response(users_with_permissions, status=status.HTTP_200_OK)
+
+
+class Notifications(APIView):
+    permission_classes = (TeachPermission,)
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            query_ = f"""
+            select bc.name as name_english, bc.entity_id as bc_entity_id, bc.id as badgeclass_id, bc.image,
+f.name_dutch as f_name_dutch, f.name_english as f_name_english, f.entity_id as f_entity_id, f.id as faculty_id,
+i.entity_id as i_entity_id, i.name_dutch as i_name_dutch, i.name_english as i_name_english, i.id as issuer_id,
+ins.entity_id as ins_entity_id, ins.name_dutch as ins_name_dutch, ins.name_english as ins_name_english, ins.id as institution_id,
+nbc.badgeclass_id as nbc_badgeclass_id,
+st_in.may_update as ins_may_update,
+st_fa.may_update as f_may_update,
+st_fa.may_award as f_may_award,
+st_fa.may_administrate_users as f_may_administrate_users,
+st_is.may_update as i_may_update,
+st_is.may_award as i_may_award,
+st_is.may_administrate_users as i_may_administrate_users,
+st_bc.may_update as bc_may_update,
+st_bc.may_award as bc_may_award,
+st_bc.may_administrate_users as bc_may_administrate_users
+from  issuer_badgeclass bc
+left join notifications_badgeclassusernotification nbc on nbc.badgeclass_id = bc.id and nbc.user_id = %(u_id)s
+inner join issuer_issuer i on i.id = bc.issuer_id
+inner join institution_faculty f on f.id = i.faculty_id
+inner join institution_institution ins on ins.id = f.institution_id
+LEFT JOIN staff_institutionstaff st_in ON st_in.institution_id = ins.id AND st_in.user_id = %(u_id)s
+LEFT JOIN staff_facultystaff st_fa ON st_fa.faculty_id = f.id AND st_fa.user_id = %(u_id)s
+LEFT JOIN staff_issuerstaff st_is ON st_is.issuer_id = i.id and st_is.user_id = %(u_id)s
+LEFT JOIN staff_badgeclassstaff st_bc ON st_bc.badgeclass_id = bc.id AND st_bc.user_id = %(u_id)s
+where ins.id = %(ins_id)s and bc.archived = 0 and {permissions_query} 
+"""
+            cursor.execute(query_, {"u_id": request.user.id, "ins_id": request.user.institution.id})
+            notifications = dict_fetch_all(cursor)
+
+            for r in notifications:
+                user_permissions = permissions(r, False)
+                if user_permissions:
+                    r["permissions"] = user_permissions
+                    remove_duplicate_permissions(r)
+            return Response(notifications, status=status.HTTP_200_OK)

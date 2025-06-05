@@ -1,9 +1,18 @@
+export BADGR_DB_PASSWORD=""
+export OIDC_RS_SECRET="ask-a-colleague"
+export EDU_ID_SECRET="ask-a-colleague"
+export SURF_CONEXT_SECRET="ask-a-colleague"
+
+# Only needed when wallet import is used
+export OB3_AGENT_AUTHZ_TOKEN_SPHEREON="s3cr3t"
+
+# Not needed when running with Docker compose: Don't set these as they might break the app when
+#  it runs in the container
 export PYTHONUNBUFFERED=1
 export ACCOUNT_SALT="secret"
 export ALLOW_SEEDS=1
 export BADGR_DB_NAME="badgr"
 export BADGR_DB_USER="root"
-export BADGR_DB_PASSWORD=""
 export BADGR_DB_HOST=""
 export BADGR_DB_PORT="3306"
 export DEBUG=1
@@ -11,9 +20,7 @@ export DEFAULT_DOMAIN="http://127.0.0.1:8000"
 export DEFAULT_FROM_EMAIL="noreply@surf.nl"
 export DOMAIN="localhost:4000"
 export EDU_ID_CLIENT="edubadges"
-export EDU_ID_SECRET="ask-a-colleague"
 export OIDC_RS_ENTITY_ID="test.edubadges.rs.nl"
-export OIDC_RS_SECRET="ask-a-colleague"
 export EDUID_PROVIDER_URL="https://connect.test.surfconext.nl/oidc"
 export EDUID_REGISTRATION_URL="https://login.test.eduid.nl/register"
 export EMAIL_HOST="localhost"
@@ -27,7 +34,6 @@ export SITE_ID=1
 export BADGR_APP_ID=1
 export SURF_CONEXT_CLIENT="www.edubadges.nl"
 export SURF_CONEXT_CLIENT="test.edubadges.nl"
-export SURF_CONEXT_SECRET="secret"
 export TIME_STAMPED_OPEN_BADGES_BASE_URL="http://127.0.0.1:3000/"
 export UI_URL="http://localhost:4000"
 export UNSUBSCRIBE_SECRET_KEY="secret"
@@ -36,7 +42,6 @@ export LANG="en_US.UTF-8"
 export MEMCACHED="127.0.0.1:11211"
 export LOKI_API_URL="https://localhost"
 
-# Only needed when wallet import is used
+# Only needed when wallet import is used and only in a non-docker compose setup.
 export OB3_AGENT_URL_SPHEREON="http://localhost:5000"
-export OB3_AGENT_AUTHZ_TOKEN_SPHEREON="s3cr3t"
 export OB3_AGENT_URL_UNIME="http://localhost:6000"

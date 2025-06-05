@@ -28,6 +28,8 @@ services:
       - EDUID_REGISTRATION_URL=https://login.test.eduid.nl/register
       - EDU_ID_CLIENT=edubadges
       - EDU_ID_SECRET=${EDU_ID_SECRET}
+      - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      - EMAIL_USE_TLS=0
       - EMAIL_HOST=mailhog
       - EMAIL_PORT=1025
       - LTI_FRONTEND_URL=localhost
@@ -57,6 +59,8 @@ services:
       db:
         condition: service_healthy
       memcached:
+        condition: service_started
+      mailhog:
         condition: service_started
     ports:
       - "8000:8000"

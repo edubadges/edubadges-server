@@ -6,9 +6,9 @@ permissions:
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "feature/ewi" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "feature/ewi" ]
 
 jobs:
 

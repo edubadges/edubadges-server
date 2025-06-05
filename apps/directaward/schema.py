@@ -8,21 +8,23 @@ class DirectAwardType(DjangoObjectType):
     class Meta:
         model = DirectAward
         fields = ('entity_id', 'eppn', 'status', 'recipient_email', 'badgeclass', 'created_at', 'updated_at',
-                  'resend_at', 'delete_at')
+                  'resend_at', 'delete_at', 'expiration_date')
 
 
 class DirectAwardBundleType(DjangoObjectType):
     class Meta:
         model = DirectAwardBundle
         fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at', 'identifier_type',
-                  'assertion_count', 'direct_award_count', 'direct_award_rejected_count',
-                  'direct_award_scheduled_count', 'direct_award_revoked_count', 'initial_total')
+                  'assertion_count', 'direct_award_count', 'direct_award_rejected_count', 'direct_award_expired_count',
+                  'direct_award_removed_count', 'direct_award_deleted_count', 'direct_award_scheduled_count',
+                  'direct_award_revoked_count', 'initial_total')
 
     assertion_count = graphene.Int()
     direct_award_count = graphene.Int()
     direct_award_rejected_count = graphene.Int()
     direct_award_scheduled_count = graphene.Int()
     direct_award_revoked_count = graphene.Int()
+    direct_award_deleted_count = graphene.Int()
     direct_awards = graphene.List(DirectAwardType)
 
     def resolve_direct_awards(self, info, **kwargs):
@@ -44,7 +46,8 @@ class Query(object):
         if id is not None:
             da = DirectAward.objects.get(entity_id=id)
             user = info.context.user
-            if da.eppn in user.eppns or (da.recipient_email == user.email and da.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL):
+            if da.eppn in user.eppns or (
+                    da.recipient_email == user.email and da.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL):
                 return da
 
     def resolve_all_unclaimed_direct_awards(self, info, **kwargs):

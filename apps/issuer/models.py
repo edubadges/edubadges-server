@@ -9,6 +9,7 @@ from json import loads as json_loads
 from urllib.parse import urljoin
 
 import requests
+from auditlog.registry import auditlog
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -209,7 +210,7 @@ class Issuer(
             elif self.name_english:
                 query = Q(name_english=self.name_english)
             elif self.name_dutch:
-                query = Q(name_english=self.name_english)
+                query = Q(name_dutch=self.name_dutch)
             else:
                 raise BadgrValidationMultipleFieldError(
                     [
@@ -1211,7 +1212,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
             self.user.publish()
         self.publish_delete('entity_id', 'revoked')
 
-    def revoke(self, revocation_reason):
+    def revoke(self, revocation_reason, user):
         if self.revoked:
             raise ValidationError('Assertion is already revoked')
 
@@ -1219,6 +1220,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
             raise ValidationError('revocation_reason is required')
 
         self.revoked = True
+        self.updated_by = user
         self.revocation_reason = revocation_reason
         self.image.delete()
         self.save()
@@ -1594,3 +1596,7 @@ class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, CacheModel)
     def save(self, *args, **kwargs):
         self.validate_unique()
         return super(BadgeInstanceCollection, self).save(*args, **kwargs)
+
+
+auditlog.register(Issuer)
+auditlog.register(BadgeClass)
