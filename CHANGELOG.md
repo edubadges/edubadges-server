@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [8.2.0] - 2025-06-06
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.1.0...v8.2.0</br>
+Frontend: https://github.com/edubadges/edubadges-ui/compare/v8.1.0...v8.2.0
+
+- Bump cryptography from 44.0.0 to 44.0.1 by @dependabot in #178
+- Bump django from 4.2.17 to 4.2.20 by @dependabot in #177
+- Fix mailhog in dockerized environment by @berkes in #180
+- docs: Clarify which env vars should or may be set when running with docker-compose by @berkes in #179
+- Fix for b0SuWoNC/1072-uitbeiden-insights by @oharsta in #183
+- WIP for F0X2cE1G-direct-awards-reminders by @oharsta in #182
+- Feature/sis reporting (ETV9MIpW) by @Iso5786 in #184
+- Fix for F0X2cE1G by @oharsta in #185
+- Feature/auditlog by @Iso5786 in #186
+- Bump django from 4.2.20 to 4.2.21 by @dependabot in #188
+
 ## [8.1.0] - 2025-04-01
 
 #### Full GitHub changelogs:
