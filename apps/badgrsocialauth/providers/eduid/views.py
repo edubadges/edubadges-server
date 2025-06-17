@@ -201,7 +201,7 @@ def after_terms_agreement(request, **kwargs):
         update_user_params(social_account.user, payload)
 
     # 3. Complete social login
-
+    payload['email'] = payload['email'].lower()
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, payload)
 

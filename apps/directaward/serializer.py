@@ -100,6 +100,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 expiration_date = now + datetime.timedelta(days=settings.EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS)
                 for direct_award in direct_awards:
                     # Not required and already validated
+                    direct_award['recipient_email'] = direct_award['recipient_email'].lower()
                     direct_award['eppn'] = direct_award['eppn'].lower() if eppn_required else None
                     status = DirectAward.STATUS_SCHEDULED if scheduled_at else DirectAward.STATUS_UNACCEPTED
                     direct_award['status'] = status

@@ -115,7 +115,7 @@ def update_user_params(user, userinfo):
         user.last_name = userinfo['family_name']
         user.save()
     if userinfo.get('email'):
-        user.email = userinfo['email']
+        user.email = userinfo['email'].lower()
         for email in user.email_items:
             email.delete()
         EmailAddress.objects.create(email=userinfo['email'],
