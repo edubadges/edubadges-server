@@ -150,6 +150,7 @@ def callback(request):
             return render_authentication_error(request, SurfConextProvider.id, error)
 
     # 3. Complete social login and return to frontend
+    payload['email'] = payload['email'].lower()
     provider = SurfConextProvider(request)
     login = provider.sociallogin_from_response(request, payload)
     # connect process in which OpenID connects with, either login or connect, if you connect then login user with token
