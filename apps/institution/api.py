@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
 from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView, BaseArchiveView
@@ -48,6 +48,21 @@ class FacultyDeleteView(BaseArchiveView):
     v1_serializer_class = FacultySerializer
 
 
+class FacultyArchiveView(BaseEntityDetailView):
+    model = Faculty
+    v1_serializer_class = FacultySerializer
+    permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
+    http_method_names = ['put']
+
+    def put(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=HTTP_404_NOT_FOUND)
+        obj.archived = False if request.data['archive'] else True
+        obj.save()
+        return Response(status=HTTP_204_NO_CONTENT, data={})
+
+
 class FacultyDetail(BaseEntityDetailView):
     """
     PUT to edit a faculty
@@ -84,10 +99,10 @@ class InstitutionsTagUsage(APIView):
 
         from issuer.models import BadgeClass
 
-        badge_classes = BadgeClass.objects\
-            .filter(tags__name=tag_name)\
+        badge_classes = BadgeClass.objects \
+            .filter(tags__name=tag_name) \
             .filter(archived=False) \
-            .filter(issuer__faculty__institution=request.user.institution)\
+            .filter(issuer__faculty__institution=request.user.institution) \
             .all()
         data = [{"name": bc.name} for bc in badge_classes]
         return Response(data, status=HTTP_200_OK)

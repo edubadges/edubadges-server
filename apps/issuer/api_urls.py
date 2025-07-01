@@ -14,6 +14,7 @@ from issuer.api import (
     BadgeInstanceCollectionDetail,
     BadgeInstanceCollectionDetailList,
     BadgeClassArchiveView,
+    IssuerArchiveView,
 )
 
 urlpatterns = [
@@ -24,6 +25,7 @@ urlpatterns = [
     path('badgeclasses/edit/<str:entity_id>', BadgeClassDetail.as_view(), name='badgeclass_detail'),
     path('badgeclasses/delete/<str:entity_id>', BadgeClassDeleteView.as_view(), name='badgeclass_delete'),
     path('badgeclasses/archive/<str:entity_id>', BadgeClassArchiveView.as_view(), name='badgeclass_archive'),
+    path('issuers/archive/<str:entity_id>', IssuerArchiveView.as_view(), name='issuer_archive'),
     path(
         'badgeclasses/award-enrollments/<str:entity_id>',
         BatchAwardEnrollments.as_view(),
