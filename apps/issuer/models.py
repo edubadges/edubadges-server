@@ -614,13 +614,6 @@ class BadgeClass(
         }
 
     def validate_unique(self, exclude=None):
-        if not self.archived:
-            if (
-                self.__class__.objects.filter(name=self.name, issuer=self.issuer, archived=False)
-                .exclude(pk=self.pk)
-                .exists()
-            ):
-                raise IntegrityError('Badgeclass with this name already exists in the same issuer.')
         return super(BadgeClass, self).validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
