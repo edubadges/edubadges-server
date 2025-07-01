@@ -154,6 +154,28 @@ where  bc.is_private = 0 and f.archived = 0 and i.archived = 0 and (f.visibility
             """, {})
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
 
+class IssuersOverview(APIView):
+    permission_classes = (TeachPermission,)
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute(f"""
+select i.name_dutch as nameDutch, i.name_english as nameEnglish, i.entity_id as entityId
+from  issuer_issuer i
+inner join institution_faculty f on f.id = i.faculty_id
+inner join institution_institution ins on ins.id = f.institution_id
+where ins.id = %(ins_id)s and 
+(
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1))
+    or
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1))
+    or
+    (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1))
+    or
+    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
+)
+""", {"ins_id": request.user.institution.id, "u_id": request.user.id})
+            return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
 
 class Issuers(APIView):
     permission_classes = (TeachPermission,)
