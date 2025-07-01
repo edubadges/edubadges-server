@@ -394,16 +394,11 @@ class BadgeClassSerializer(
                     setattr(instance, key, value)
         instance.award_allowed_institutions.set(validated_data.get('award_allowed_institutions', []))
         instance.tags.set(validated_data.get('tags', []))
-        try:
-            badge_class = BadgeClass.objects.get(id=instance.id)
-            if badge_class.issuer.id != validated_data['issuer'].id:
-                badge_class.issuer.faculty.remove_cached_data(['cached_badgeclasses'])
-                badge_class.issuer.remove_cached_data(['cached_badgeclasses'])
-            instance.save()
-        except IntegrityError:
-            raise BadgrValidationFieldError(
-                'name', 'There is already a Badgeclass with this name inside this Issuer', 911
-            )
+        badge_class = BadgeClass.objects.get(id=instance.id)
+        if badge_class.issuer.id != validated_data['issuer'].id:
+            badge_class.issuer.faculty.remove_cached_data(['cached_badgeclasses'])
+            badge_class.issuer.remove_cached_data(['cached_badgeclasses'])
+        instance.save()
         return instance
 
     def validate_alignments(self, alignments):
@@ -456,17 +451,12 @@ class BadgeClassSerializer(
                     'Cannot create an informal badgeclass for an institution without the judicial basis for informal badges',
                     216,
                 )
-            try:
-                tags = validated_data.get('tags', [])
-                if 'tags' in validated_data:
-                    del validated_data['tags']
-                new_badgeclass = BadgeClass.objects.create(**validated_data)
-                new_badgeclass.tags.set(tags)
-                new_badgeclass.save()
-            except IntegrityError:
-                raise BadgrValidationFieldError(
-                    'name', 'There is already a Badgeclass with this name inside this Issuer', 911
-                )
+            tags = validated_data.get('tags', [])
+            if 'tags' in validated_data:
+                del validated_data['tags']
+            new_badgeclass = BadgeClass.objects.create(**validated_data)
+            new_badgeclass.tags.set(tags)
+            new_badgeclass.save()
             return new_badgeclass
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
