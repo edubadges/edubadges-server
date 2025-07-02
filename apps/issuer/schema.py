@@ -94,7 +94,6 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     has_unrevoked_assertions = graphene.Boolean()
     has_assertions = graphene.Boolean()
 
-
     def resolve_image_english(self, info):
         return generate_image_url(self.image_english)
 
@@ -136,6 +135,7 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
 
     def resolve_has_assertions(self, info):
         return bool(self.assertions)
+
 
 def badge_user_type():
     from badgeuser.schema import BadgeUserType
@@ -368,10 +368,11 @@ class Query(object):
         id = kwargs.get('id')
         if id is not None:
             bc = BadgeClass.objects.get(entity_id=id)
-            # Student's who are logged in need to access this to start the enrollment
-            if (hasattr(info.context.user, 'is_student') and info.context.user.is_student) or bc.has_permissions(
-                    info.context.user, ['may_read']):
+            # Students who are logged in need to access this to start the enrollment and copy public data is allowed
+            if (hasattr(info.context.user, 'is_student') and info.context.user.is_student) or (
+                    hasattr(info.context.user, 'is_teacher') and info.context.user.is_teacher):
                 return bc
+        return None
 
     def resolve_badge_instance(self, info, **kwargs):
         id = kwargs.get('id')
@@ -379,6 +380,7 @@ class Query(object):
             bc = BadgeInstance.objects.get(entity_id=id)
             if bc.user_id == info.context.user.id:
                 return bc
+        return None
 
     def resolve_badge_instance_collection(self, info, **kwargs):
         id = kwargs.get('id')
@@ -387,6 +389,7 @@ class Query(object):
             # Called anonymous in public collection page
             if bc.public or bc.user_id == info.context.user.id:
                 return bc
+        return None
 
     def resolve_badge_instance_collections(self, info, **kwargs):
         return BadgeInstanceCollection.objects.filter(user=info.context.user)
