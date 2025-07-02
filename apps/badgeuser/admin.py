@@ -2,12 +2,13 @@ from django.contrib.admin import ModelAdmin, TabularInline
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.contenttypes.models import ContentType
 from django.forms import ModelForm
-
+from django.urls import reverse
+from django.utils.html import format_html
 from mainsite.admin import badgr_admin
 from mainsite.utils import admin_list_linkify
 from staff.models import PermissionedRelationshipBase
 from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl, \
-    ImportBadgeAllowedUrl, StudentAffiliation
+    ImportBadgeAllowedUrl, StudentAffiliation, TermsAgreement
 
 
 class EmailAddressInline(TabularInline):
@@ -15,6 +16,32 @@ class EmailAddressInline(TabularInline):
     fk_name = 'user'
     extra = 0
     fields = ('email', 'verified', 'primary')
+
+
+class TermsAgreementInline(TabularInline):
+    model = TermsAgreement
+    fk_name = 'user'
+    can_delete = False
+    extra = 0
+    fields = ['agreed','term_type', 'institution','admin_link',]
+    readonly_fields = ['agreed','term_type', 'institution','admin_link',]
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def admin_link(self, obj):
+        url = reverse("admin:badgeuser_terms_change", args=[obj.terms.id])
+        return format_html('<a href="{}">View</a>', url)
+
+    admin_link.short_description = "Details"
+    def term_type(self, obj):
+        return obj.terms.terms_type if obj.terms else '-'
+    term_type.short_description = "Term Type"
+
+    def institution(self, obj):
+        return obj.terms.institution.name_english
+    institution.short_description = "Institution"
+
 
 
 class BadgeUserAdmin(UserAdmin):
@@ -32,7 +59,7 @@ class BadgeUserAdmin(UserAdmin):
     )
     filter_horizontal = ('groups', 'user_permissions', 'faculty',)
     inlines = [
-        EmailAddressInline,
+        EmailAddressInline, TermsAgreementInline
     ]
 
     def eppn(self, obj):
