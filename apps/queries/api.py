@@ -96,7 +96,7 @@ class CurrentInstitution(APIView):
 
         with connection.cursor() as cursor:
             cursor.execute("""
-    select ins.id, ins.name_english, ins.name_dutch, ins.description_english, ins.description_dutch,
+    select ins.id, ins.name_english, ins.name_dutch, ins.description_english, ins.description_dutch, ins.entity_id,
             ins.created_at, ins.image_english, ins.image_dutch, ins.brin, ins.grading_table, ins.eppn_reg_exp_format,
             u.email, u.first_name, u.last_name
     from institution_institution ins
@@ -436,3 +436,22 @@ where ins.id = %(ins_id)s and bc.archived = 0 and {permissions_query}
                     r["permissions"] = user_permissions
                     remove_duplicate_permissions(r)
             return Response(notifications, status=status.HTTP_200_OK)
+
+class EndorsementBadgeClasses(APIView):
+    permission_classes = (TeachPermission,)
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            query_ = f"""
+            select bc.name, bc.entity_id as entityId, bc.id as badgeclass_id, bc.image,
+            ins.entity_id as institution_entity_id, ins.id as institution_id
+            from  issuer_badgeclass bc
+            inner join issuer_issuer i on i.id = bc.issuer_id
+            inner join institution_faculty f on f.id = i.faculty_id
+            inner join institution_institution ins on ins.id = f.institution_id
+            where ins.id = %(ins_id)s and bc.archived = 0 and {permissions_query} 
+"""
+            cursor.execute(query_, {"u_id": request.user.id, "ins_id": request.user.institution.id})
+            badge_classes = dict_fetch_all(cursor)
+
+            return Response(badge_classes, status=status.HTTP_200_OK)
