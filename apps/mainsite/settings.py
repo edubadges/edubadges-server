@@ -319,6 +319,9 @@ handlers = {
         'filters': ['require_debug_true'],
         'class': 'logging.StreamHandler',
     },
+    'null': {
+            'class': 'logging.NullHandler',  # Use fully qualified class name
+    },
 }
 
 debug_handlers = ['badgr_debug']
@@ -357,6 +360,11 @@ LOGGING = {
             'handlers': ['badgr_debug_console'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'django.utils.autoreload': {
+            'handlers': ['null'],
+            'level': 'WARNING',  # or 'WARNING' or 'ERROR'
+            'propagate': False,
         },
         'Badgr.Events': {
             'handlers': ['badgr_events'],

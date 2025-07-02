@@ -57,11 +57,11 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     def _validate_unique(self, exclude=None):
         """Custom uniqueness validation of the provisionment, used before save"""
         if (
-            UserProvisionment.objects.filter(
-                type=self.type, rejected=False, for_teacher=self.for_teacher, email=self.email
-            )
-            .exclude(pk=self.pk)
-            .exists()
+                UserProvisionment.objects.filter(
+                    type=self.type, rejected=False, for_teacher=self.for_teacher, email=self.email
+                )
+                        .exclude(pk=self.pk)
+                        .exists()
         ):
             raise BadgrValidationError('There may be only one invite per email address.', 501)
         return super(UserProvisionment, self).validate_unique(exclude=exclude)
@@ -653,9 +653,9 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
             return False
 
         if (
-            email != canonical_email.email
-            and email not in [e.email for e in canonical_email.cached_variants()]
-            and EmailAddressVariant(email=email, canonical_email=canonical_email).is_valid()
+                email != canonical_email.email
+                and email not in [e.email for e in canonical_email.cached_variants()]
+                and EmailAddressVariant(email=email, canonical_email=canonical_email).is_valid()
         ):
             return True
         return False
@@ -725,9 +725,9 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         if getattr(settings, 'BADGEUSER_SKIP_LAST_LOGIN_TIME', True):
             # skip saving last_login to the database
             if (
-                'update_fields' in kwargs
-                and kwargs['update_fields'] is not None
-                and 'last_login' in kwargs['update_fields']
+                    'update_fields' in kwargs
+                    and kwargs['update_fields'] is not None
+                    and 'last_login' in kwargs['update_fields']
             ):
                 kwargs['update_fields'].remove('last_login')
                 if len(kwargs['update_fields']) < 1:
