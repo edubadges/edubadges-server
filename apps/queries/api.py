@@ -160,7 +160,8 @@ class IssuersOverview(APIView):
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             cursor.execute(f"""
-select i.name_dutch as nameDutch, i.name_english as nameEnglish, i.entity_id as entityId
+select i.name_dutch as nameDutch, i.name_english as nameEnglish, i.entity_id as entityId,
+    f.faculty_type as facultyType
 from  issuer_issuer i
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
