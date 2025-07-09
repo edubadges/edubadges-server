@@ -237,6 +237,7 @@ def after_terms_agreement(request, **kwargs):
     if request.user.validated_name and len(validated_names) == 0:
         ret = HttpResponseRedirect(ret.url + '&revalidate-name=true')
     if len(validated_names) > 0:
+        # TODO use the preferred validated_name. Release 8.0.6 of eduID
         val_name_audit_trail_signal.send(
             sender=request.user.__class__,
             user=request.user,
