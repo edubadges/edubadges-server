@@ -5,12 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [8.3.0] - 2025-07-14
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.2.0...v8.3.0</br>
+
+- TODO for preferred linked_account for the validated_name
+- To sent or not to send
+- Resolves ERRORCSSStyleDeclaration: Unexpected token, ignoring upto '
+- Merge branch 'master' into develop
+- Added not null filter for DA uniqueness
+- Added not null filter for DA uniqueness
+- Select the faculty type for badge class edit
+- Raw query for badgeclasses for possible endorsements
+- Merge pull request #191 from edubadges/dependabot/pip/django-4.2.22
+- Merge pull request #192 from edubadges/dependabot/pip/requests-2.32.4
+- Show terms in details of users https://trello.com/c/1yKFrJkw/1086-overzicht-in-backend-zodat-we-kunnen-zien-of-de-terms-zijn-geaccepteerd
+- Raw query to get all issuers from institution
+- Archiveren van issuer groepen en issuers https://trello.com/c/e8BlRkvf/1088-kunnen-archiveren-issuergroepen-en-issuers
+- Badgeclass met dezelfde naam toestaan https://trello.com/c/PyAwVAyJ/1087-badgeclass-met-dezelfde-naam-toestaan-binnen-issuer
+- Bump requests from 2.32.0 to 2.32.4
+- Bump django from 4.2.21 to 4.2.22
+  
 ## [8.2.0] - 2025-06-06
 
 #### Full GitHub changelogs:
 
 Backend: https://github.com/edubadges/edubadges-server/compare/v8.1.0...v8.2.0</br>
-Frontend: https://github.com/edubadges/edubadges-ui/compare/v8.1.0...v8.2.0
 
 - Bump cryptography from 44.0.0 to 44.0.1 by @dependabot in #178
 - Bump django from 4.2.17 to 4.2.20 by @dependabot in #177
@@ -28,7 +50,6 @@ Frontend: https://github.com/edubadges/edubadges-ui/compare/v8.1.0...v8.2.0
 #### Full GitHub changelogs:
 
 Backend: https://github.com/edubadges/edubadges-server/compare/v8.0.1...v8.1.0</br>
-Frontend: https://github.com/edubadges/edubadges-ui/compare/v8.0.0...v8.1.0
 
 - Added full_name for UserType
 - Log stacktraces in case of errors
@@ -50,7 +71,6 @@ Backend: https://github.com/edubadges/edubadges-server/compare/v8.0.0...v8.0.1
 #### Full GitHub changelogs:
 
 Backend: https://github.com/edubadges/edubadges-server/compare/v7.4.2...v8.0.0</br>
-Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.2...v8.0.0
 
 - 1XcPzMWl Optie wel tonen EQF/NLQF
 - Annotated ValidatorVersion get with method_decorator
@@ -90,7 +110,6 @@ Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.2...v8.0.0
 #### Full GitHub changelogs:
 
 Backend: https://github.com/edubadges/edubadges-server/compare/v7.4.1...v7.4.2</br>
-Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.1...v7.4.2
 
 - Fix for undefined name institution
 - Update CHANGELOG.md
@@ -100,7 +119,6 @@ Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.1...v7.4.2
 #### Full GitHub changelogs:
 
 Backend: https://github.com/edubadges/edubadges-server/compare/v7.4.0...v7.4.1</br>
-Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.0...v7.4.1
 
 - Bugfix for Gi19IFS8
 - Bugfix for Gi19IFS8
@@ -120,7 +138,6 @@ Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.4.0...v7.4.1
 #### Full GitHub changelogs:
 
 Backend: https://github.com/edubadges/edubadges-server/compare/v7.3.1...v7.4.0</br>
-Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.3.1...v7.4.0
 
 - Removed panda code and dependency
 - Faculty staff no super_user
@@ -170,7 +187,6 @@ Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.3.1...v7.4.0
 #### Full GitHub changelogs:
 
 Backend: https://github.com/edubadges/edubadges-server/compare/v7.3.0...v7.3.1</br>
-Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.3.0...v7.3.1
 
 - Merge pull request #166 from edubadges/feature/sphereon-random-offer-id
 - Merge pull request #165 from edubadges/feature/docker-compose-fix
@@ -183,7 +199,6 @@ Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.3.0...v7.3.1
 #### Full GitHub changelogs:
 
 Backend: https://github.com/edubadges/edubadges-server/compare/v7.2.0...v7.3.0</br>
-Frontend: https://github.com/edubadges/edubadges-ui/compare/V7.2.0...v7.3.0
 
 - Added the option to award edubadges to learners using their mailaddress. This mailaddress should match the one used for eduID.
 - Added an option to change the contact mailaddress of the institution.
