@@ -38,9 +38,12 @@ class Command(BaseCommand):
         unaccepted = 'Unaccepted'
         for days in threshold_days:
             reminder_cutoff = now + timedelta(days=days)
+            self.stdout.write(f"Query for direct_awards with reminders={index} and expiration_date__lt {reminder_cutoff}\n")
             direct_awards = DirectAward.objects.filter(expiration_date__lt=reminder_cutoff,
                                                        reminders=index,
                                                        status=unaccepted).all()
+            # When run as standalone job the logger messages are not outputted
+            self.stdout.write(f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}\n")
             logger.info(f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}")
 
             for direct_award in direct_awards:
@@ -57,6 +60,7 @@ class Command(BaseCommand):
         direct_awards = DirectAward.objects.filter(expiration_date__lt=now,
                                                    status=unaccepted).all()
 
+        self.stdout.write(f"Deleting {len(direct_awards)} expired direct_awards")
         logger.info(f"Deleting {len(direct_awards)} expired direct_awards")
 
         for direct_award in direct_awards:
