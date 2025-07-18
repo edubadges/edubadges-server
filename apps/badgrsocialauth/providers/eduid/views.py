@@ -237,14 +237,18 @@ def after_terms_agreement(request, **kwargs):
     if request.user.validated_name and len(validated_names) == 0:
         ret = HttpResponseRedirect(ret.url + '&revalidate-name=true')
     if len(validated_names) > 0:
-        # TODO use the preferred validated_name. Release 8.0.6 of eduID
+        # Use the preferred linked account for the validated_name.
+        preferred_validated_name = [info['validated_name'] for info in eppn_json if info['preferred']]
+        if not preferred_validated_name:
+            # This should never happen as it would be a bug in eduID, but let's be defensive
+            preferred_validated_name = [validated_names[0]]
         val_name_audit_trail_signal.send(
             sender=request.user.__class__,
             user=request.user,
             old_validated_name=request.user.validated_name,
-            new_validated_name=validated_names[0],
+            new_validated_name=preferred_validated_name[0],
         )
-        request.user.validated_name = validated_names[0]
+        request.user.validated_name = preferred_validated_name[0]
     else:
         val_name_audit_trail_signal.send(
             sender=request.user.__class__,
