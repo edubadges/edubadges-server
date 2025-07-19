@@ -578,6 +578,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 extensions=validated_data.get('extension_items', None),
                 identifier=uuid.uuid4().urn,
                 signer=validated_data.get('created_by'),
+                issued_on=enrollment.date_created,
                 # evidence=validated_data.get('evidence_items', None)  # Dont forget this one when you re-implement signing
                 # narrative=validated_data.get('narrative', None)  # idem
             )
@@ -592,6 +593,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 evidence=validated_data.get('evidence_items', None),
                 narrative=validated_data.get('narrative', None),
                 grade_achieved=validated_data.get('grade_achieved', None),
+                issued_on=enrollment.date_created,
             )
 
         enrollment.date_awarded = timezone.now()
