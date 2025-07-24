@@ -34,7 +34,7 @@ class Command(BaseCommand):
         threshold_days = [int(days.strip()) for days in threshold_days]
         # We need to process them in reverse order
         threshold_days.sort(reverse=True)
-        index = len(threshold_days) - 1
+        index = 0
         unaccepted = 'Unaccepted'
         for days in threshold_days:
             reminder_cutoff = now + timedelta(days=days)
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                           message=None,
                           html_message=html_message,
                           recipient_list=[direct_award.recipient_email])
-            index -= 1
+            index += 1
 
         direct_awards = DirectAward.objects.filter(expiration_date__lt=now,
                                                    status=unaccepted).all()
