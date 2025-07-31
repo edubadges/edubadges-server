@@ -1,8 +1,8 @@
 import os
+import logging
 
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
-
 
 def legacy_boolean_parsing(env_key, default_value):
     val = os.environ.get(env_key, default_value)
@@ -16,6 +16,8 @@ SESSION_COOKIE_AGE = 60 * 60  # 1 hour session validity
 SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
 SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+DEBUG = legacy_boolean_parsing('DEBUG', '0')
 
 ##
 #
@@ -285,111 +287,40 @@ FIXTURE_DIRS = [
 ##
 #
 #  Logging
-#
+#  
+#  We try to keep close to the default Django logging. Convention over configuration..
+#  But we want to remove handlers that email. And want to ensure useful logs are propagated to the console
+#  We set the log level, based on the DEBUG flag: DEBUG if DEBUG else INFO This is default Django behaviour
+#  The container runner will add timestamp and container name to the logs
 ##
-
-LOGS_DIR = os.path.join(TOP_DIR, 'logs')
-if not os.path.exists(LOGS_DIR):
-    os.makedirs(LOGS_DIR)
-
-LOG_STORAGE_DURATION = 30  # days
-
-handlers = {
-    'badgr_events': {
-        'level': 'INFO',
-        'formatter': 'json',
-        'class': 'logging.handlers.TimedRotatingFileHandler',
-        'when': 'H',
-        'interval': 1,
-        'backupCount': 30 * 24,  # 30 days times 24 hours
-        'filename': os.path.join(LOGS_DIR, 'badgr_events.log'),
-    },
-    'badgr_debug': {
-        'level': 'DEBUG',
-        'formatter': 'badgr',
-        'class': 'logging.handlers.TimedRotatingFileHandler',
-        'when': 'H',
-        'interval': 1,
-        'backupCount': 30 * 24,  # 30 days times 24 hours
-        'filename': os.path.join(LOGS_DIR, 'badgr_debug.log'),
-    },
-    'badgr_debug_console': {
-        'level': 'DEBUG',
-        'formatter': 'default',
-        'filters': ['require_debug_true'],
-        'class': 'logging.StreamHandler',
-    },
-    'null': {
-            'class': 'logging.NullHandler',  # Use fully qualified class name
-    },
-}
-
-debug_handlers = ['badgr_debug']
-SERVER_NAME = os.environ.get('SERVER_NAME', 'localhost')
-LOKI_URL = os.environ.get('LOKI_API_URL', 'https://localhost')
-
-# Only ACC and PROD are connected to our central logging and monitoring server
-if DOMAIN.startswith('acc') or DOMAIN.startswith('www'):
-    handlers = handlers | {
-        'badgr_debug_loki': {
-            'level': 'DEBUG',
-            'class': 'loki_logger_handler.loki_logger_handler.LokiLoggerHandler',
-            'timeout': 1,
-            'labels': {
-                'job': 'badgr_debug',
-                'domain': DOMAIN,
-                'server': SERVER_NAME,
-            },
-            'url': LOKI_URL,
-        }
-    }
-    debug_handlers.append('badgr_debug_loki')
-
-# Dev and Test use console logging and never loki or file-logging
-# Django appears to have no common way to determine if it is running in dev/test mode, so we
-# hack around this by checking if the server name is localhost.
-if SERVER_NAME == 'localhost':
-    debug_handlers = ['badgr_debug_console']
+LOG_LEVEL = logging.DEBUG if DEBUG else logging.INFO
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': handlers,
-    'loggers': {
-        'django': {
-            'handlers': ['badgr_debug_console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'django.utils.autoreload': {
-            'handlers': ['null'],
-            'level': 'WARNING',  # or 'WARNING' or 'ERROR'
-            'propagate': False,
-        },
-        'Badgr.Events': {
-            'handlers': ['badgr_events'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'Badgr.Debug': {
-            'handlers': debug_handlers,
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
     'formatters': {
-        'default': {'format': '%(asctime)s %(levelname)s %(module)s %(message)s'},
-        'badgr': {'format': '%(asctime)s | %(levelname)s | %(message)s'},
-        'json': {
-            '()': 'mainsite.formatters.JsonFormatter',
-            'format': '%(asctime)s',
-            'datefmt': '%Y-%m-%dT%H:%M:%S%z',
+        'plain': {
+            'format': '[%(levelname)s] %(name)s %(module)s %(message)s'
         },
     },
-    'filters': {
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        }
+    'handlers': {
+        'console': {
+            'level': LOG_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'plain'
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'django': {
+            'handlers': ['console'], # Replace stream and email handler with console
+            'level': LOG_LEVEL,
+            'propagate': False, # Don't propagate to root logger as that will cause duplicate logs
+        },
     },
 }
 
@@ -595,7 +526,7 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Email
-EMAIL_USE_TLS = legacy_boolean_parsing('EMAIL_USE_TLS', '1')
+EMAIL_USE_TLS = True
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))

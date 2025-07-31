@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+
+- Removed logging to loki, syslog and files. In k8s all logging goes to the default "console" - k8s then forwards to a.o. loki for us
+
 ## [8.3.0] - 2025-07-14
 
 #### Full GitHub changelogs:
