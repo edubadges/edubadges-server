@@ -39,7 +39,6 @@ export UNSUBSCRIBE_SECRET_KEY="secret"
 export LC_ALL="en_US.UTF-8"
 export LANG="en_US.UTF-8"
 export MEMCACHED="127.0.0.1:11211"
-export LOKI_API_URL="https://localhost"
 
 # Only needed when wallet import is used and only in a non-docker compose setup.
 export OB3_AGENT_URL_SPHEREON="http://localhost:5000/oid4vci/admin/credentials"
