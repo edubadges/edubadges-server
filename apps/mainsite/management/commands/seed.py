@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection
 from random import randrange
 from badgeuser.models import BadgeUser
-from mainsite.seeds.util import seed_image_for
+from mainsite.models import BadgrApp
 from mainsite.tests.base import SetupHelper
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeInstance
@@ -20,9 +20,11 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-c', '--clean', action='store_true')
         parser.add_argument('-as', '--add_assertions', type=int)
+        parser.add_argument('-cf', '--check_first', action="store_true")
 
     def handle(self, *args, **options):
         if not settings.ALLOW_SEEDS:
+            print('Not seeding: ALLOW_SEEDS is set to false')
             return
             
         with override_settings(CACHES={
