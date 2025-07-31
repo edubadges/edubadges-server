@@ -24,6 +24,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Remove leading e
+        uses: bhowell2/github-substring-action@1.0.2
+        id: subs
+        with:
+          value: ${{ steps.previoustag.outputs.tag }}
+          index_of_str: "e"
+
       - name: Log in to SURF harbor
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
@@ -40,7 +47,7 @@ jobs:
           push: true
           # tags are nested on cr.surf.nl
           # e.g. docker pull cr.surf.nl/edubadges-edubadges/edubadges/edubadges-server
-          tags: cr.surf.nl/edubadges-edubadges/edubadges/edubadges-server:${{ steps.previoustag.outputs.tag }}
+          tags: cr.surf.nl/edubadges-edubadges/edubadges/edubadges-server:${{ steps.subs.outputs.substring }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
