@@ -8,26 +8,37 @@ from django.core.management.base import BaseCommand
 from django.db import connection
 from random import randrange
 from badgeuser.models import BadgeUser
+from mainsite.models import BadgrApp
 from mainsite.tests.base import SetupHelper
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 import badgrlog
 
-
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-c', '--clean', action='store_true')
         parser.add_argument('-as', '--add_assertions', type=int)
+        parser.add_argument('-cf', '--check_first', action="store_true")
 
     def handle(self, *args, **options):
-        if settings.ALLOW_SEEDS:
-            if options['clean']:
-                clear_data()
+        if not settings.ALLOW_SEEDS:
+            print('Not seeding: ALLOW_SEEDS is set to false')
+            return
 
-            run_seeds()
-            if options['add_assertions']:
-                nr_of_assertions = options['add_assertions']
-                run_scaled_seed(scale=nr_of_assertions)
+        if options['check_first']:
+            badgr_app_id = getattr(settings, 'BADGR_APP_ID')
+            if BadgrApp.objects.filter(id=badgr_app_id).exists():
+                print(f'Not seeding: BadgrApp with id {badgr_app_id} exists, so presume db is already seeded')
+                return
+                
+        if options['clean']:
+            clear_data()
+
+        run_seeds()
+        
+        if options['add_assertions']:
+            nr_of_assertions = options['add_assertions']
+            run_scaled_seed(scale=nr_of_assertions)
 
 
 def clear_data():

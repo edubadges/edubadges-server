@@ -9,7 +9,7 @@ echo "Running migrations"
 python ./manage.py migrate
 
 echo "Seeding the database"
-python ./manage.py seed
+python ./manage.py seed --check_first
 
 # Run the server
 echo "Starting the server"
