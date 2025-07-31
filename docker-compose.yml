@@ -34,6 +34,7 @@ services:
       - MEMCACHED=memcached:11211
       - OIDC_RS_ENTITY_ID=test.edubadges.rs.nl
       - OIDC_RS_SECRET=${OIDC_RS_SECRET}
+      - PYTHONUNBUFFERED=1
       - ROOT_INFO_SECRET_KEY=secret
       - SITE_ID=1
       - SUPERUSER_EMAIL=superuser@example.com
