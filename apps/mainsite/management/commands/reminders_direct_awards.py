@@ -1,10 +1,11 @@
 import logging
-
 from datetime import timedelta
-from django.utils import timezone
-from mainsite import settings
+
 from django.core.management.base import BaseCommand
 from django.db import connections
+from django.utils import timezone
+
+from mainsite import settings
 
 
 def _remove_cached_direct_awards(direct_award):
@@ -38,12 +39,14 @@ class Command(BaseCommand):
         unaccepted = 'Unaccepted'
         for days in threshold_days:
             reminder_cutoff = now + timedelta(days=days)
-            self.stdout.write(f"Query for direct_awards with reminders={index} and expiration_date__lt {reminder_cutoff}\n")
+            self.stdout.write(
+                f"Query for direct_awards with reminders={index} and expiration_date__lt {reminder_cutoff}\n")
             direct_awards = DirectAward.objects.filter(expiration_date__lt=reminder_cutoff,
                                                        reminders=index,
                                                        status=unaccepted).all()
             # When run as standalone job the logger messages are not outputted
-            self.stdout.write(f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}\n")
+            self.stdout.write(
+                f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}\n")
             logger.info(f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}")
 
             for direct_award in direct_awards:
@@ -76,4 +79,3 @@ class Command(BaseCommand):
                       recipient_list=[direct_award.recipient_email])
 
         self.stdout.write(f"Direct awards {len(direct_awards)} deleted!\n")
-
