@@ -16,21 +16,22 @@ from .util import add_terms_institution
 setattr(settings, 'SUPPRESS_EMAILS', 1)
 badgr_app_id = getattr(settings, 'BADGR_APP_ID')
 
-
-main_badgr_app, _ = BadgrApp.objects.get_or_create(
+main_badgr_app, created = BadgrApp.objects.update_or_create(
     id=badgr_app_id,
-    is_active=1,
-    cors=settings.UI_URL,
-    email_confirmation_redirect="{}/login/".format(settings.UI_URL),
-    forgot_password_redirect="{}/change-password/".format(settings.UI_URL),
-    signup_redirect="{}/signup/".format(settings.UI_URL),
-    ui_login_redirect="{}/auth/login/".format(settings.UI_URL),
-    ui_signup_success_redirect="{}/signup/success/".format(settings.UI_URL),
-    ui_connect_success_redirect="{}/profile/".format(settings.UI_URL),
-    public_pages_redirect="{}/public/".format(settings.UI_URL),
-    oauth_authorization_redirect="{}/oauth/".format(settings.UI_URL),
-    use_auth_code_exchange=0,
-    is_demo_environment=True
+    defaults={
+        'is_active': 1,
+        'cors': settings.UI_URL,
+        'email_confirmation_redirect': "{}/login/".format(settings.UI_URL),
+        'forgot_password_redirect': "{}/change-password/".format(settings.UI_URL),
+        'signup_redirect': "{}/signup/".format(settings.UI_URL),
+        'ui_login_redirect': "{}/auth/login/".format(settings.UI_URL),
+        'ui_signup_success_redirect': "{}/signup/success/".format(settings.UI_URL),
+        'ui_connect_success_redirect': "{}/profile/".format(settings.UI_URL),
+        'public_pages_redirect': "{}/public/".format(settings.UI_URL),
+        'oauth_authorization_redirect': "{}/oauth/".format(settings.UI_URL),
+        'use_auth_code_exchange': 0,
+        'is_demo_environment': True
+    }
 )
 
 # Site
