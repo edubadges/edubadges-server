@@ -9,8 +9,6 @@ on:
     branches: ["feature/ewi"]
     tags:
       - ewi-*
-  pull_request:
-    branches: ["feature/ewi"]
 
 jobs:
 
