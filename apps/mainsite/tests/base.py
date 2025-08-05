@@ -9,11 +9,9 @@ import uuid
 from allauth.socialaccount.models import SocialAccount
 from badgeuser.models import BadgeUser, Terms, TermsUrl
 from directaward.models import DirectAward, DirectAwardBundle
-from django.utils import timezone
 from graphene.test import Client as GrapheneClient
 from institution.models import Faculty, Institution
 from issuer.models import BadgeClass, Issuer
-from lti_edu.models import StudentsEnrolled
 from mainsite import TOP_DIR
 from mainsite.models import BadgrApp
 from mainsite.schema import schema
@@ -151,11 +149,6 @@ class SetupHelper(object):
         direct_award = DirectAward.objects.create(badgeclass=badgeclass, **kwargs)
         badgeclass.remove_cached_data(['cached_direct_awards'])
         return direct_award
-
-    def enroll_user(self, recipient, badgeclass):
-        return StudentsEnrolled.objects.create(
-            user=recipient, badge_class_id=badgeclass.pk, date_consent_given=timezone.now()
-        )
 
     def _setup_institution_terms(self, institution):
         formal_badge, _ = Terms.objects.get_or_create(institution=institution, terms_type=Terms.TYPE_FORMAL_BADGE)
@@ -350,10 +343,6 @@ class BadgrTestCase(SetupHelper, APITransactionTestCase):
         from django.conf import settings
 
         badgr_app_id = getattr(settings, 'BADGR_APP_ID')
-        try:
-            self.badgr_app = BadgrApp.objects.get(pk=badgr_app_id)
-        except BadgrApp.DoesNotExist:
-            self.badgr_app = BadgrApp.objects.create(name='test cors', cors='localhost:8000')
+        self.badgr_app = BadgrApp.objects.get_or_create(pk=badgr_app_id)[0]
         self.setup_general_terms()
-
         self.assertEqual(self.badgr_app.pk, badgr_app_id)

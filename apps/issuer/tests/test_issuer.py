@@ -2,20 +2,18 @@ import copy
 import json
 import os
 
+from directaward.models import DirectAward
 from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
-
-from directaward.models import DirectAward
 from institution.models import Institution
 from issuer.models import Issuer
-from issuer.testfiles.helper import issuer_json, badgeclass_json
+from issuer.testfiles.helper import badgeclass_json, issuer_json
 from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.tests import BadgrTestCase
 
 
 class IssuerAPITest(BadgrTestCase):
-
     def test_assertion_revoking(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
@@ -24,10 +22,8 @@ class IssuerAPITest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
-        post_data = {'revocation_reason': 'revocation_reason',
-                     'assertions': [{'entity_id': assertion.entity_id}]}
-        response = self.client.post('/issuer/revoke-assertions',
-                                    json.dumps(post_data), content_type='application/json')
+        post_data = {'revocation_reason': 'revocation_reason', 'assertions': [{'entity_id': assertion.entity_id}]}
+        response = self.client.post('/issuer/revoke-assertions', json.dumps(post_data), content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
     def test_create_issuer(self):
@@ -61,8 +57,9 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_create=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
-        response = self.client.post("/issuer/badgeclasses/create",
-                                    json.dumps(badgeclass_json_copy), content_type='application/json')
+        response = self.client.post(
+            '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
+        )
         self.assertEqual(201, response.status_code)
 
     def test_create_badgeclass_alignments(self):
@@ -72,14 +69,19 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_create=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
-        alignment_json = [{'target_name' :'name',
-                          'target_url': 'http://www.google.com',
-                          'target_description': 'descr',
-                          'target_framework': 'framework',
-                          'target_code': 'code'}]
+        alignment_json = [
+            {
+                'target_name': 'name',
+                'target_url': 'http://www.google.com',
+                'target_description': 'descr',
+                'target_framework': 'framework',
+                'target_code': 'code',
+            }
+        ]
         badgeclass_json_copy['alignments'] = alignment_json
-        response = self.client.post("/issuer/badgeclasses/create",
-                                    json.dumps(badgeclass_json_copy), content_type='application/json')
+        response = self.client.post(
+            '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
+        )
         self.assertEqual(201, response.status_code)
 
     def test_create_badgeclass_grondslag_failure(self):
@@ -92,23 +94,27 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['formal'] = True
         badgeclass_json_copy['issuer'] = issuer.entity_id
-        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy),
-                                    content_type='application/json')
+        response = self.client.post(
+            '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
+        )
         self.assertEqual('215', str(response.data['fields']['error_code']))
         badgeclass_json_copy['formal'] = False
-        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy),
-                                    content_type='application/json')
+        response = self.client.post(
+            '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
+        )
         self.assertEqual(201, response.status_code)
         teacher1.institution.grondslag_formeel = Institution.GRONDSLAG_GERECHTVAARDIGD_BELANG
         teacher1.institution.grondslag_informeel = None
         teacher1.institution.save()
-        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy),
-                                    content_type='application/json')
+        response = self.client.post(
+            '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
+        )
         self.assertEqual('216', str(response.data['fields']['error_code']))
         badgeclass_json_copy['formal'] = True
         badgeclass_json_copy['name'] = 'And now for something completely different'
-        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy),
-                                    content_type='application/json')
+        response = self.client.post(
+            '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
+        )
         self.assertEqual(201, response.status_code)
 
     def test_create_badgeclass_image_too_large(self):
@@ -121,8 +127,9 @@ class IssuerAPITest(BadgrTestCase):
         image_path = self.get_test_image_path_too_large()
         image_base64 = self.get_image_data(image_path)
         badgeclass_json_copy['image'] = image_base64
-        response = self.client.post("/issuer/badgeclasses/create",
-                                    json.dumps(badgeclass_json_copy), content_type='application/json')
+        response = self.client.post(
+            '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
+        )
         self.assertEqual(400, response.status_code)
         self.assertTrue(bool(str(response.data['fields']['error_message']['image'][0]['error_message'])))
 
@@ -133,8 +140,9 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_read=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
-        response = self.client.post("/issuer/badgeclasses/create", json.dumps(badgeclass_json_copy),
-                                    content_type='application/json')
+        response = self.client.post(
+            '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
+        )
         self.assertEqual(400, response.status_code)
         self.assertEqual(str(response.data['fields']['error_message']), "You don't have the necessary permissions")
 
@@ -148,16 +156,19 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass = self.setup_badgeclass(issuer=issuer)
         assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
         # cannot archive when unrevoked assertion present
-        badgeclass_response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
-                                                 content_type='application/json')
+        badgeclass_response = self.client.delete(
+            '/issuer/badgeclasses/delete/{}'.format(badgeclass.entity_id), content_type='application/json'
+        )
         self.assertEqual(badgeclass_response.status_code, 404)
-        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
-                                             content_type='application/json')
+        issuer_response = self.client.delete(
+            '/issuer/delete/{}'.format(issuer.entity_id), content_type='application/json'
+        )
         self.assertEqual(issuer_response.status_code, 404)
-        assertion.revoke('For test reasons')
+        assertion.revoke('For test reasons', student)
         # after revoking it should work
-        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
-                                             content_type='application/json')
+        issuer_response = self.client.delete(
+            '/issuer/delete/{}'.format(issuer.entity_id), content_type='application/json'
+        )
         self.assertEqual(issuer_response.status_code, 204)
         # and its child badgeclass is not gettable, as it has been archived
         query = 'query foo{badgeClass(id: "' + badgeclass.entity_id + '") { entityId name } }'
@@ -173,11 +184,11 @@ class IssuerAPITest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
-        response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
-                                      content_type='application/json')
+        response = self.client.delete(
+            '/issuer/badgeclasses/delete/{}'.format(badgeclass.entity_id), content_type='application/json'
+        )
         self.assertEqual(response.status_code, 404)
-        response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
-                                      content_type='application/json')
+        response = self.client.delete('/issuer/delete/{}'.format(issuer.entity_id), content_type='application/json')
         self.assertEqual(response.status_code, 404)
 
     def test_delete(self):
@@ -186,11 +197,13 @@ class IssuerAPITest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         self.setup_staff_membership(teacher1, teacher1.institution, may_delete=True)
-        badgeclass_response = self.client.delete("/issuer/badgeclasses/delete/{}".format(badgeclass.entity_id),
-                                                 content_type='application/json')
+        badgeclass_response = self.client.delete(
+            '/issuer/badgeclasses/delete/{}'.format(badgeclass.entity_id), content_type='application/json'
+        )
         self.assertEqual(badgeclass_response.status_code, 204)
-        issuer_response = self.client.delete("/issuer/delete/{}".format(issuer.entity_id),
-                                             content_type='application/json')
+        issuer_response = self.client.delete(
+            '/issuer/delete/{}'.format(issuer.entity_id), content_type='application/json'
+        )
         self.assertEqual(issuer_response.status_code, 204)
         self.assertTrue(self.instance_is_removed(badgeclass))
         self.assertTrue(self.instance_is_removed(issuer))
@@ -202,37 +215,53 @@ class IssuerAPITest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
-        direct_award = self.setup_direct_award(badgeclass=badgeclass, eppn=student.eppns[0])  # setup direct award, to check if it will be removed after awarding
+        direct_award = self.setup_direct_award(
+            badgeclass=badgeclass, eppn=student.eppns[0]
+        )  # setup direct award, to check if it will be removed after awarding
         self.setup_staff_membership(teacher1, teacher1.institution, may_award=True, may_read=True)
-        enroll_body = {"badgeclass_slug": badgeclass.entity_id}
+        enroll_body = {'badgeclass_slug': badgeclass.entity_id}
         terms = badgeclass._get_terms()
         accept_terms_body = [{'terms_entity_id': terms.entity_id, 'accepted': True}]
-        terms_accept_response = self.client.post("/user/terms/accept", json.dumps(accept_terms_body),
-                                                 content_type='application/json')
-        enrollment_response = self.client.post("/lti_edu/enroll", json.dumps(enroll_body),
-                                               content_type='application/json')
+        terms_accept_response = self.client.post(
+            '/user/terms/accept', json.dumps(accept_terms_body), content_type='application/json'
+        )
+        enrollment_response = self.client.post(
+            '/lti_edu/enroll', json.dumps(enroll_body), content_type='application/json'
+        )
         self.assertEqual(enrollment_response.status_code, 201)
         self.client.logout()
         self.authenticate(teacher1)
-        award_body = {"issue_signed": False, "create_notification": True,
-                      "enrollments": [{"enrollment_entity_id": enrollment_response.data['entity_id'],
-                                       "evidence_items": [
-                                           {"evidence_url": "invalid.com",
-                                            "narrative": "Some evidence narrative",
-                                            "name": "Some name",
-                                            "description": "Some description"
-                                            }],
-                                       "narrative": "Some assertion narrative",
-
-                                       }]
-                      }
-        failure_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
-                                            json.dumps(award_body), content_type='application/json')
+        award_body = {
+            'issue_signed': False,
+            'create_notification': True,
+            'enrollments': [
+                {
+                    'enrollment_entity_id': enrollment_response.data['entity_id'],
+                    'evidence_items': [
+                        {
+                            'evidence_url': 'invalid.com',
+                            'narrative': 'Some evidence narrative',
+                            'name': 'Some name',
+                            'description': 'Some description',
+                        }
+                    ],
+                    'narrative': 'Some assertion narrative',
+                }
+            ],
+        }
+        failure_response = self.client.post(
+            '/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
+            json.dumps(award_body),
+            content_type='application/json',
+        )
         self.assertEqual(failure_response.status_code, 400)
         self.assertEqual(str(failure_response.data[0]['evidence_items'][0]['evidence_url'][0]), 'Enter a valid URL.')
         award_body['enrollments'][0]['evidence_items'][0]['evidence_url'] = 'https://www.valid.com'
-        award_response = self.client.post('/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
-                                          json.dumps(award_body), content_type='application/json')
+        award_response = self.client.post(
+            '/issuer/badgeclasses/award-enrollments/{}'.format(badgeclass.entity_id),
+            json.dumps(award_body),
+            content_type='application/json',
+        )
         assertion = student.cached_badgeinstances().first()
         evidence = assertion.cached_evidence().first()  # test cache update
         self.assertEqual(evidence.evidence_url, 'https://www.valid.com')
@@ -250,8 +279,9 @@ class IssuerAPITest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_award=True, may_read=True,
-                                    may_create=True, may_update=True)
+        self.setup_staff_membership(
+            teacher1, teacher1.institution, may_award=True, may_read=True, may_create=True, may_update=True
+        )
         enrollment = self.enroll_user(student, badgeclass)
         response = self.client.put(reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}))
         self.assertEqual(response.status_code, 200)
@@ -286,7 +316,6 @@ class IssuerAPITest(BadgrTestCase):
 
 
 class IssuerPublicAPITest(BadgrTestCase):
-
     def test_get_name_from_recipient_identifer(self):
         teacher1 = self.setup_teacher()
         student = self.setup_student()
@@ -346,7 +375,6 @@ class IssuerPublicAPITest(BadgrTestCase):
 
 
 class IssuerModelsTest(BadgrTestCase):
-
     def test_issuer_uniqueness_constraint(self):
         """Checks if uniquness constraints on name trigger for Issuers"""
         teacher1 = self.setup_teacher(authenticate=True)
@@ -426,16 +454,15 @@ class IssuerModelsTest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         evidence_items = [{'evidence_url': 'http://valid.com', 'narrative': 'Some narrative'}]
-        assertion = self.setup_assertion(student, badgeclass, teacher1,
-                                         evidence=evidence_items,
-                                         narrative='assertion narrative')
+        assertion = self.setup_assertion(
+            student, badgeclass, teacher1, evidence=evidence_items, narrative='assertion narrative'
+        )
         assertion_data = assertion.get_json()
         self.assertEqual(assertion_data['evidence'][0]['id'], 'http://valid.com')
         self.assertEqual(assertion_data['narrative'], 'assertion narrative')
 
 
 class IssuerSchemaTest(BadgrTestCase):
-
     def test_issuer_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
