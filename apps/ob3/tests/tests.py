@@ -3,8 +3,8 @@ from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
 
-from .models import ImpierceOfferRequest as OfferRequest, IdentityObject
-from .serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
+from apps.ob3.models import ImpierceOfferRequest as OfferRequest, IdentityObject
+from apps.ob3.serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
 
 from  mainsite.settings import UI_URL
 
