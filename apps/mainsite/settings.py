@@ -299,15 +299,17 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'plain': {
-            'format': '[%(levelname)s] %(name)s %(module)s %(message)s'
+        'json': {
+            '()': 'mainsite.formatters.JsonFormatter',
+            'format': '%(levelname)s %(name)s %(module)s %(message)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S%z',
         },
     },
     'handlers': {
         'console': {
             'level': LOG_LEVEL,
             'class': 'logging.StreamHandler',
-            'formatter': 'plain'
+            'formatter': 'json'
         },
     },
     'loggers': {
