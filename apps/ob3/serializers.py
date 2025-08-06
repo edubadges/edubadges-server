@@ -211,3 +211,12 @@ class ImpierceOfferRequestSerializer(serializers.Serializer):
     credentialConfigurationId = serializers.CharField(source='credential_configuration_id')
     expiresAt = serializers.CharField(source='expires_at', required=True)
     credential = CredentialSerializer()
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if instance.expires_at:
+            ret['expiresAt'] = instance.expires_at.strftime('%Y-%m-%dT%H:%M:%SZ')
+        else:
+            ret['expiresAt'] = "never"
+            
+        return ret

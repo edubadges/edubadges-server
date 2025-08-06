@@ -65,10 +65,10 @@ class ImpierceOfferRequest:
         )
 
         if badge_instance.expires_at:
-            self.expires_at = badge_instance.expires_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+            self.expires_at = badge_instance.expires_at
             self.credential.valid_until = badge_instance.expires_at
         else:
-            self.expires_at = "never"
+            self.expires_at = None
 
 class SphereonOfferRequest:
     def __init__(self, offer_id, credential_configuration_id, badge_instance, edu_id, email, eppn, family_name, given_name):
