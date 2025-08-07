@@ -1,7 +1,7 @@
-from mainsite.tests import BadgrTestCase
+from django.test import SimpleTestCase
 
 
-class SocialAuthTests(BadgrTestCase):
+class SocialAuthTests(SimpleTestCase):
 
     def test_student_login(self):
         """test login and successful also is_student should be set"""
