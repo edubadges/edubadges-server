@@ -24,7 +24,7 @@ class EduIdUserInfoTest(SimpleTestCase):
         
     def test_validated_names_not_in_info(self):
         eppn_json = [
-            { 'name': 'Hendrik-Jan Visser' }, # no validated_name key
+            { 'name': 'Hendrik-Jan Visser', 'preferred': True }, # no validated_name key
             { 'validated_name': 'Hennie Visser' } # no preferred key
         ]
             
