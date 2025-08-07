@@ -169,6 +169,7 @@ class AchievementSubjectSerializer(OmitNoneFieldsMixin, serializers.Serializer):
 class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     OMIT_IF_NONE = ['validFrom', 'validUntil']
 
+    id = serializers.URLField()
     issuer = IssuerSerializer()
     validFrom = serializers.DateTimeField(
             source='valid_from',
@@ -184,7 +185,38 @@ class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
     )
     credentialSubject = AchievementSubjectSerializer(source='credential_subject')
 
-class OfferRequestSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # TODO: Decide how to handle public vs private assertions: the latter won't resolve
+        # TODO: DRY the id-to-url conversion
+        """Convert the id to a URL"""
+        ret['id'] = f"{UI_URL}/public/assertions/{ret['id']}"
+
+        return ret
+
+class SphereonOfferRequestSerializer(serializers.Serializer):
+    credential_configuration_ids = serializers.ListField()
+    grants = serializers.DictField()
+
+    credentialData = CredentialSerializer(source='credential')
+
+    eduId = serializers.CharField(source='edu_id')
+    email = serializers.EmailField()
+    eppn = serializers.EmailField()
+    familyName = serializers.CharField(source='family_name')
+    givenName = serializers.CharField(source='given_name')
+
+class ImpierceOfferRequestSerializer(serializers.Serializer):
     offerId = serializers.CharField(source='offer_id')
     credentialConfigurationId = serializers.CharField(source='credential_configuration_id')
+    expiresAt = serializers.CharField(source='expires_at', required=True)
     credential = CredentialSerializer()
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if instance.expires_at:
+            ret['expiresAt'] = instance.expires_at.strftime('%Y-%m-%dT%H:%M:%SZ')
+        else:
+            ret['expiresAt'] = "never"
+            
+        return ret

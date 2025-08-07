@@ -3,8 +3,8 @@ from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
 
-from .models import OfferRequest, IdentityObject
-from .serializers import OfferRequestSerializer
+from apps.ob3.models import ImpierceOfferRequest as OfferRequest, IdentityObject
+from apps.ob3.serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
 
 from  mainsite.settings import UI_URL
 
@@ -51,11 +51,12 @@ class TestCredentialsSerializers(SimpleTestCase):
     def test_serializer_serializes_credential(self):
         badge_instance = BadgeInstanceMock()
         actual_data = self._serialize_it(badge_instance)
-
         expected_data = {
             "offerId": "offer_id",
+            "expiresAt": "never",
             "credentialConfigurationId": "credential_configuration_id",
             "credential": {
+                "id": f"{UI_URL}/public/assertions/BADGE1234",
                 "issuer": {
                     "id": f"{UI_URL}/ob3/issuers/ISS1234",
                     "type": ["Profile"],
@@ -118,6 +119,20 @@ class TestCredentialsSerializers(SimpleTestCase):
         actual_data = self._serialize_it(badge_instance)
 
         self.assertEqual(actual_data["credential"]["validUntil"], "2020-01-01T01:13:37Z")
+
+    def test_impierce_offer_request_expires_at(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.expires_at = DateTime.fromisoformat("2020-01-01:01:13:37")
+        actual_data = self._serialize_it(badge_instance)
+
+        self.assertEqual(actual_data["expiresAt"], "2020-01-01T01:13:37Z")
+
+    def test_impierce_offer_request_expires_at_notset(self):
+        badge_instance = BadgeInstanceMock()
+        badge_instance.expires_at = None
+        actual_data = self._serialize_it(badge_instance)
+
+        self.assertEqual(actual_data["expiresAt"], "never")
 
     def test_education_language_extension(self):
         badge_instance = BadgeInstanceMock()
@@ -191,6 +206,7 @@ class TestCredentialsSerializers(SimpleTestCase):
         self.assertIn(expected_alignment, actual_data["alignment"])
 
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
+       # TODO: We should test both impierce and sphereon models and serializers
        edu_credential = OfferRequest("offer_id", "credential_configuration_id", badge_instance)
        return dict(OfferRequestSerializer(edu_credential).data)
 
