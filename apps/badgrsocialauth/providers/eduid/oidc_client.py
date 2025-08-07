@@ -120,7 +120,7 @@ class EduIdUserInfo(UserInfo):
     def __init__(self, eppn_json):
         super().__init__()
         
-        self._validated_names = [info['validated_name'] for info in eppn_json if 'validated_name' in info]
+        self._validated_names = [info['validated_name'] for info in eppn_json if info.get('preferred', False)]
         self._eppn = [info['eppn'] for info in eppn_json if 'eppn' in info]
         self._schac_home_organization = [info['schac_home_organization'] for info in eppn_json if 'schac_home_organization' in info]
 
