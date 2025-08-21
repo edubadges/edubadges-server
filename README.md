@@ -180,7 +180,7 @@ If you login to http://localhost:8000/staff/superuser then you'll have to provid
 
 ### Run unit / integration tests
 
-- `./manage.py test
+- `./manage.py test`
   (add --keepdb in case you want to keep the test database)
 
 ### Staff dashboard
