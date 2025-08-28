@@ -32,8 +32,11 @@ class BadgeExtensionValidator(object):
         if len(value) > 0:
             options = {"use_cache": True, "cache_expire_after": 60 * 60 * 24,
                        "jsonld_options": {"compactArrays": False}}
-            result = openbadges.verifier.validate_extensions(value.copy(), **options)
-            report = result.get('report', {})
+            try:
+                result = openbadges.verifier.validate_extensions(value.copy(), **options)
+                report = result.get('report', {})
+            except Exception as e:
+                raise ValidationError(f"Unable to verify badge extensions: {str(e)}")
             if not report.get('valid', False):
                 messages = report.get('messages', [])
                 if len(messages) > 0:

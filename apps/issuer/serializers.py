@@ -5,6 +5,7 @@ import uuid
 from collections import OrderedDict
 from itertools import chain
 
+from badgeuser.serializers import BadgeUserIdentifierField
 from django.apps import apps
 from django.conf import settings
 from django.core.validators import URLValidator
@@ -12,12 +13,7 @@ from django.db import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
-from rest_framework import serializers
-from rest_framework.exceptions import ErrorDetail, ValidationError
-from rest_framework.serializers import PrimaryKeyRelatedField
-
-from badgeuser.serializers import BadgeUserIdentifierField
-from institution.models import Institution, BadgeClassTag
+from institution.models import BadgeClassTag, Institution
 from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
@@ -25,14 +21,17 @@ from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.models import BadgrApp
 from mainsite.serializers import (
-    StripTagsCharField,
+    BaseSlugRelatedField,
     MarkdownCharField,
     OriginalJsonSerializerMixin,
-    BaseSlugRelatedField,
+    StripTagsCharField,
 )
-from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
-from mainsite.validators import BadgeExtensionValidator
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceCollection
+from mainsite.utils import OriginSetting, add_watermark, resize_image, scrub_svg_image, verify_svg
+from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail, ValidationError
+from rest_framework.serializers import PrimaryKeyRelatedField
+
+from .models import BadgeClass, BadgeClassExtension, BadgeInstance, BadgeInstanceCollection, Issuer, IssuerExtension
 
 
 class IssuerSlugRelatedField(BaseSlugRelatedField):
@@ -97,7 +96,7 @@ class IssuerSerializer(
     url_english = serializers.URLField(max_length=1024, required=False, allow_null=True, allow_blank=True)
     url_dutch = serializers.URLField(max_length=1024, required=False, allow_null=True, allow_blank=True)
     faculty = FacultySlugRelatedField(slug_field='entity_id', required=True)
-    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
+    extensions = serializers.DictField(source='extension_items', required=False)
 
     def _validate_image(self, image):
         img_name, img_ext = os.path.splitext(image.name)
@@ -241,7 +240,7 @@ class BadgeClassSerializer(
     stackable = serializers.BooleanField(required=False, default=False)
 
     alignments = AlignmentItemSerializer(many=True, source='alignment_items', required=False)
-    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
+    extensions = serializers.DictField(source='extension_items', required=False)
     expiration_period = PeriodField(required=False)
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
     tags = PrimaryKeyRelatedField(many=True, queryset=BadgeClassTag.objects.all(), required=False)
@@ -479,7 +478,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
     issue_signed = serializers.BooleanField(required=False)
     signing_password = serializers.CharField(max_length=1024, required=False)
     enrollment_entity_id = serializers.CharField(max_length=1024, required=False)
-    extensions = serializers.DictField(source='extension_items', required=False, validators=[BadgeExtensionValidator()])
+    extensions = serializers.DictField(source='extension_items', required=False)
     grade_achieved = serializers.CharField(max_length=254, required=False, allow_blank=True, allow_null=True)
     narrative = MarkdownCharField(required=False, allow_blank=True, allow_null=True)
     evidence_items = EvidenceItemSerializer(many=True, required=False)
