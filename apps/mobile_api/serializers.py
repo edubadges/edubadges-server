@@ -1,6 +1,7 @@
 from rest_framework import serializers
 import json
 
+from directaward.models import DirectAward
 from institution.models import Faculty, Institution
 from issuer.models import BadgeInstance, BadgeClass, BadgeClassExtension, Issuer
 
@@ -77,3 +78,11 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
         model = BadgeInstance
         fields = ["id", "created_at", "entity_id", "issued_on", "award_type", "revoked", "expires_at", "acceptance",
                   "public", "badgeclass"]
+
+class DirectAwardSerializer(serializers.ModelSerializer):
+    badgeclass = BadgeClassSerializer()
+
+    class Meta:
+        model = DirectAward
+        fields = ["id", "created_at", "entity_id", "badgeclass"]
+

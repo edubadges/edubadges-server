@@ -1,8 +1,9 @@
 from django.urls import re_path, path
 
-from mobile_api.api import BadgeInstances, BadgeInstanceDetail
+from mobile_api.api import BadgeInstances, BadgeInstanceDetail, UnclaimedDirectAwards
 
 urlpatterns = [
     path('badge-instances', BadgeInstances.as_view(), name='mobile_api_badge_instances'),
     path('badge-instance-detail/<str:entity_id>', BadgeInstanceDetail.as_view(), name='mobile_api_badge_instance_detail'),
+    path('direct-awards', UnclaimedDirectAwards.as_view(), name='mobile_api_direct_awards'),
 ]
