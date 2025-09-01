@@ -31,3 +31,12 @@ class TeachPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.user and hasattr(request.user, 'is_teacher') and request.user.is_teacher
+
+
+class MobileAPIPermission(permissions.BasePermission):
+    """
+    Allows access only to student
+    """
+
+    def has_permission(self, request, view):
+        return hasattr(request, 'mobile_api_call') and request.mobile_api_call

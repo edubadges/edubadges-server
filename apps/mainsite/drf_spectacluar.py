@@ -19,6 +19,7 @@ included_endpoint_prefixes = [
     '/public/assertions',
     '/public/validator',
     '/public/institution',
+    '/mobile/api',
 ]
 
 excluded_keywords = ['pubkey', 'baked', 'image']
