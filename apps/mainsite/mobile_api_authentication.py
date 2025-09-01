@@ -5,11 +5,9 @@ import urllib.request
 
 import requests
 from django.conf import settings
-from django.core.exceptions import BadRequest
 from rest_framework.authentication import BaseAuthentication
 
 from badgeuser.models import BadgeUser
-from institution.models import Institution
 
 
 class MobileAPIAuthentication(BaseAuthentication):
@@ -30,7 +28,7 @@ class MobileAPIAuthentication(BaseAuthentication):
             logger.info('MobileAPIAuthentication: return None as no authorization header')
             return None
 
-        bearer_token = authorization[len('bearer ') :]
+        bearer_token = authorization[len('bearer '):]
         if not bearer_token:
             logger.info('MobileAPIAuthentication: return None as no bearer_token in authorization')
             return None
