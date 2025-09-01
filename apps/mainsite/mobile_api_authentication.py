@@ -33,6 +33,9 @@ class MobileAPIAuthentication(BaseAuthentication):
             logger.info('MobileAPIAuthentication: return None as no bearer_token in authorization')
             return None
 
+        # Discussion: do we check the token with each API call, or do we cache for 30 min. (?). Performance
+        # vs easy code. First see how chatty the mobile app is with API calls and then decide?
+
         payload = {'token': bearer_token}
         headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
         url = f'{settings.EDUID_PROVIDER_URL}/introspect'
@@ -54,6 +57,10 @@ class MobileAPIAuthentication(BaseAuthentication):
 
         user = BadgeUser.objects.get(email=introspect_json['email'], is_teacher=False)
         # TODO need to check if we need to add social data - see edubadges-server/apps/badgrsocialauth/providers/eduid/views.py
+
+        # Discuss: do we agree on a login(or /me) endpoint that syncs all the data once to be called each time the mobile
+        # app receives an answer on their redirect_url, or do we don't rely on that and perform
+        #  the sync with each endpoint. Performance vs. agnostic idempotent API.
         if user:
             request.mobile_api_call = True
 
