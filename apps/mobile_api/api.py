@@ -1,12 +1,3 @@
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import serializers
-from issuer.models import BadgeInstance
-from mainsite.permissions import MobileAPIPermission
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter, \
-    OpenApiTypes
-
-from mobile_api.serializers import BadgeInstanceSerializer, BadgeInstanceDetailSerializer
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter, \
     OpenApiTypes
 from rest_framework import serializers
@@ -15,6 +6,7 @@ from rest_framework.views import APIView
 
 from issuer.models import BadgeInstance
 from mainsite.permissions import MobileAPIPermission
+from mobile_api.serializers import BadgeInstanceDetailSerializer
 from mobile_api.serializers import BadgeInstanceSerializer
 
 permission_denied_response = OpenApiResponse(
@@ -94,16 +86,15 @@ class BadgeInstanceDetail(APIView):
         ],
         examples=[],
     )
-    def get(self, request, **kwargs):
-        entity_id = kwargs.get('entity_id', None)
+    def get(self, request, entity_id, **kwargs):
         instance = BadgeInstance.objects \
             .select_related("badgeclass") \
             .prefetch_related("badgeclass__badgeclassextension_set") \
             .select_related("badgeclass__issuer") \
             .select_related("badgeclass__issuer__faculty") \
             .select_related("badgeclass__issuer__faculty__institution") \
-            .filter(user=request.user)\
-            .filter(entity_id=entity_id)\
+            .filter(user=request.user) \
+            .filter(entity_id=entity_id) \
             .get()
         serializer = BadgeInstanceDetailSerializer(instance)
         data = serializer.data
