@@ -9,11 +9,10 @@ import dateutil.parser
 from django.core.files.base import ContentFile
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
-from django.urls import resolve, Resolver404
-from openbadges_bakery import bake
-
+from django.urls import Resolver404, resolve
 from issuer.utils import UNVERSIONED_BAKED_VERSION
-from mainsite.utils import fetch_remote_file_to_storage, list_of, OriginSetting
+from mainsite.utils import OriginSetting, fetch_remote_file_to_storage, list_of
+from openbadges_bakery import bake
 
 
 def resolve_source_url_referencing_local_object(source_url):
@@ -68,6 +67,7 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
     def create(self, **kwargs):
         new_kwargs = {key: value for (key, value) in kwargs.items() if key != 'award_allowed_institutions'}
         obj = self.model(**new_kwargs)
+        obj.save()
         obj.award_allowed_institutions.set(kwargs.get('award_allowed_institutions', []))
         obj.save()
         return obj
