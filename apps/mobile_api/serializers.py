@@ -3,7 +3,8 @@ import json
 
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
-from issuer.models import BadgeInstance, BadgeClass, BadgeClassExtension, Issuer
+from issuer.models import BadgeInstance, BadgeClass, BadgeClassExtension, Issuer, BadgeInstanceCollection
+from lti_edu.models import StudentsEnrolled
 
 
 class InstitutionSerializer(serializers.ModelSerializer):
@@ -30,7 +31,6 @@ class IssuerSerializer(serializers.ModelSerializer):
 
 
 class BadgeClassExtensionSerializer(serializers.ModelSerializer):
-
     value = serializers.SerializerMethodField()
 
     class Meta:
@@ -79,6 +79,7 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
         fields = ["id", "created_at", "entity_id", "issued_on", "award_type", "revoked", "expires_at", "acceptance",
                   "public", "badgeclass"]
 
+
 class DirectAwardSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassSerializer()
 
@@ -86,3 +87,26 @@ class DirectAwardSerializer(serializers.ModelSerializer):
         model = DirectAward
         fields = ["id", "created_at", "entity_id", "badgeclass"]
 
+
+class StudentsEnrolledSerializer(serializers.ModelSerializer):
+    badge_class = BadgeClassSerializer()
+
+    class Meta:
+        model = StudentsEnrolled
+        fields = ["id", "entity_id", "date_created", "denied", "date_awarded", "badge_class"]
+
+
+class StudentsEnrolledDetailSerializer(serializers.ModelSerializer):
+    badge_class = BadgeClassDetailSerializer()
+
+    class Meta:
+        model = StudentsEnrolled
+        fields = ["id", "entity_id", "date_created", "denied", "date_awarded", "badge_class"]
+
+
+class BadgeCollectionSerializer(serializers.ModelSerializer):
+    badge_instances = serializers.PrimaryKeyRelatedField(many=True, queryset=BadgeInstance.objects.all())
+
+    class Meta:
+        model = BadgeInstanceCollection
+        fields = ["id", "created_at", "entity_id", "badge_instances", "name", "public", "description"]
