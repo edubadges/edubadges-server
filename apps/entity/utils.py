@@ -26,18 +26,19 @@ def validate_errors(serializer):
             fields[attr] = []
             for error in field_errors:
                 try:
-                    fields[attr].append({
-                        'error_code': get_form_error_code(vars(error)['code']),
-                        'error_message': error
-                    })
+                    fields[attr].append(
+                        {'error_code': get_form_error_code(getattr(error, 'code', 999)), 'error_message': error}
+                    )
                 except TypeError:
                     sub_fields = {}
                     for sub_attr, sub_errors in error.items():
                         sub_fields[sub_attr] = []
                         for sub_error in sub_errors:
-                            sub_fields[sub_attr].append({
-                                'error_code': get_form_error_code(vars(sub_error)['code']),
-                                'error_message': sub_error
-                            })
+                            sub_fields[sub_attr].append(
+                                {
+                                    'error_code': get_form_error_code(getattr(sub_error, 'code', 999)),
+                                    'error_message': sub_error,
+                                }
+                            )
                     fields[attr].append(sub_fields)
         raise BadgrValidationError(error_message=fields, error_code=999)
