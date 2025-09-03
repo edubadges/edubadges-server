@@ -103,7 +103,7 @@
 {% endblock %}
 
 {% block title %}
-<title>Je hebt een edubadge ontvangen. You received an edubadge.</title>
+<title>[Eduwallet] Je hebt een edubadge ontvangen. You received an edubadge.</title>
 {% endblock %}
 
 {% block content %}
@@ -132,6 +132,7 @@
         <br><br>Denk eraan om je edubadge publiek te zetten als je deze wilt delen met anderen.</p>
     <a class="button" target="_blank" rel="noopener noreferrer" href="{{assertion_url}}">
         Bekijk jouw edubadge</a>
+    <p class=text">Let op: dit is een Edubadge uitgegeven voor het Eduwallet project</p>
 </div>
 <p class="title">{{issuer_name}} has sent you the following edubadge.</p>
 <div class="message_container">
@@ -156,5 +157,6 @@
         <br><br>Remember to make your edubadge public if you want to share it with others.</p>
     <a class="button" target="_blank" rel="noopener noreferrer" href="{{assertion_url}}">
         View your edubadge</a>
+    <p class=text">Please note: this is an Edubadge that is issued for the Eduwallet project.</p>
 </div>
 {% endblock %}
