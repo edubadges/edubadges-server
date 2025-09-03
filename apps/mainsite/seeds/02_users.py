@@ -51,6 +51,7 @@ for ins in institutions:
         grading_table='https://url.to.gradingtable/gradingtable.html',
         direct_awarding_enabled=True,
         micro_credentials_enabled=True,
+        ob3_ssi_agent_enabled=True,
         brin='000-7777-11111',
     )
     add_terms_institution(institution)
@@ -212,6 +213,7 @@ def create_student(username, first_name, last_name, email, uid, **kwargs):
 
     social_account.save()
 
+
 students = [
     {
         'username': 'user',
@@ -251,9 +253,7 @@ students = [
             'schac_home': 'university-example.org',
             'eppn': DEMO_STUDENT_EPPN,
         },
-        'extra_data': {
-            'eduid': '7bf2c4ae-f355-496d-8bc2-db550f1e2d7a'
-        }
+        'extra_data': {'eduid': '7bf2c4ae-f355-496d-8bc2-db550f1e2d7a'},
     },
 ]
 
