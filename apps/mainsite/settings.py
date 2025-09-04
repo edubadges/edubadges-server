@@ -324,7 +324,7 @@ LOGGING = {
             'level': LOG_LEVEL,
             'propagate': False,
         },
-        'Badgr.Event': {
+        'Badgr.Events': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
