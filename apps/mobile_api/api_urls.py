@@ -13,5 +13,7 @@ urlpatterns = [
     path('badge-collections', BadgeCollectionsListView.as_view(), name='mobile_api_badge_collections'),
     path('badge-collections/<str:entity_id>', BadgeCollectionsDetailView.as_view(),
          name='mobile_api_badge_collection_update'),
+    path('login', Login.as_view(),
+         name='mobile_api_login'),
 
 ]

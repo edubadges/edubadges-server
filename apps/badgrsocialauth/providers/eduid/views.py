@@ -141,7 +141,7 @@ def callback(request):
             'Accept': 'application/json, application/json;charset=UTF-8',
             'Authorization': f'Bearer {access_token}',
         }
-        eduid_url = f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links';
+        eduid_url = f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links'
         response = requests.get(eduid_url, headers=headers, timeout=60)
         if response.status_code != 200:
             error = f'Server error: eduID eppn endpoint error ({response.status_code})'

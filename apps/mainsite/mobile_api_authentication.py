@@ -2,12 +2,21 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
-
+from allauth.socialaccount.models import SocialAccount
 import requests
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from rest_framework.authentication import BaseAuthentication
 
 from badgeuser.models import BadgeUser
+
+
+class TemporaryUser:
+
+    def __init__(self, user_payload, bearer_token):
+        # Not saved to DB
+        self.user_payload = user_payload
+        self.bearer_token = bearer_token
 
 
 class MobileAPIAuthentication(BaseAuthentication):
@@ -33,11 +42,11 @@ class MobileAPIAuthentication(BaseAuthentication):
             logger.info('MobileAPIAuthentication: return None as no bearer_token in authorization')
             return None
 
-        payload = {'token': bearer_token}
         headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
         url = f'{settings.EDUID_PROVIDER_URL}/introspect'
         auth = (settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET)
-        response = requests.post(url, data=urllib.parse.urlencode(payload), auth=auth, headers=headers, timeout=60)
+        response = requests.post(url, data=urllib.parse.urlencode({'token': bearer_token}), auth=auth, headers=headers,
+                                 timeout=60)
         if response.status_code != 200:
             logger.info(f'MobileAPIAuthentication bad response from oidcng: {response.status_code} {response.json()}')
             return None
@@ -48,23 +57,29 @@ class MobileAPIAuthentication(BaseAuthentication):
         if not introspect_json['active']:
             logger.info(f'MobileAPIAuthentication inactive introspect_json {introspect_json}')
             return None
-        if not 'email' in introspect_json:
-            logger.info(f'MobileAPIAuthentication return None as no email in introspect_json {introspect_json}')
+        if not 'eduid' in introspect_json:
+            logger.info(f'MobileAPIAuthentication return None as no eduid in introspect_json {introspect_json}')
             return None
 
-        user = BadgeUser.objects.filter(email=introspect_json['email'], is_teacher=False).first()
-        # if user is None:
-        #
-        # else:
-
-        # TODO need to check if we need to add social data - see edubadges-server/apps/badgrsocialauth/providers/eduid/views.py
-        # if request.path == "/mobile/api/login":
-        # We can assume that on all other endpoint the user has agreed to the terms and has a validated name
-
-        # Discuss: do we agree on a login(or /me) endpoint that syncs all the data once to be called each time the mobile
-        # app receives an answer on their redirect_url, or do we don't rely on that and perform
-        #  the sync with each endpoint. Performance vs. agnostic idempotent API.
-        if user:
+        social_account = SocialAccount.objects.filter(uid=introspect_json['eduid']).first()
+        login_endpoint = request.path == "/mobile/api/login"
+        if social_account is None:
+            if login_endpoint:
+                # further logic is dealt with in /mobile/api/login
+                request.mobile_api_call = True
+                return TemporaryUser(introspect_json, bearer_token), bearer_token
+            else:
+                # If not heading to login-endpoint, we return None resulting in 403
+                return None
+        # SocialAccount always has a User
+        user = social_account.user
+        if login_endpoint:
+            # further logic is dealt with in /mobile/api/login
             request.mobile_api_call = True
+            return user
+        elif not user.general_terms_accepted() or not user.validated_name:
+            # If not heading to login-endpoint, we return None resulting in 403
+            return None
 
+        request.mobile_api_call = True
         return user, bearer_token

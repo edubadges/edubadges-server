@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter, \
     OpenApiTypes
@@ -12,10 +14,13 @@ from issuer.models import BadgeInstance, BadgeInstanceCollection
 from issuer.serializers import BadgeInstanceCollectionSerializer
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
+from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
 from mobile_api.serializers import BadgeInstanceDetailSerializer, DirectAwardSerializer, StudentsEnrolledSerializer, \
     StudentsEnrolledDetailSerializer, BadgeCollectionSerializer
 from mobile_api.serializers import BadgeInstanceSerializer
+import requests
+from django.conf import settings
 
 permission_denied_response = OpenApiResponse(
     response=inline_serializer(name='PermissionDeniedResponse', fields={'detail': serializers.CharField()}),
@@ -23,6 +28,77 @@ permission_denied_response = OpenApiResponse(
         OpenApiExample(name='Forbidden Response', value={'detail': 'Authentication credentials were not provided.'})
     ],
 )
+
+class Login(APIView):
+    permission_classes = (MobileAPIPermission,)
+
+    @extend_schema(
+        methods=['GET'],
+        description='Login and validate the user',
+        examples=[],
+    )
+    def get(self, request, **kwargs):
+        logger = logging.getLogger('Badgr.Debug')
+
+        user = request.user
+        '''
+        Check if the user is known, has agreed to the terms and has a validated_name. If the user is not known
+        then check if there is a validate name and provision the user. If all is well, then return the user information
+        '''
+        if isinstance(user, TemporaryUser):
+            # Check if there is a validated name
+            headers = {
+                'Accept': 'application/json, application/json;charset=UTF-8',
+                'Authorization': f'Bearer {user.bearer_token}',
+            }
+            response = requests.get(f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links', headers=headers,
+                                    timeout=60)
+            if response.status_code != 200:
+                error = f'Server error: eduID eppn endpoint error ({response.status_code})'
+                logger.debug(error)
+                return Response({"error": str(error)})
+
+            eppn_json = response.json()
+            for info in eppn_json:
+                if 'eppn' in info and 'schac_home_organization' in info:
+                    request.user.add_affiliations(
+                        [
+                            {
+                                'eppn': info['eppn'].lower(),
+                                'schac_home': info['schac_home_organization'],
+                            }
+                        ]
+                    )
+                    logger.info(f'Stored affiliations {info["eppn"]} {info["schac_home_organization"]}')
+            validated_names = [info['validated_name'] for info in eppn_json if 'validated_name' in info]
+            if request.user.validated_name and len(validated_names) == 0:
+                ret = HttpResponseRedirect(ret.url + '&revalidate-name=true')
+            if len(validated_names) > 0:
+                # Use the preferred linked account for the validated_name.
+                preferred_validated_name = [info['validated_name'] for info in eppn_json if info['preferred']]
+                if not preferred_validated_name:
+                    # This should never happen as it would be a bug in eduID, but let's be defensive
+                    preferred_validated_name = [validated_names[0]]
+                val_name_audit_trail_signal.send(
+                    sender=request.user.__class__,
+                    user=request.user,
+                    old_validated_name=request.user.validated_name,
+                    new_validated_name=preferred_validated_name[0],
+                )
+                request.user.validated_name = preferred_validated_name[0]
+            else:
+                val_name_audit_trail_signal.send(
+                    sender=request.user.__class__,
+                    user=request.user,
+                    old_validated_name=request.user.validated_name,
+                    new_validated_name=None,
+                )
+                request.user.validated_name = None
+            request.user.save()
+
+        return Response(data)
+
+
 
 
 class BadgeInstances(APIView):
