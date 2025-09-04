@@ -319,9 +319,14 @@ LOGGING = {
         },
     },
     'loggers': {
-        '': {
+        'Badgr.Debug': {
             'handlers': ['console'],
             'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'Badgr.Event': {
+            'handlers': ['console'],
+            'level': 'INFO',
             'propagate': False,
         },
         'django': {
