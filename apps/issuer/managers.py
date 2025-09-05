@@ -12,6 +12,7 @@ from django.db import models, transaction
 from django.urls import resolve, Resolver404
 from openbadges_bakery import bake
 
+import badgrlog
 from issuer.utils import UNVERSIONED_BAKED_VERSION
 from mainsite.utils import fetch_remote_file_to_storage, list_of, OriginSetting
 
@@ -211,6 +212,10 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                 for name, ext in list(extensions.items()):
                     new_instance.badgeinstanceextension_set.create(name=name, original_json=json.dumps(ext))
 
+        # Log the badge instance creation event
+        logger = badgrlog.BadgrLogger()
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(new_instance))
+        
         return new_instance
 
 

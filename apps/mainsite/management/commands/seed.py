@@ -12,6 +12,7 @@ from mainsite.tests.base import SetupHelper
 from mainsite.seeds.constants import INSTITUTION_UNIVERSITY_EXAMPLE_ORG
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeInstance
+import badgrlog
 
 
 class Command(BaseCommand):
@@ -110,3 +111,7 @@ def run_scaled_seed(scale):
             created_by=issuing_teacher,
             created_at=timezone.now().replace(month=randrange(12) + 1),
             user=recipient)
+        
+        # Log the badge instance creation event
+        logger = badgrlog.BadgrLogger()
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))

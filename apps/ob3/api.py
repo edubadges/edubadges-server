@@ -4,6 +4,8 @@ import uuid
 import requests
 import logging
 from django.http import Http404
+
+import badgrlog
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from rest_framework import status, permissions
 from rest_framework.response import Response
@@ -57,6 +59,11 @@ class CredentialsView(APIView):
             logger.debug(f"Unime offer: {offer}")
 
         logger.info(f"Issued credential for badge {badge_id} with offer_id {offer_id}")
+        
+        # Log the credential issuance event
+        badgr_logger = badgrlog.BadgrLogger()
+        badgr_logger.event(badgrlog.CredentialIssuedEvent(badge_instance, request.user, offer_id, variant))
+        
         return Response({"offer": offer}, status=status.HTTP_201_CREATED)
 
     def __badge_instance(self, badge_id, user):

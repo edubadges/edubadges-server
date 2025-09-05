@@ -13,6 +13,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
 from rest_framework import serializers
+
+import badgrlog
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.serializers import PrimaryKeyRelatedField
 
@@ -457,6 +459,10 @@ class BadgeClassSerializer(
             new_badgeclass = BadgeClass.objects.create(**validated_data)
             new_badgeclass.tags.set(tags)
             new_badgeclass.save()
+            
+            logger = badgrlog.BadgrLogger()
+            logger.event(badgrlog.BadgeClassCreatedEvent(new_badgeclass))
+            
             return new_badgeclass
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
@@ -604,6 +610,11 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment.user.remove_cached_data(['cached_pending_enrollments'])
         # delete the pending direct awards for this badgeclass and this user
         badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns).delete()
+        
+        # Log the badge instance creation event
+        logger = badgrlog.BadgrLogger()
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))
+        
         return assertion
 
 

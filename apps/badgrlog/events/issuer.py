@@ -41,7 +41,7 @@ class BadgeClassDeletedEvent(BaseBadgrEvent):
     def to_representation(self):
         return {
             'user': self.user,
-            'badgeClass': self.badge_class.json,
+            'badgeClass': self.badge_class_json,
         }
 
 
@@ -68,5 +68,21 @@ class BadgeAssertionRevokedEvent(BaseBadgrEvent):
         return {
             'user': self.user,
             'badgeInstance': self.badge_instance.json
+        }
+
+
+class CredentialIssuedEvent(BaseBadgrEvent):
+    def __init__(self, badge_instance, user, offer_id, variant):
+        self.badge_instance = badge_instance
+        self.user = user
+        self.offer_id = offer_id
+        self.variant = variant
+
+    def to_representation(self):
+        return {
+            'user': self.user,
+            'badgeInstance': self.badge_instance.json,
+            'offerId': self.offer_id,
+            'variant': self.variant
         }
 
