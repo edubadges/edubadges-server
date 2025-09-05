@@ -1,4 +1,5 @@
 from auditlog.mixins import LogAccessMixin
+from django.db.models import ProtectedError
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework import status
@@ -48,6 +49,20 @@ class IssuerList(VersionedObjectMixin, BaseEntityListView):
 class BadgeClassDeleteView(BaseArchiveView):
     model = BadgeClass
     v1_serializer_class = BadgeClassSerializer
+
+    def delete(self, request, **kwargs):
+        obj = self.get_object(request, **kwargs)
+        if not self.has_object_permissions(request, obj):
+            return Response(status=HTTP_404_NOT_FOUND)
+        
+        # Log the deletion event before deleting
+        logger.event(badgrlog.BadgeClassDeletedEvent(obj.get_json(obi_version='1_1', use_canonical_id=True), request.user))
+        
+        try:
+            obj.delete()
+        except ProtectedError:
+            obj.archive()
+        return Response(status=HTTP_204_NO_CONTENT)
 
 
 class IssuerArchiveView(BaseEntityDetailView):

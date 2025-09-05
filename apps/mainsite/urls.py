@@ -52,7 +52,7 @@ urlpatterns = [
     re_path(r'^staff/superlogin', badgr_admin.login, name='badgr_admin_super_login'),
     # legacy superlogin is now a duplicate of /staff/login
     # Service health endpoint
-    path('health', include('health.urls')),
+    path('health/', include('health.urls')),
     # unversioned public endpoints
     re_path(
         r'^unsubscribe/(?P<email_encoded>[^/]+)/(?P<expiration>[^/]+)/(?P<signature>[^/]+)',
@@ -97,6 +97,7 @@ urlpatterns = [
     path('signing/', include(('signing.api_urls', 'signing'), namespace='signing_apis')),
     # include staff endpoints
     path('staff-membership/', include('staff.api_urls')),
+    # Prometheus
     path('', include('django_prometheus.urls')),
 ]
 

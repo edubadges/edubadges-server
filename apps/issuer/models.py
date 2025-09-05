@@ -23,6 +23,7 @@ from jsonfield import JSONField
 from openbadges_bakery import bake
 from rest_framework import serializers
 
+import badgrlog
 from cachemodel.decorators import cached_method
 from cachemodel.managers import CacheModelManager
 from cachemodel.models import CacheModel
@@ -868,6 +869,11 @@ class BadgeClass(
             recipient.email_user(
                 subject='Je hebt een edubadge ontvangen! You received an edubadge!', html_message=message
             )
+        
+        # Log the badge instance creation event
+        logger = badgrlog.BadgrLogger()
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))
+        
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
@@ -884,6 +890,11 @@ class BadgeClass(
             **kwargs,
         )
         assertion.submit_for_timestamping(signer=signer)
+        
+        # Log the badge instance creation event
+        logger = badgrlog.BadgrLogger()
+        logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))
+        
         return assertion
 
     def get_json(
@@ -1217,6 +1228,10 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
         self.revocation_reason = revocation_reason
         self.image.delete()
         self.save()
+
+        # Log the badge assertion revocation event
+        logger = badgrlog.BadgrLogger()
+        logger.event(badgrlog.BadgeAssertionRevokedEvent(self, user))
 
         html_message = EmailMessageMaker.create_assertion_revoked_email(self)
         send_mail(
