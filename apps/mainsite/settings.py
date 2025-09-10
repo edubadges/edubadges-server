@@ -5,6 +5,7 @@ from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 from django.http import response as http_response
 
+
 def legacy_boolean_parsing(env_key, default_value):
     val = os.environ.get(env_key, default_value)
     val = '1' if val == 'True' else '0' if val == 'False' else val
@@ -208,9 +209,9 @@ SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
 SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://connect.test.surfconext.nl/oidc')
 
-## 
+##
 # EduId, in both provider and EDUID_xxx (or EDU_ID) is a confusing name, because it's really surfconext but the surfconext setup for the students.
-# A better name would be something like OIDC_STUDENT_xxx but that would be a big change as we'd need to rename socialauth providers, 
+# A better name would be something like OIDC_STUDENT_xxx but that would be a big change as we'd need to rename socialauth providers,
 # urls, views, and database migrations.
 
 # Determines the subclass of the oidc client to use. Can be 'eduid' or 'surfconext'.
@@ -293,7 +294,7 @@ FIXTURE_DIRS = [
 ##
 #
 #  Logging
-#  
+#
 #  We try to keep close to the default Django logging. Convention over configuration..
 #  But we want to remove handlers that email. And want to ensure useful logs are propagated to the console
 #  We set the log level, based on the DEBUG flag: DEBUG if DEBUG else INFO This is default Django behaviour
@@ -312,11 +313,7 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console': {
-            'level': LOG_LEVEL,
-            'class': 'logging.StreamHandler',
-            'formatter': 'json'
-        },
+        'console': {'level': LOG_LEVEL, 'class': 'logging.StreamHandler', 'formatter': 'json'},
     },
     'loggers': {
         'Badgr.Debug': {
@@ -330,9 +327,9 @@ LOGGING = {
             'propagate': False,
         },
         'django': {
-            'handlers': ['console'], # Replace stream and email handler with console
+            'handlers': ['console'],  # Replace stream and email handler with console
             'level': LOG_LEVEL,
-            'propagate': False, # Don't propagate to root logger as that will cause duplicate logs
+            'propagate': False,  # Don't propagate to root logger as that will cause duplicate logs
         },
     },
 }
@@ -540,7 +537,7 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Email
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = legacy_boolean_parsing('EMAIL_USE_TLS', '1')
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
