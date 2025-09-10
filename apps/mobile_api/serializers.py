@@ -1,6 +1,7 @@
 from rest_framework import serializers
 import json
 
+from badgeuser.models import BadgeUser
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
 from issuer.models import BadgeInstance, BadgeClass, BadgeClassExtension, Issuer, BadgeInstanceCollection
@@ -110,3 +111,10 @@ class BadgeCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeInstanceCollection
         fields = ["id", "created_at", "entity_id", "badge_instances", "name", "public", "description"]
+
+class UserSerializer(serializers.ModelSerializer):
+    badgeclassextension_set = BadgeClassExtensionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = BadgeUser
+        fields = ["id", "email", "last_name", "first_name", "validated_name", "schac_homes", "issuer"]

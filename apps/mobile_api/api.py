@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from django.db.models import Q, Subquery
 from rest_framework import status
 from badgeuser.models import StudentAffiliation
+from badgrsocialauth.providers.eduid.provider import EduIDProvider
 from directaward.models import DirectAward, DirectAwardBundle
 from issuer.models import BadgeInstance, BadgeInstanceCollection
 from issuer.serializers import BadgeInstanceCollectionSerializer
@@ -16,6 +17,7 @@ from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
 from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
+from mobile_api.helper import process_eduid_response, RevalidatedNameException, NoValidatedNameException
 from mobile_api.serializers import BadgeInstanceDetailSerializer, DirectAwardSerializer, StudentsEnrolledSerializer, \
     StudentsEnrolledDetailSerializer, BadgeCollectionSerializer
 from mobile_api.serializers import BadgeInstanceSerializer
@@ -29,6 +31,7 @@ permission_denied_response = OpenApiResponse(
     ],
 )
 
+
 class Login(APIView):
     permission_classes = (MobileAPIPermission,)
 
@@ -41,12 +44,12 @@ class Login(APIView):
         logger = logging.getLogger('Badgr.Debug')
 
         user = request.user
+        results = {}
         '''
         Check if the user is known, has agreed to the terms and has a validated_name. If the user is not known
         then check if there is a validate name and provision the user. If all is well, then return the user information
         '''
         if isinstance(user, TemporaryUser):
-            # Check if there is a validated name
             headers = {
                 'Accept': 'application/json, application/json;charset=UTF-8',
                 'Authorization': f'Bearer {user.bearer_token}',
@@ -56,49 +59,49 @@ class Login(APIView):
             if response.status_code != 200:
                 error = f'Server error: eduID eppn endpoint error ({response.status_code})'
                 logger.debug(error)
-                return Response({"error": str(error)})
+                return Response(data={"error": str(error)}, status=response.status_code)
 
-            eppn_json = response.json()
-            for info in eppn_json:
-                if 'eppn' in info and 'schac_home_organization' in info:
-                    request.user.add_affiliations(
-                        [
-                            {
-                                'eppn': info['eppn'].lower(),
-                                'schac_home': info['schac_home_organization'],
-                            }
-                        ]
-                    )
-                    logger.info(f'Stored affiliations {info["eppn"]} {info["schac_home_organization"]}')
-            validated_names = [info['validated_name'] for info in eppn_json if 'validated_name' in info]
-            if request.user.validated_name and len(validated_names) == 0:
-                ret = HttpResponseRedirect(ret.url + '&revalidate-name=true')
-            if len(validated_names) > 0:
-                # Use the preferred linked account for the validated_name.
-                preferred_validated_name = [info['validated_name'] for info in eppn_json if info['preferred']]
-                if not preferred_validated_name:
-                    # This should never happen as it would be a bug in eduID, but let's be defensive
-                    preferred_validated_name = [validated_names[0]]
-                val_name_audit_trail_signal.send(
-                    sender=request.user.__class__,
-                    user=request.user,
-                    old_validated_name=request.user.validated_name,
-                    new_validated_name=preferred_validated_name[0],
-                )
-                request.user.validated_name = preferred_validated_name[0]
-            else:
-                val_name_audit_trail_signal.send(
-                    sender=request.user.__class__,
-                    user=request.user,
-                    old_validated_name=request.user.validated_name,
-                    new_validated_name=None,
-                )
-                request.user.validated_name = None
-            request.user.save()
+            eduid_response = response.json()
+            validated_names = [info['validated_name'] for info in eduid_response if 'validated_name' in info]
+            if not validated_names:
+                # The user must go back to eduID and link an account
+                results["status"] = "link-account"
+                return Response(data=results)
 
-        return Response(data)
+            # User must be created / provisioned together with social account
+            provider = EduIDProvider(request)
+            social_login = provider.sociallogin_from_response(request, user.user_payload)
+            social_login.save()
+            user = social_login.user
+            try:
+                process_eduid_response(eduid_response, user)
+            except RevalidatedNameException:
+                results["status"] = "revalidate-name"
+                return Response(data=results)
+            except NoValidatedNameException:
+                results["status"] = "link-account"
+                return Response(data=results)
+            user.save()
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
 
+class AcceptGeneralTerms(APIView):
+    permission_classes = (MobileAPIPermission,)
+
+    @extend_schema(
+        methods=['GET'],
+        description='Accept the general terms',
+        examples=[],
+    )
+    def get(self, request, **kwargs):
+        logger = logging.getLogger('Badgr.Debug')
+        user = request.user
+        user.accept_general_terms()
+        user.save()
+        logger.info(f"Accepted general terms for user {user.email}")
+        return Response(data={"status": "ok"})
 
 
 class BadgeInstances(APIView):
@@ -120,8 +123,7 @@ class BadgeInstances(APIView):
             .select_related("badgeclass__issuer__faculty__institution") \
             .filter(user=request.user)
         serializer = BadgeInstanceSerializer(instances, many=True)
-        data = serializer.data
-        return Response(data)
+        return Response(serializer.data)
 
 
 class BadgeInstanceDetail(APIView):
@@ -152,8 +154,7 @@ class BadgeInstanceDetail(APIView):
             .filter(entity_id=entity_id) \
             .get()
         serializer = BadgeInstanceDetailSerializer(instance)
-        data = serializer.data
-        return Response(data)
+        return Response(serializer.data)
 
 
 class UnclaimedDirectAwards(APIView):
@@ -181,8 +182,7 @@ class UnclaimedDirectAwards(APIView):
             .filter(status='Unaccepted')
 
         serializer = DirectAwardSerializer(direct_awards, many=True)
-        data = serializer.data
-        return Response(data)
+        return Response(serializer.data)
 
 
 class Enrollments(APIView):
@@ -204,8 +204,7 @@ class Enrollments(APIView):
             .filter(user=request.user)
 
         serializer = StudentsEnrolledSerializer(enrollments, many=True)
-        data = serializer.data
-        return Response(data)
+        return Response(serializer.data)
 
 
 class EnrollmentDetail(APIView):
@@ -236,8 +235,7 @@ class EnrollmentDetail(APIView):
             .filter(entity_id=entity_id) \
             .get()
         serializer = StudentsEnrolledDetailSerializer(enrollment)
-        data = serializer.data
-        return Response(data)
+        return Response(serializer.data)
 
     @extend_schema(
         methods=['DELETE'],
@@ -275,8 +273,7 @@ class BadgeCollectionsListView(APIView):
         collections = BadgeInstanceCollection.objects \
             .filter(user=request.user)
         serializer = BadgeCollectionSerializer(collections, many=True)
-        data = serializer.data
-        return Response(data)
+        return Response(serializer.data)
 
     @extend_schema(
         request=BadgeInstanceCollectionSerializer,

@@ -2,13 +2,11 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
-from allauth.socialaccount.models import SocialAccount
-import requests
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser
-from rest_framework.authentication import BaseAuthentication
 
-from badgeuser.models import BadgeUser
+import requests
+from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
+from rest_framework.authentication import BaseAuthentication
 
 
 class TemporaryUser:
@@ -73,12 +71,13 @@ class MobileAPIAuthentication(BaseAuthentication):
                 return None
         # SocialAccount always has a User
         user = social_account.user
-        if login_endpoint:
+        agree_terms_endpoint = request.path == "/mobile/api/accept-general-terms"
+        if login_endpoint or agree_terms_endpoint:
             # further logic is dealt with in /mobile/api/login
             request.mobile_api_call = True
-            return user
+            return user, bearer_token
         elif not user.general_terms_accepted() or not user.validated_name:
-            # If not heading to login-endpoint, we return None resulting in 403
+            # If not heading to login-endpoint or agree-terms, we return None resulting in 403
             return None
 
         request.mobile_api_call = True
