@@ -14,7 +14,8 @@ python-dateutil==2.8.1
 # mysqlclient==2.2.4  # Replaced with psycopg for PostgreSQL
 psycopg>=3.1.8
 
-django-storages==1.7
+django-storages[s3]==1.7
+boto3==1.34.162
 
 python-resize-image==1.1.19
 
