@@ -11,7 +11,8 @@ Pillow==10.3.0
 python-dateutil==2.8.1
 
 # MySQL-python==1.2.5 # python3 incompatible
-mysqlclient==2.2.4
+# mysqlclient==2.2.4  # Replaced with psycopg for PostgreSQL
+psycopg>=3.1.8
 
 django-storages==1.7
 

@@ -523,12 +523,12 @@ GRAPHENE = {'SCHEMA': 'apps.mainsite.schema.schema'}
 DATABASES = {
     'default': {
         # Use of django_prometheus to monitor db: https://github.com/korfuri/django-prometheus/blob/master/README.md#monitoring-your-databases
-        'ENGINE': 'django_prometheus.db.backends.mysql',
+        'ENGINE': 'django_prometheus.db.backends.postgresql',
         'NAME': os.environ['BADGR_DB_NAME'],
         'USER': os.environ['BADGR_DB_USER'],
         'PASSWORD': os.environ['BADGR_DB_PASSWORD'],
         'HOST': os.environ.get('BADGR_DB_HOST', 'localhost'),
-        'PORT': os.environ.get('BADGR_DB_PORT', 3306),
+        'PORT': os.environ.get('BADGR_DB_PORT', 5432),
         'TEST': {
             'CHARSET': 'utf8',
         },
