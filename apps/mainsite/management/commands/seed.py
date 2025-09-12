@@ -42,13 +42,13 @@ def clear_data():
             f'AND table_name NOT IN {migration_filled_tables}'
         )
 
-        cursor.execute("SET session_replication_role = 'replica';")
-        try:
+        # cursor.execute("SET session_replication_role = 'replica';")
+        # try:
             cursor.execute(sql)
             for (table,) in cursor.fetchall():
-                cursor.execute('TRUNCATE TABLE ' + table)
-        finally:
-            cursor.execute("SET session_replication_role = 'origin';")
+                cursor.execute('TRUNCATE TABLE ' + table + ' CASCADE')
+        # finally:
+            # cursor.execute("SET session_replication_role = 'origin';")
 
         print('\033[92mdone!\033[0m')
 
