@@ -18,15 +18,15 @@ from drf_spectacular.utils import (
 
 permissions_query = """
 (
-    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1))
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = true))
     or
-    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1))
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true))
     or
-    (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1))
+    (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = true))
     or
-    (exists (select 1 from staff_badgeclassstaff bcst where bcst.badgeclass_id = bc.id and bcst.user_id = %(u_id)s and bcst.may_award = 1))
+    (exists (select 1 from staff_badgeclassstaff bcst where bcst.badgeclass_id = bc.id and bcst.user_id = %(u_id)s and bcst.may_award = true))
     or
-    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
+    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = true))
 )
 """
 
@@ -254,10 +254,10 @@ select bc.created_at as createdAt, bc.name, bc.image, bc.archived, bc.entity_id 
         (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as selfRequestedAssertionsCount,
         (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as directAwardedAssertionsCount,
         (select count(id) from lti_edu_studentsenrolled WHERE badge_class_id = bc.id AND badge_instance_id is null AND denied = false) as pendingEnrollmentCount,
-        (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1) as ins_staff,
-        (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1) as fac_staff,
-        (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1) as iss_staff,
-        (select 1 from staff_badgeclassstaff bcst where bcst.badgeclass_id = bc.id and bcst.user_id = %(u_id)s and bcst.may_award = 1) as bc_staff
+        (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = true) as ins_staff,
+        (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true) as fac_staff,
+        (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = true) as iss_staff,
+        (select 1 from staff_badgeclassstaff bcst where bcst.badgeclass_id = bc.id and bcst.user_id = %(u_id)s and bcst.may_award = true) as bc_staff
 from  issuer_badgeclass bc
 inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
@@ -479,7 +479,7 @@ from  issuer_badgeclass bc
 inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
-where  bc.is_private = 0 and f.archived = 0 and i.archived = 0 and (f.visibility_type <> 'TEST' OR f.visibility_type IS NULL);
+where  bc.is_private = false and f.archived = false and i.archived = false and (f.visibility_type <> 'TEST' OR f.visibility_type IS NULL);
             """,
                 {},
             )
@@ -555,13 +555,13 @@ inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
 where ins.id = %(ins_id)s and 
 (
-    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1))
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = true))
     or
-    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1))
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true))
     or
-    (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1))
+    (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = true))
     or
-    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
+    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = true))
 )
 """,
                 {'ins_id': request.user.institution.id, 'u_id': request.user.id},
@@ -639,24 +639,24 @@ select i.image_dutch, i.image_english, i.name_dutch, i.name_english, i.archived,
     (select count(*) from lti_edu_studentsenrolled l inner join issuer_badgeclass ib on ib.id = l.badge_class_id 
             WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL AND l.denied = false) as pendingEnrollmentCount,
      (
-    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = 1))
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = true))
     or
-    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_create = 1))
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_create = true))
     or
-    (exists (select 1 from users us where us.id = %(u_id)s  and us.is_superuser = 1))
+    (exists (select 1 from users us where us.id = %(u_id)s  and us.is_superuser = true))
 ) as may_create       
 from  issuer_issuer i
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
 where ins.id = %(ins_id)s and 
 (
-    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1))
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = true))
     or
-    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1))
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true))
     or
-    (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1))
+    (exists (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = true))
     or
-    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
+    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = true))
 )
 """,
                 {'ins_id': request.user.institution.id, 'u_id': request.user.id},
@@ -729,19 +729,19 @@ select f.name_english as name_english, f.name_dutch as name_dutch, f.entity_id a
             inner join issuer_issuer ii on ii.id = ib.issuer_id 
             WHERE ii.faculty_id = f.id and l.badge_instance_id IS NULL AND l.denied = false) as pendingEnrollmentCount,
      (
-    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = 1))
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = true))
     or
-    (exists (select 1 from users us where us.id = %(u_id)s  and us.is_superuser = 1))
+    (exists (select 1 from users us where us.id = %(u_id)s  and us.is_superuser = true))
     ) as may_create       
 from  institution_faculty f
 inner join institution_institution ins on ins.id = f.institution_id
 where ins.id = %(ins_id)s and 
 (
-    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1))
+    (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = true))
     or
-    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1))
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true1))
     or
-    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
+    (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = true))
 )
 """,
                 {'ins_id': request.user.institution.id, 'u_id': request.user.id},
@@ -1153,7 +1153,7 @@ LEFT JOIN staff_institutionstaff st_in ON st_in.institution_id = ins.id AND st_i
 LEFT JOIN staff_facultystaff st_fa ON st_fa.faculty_id = f.id AND st_fa.user_id = %(u_id)s
 LEFT JOIN staff_issuerstaff st_is ON st_is.issuer_id = i.id and st_is.user_id = %(u_id)s
 LEFT JOIN staff_badgeclassstaff st_bc ON st_bc.badgeclass_id = bc.id AND st_bc.user_id = %(u_id)s
-where ins.id = %(ins_id)s and bc.archived = 0 and {permissions_query} 
+where ins.id = %(ins_id)s and bc.archived = false and {permissions_query} 
 """
             cursor.execute(query_, {'u_id': request.user.id, 'ins_id': request.user.institution.id})
             notifications = dict_fetch_all(cursor)
@@ -1228,7 +1228,7 @@ class EndorsementBadgeClasses(APIView):
             inner join issuer_issuer i on i.id = bc.issuer_id
             inner join institution_faculty f on f.id = i.faculty_id
             inner join institution_institution ins on ins.id = f.institution_id
-            where ins.id = %(ins_id)s and bc.archived = 0 and {permissions_query} 
+            where ins.id = %(ins_id)s and bc.archived = false and {permissions_query} 
 """
             cursor.execute(query_, {'u_id': request.user.id, 'ins_id': request.user.institution.id})
             badge_classes = dict_fetch_all(cursor)
