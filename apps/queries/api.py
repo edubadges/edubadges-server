@@ -39,11 +39,11 @@ class DirectAwards(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-select da.created_at, da.resend_at, da.delete_at, da.recipient_email as recipientEmail, da.eppn, da.entity_id as entityId,
+select da.created_at, da.resend_at, da.delete_at, da.recipient_email as "recipientEmail", da.eppn, da.entity_id as "entityId",
         da.expiration_date,
-        bc.name, bc.entity_id as bc_entity_id,
-        i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id, 
-        f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id
+        bc.name, bc.entity_id as "bc_entity_id",
+        i.name_english as "i_name_english", i.name_dutch as "i_name_dutch", i.entity_id as "i_entity_id", 
+        f.name_english as "f_name_english", f.name_dutch as "f_name_dutch", f.entity_id as "f_entity_id"
 from  directaward_directaward da
 inner join issuer_badgeclass bc on bc.id = da.badgeclass_id
 inner join issuer_issuer i on i.id = bc.issuer_id
@@ -63,26 +63,26 @@ class BadgeClasses(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-select bc.created_at as createdAt, bc.name, bc.image, bc.archived, bc.entity_id as entityId,
-        bc.is_private as isPrivate, bc.is_micro_credentials as isMicroCredentials,
-        bc.badge_class_type as typeBadgeClass,
-        i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id,
-        i.image_dutch as i_image_dutch, i.image_english as i_image_english, 
-        f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
-        f.on_behalf_of as onBehalfOf, f.on_behalf_of_display_name as onBehalfOfDisplayName, 
-        f.image_dutch as f_image_dutch, f.image_english as f_image_english,
-        ins.entity_id as ins_entity_id, ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch,
-        ins.image_dutch as ins_image_dutch, ins.image_english as ins_image_english,
+select bc.created_at as "createdAt", bc.name, bc.image, bc.archived, bc.entity_id as "entityId",
+        bc.is_private as "isPrivate", bc.is_micro_credentials as "isMicroCredentials",
+        bc.badge_class_type as "typeBadgeClass",
+        i.name_english as "i_name_english", i.name_dutch as "i_name_dutch", i.entity_id as "i_entity_id",
+        i.image_dutch as "i_image_dutch", i.image_english as "i_image_english", 
+        f.name_english as "f_name_english", f.name_dutch as "f_name_dutch", f.entity_id as "f_entity_id",
+        f.on_behalf_of as "onBehalfOf", f.on_behalf_of_display_name as "onBehalfOfDisplayName", 
+        f.image_dutch as "f_image_dutch", f.image_english as "f_image_english",
+        ins.entity_id as "ins_entity_id", ins.name_english as "ins_name_english", ins.name_dutch as "ins_name_dutch",
+        ins.image_dutch as "ins_image_dutch", ins.image_english as "ins_image_english",
         (SELECT STRING_AGG(DISTINCT isbt.name, ',') FROM institution_badgeclasstag isbt
         INNER JOIN issuer_badgeclass_tags ibt ON ibt.badgeclasstag_id = isbt.id
         WHERE ibt.badgeclass_id = bc.id) AS tags,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as selfRequestedAssertionsCount,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as directAwardedAssertionsCount,
-        (select count(id) from lti_edu_studentsenrolled WHERE badge_class_id = bc.id AND badge_instance_id is null AND denied = false) as pendingEnrollmentCount,
-        (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = true) as ins_staff,
-        (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true) as fac_staff,
-        (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = true) as iss_staff,
-        (select 1 from staff_badgeclassstaff bcst where bcst.badgeclass_id = bc.id and bcst.user_id = %(u_id)s and bcst.may_award = true) as bc_staff
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as "selfRequestedAssertionsCount",
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as "directAwardedAssertionsCount",
+        (select count(id) from lti_edu_studentsenrolled WHERE badge_class_id = bc.id AND badge_instance_id is null AND denied = false) as "pendingEnrollmentCount",
+        (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = true) as "ins_staff",
+        (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true) as "fac_staff",
+        (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = true) as "iss_staff",
+        (select 1 from staff_badgeclassstaff bcst where bcst.badgeclass_id = bc.id and bcst.user_id = %(u_id)s and bcst.may_award = true) as "bc_staff"
 from  issuer_badgeclass bc
 inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
@@ -126,8 +126,8 @@ class CurrentInstitution(APIView):
 
                 cursor.execute(
                     """
-            select sta_ins.may_create as ins_may_create, facst.may_create as f_may_create,
-                (select count(id) from institution_faculty where institution_id = %(insitution_id)s) as fac_count
+            select sta_ins.may_create as "ins_may_create", facst.may_create as "f_may_create",
+                (select count(id) from institution_faculty where institution_id = %(insitution_id)s) as "fac_count"
                 from staff_institutionstaff sta_ins
                 left join users u on u.id = sta_ins.user_id
                 left join staff_facultystaff facst on facst.user_id = u.id
@@ -150,19 +150,19 @@ class CatalogBadgeClasses(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-select bc.created_at as createdAt, bc.name, bc.image, bc.archived, bc.entity_id as entityId,
-        bc.is_private as isPrivate, bc.is_micro_credentials as isMicroCredentials,
-        bc.badge_class_type as typeBadgeClass,
-        i.name_english as i_name_english, i.name_dutch as i_name_dutch, i.entity_id as i_entity_id,
-        i.image_dutch as i_image_dutch, i.image_english as i_image_english, 
-        f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
-        f.image_dutch as f_image_dutch, f.image_english as f_image_english,
-        f.on_behalf_of as onBehalfOf, f.faculty_type as facultyType,
-        ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch, ins.entity_id as ins_entity_id,
-        ins.image_dutch as ins_image_dutch, ins.image_english as ins_image_english,
-        ins.institution_type as institutionType,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as selfRequestedAssertionsCount,
-        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as directAwardedAssertionsCount
+select bc.created_at as "createdAt", bc.name, bc.image, bc.archived, bc.entity_id as "entityId",
+        bc.is_private as "isPrivate", bc.is_micro_credentials as "isMicroCredentials",
+        bc.badge_class_type as "typeBadgeClass",
+        i.name_english as "i_name_english", i.name_dutch as "i_name_dutch", i.entity_id as "i_entity_id",
+        i.image_dutch as "i_image_dutch", i.image_english as "i_image_english", 
+        f.name_english as "f_name_english", f.name_dutch as "f_name_dutch", f.entity_id as "f_entity_id",
+        f.image_dutch as "f_image_dutch", f.image_english as "f_image_english",
+        f.on_behalf_of as "onBehalfOf", f.faculty_type as "facultyType",
+        ins.name_english as "ins_name_english", ins.name_dutch as "ins_name_dutch", ins.entity_id as "ins_entity_id",
+        ins.image_dutch as "ins_image_dutch", ins.image_english as "ins_image_english",
+        ins.institution_type as "institutionType",
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as "selfRequestedAssertionsCount",
+        (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as "directAwardedAssertionsCount"
 from  issuer_badgeclass bc
 inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
@@ -181,8 +181,8 @@ class IssuersOverview(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-select i.name_dutch as nameDutch, i.name_english as nameEnglish, i.entity_id as entityId,
-    f.faculty_type as facultyType
+select i.name_dutch as "nameDutch", i.name_english as "nameEnglish", i.entity_id as "entityId",
+    f.faculty_type as "facultyType"
 from  issuer_issuer i
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
@@ -209,19 +209,19 @@ class Issuers(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-select i.image_dutch, i.image_english, i.name_dutch, i.name_english, i.archived, i.entity_id as entityId,
-    f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
-    (select count(id) from issuer_badgeinstance WHERE issuer_id = i.id) as assertionCount, 
-    (select count(id) from issuer_badgeclass WHERE issuer_id = i.id) as badgeclassCount,
+select i.image_dutch, i.image_english, i.name_dutch, i.name_english, i.archived, i.entity_id as "entityId",
+    f.name_english as "f_name_english", f.name_dutch as "f_name_dutch", f.entity_id as "f_entity_id",
+    (select count(id) from issuer_badgeinstance WHERE issuer_id = i.id) as "assertionCount", 
+    (select count(id) from issuer_badgeclass WHERE issuer_id = i.id) as "badgeclassCount",
     (select count(*) from lti_edu_studentsenrolled l inner join issuer_badgeclass ib on ib.id = l.badge_class_id 
-            WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL AND l.denied = false) as pendingEnrollmentCount,
+            WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL AND l.denied = false) as "pendingEnrollmentCount",
      (
     (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = true))
     or
     (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_create = true))
     or
     (exists (select 1 from users us where us.id = %(u_id)s  and us.is_superuser = true))
-) as may_create       
+) as "may_create"       
 from  issuer_issuer i
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
@@ -248,18 +248,18 @@ class Faculties(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 f"""
-select f.name_english as name_english, f.name_dutch as name_dutch, f.entity_id as entityId, f.on_behalf_of as onBehalfOf,
+select f.name_english as "name_english", f.name_dutch as "name_dutch", f.entity_id as "entityId", f.on_behalf_of as "onBehalfOf",
     f.image_dutch, f.image_english, f.archived,
-        (select count(id) from issuer_issuer WHERE faculty_id = f.id) as issuerCount,
+        (select count(id) from issuer_issuer WHERE faculty_id = f.id) as "issuerCount",
     (select count(*) from lti_edu_studentsenrolled l 
             inner join issuer_badgeclass ib on ib.id = l.badge_class_id
             inner join issuer_issuer ii on ii.id = ib.issuer_id 
-            WHERE ii.faculty_id = f.id and l.badge_instance_id IS NULL AND l.denied = false) as pendingEnrollmentCount,
+            WHERE ii.faculty_id = f.id and l.badge_instance_id IS NULL AND l.denied = false) as "pendingEnrollmentCount",
      (
     (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = true))
     or
     (exists (select 1 from users us where us.id = %(u_id)s  and us.is_superuser = true))
-    ) as may_create       
+    ) as "may_create"       
 from  institution_faculty f
 inner join institution_institution ins on ins.id = f.institution_id
 where ins.id = %(ins_id)s and 
@@ -347,23 +347,23 @@ class Users(APIView):
         with connection.cursor() as cursor:
             query_ = """
 SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id, 
-        institution.entity_id as institution_entity_id, 
-        institution.name_english as institution_name_english, 
-        institution.name_dutch as institution_name_dutch,
-    ins.may_update as ins_may_update, ins.institution_id,
-        ins.name_english as ins_ins_name_english, ins.name_dutch as ins_ins_name_dutch, ins.entity_id as ins_ins_entity_id,
-    f.may_update as f_may_update, f.may_award as f_may_award, f.may_administrate_users as f_may_admin, f.faculty_id,
-        f.name_dutch as f_f_name_dutch, f.name_english as f_f_name_english, f.entity_id as f_f_entity_id, 
-        f.ins_entity_id as f_ins_entity_id, f.ins_name_dutch as f_ins_name_dutch, f.ins_name_english as f_ins_name_english,
-    i.may_update as i_may_update, i.may_award as i_may_award, i.may_administrate_users as i_may_admin, i.issuer_id,
-        i.entity_id as i_i_entity_id, i.name_dutch as i_i_name_dutch, i.name_english as i_i_name_english,
-        i.f_name_dutch as i_f_name_dutch, i.f_name_english as i_f_name_english, i.f_entity_id as i_f_entity_id, 
-        i.ins_entity_id as i_ins_entity_id, i.ins_name_dutch as i_ins_name_dutch, i.ins_name_english as i_ins_name_english,
-    bc.may_update as bc_may_update, bc.may_award as bc_may_award, bc.may_administrate_users as bc_may_admin, bc.badgeclass_id,
-        bc.name as bc_bc_name_dutch, bc.name as bc_bc_name_english, bc.entity_id as bc_bc_entity_id, 
-        bc.i_entity_id as bc_i_entity_id, bc.i_name_dutch as bc_i_name_dutch, bc.i_name_english as bc_i_name_english,
-        bc.f_name_dutch as bc_f_name_dutch, bc.f_name_english as bc_f_name_english, bc.f_entity_id as bc_f_entity_id, 
-        bc.ins_entity_id as bc_ins_entity_id, bc.ins_name_dutch as bc_ins_name_dutch, bc.ins_name_english as bc_ins_name_english
+        institution.entity_id as "institution_entity_id", 
+        institution.name_english as "institution_name_english", 
+        institution.name_dutch as "institution_name_dutch",
+    ins.may_update as "ins_may_update", ins.institution_id,
+        ins.name_english as "ins_ins_name_english", ins.name_dutch as "ins_ins_name_dutch", ins.entity_id as "ins_ins_entity_id",
+    f.may_update as "f_may_update", f.may_award as "f_may_award", f.may_administrate_users as "f_may_admin", f.faculty_id,
+        f.name_dutch as "f_f_name_dutch", f.name_english as "f_f_name_english", f.entity_id as "f_f_entity_id", 
+        f.ins_entity_id as "f_ins_entity_id", f.ins_name_dutch as "f_ins_name_dutch", f.ins_name_english as "f_ins_name_english",
+    i.may_update as "i_may_update", i.may_award as "i_may_award", i.may_administrate_users as "i_may_admin", i.issuer_id,
+        i.entity_id as "i_i_entity_id", i.name_dutch as "i_i_name_dutch", i.name_english as "i_i_name_english",
+        i.f_name_dutch as "i_f_name_dutch", i.f_name_english as "i_f_name_english", i.f_entity_id as "i_f_entity_id", 
+        i.ins_entity_id as "i_ins_entity_id", i.ins_name_dutch as "i_ins_name_dutch", i.ins_name_english as "i_ins_name_english",
+    bc.may_update as "bc_may_update", bc.may_award as "bc_may_award", bc.may_administrate_users as "bc_may_admin", bc.badgeclass_id,
+        bc.name as "bc_bc_name_dutch", bc.name as "bc_bc_name_english", bc.entity_id as "bc_bc_entity_id", 
+        bc.i_entity_id as "bc_i_entity_id", bc.i_name_dutch as "bc_i_name_dutch", bc.i_name_english as "bc_i_name_english",
+        bc.f_name_dutch as "bc_f_name_dutch", bc.f_name_english as "bc_f_name_english", bc.f_entity_id as "bc_f_entity_id", 
+        bc.ins_entity_id as "bc_ins_entity_id", bc.ins_name_dutch as "bc_ins_name_dutch", bc.ins_name_english as "bc_ins_name_english"
     FROM users u INNER JOIN institution_institution institution ON u.institution_id = institution.id
     LEFT JOIN (
         SELECT st_in.may_update, st_in.user_id, st_in.institution_id, 
@@ -374,7 +374,7 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
     LEFT JOIN (
         SELECT st_fa.may_update, st_fa.may_award, st_fa.may_administrate_users, st_fa.user_id, st_fa.faculty_id,
             fac.name_english, fac.name_dutch, fac.entity_id,
-            ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch, ins.entity_id as ins_entity_id
+            ins.name_english as "ins_name_english", ins.name_dutch as "ins_name_dutch", ins.entity_id as "ins_entity_id"
         FROM staff_facultystaff st_fa
             INNER JOIN institution_faculty fac ON st_fa.faculty_id = fac.id
             INNER JOIN institution_institution ins ON fac.institution_id = ins.id            
@@ -382,8 +382,8 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
     LEFT JOIN (
         SELECT st_is.may_update, st_is.may_award, st_is.may_administrate_users, st_is.user_id, st_is.issuer_id,
             iss_iss.name_english, iss_iss.name_dutch, iss_iss.entity_id,
-            fac.name_english as f_name_english, fac.name_dutch as f_name_dutch, fac.entity_id as f_entity_id,
-            ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch, ins.entity_id as ins_entity_id
+            fac.name_english as "f_name_english", fac.name_dutch as "f_name_dutch", fac.entity_id as "f_entity_id",
+            ins.name_english as "ins_name_english", ins.name_dutch as "ins_name_dutch", ins.entity_id as "ins_entity_id"
         FROM staff_issuerstaff st_is
             INNER JOIN issuer_issuer iss_iss ON iss_iss.id = st_is.issuer_id 
             INNER JOIN institution_faculty fac ON iss_iss.faculty_id = fac.id
@@ -392,9 +392,9 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
     LEFT JOIN (
         SELECT st_bc.may_update, st_bc.may_award, st_bc.may_administrate_users, st_bc.user_id, st_bc.badgeclass_id,
             ib.name, ib.entity_id,
-            iss_iss.name_english as i_name_english, iss_iss.name_dutch as i_name_dutch, iss_iss.entity_id as i_entity_id,
-            fac.name_english as f_name_english, fac.name_dutch as f_name_dutch, fac.entity_id as f_entity_id,
-            ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch, ins.entity_id as ins_entity_id
+            iss_iss.name_english as "i_name_english", iss_iss.name_dutch as "i_name_dutch", iss_iss.entity_id as "i_entity_id",
+            fac.name_english as "f_name_english", fac.name_dutch as "f_name_dutch", fac.entity_id as "f_entity_id",
+            ins.name_english as "ins_name_english", ins.name_dutch as "ins_name_dutch", ins.entity_id as "ins_entity_id"
         FROM staff_badgeclassstaff st_bc  
             INNER JOIN issuer_badgeclass ib ON ib.id = st_bc.badgeclass_id
             INNER JOIN issuer_issuer iss_iss ON iss_iss.id = ib.issuer_id 
@@ -436,21 +436,21 @@ class Notifications(APIView):
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             query_ = f"""
-            select bc.name as name_english, bc.entity_id as bc_entity_id, bc.id as badgeclass_id, bc.image,
-f.name_dutch as f_name_dutch, f.name_english as f_name_english, f.entity_id as f_entity_id, f.id as faculty_id,
-i.entity_id as i_entity_id, i.name_dutch as i_name_dutch, i.name_english as i_name_english, i.id as issuer_id,
-ins.entity_id as ins_entity_id, ins.name_dutch as ins_name_dutch, ins.name_english as ins_name_english, ins.id as institution_id,
-nbc.badgeclass_id as nbc_badgeclass_id,
-st_in.may_update as ins_may_update,
-st_fa.may_update as f_may_update,
-st_fa.may_award as f_may_award,
-st_fa.may_administrate_users as f_may_administrate_users,
-st_is.may_update as i_may_update,
-st_is.may_award as i_may_award,
-st_is.may_administrate_users as i_may_administrate_users,
-st_bc.may_update as bc_may_update,
-st_bc.may_award as bc_may_award,
-st_bc.may_administrate_users as bc_may_administrate_users
+            select bc.name as "name_english", bc.entity_id as "bc_entity_id", bc.id as "badgeclass_id", bc.image,
+f.name_dutch as "f_name_dutch", f.name_english as "f_name_english", f.entity_id as "f_entity_id", f.id as "faculty_id",
+i.entity_id as "i_entity_id", i.name_dutch as "i_name_dutch", i.name_english as "i_name_english", i.id as "issuer_id",
+ins.entity_id as "ins_entity_id", ins.name_dutch as "ins_name_dutch", ins.name_english as "ins_name_english", ins.id as "institution_id",
+nbc.badgeclass_id as "nbc_badgeclass_id",
+st_in.may_update as "ins_may_update",
+st_fa.may_update as "f_may_update",
+st_fa.may_award as "f_may_award",
+st_fa.may_administrate_users as "f_may_administrate_users",
+st_is.may_update as "i_may_update",
+st_is.may_award as "i_may_award",
+st_is.may_administrate_users as "i_may_administrate_users",
+st_bc.may_update as "bc_may_update",
+st_bc.may_award as "bc_may_award",
+st_bc.may_administrate_users as "bc_may_administrate_users"
 from  issuer_badgeclass bc
 left join notifications_badgeclassusernotification nbc on nbc.badgeclass_id = bc.id and nbc.user_id = %(u_id)s
 inner join issuer_issuer i on i.id = bc.issuer_id
@@ -479,8 +479,8 @@ class EndorsementBadgeClasses(APIView):
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             query_ = f"""
-            select bc.name, bc.entity_id as entityId, bc.id as badgeclass_id, bc.image,
-            ins.entity_id as institution_entity_id, ins.id as institution_id
+            select bc.name, bc.entity_id as "entityId", bc.id as "badgeclass_id", bc.image,
+            ins.entity_id as "institution_entity_id", ins.id as "institution_id"
             from  issuer_badgeclass bc
             inner join issuer_issuer i on i.id = bc.issuer_id
             inner join institution_faculty f on f.id = i.faculty_id
