@@ -44,11 +44,11 @@ def clear_data():
 
         # cursor.execute("SET session_replication_role = 'replica';")
         # try:
-            cursor.execute(sql)
-            for (table,) in cursor.fetchall():
-                cursor.execute('TRUNCATE TABLE ' + table + ' CASCADE')
+        cursor.execute(sql)
+        for (table,) in cursor.fetchall():
+            cursor.execute('TRUNCATE TABLE ' + table + ' CASCADE')
         # finally:
-            # cursor.execute("SET session_replication_role = 'origin';")
+        # cursor.execute("SET session_replication_role = 'origin';")
 
         print('\033[92mdone!\033[0m')
 
