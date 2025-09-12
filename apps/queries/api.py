@@ -68,7 +68,7 @@ select bc.created_at as createdAt, bc.name, bc.image, bc.archived, bc.entity_id 
         f.image_dutch as f_image_dutch, f.image_english as f_image_english,
         ins.entity_id as ins_entity_id, ins.name_english as ins_name_english, ins.name_dutch as ins_name_dutch,
         ins.image_dutch as ins_image_dutch, ins.image_english as ins_image_english,
-        (SELECT GROUP_CONCAT(DISTINCT isbt.name) FROM institution_badgeclasstag isbt
+        (SELECT STRING_AGG(DISTINCT isbt.name, ',') FROM institution_badgeclasstag isbt
         INNER JOIN issuer_badgeclass_tags ibt ON ibt.badgeclasstag_id = isbt.id
         WHERE ibt.badgeclass_id = bc.id) AS tags,
         (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as selfRequestedAssertionsCount,
@@ -370,7 +370,7 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
             INNER JOIN issuer_issuer iss_iss ON iss_iss.id = ib.issuer_id 
             INNER JOIN institution_faculty fac ON iss_iss.faculty_id = fac.id
             INNER JOIN institution_institution ins ON fac.institution_id = ins.id
-    ) bc ON (u.id = bc.user_id) where u.institution_id = IFNULL(%(ins_id)s, u.institution_id)"""
+    ) bc ON (u.id = bc.user_id) where u.institution_id = COALESCE(%(ins_id)s, u.institution_id)"""
             cursor.execute(query_, {"ins_id": request.user.institution.id if filter_by_institution else None})
             users = dict_fetch_all(cursor)
 
