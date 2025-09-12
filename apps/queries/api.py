@@ -253,7 +253,7 @@ select bc.created_at as createdAt, bc.name, bc.image, bc.archived, bc.entity_id 
         WHERE ibt.badgeclass_id = bc.id) AS tags,
         (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'requested') as selfRequestedAssertionsCount,
         (select count(id) from issuer_badgeinstance WHERE badgeclass_id = bc.id AND award_type = 'direct_award') as directAwardedAssertionsCount,
-        (select count(id) from lti_edu_studentsenrolled WHERE badge_class_id = bc.id AND badge_instance_id is null AND denied = 0) as pendingEnrollmentCount,
+        (select count(id) from lti_edu_studentsenrolled WHERE badge_class_id = bc.id AND badge_instance_id is null AND denied = false) as pendingEnrollmentCount,
         (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = 1) as ins_staff,
         (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = 1) as fac_staff,
         (select 1 from staff_issuerstaff issst where issst.issuer_id = i.id and issst.user_id = %(u_id)s and issst.may_award = 1) as iss_staff,
@@ -349,7 +349,7 @@ class CurrentInstitution(APIView):
                 return Response({'current_institution': {}, 'permissions': {}}, status=status.HTTP_200_OK)
             current_institution = records[0]
             current_institution['admins'] = [
-                {'email': u['email'], 'name': f'{u["first_name"]} {u["last_name"]}'} for u in records
+                {'email': u['email'], 'name': f"{u['first_name']} {u['last_name']}"} for u in records
             ]
             for attr in ['email', 'first_name', 'last_name']:
                 del current_institution[attr]
@@ -547,7 +547,7 @@ class IssuersOverview(APIView):
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
 select i.name_dutch as nameDutch, i.name_english as nameEnglish, i.entity_id as entityId,
     f.faculty_type as facultyType
 from  issuer_issuer i
@@ -631,13 +631,13 @@ class Issuers(APIView):
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
 select i.image_dutch, i.image_english, i.name_dutch, i.name_english, i.archived, i.entity_id as entityId,
     f.name_english as f_name_english, f.name_dutch as f_name_dutch, f.entity_id as f_entity_id,
     (select count(id) from issuer_badgeinstance WHERE issuer_id = i.id) as assertionCount, 
     (select count(id) from issuer_badgeclass WHERE issuer_id = i.id) as badgeclassCount,
     (select count(*) from lti_edu_studentsenrolled l inner join issuer_badgeclass ib on ib.id = l.badge_class_id 
-            WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL AND l.denied = 0) as pendingEnrollmentCount,
+            WHERE ib.issuer_id = i.id and l.badge_instance_id IS NULL AND l.denied = false) as pendingEnrollmentCount,
      (
     (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = 1))
     or
@@ -720,14 +720,14 @@ class Faculties(APIView):
     def get(self, request, **kwargs):
         with connection.cursor() as cursor:
             cursor.execute(
-                """
+                f"""
 select f.name_english as name_english, f.name_dutch as name_dutch, f.entity_id as entityId, f.on_behalf_of as onBehalfOf,
     f.image_dutch, f.image_english, f.archived,
         (select count(id) from issuer_issuer WHERE faculty_id = f.id) as issuerCount,
     (select count(*) from lti_edu_studentsenrolled l 
             inner join issuer_badgeclass ib on ib.id = l.badge_class_id
             inner join issuer_issuer ii on ii.id = ib.issuer_id 
-            WHERE ii.faculty_id = f.id and l.badge_instance_id IS NULL AND l.denied = 0) as pendingEnrollmentCount,
+            WHERE ii.faculty_id = f.id and l.badge_instance_id IS NULL AND l.denied = false) as pendingEnrollmentCount,
      (
     (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_create = 1))
     or
@@ -977,7 +977,7 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
             INNER JOIN institution_faculty fac ON iss_iss.faculty_id = fac.id
             INNER JOIN institution_institution ins ON fac.institution_id = ins.id
     ) bc ON (u.id = bc.user_id) where u.institution_id = COALESCE(%(ins_id)s, u.institution_id)"""
-            cursor.execute(query_, {"ins_id": request.user.institution.id if filter_by_institution else None})
+            cursor.execute(query_, {'ins_id': request.user.institution.id if filter_by_institution else None})
             users = dict_fetch_all(cursor)
 
             users_dict = {}
