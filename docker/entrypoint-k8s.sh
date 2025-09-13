@@ -2,7 +2,8 @@
 set -e
 
 # Only copy files to mediafiles if not using S3 storage
-if [ "${USE_S3,,}" != "true" ]; then
+USE_S3_LOWER=$(echo "${USE_S3}" | tr '[:upper:]' '[:lower:]')
+if [ "${USE_S3_LOWER}" != "true" ]; then
     echo "Setting up local file storage..."
     mkdir -p mediafiles/uploads/badges/
     mkdir -p mediafiles/uploads/issuers/
