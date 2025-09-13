@@ -5,7 +5,6 @@ services:
       context: .
       dockerfile: ./docker/dev.Dockerfile
     container_name: badgr
-    command: "./docker/entrypoint-dev.sh"
     volumes:
       - .:/app
     working_dir: /app
@@ -14,10 +13,10 @@ services:
       - ACCOUNT_SALT=secret
       - ALLOW_SEEDS=1
       - BADGR_APP_ID=1
-      - BADGR_DB_HOST=badgr_mysql_db
+      - BADGR_DB_HOST=badgr_postgres_db
       - BADGR_DB_NAME=badgr
       - BADGR_DB_PASSWORD=${BADGR_DB_PASSWORD}
-      - BADGR_DB_PORT=3306
+      - BADGR_DB_PORT=5432
       - BADGR_DB_USER=badgr
       - DEBUG=1
       - DEFAULT_DOMAIN=http://0.0.0.0:8000
@@ -67,24 +66,25 @@ services:
       - "8000:8000"
       
   db:
-    image: mysql:8.4
-    container_name: badgr_mysql_db
+    image: postgres:16 
+    container_name: badgr_postgres_db
     environment:
-      MYSQL_ROOT_PASSWORD: ${BADGR_DB_PASSWORD}
-      MYSQL_DATABASE: badgr
-      MYSQL_USER: badgr
-      MYSQL_PASSWORD: ${BADGR_DB_PASSWORD}
+      POSTGRES_DB: badgr
+      POSTGRES_USER: badgr
+      POSTGRES_PASSWORD: ${BADGR_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "3306:3306"
-    # Health check for MySQL
+      - "5432:5432"
+    # Health check for PostgreSQL
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD-SHELL", "pg_isready -U badgr -d badgr"]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
     volumes:
-      - db-data:/var/lib/mysql
+      - postgresql.conf:/etc/postgresql.conf
+      - db-data:/var/lib/postgresql/data
     networks:
       - edubadges-server
 
@@ -111,3 +111,4 @@ networks:
 
 volumes:
   db-data:
+  postgresql.conf:

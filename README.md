@@ -62,7 +62,7 @@ docker compose up
 ```
 
 This will:
-* Start Mysql
+* Start PostgreSQL
 * Start memcached
 * Build a container that can run and host the app.
 * Run that container and mount the local source code in the app.
@@ -74,7 +74,7 @@ Prerequisites:
 
 * git
 * python 3.9
-* mysql
+* postgresql
 * [cairo](https://www.cairographics.org/download/) (SVG utility)
 
 #### Optional extras:
@@ -83,8 +83,8 @@ Prerequisites:
 
 #### System-specific requirements:
 * OS X: [XCode Command line tools](http://osxdaily.com/2014/02/12/install-command-line-tools-mac-os-x/)
-* Ubuntu 12.04 (install packages with apt-get): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, mariadb-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
-* Fedora / Rocky 9.x (install packages with dnf): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, mariadb-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
+* Ubuntu 12.04 (install packages with apt-get): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, postgresql-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
+* Fedora / Rocky 9.x (install packages with dnf): git, git-core, python-virtualenv, gcc, python-pip, python-devel, libjpeg-turbo, libjpeg-turbo-devel, zlib-devel, postgresql-devel, openldap-devel, cyrus-sasl-devel, swig, libxslt-devel, automake, autoconf, libtool, libffi-devel
 
 Note: some of these packages would introduce additional security considerations if left installed on a server used in production.
 
@@ -103,26 +103,24 @@ Note: some of these packages would introduce additional security considerations 
 ### Create database
 ```
 DROP DATABASE IF EXISTS badgr;
-CREATE DATABASE badgr CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+CREATE DATABASE badgr;
 ```
 
 ### Install timezones
-```
-mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql
-```
+PostgreSQL timezone data is included by default, no additional installation needed.
 
 ### Install requirements
 *from within edubadges-server directory*
 
 * `pip install -r requirements.txt`
 
-if on a mac mysqlclient does not build, try:
+if on a mac psycopg does not build, try:
 ```
-LDFLAGS=-L/usr/local/opt/openssl/lib pip install mysqlclient
+LDFLAGS=-L/usr/local/opt/openssl/lib pip install psycopg
 ```
-If for some reason the library files for mysql are no longer there due to an upgrade
+If for some reason the library files for postgresql are no longer there due to an upgrade
 ```
-pip install --upgrade --force-reinstall --no-cache-dir mysqlclient
+pip install --upgrade --force-reinstall --no-cache-dir psycopg
 ```
 ### Run / debug IDE
 If you use an IDE, you'll need to add the environment variables from env_vars.sh.example to a run configuration
