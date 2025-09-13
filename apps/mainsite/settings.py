@@ -277,6 +277,49 @@ ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
 ##
 #
+#   S3/MinIO Storage Configuration
+#
+##
+
+# S3/MinIO configuration for file storage
+USE_S3 = os.environ.get('USE_S3', 'False').lower() == 'true'
+
+if USE_S3:
+    # S3/MinIO settings
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', None)  # For MinIO
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+    
+    # SSL and signature configuration
+    AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'True').lower() == 'true'
+    AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION', 's3v4')
+    
+    # Public read permissions for badge images
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    
+    # Use custom domain if provided (for MinIO or custom S3 setup)
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
+    
+    # Storage configuration
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    
+    # Media URL configuration
+    if AWS_S3_CUSTOM_DOMAIN:
+        MEDIA_URL = f"{'https' if AWS_S3_USE_SSL else 'http'}://{AWS_S3_CUSTOM_DOMAIN}/"
+    else:
+        MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/"
+        if AWS_S3_ENDPOINT_URL:  # MinIO case
+            from urllib.parse import urlparse
+            parsed = urlparse(AWS_S3_ENDPOINT_URL)
+            MEDIA_URL = f"{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/"
+
+##
+#
 #   Fixtures
 #
 ##
