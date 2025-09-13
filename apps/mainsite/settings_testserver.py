@@ -2,11 +2,9 @@ from mainsite.settings import *
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'badgr',
-        'OPTIONS': {
-           # "init_command": "SET storage_engine=InnoDB",  # Uncomment when using MySQL to ensure consistency across servers
-        },
+        'OPTIONS': {},
     }
 }
 
