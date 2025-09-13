@@ -8,11 +8,9 @@ LOGGING = {}
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'badgr_server',
-        'OPTIONS': {
-            "init_command": "SET default_storage_engine=InnoDB",
-        },
+        'OPTIONS': {},
     }
 }
 
