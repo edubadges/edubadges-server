@@ -10,7 +10,7 @@ from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.models import BadgrApp
 # BadgrApp
 from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, EDU_BADGES_ISSUER_NAME
-from .util import add_terms_institution
+from .util import add_terms_institution, upload_initial_images_to_s3
 
 
 setattr(settings, 'SUPPRESS_EMAILS', 1)
@@ -143,3 +143,6 @@ for key, value in badge_class_extensions.items():
         original_json=json.dumps(value),
         badgeclass_id=badge_class.id
     )
+
+# Upload initial images to S3 if S3 storage is enabled
+upload_initial_images_to_s3()
