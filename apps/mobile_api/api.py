@@ -19,7 +19,7 @@ from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
 from mobile_api.helper import process_eduid_response, RevalidatedNameException, NoValidatedNameException
 from mobile_api.serializers import BadgeInstanceDetailSerializer, DirectAwardSerializer, StudentsEnrolledSerializer, \
-    StudentsEnrolledDetailSerializer, BadgeCollectionSerializer, UserSerializer
+    StudentsEnrolledDetailSerializer, BadgeCollectionSerializer, UserSerializer, DirectAwardDetailSerializer
 from mobile_api.serializers import BadgeInstanceSerializer
 import requests
 from django.conf import settings
@@ -41,7 +41,7 @@ class Login(APIView):
         responses={
             200: OpenApiResponse(
                 description="Successful responses with examples",
-                response=dict,  # or your serializer class
+                response=dict,  # or inline custom serializer class
                 examples=[
                     OpenApiExample(
                         "User needs to link account in eduID",
@@ -233,6 +233,38 @@ class UnclaimedDirectAwards(APIView):
         serializer = DirectAwardSerializer(direct_awards, many=True)
         return Response(serializer.data)
 
+class DirectAwardDetail(APIView):
+    permission_classes = (MobileAPIPermission,)
+
+    @extend_schema(
+        methods=['GET'],
+        description='Get direct award details for the user',
+        parameters=[
+            OpenApiParameter(
+                name="entity_id",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                required=True,
+                description="entity_id of the direct award"
+            )
+        ],
+        examples=[],
+    )
+    # ForeignKey / OneToOneField → select_related
+    # ManyToManyField / reverse FK → prefetch_related
+    def get(self, request, entity_id, **kwargs):
+        instance = DirectAward.objects \
+            .select_related("badgeclass") \
+            .prefetch_related("badgeclass__badgeclassextension_set") \
+            .select_related("badgeclass__issuer") \
+            .select_related("badgeclass__issuer__faculty") \
+            .select_related("badgeclass__issuer__faculty__institution") \
+            .prefetch_related("badgeclass__issuer__faculty__institution__terms") \
+            .filter(entity_id=entity_id) \
+            .get()
+        serializer = DirectAwardDetailSerializer(instance)
+        data = serializer.data
+        return Response(serializer.data)
 
 class Enrollments(APIView):
     permission_classes = (MobileAPIPermission,)

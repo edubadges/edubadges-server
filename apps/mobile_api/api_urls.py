@@ -1,7 +1,7 @@
 from django.urls import path
 
 from mobile_api.api import BadgeInstances, BadgeInstanceDetail, UnclaimedDirectAwards, Enrollments, EnrollmentDetail, \
-    BadgeCollectionsListView, BadgeCollectionsDetailView, Login, AcceptGeneralTerms
+    BadgeCollectionsListView, BadgeCollectionsDetailView, Login, AcceptGeneralTerms, DirectAwardDetail
 
 urlpatterns = [
     path('accept-general-terms', AcceptGeneralTerms.as_view(), name='mobile_api_accept_general_terms'),
@@ -12,6 +12,7 @@ urlpatterns = [
     path('badge-instances/<str:entity_id>', BadgeInstanceDetail.as_view(),
          name='mobile_api_badge_instance_detail'),
     path('direct-awards', UnclaimedDirectAwards.as_view(), name='mobile_api_direct_awards'),
+    path('direct-awards/<str:entity_id>', DirectAwardDetail.as_view(), name='mobile_api_direct_awards_detail'),
     path('enrollments', Enrollments.as_view(), name='mobile_api_enrollments'),
     path('enrollments/<str:entity_id>', EnrollmentDetail.as_view(), name='mobile_api_enrollment_detail'),
     path('login', Login.as_view(), name='mobile_api_login'),

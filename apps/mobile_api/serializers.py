@@ -1,7 +1,7 @@
 from rest_framework import serializers
 import json
 
-from badgeuser.models import BadgeUser, UserProvisionment, TermsAgreement, Terms
+from badgeuser.models import BadgeUser, UserProvisionment, TermsAgreement, Terms, TermsUrl
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
 from issuer.models import BadgeInstance, BadgeClass, BadgeClassExtension, Issuer, BadgeInstanceCollection
@@ -11,7 +11,8 @@ from lti_edu.models import StudentsEnrolled
 class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institution
-        fields = ["name_dutch", "name_english", "image_dutch", "image_english"]
+        fields = ["name_dutch", "name_english", "image_dutch", "image_english",
+                  "identifier", "alternative_identifier", "grondslag_formeel", "grondslag_informeel"]
 
 
 class FacultySerializer(serializers.ModelSerializer):
@@ -89,6 +90,20 @@ class DirectAwardSerializer(serializers.ModelSerializer):
         fields = ["id", "created_at", "entity_id", "badgeclass"]
 
 
+class DirectAwardDetailSerializer(serializers.ModelSerializer):
+    badgeclass = BadgeClassDetailSerializer()
+    terms = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DirectAward
+        fields = ["id", "created_at", "status", "entity_id", "badgeclass", "terms"]
+
+    def get_terms(self, obj):
+        institution_terms = obj.badgeclass.issuer.faculty.institution.terms.all()
+        serializer = TermsSerializer(institution_terms, many=True)
+        return serializer.data
+
+
 class StudentsEnrolledSerializer(serializers.ModelSerializer):
     badge_class = BadgeClassSerializer()
 
@@ -113,12 +128,19 @@ class BadgeCollectionSerializer(serializers.ModelSerializer):
         fields = ["id", "created_at", "entity_id", "badge_instances", "name", "public", "description"]
 
 
+class TermsUrlSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TermsUrl
+        fields = ["url"]
+
+
 class TermsSerializer(serializers.ModelSerializer):
     institution = InstitutionSerializer(read_only=True)
+    terms_urls = TermsUrlSerializer(many=True, read_only=True)
 
     class Meta:
         model = Terms
-        fields = ["terms_type", "institution"]
+        fields = ["terms_type", "institution", "terms_urls"]
 
 
 class TermsAgreementSerializer(serializers.ModelSerializer):
