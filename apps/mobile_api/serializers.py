@@ -1,7 +1,7 @@
 from rest_framework import serializers
 import json
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, UserProvisionment, TermsAgreement, Terms
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
 from issuer.models import BadgeInstance, BadgeClass, BadgeClassExtension, Issuer, BadgeInstanceCollection
@@ -112,9 +112,31 @@ class BadgeCollectionSerializer(serializers.ModelSerializer):
         model = BadgeInstanceCollection
         fields = ["id", "created_at", "entity_id", "badge_instances", "name", "public", "description"]
 
+
+class TermsSerializer(serializers.ModelSerializer):
+    institution = InstitutionSerializer(read_only=True)
+
+    class Meta:
+        model = Terms
+        fields = ["terms_type", "institution"]
+
+
+class TermsAgreementSerializer(serializers.ModelSerializer):
+    terms = TermsSerializer(read_only=True)
+
+    class Meta:
+        model = TermsAgreement
+        fields = ["agreed", "agreed_version", "terms"]
+
+
 class UserSerializer(serializers.ModelSerializer):
-    badgeclassextension_set = BadgeClassExtensionSerializer(many=True, read_only=True)
+    termsagreement_set = TermsAgreementSerializer(many=True, read_only=True)
+    terms_agreed = serializers.SerializerMethodField()
 
     class Meta:
         model = BadgeUser
-        fields = ["id", "email", "last_name", "first_name", "validated_name", "schac_homes", "issuer"]
+        fields = ["id", "email", "last_name", "first_name", "validated_name", "schac_homes", "terms_agreed",
+                  "termsagreement_set"]
+
+    def get_terms_agreed(self, obj):
+        return obj.general_terms_accepted()

@@ -19,7 +19,7 @@ from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
 from mobile_api.helper import process_eduid_response, RevalidatedNameException, NoValidatedNameException
 from mobile_api.serializers import BadgeInstanceDetailSerializer, DirectAwardSerializer, StudentsEnrolledSerializer, \
-    StudentsEnrolledDetailSerializer, BadgeCollectionSerializer
+    StudentsEnrolledDetailSerializer, BadgeCollectionSerializer, UserSerializer
 from mobile_api.serializers import BadgeInstanceSerializer
 import requests
 from django.conf import settings
@@ -38,7 +38,49 @@ class Login(APIView):
     @extend_schema(
         methods=['GET'],
         description='Login and validate the user',
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description="Successful responses with examples",
+                response=dict,  # or your serializer class
+                examples=[
+                    OpenApiExample(
+                        "User needs to link account in eduID",
+                        value={"status": "link-account"},
+                        description="Redirect the user back to eduID with 'acr_values' = 'https://eduid.nl/trust/validate-names'",
+                        response_only=True,
+                    ),
+                    OpenApiExample(
+                        "User needs to revalidate name in eduID",
+                        value={"status": "revalidate-name"},
+                        description="Redirect the user back to eduID with 'acr_values' = 'https://eduid.nl/trust/validate-names'",
+                        response_only=True,
+                    ),
+                    OpenApiExample(
+                        "User needs to agree to terms",
+                        value={"email": "jdoe@example.com", "last_name": "Doe", "first_name": "John",
+                                "validated_name": "John Doe", "schac_homes": ["university-example.org"],
+                                "terms_agreed": False,
+                                "termsagreement_set": []},
+                        description="Show the terms and use the 'accept-general-terms' endpoint",
+                        response_only=True,
+                    ),
+                    OpenApiExample(
+                        "User valid",
+                        value={"email": "jdoe@example.com", "last_name": "Doe", "first_name": "John",
+                                "validated_name": "John Doe", "schac_homes": ["university-example.org"],
+                                "terms_agreed": True, "termsagreement_set": [{"agreed": True, "agreed_version": 1,
+                                                                              "terms": {
+                                                                                  "terms_type": "service_agreement_student"}
+                                                                              }, {"agreed": True, "agreed_version": 1,
+                                                                                  "terms": {
+                                                                                      "terms_type": "terms_of_service",
+                                                                                      "institution": None}}]},
+                        description="The user is valid, proceed with fetching all badge-instances and OPEN direct-awards",
+                        response_only=True,
+                    ),
+                ],
+            )
+        }
     )
     def get(self, request, **kwargs):
         logger = logging.getLogger('Badgr.Debug')
@@ -49,40 +91,47 @@ class Login(APIView):
         Check if the user is known, has agreed to the terms and has a validated_name. If the user is not known
         then check if there is a validate name and provision the user. If all is well, then return the user information
         '''
-        if isinstance(user, TemporaryUser):
-            headers = {
-                'Accept': 'application/json, application/json;charset=UTF-8',
-                'Authorization': f'Bearer {user.bearer_token}',
-            }
-            response = requests.get(f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links', headers=headers,
-                                    timeout=60)
-            if response.status_code != 200:
-                error = f'Server error: eduID eppn endpoint error ({response.status_code})'
-                logger.debug(error)
-                return Response(data={"error": str(error)}, status=response.status_code)
+        temporary_user = isinstance(user, TemporaryUser)
+        if temporary_user:
+            bearer_token = user.bearer_token
+        else:
+            authorization = request.environ.get('HTTP_AUTHORIZATION')
+            bearer_token = authorization[len('bearer '):]
 
-            eduid_response = response.json()
-            validated_names = [info['validated_name'] for info in eduid_response if 'validated_name' in info]
-            if not validated_names:
-                # The user must go back to eduID and link an account
-                results["status"] = "link-account"
-                return Response(data=results)
+        headers = {
+            'Accept': 'application/json, application/json;charset=UTF-8',
+            'Authorization': f'Bearer {bearer_token}',
+        }
+        url = f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links"
+        response = requests.get(url, headers=headers,
+                                timeout=60)
+        if response.status_code != 200:
+            error = f'Server error: eduID eppn endpoint error ({response.status_code})'
+            logger.debug(error)
+            return Response(data={"error": str(error)}, status=response.status_code)
 
+        eduid_response = response.json()
+        validated_names = [info['validated_name'] for info in eduid_response if 'validated_name' in info]
+        if not validated_names:
+            # The user must go back to eduID and link an account
+            results["status"] = "link-account"
+            return Response(data=results)
+        if temporary_user:
             # User must be created / provisioned together with social account
             provider = EduIDProvider(request)
             social_login = provider.sociallogin_from_response(request, user.user_payload)
-            social_login.save()
+            social_login.save(request)
             user = social_login.user
-            try:
-                process_eduid_response(eduid_response, user)
-            except RevalidatedNameException:
-                results["status"] = "revalidate-name"
-                return Response(data=results)
-            except NoValidatedNameException:
-                results["status"] = "link-account"
-                return Response(data=results)
-            user.save()
+        try:
+            process_eduid_response(eduid_response, user)
+        except RevalidatedNameException:
+            results["status"] = "revalidate-name"
+            return Response(data=results)
+        except NoValidatedNameException:
+            results["status"] = "link-account"
+            return Response(data=results)
 
+        user.save()
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
@@ -224,6 +273,8 @@ class EnrollmentDetail(APIView):
         ],
         examples=[],
     )
+    # ForeignKey / OneToOneField → select_related
+    # ManyToManyField / reverse FK → prefetch_related
     def get(self, request, entity_id, **kwargs):
         enrollment = StudentsEnrolled.objects \
             .select_related("badgeclass") \
@@ -268,8 +319,6 @@ class BadgeCollectionsListView(APIView):
         examples=[],
     )
     def get(self, request, **kwargs):
-        # ForeignKey / OneToOneField → select_related
-        # ManyToManyField / reverse FK → prefetch_related
         collections = BadgeInstanceCollection.objects \
             .filter(user=request.user)
         serializer = BadgeCollectionSerializer(collections, many=True)
