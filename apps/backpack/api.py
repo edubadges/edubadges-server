@@ -3,7 +3,9 @@
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_302_FOUND, HTTP_204_NO_CONTENT
-
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter, \
+    OpenApiTypes
+from rest_framework import serializers
 from backpack.models import BackpackBadgeShare, ImportedAssertion
 from backpack.permissions import IsImportedBadgeOwner
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1, ImportedAssertionSerializer
@@ -32,6 +34,19 @@ class BackpackAssertionDetail(BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch)
     http_method_names = ('delete', 'put')
 
+    @extend_schema(
+        methods=['DELETE'],
+        description="Reject terms",
+        parameters=[
+            OpenApiParameter(
+                name="entity_id",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                required=True,
+                description="entity_id of the badge instance"
+            )
+        ],
+    )
     def delete(self, request, **kwargs):
         """Remove an assertion from the backpack"""
         obj = self.get_object(request, **kwargs)
@@ -40,6 +55,28 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        methods=['PUT'],
+        description="Update acceptance of a BadgeInstance",
+        parameters=[
+            OpenApiParameter(
+                name="entity_id",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                required=True,
+                description="entity_id of the badge instance"
+            )
+        ],
+        request=inline_serializer(
+            name='AcceptTermsReject',
+            fields={
+                'acceptance': serializers.BooleanField(),
+                'public': serializers.BooleanField(),
+                'include_evidence': serializers.BooleanField(),
+                'include_grade_achieved': serializers.BooleanField()
+            },
+        ),
+    )
     def put(self, request, **kwargs):
         """Update acceptance of an Assertion in the user's Backpack and make public / private """
         fields_whitelist = ('acceptance', 'public', 'include_evidence', 'include_grade_achieved')

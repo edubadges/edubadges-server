@@ -131,7 +131,7 @@ class BadgeCollectionSerializer(serializers.ModelSerializer):
 class TermsUrlSerializer(serializers.ModelSerializer):
     class Meta:
         model = TermsUrl
-        fields = ["url"]
+        fields = ["url", "language", "excerpt"]
 
 
 class TermsSerializer(serializers.ModelSerializer):
@@ -140,7 +140,7 @@ class TermsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Terms
-        fields = ["terms_type", "institution", "terms_urls"]
+        fields = ["entity_id", "terms_type", "institution", "terms_urls"]
 
 
 class TermsAgreementSerializer(serializers.ModelSerializer):
@@ -148,7 +148,7 @@ class TermsAgreementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TermsAgreement
-        fields = ["agreed", "agreed_version", "terms"]
+        fields = ["entity_id", "agreed", "agreed_version", "terms"]
 
 
 class UserSerializer(serializers.ModelSerializer):
