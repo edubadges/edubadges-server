@@ -19,7 +19,6 @@ from xml.etree import cElementTree as ET
 
 import cairosvg
 import requests
-from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core import mail
@@ -29,6 +28,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.template.loader import render_to_string
 from django.urls import get_callable, reverse
 from django.utils.html import format_html
+from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 from premailer import transform
 from resizeimage.resizeimage import resize_contain
 
@@ -71,7 +71,8 @@ Cache Utilities
 def filter_cache_key(key, key_prefix, version):
     generated_key = ':'.join([key_prefix, str(version), key])
     if len(generated_key) > 250:
-        return hashlib.md5(generated_key).hexdigest()
+        encoded_string = generated_key.encode('utf-8')
+        return hashlib.md5(encoded_string).hexdigest()
     return generated_key
 
 
@@ -301,7 +302,7 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': badgeclass.issuer.faculty.institution.name,
-            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y')
+            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
 
@@ -332,7 +333,7 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': badgeclass.issuer.faculty.institution.name,
-            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y')
+            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
 
@@ -350,7 +351,7 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': badgeclass.issuer.faculty.institution.name,
-            'da_enddate': direct_award.expiration_date
+            'da_enddate': direct_award.expiration_date,
         }
         return render_to_string(template, email_vars)
 
