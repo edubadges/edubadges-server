@@ -21,24 +21,6 @@ from .util import add_terms_institution
 
 # Institution
 institutions = [
-    # {
-    #     'name_english': INSTITUTION_UNIVERSITY_EXAMPLE_ORG,
-    #     'description_english': 'The university example is always a good place to hang out',
-    #     'description_dutch': 'De university example is altijd een goede plek om rond te hangen (wat een vertaling)',
-    #     'institution_type': 'WO',
-    # },
-    # {
-    #     'name_english': 'harvard-example.edu',
-    #     'description_english': 'Harward Example',
-    #     'description_dutch': 'Hardward Example',
-    #     'institution_type': 'MBO',
-    # },
-    # {
-    #     'name_english': 'yale-uni-example.edu',
-    #     'description_english': 'Yale Uni Example',
-    #     'description_dutch': 'Yale Uni Example',
-    #     'institution_type': 'HBO',
-    # },
     {
         'name_english': 'mbob.nl',
         'description_english': 'MBO Beek Institution',
@@ -86,13 +68,13 @@ for ins in institutions:
 
 
 def accept_terms(user):
-    if user.is_teacher:
-        terms = user.institution.cached_terms()
-        for term in terms:
-            terms_agreement, _ = TermsAgreement.objects.get_or_create(user=user, terms=term)
-            terms_agreement.agreed_version = term.version
-            terms_agreement.agreed = True
-            terms_agreement.save()
+    # if user.is_teacher:
+    terms = user.institution.cached_terms()
+    for term in terms:
+        terms_agreement, _ = TermsAgreement.objects.get_or_create(user=user, terms=term)
+        terms_agreement.agreed_version = term.version
+        terms_agreement.agreed = True
+        terms_agreement.save()
 
 
 # Users - Teachers
@@ -156,28 +138,28 @@ institution_admins = [
     # staff1
     {
         'username': 'joseph+weeler',
-        'email': 'Joseph+Weeler@university-example.org',
+        'email': 'Joseph+Weeler@mbob.nl',
         'first_name': 'Joseph',
         'last_name': 'Wheeler',
-        'institution_name': 'university-example.org',
+        'institution_name': 'mbob.nl',
         'uid': 'bf847baedbe7045394ea38de3c994f0332f2dfcb',
     },
     # professor 1
     {
         'username': 'p1u1',
-        'email': 'jordan@harvard-example.edu',
+        'email': 'jordan@uvh.nl',
         'first_name': 'Jordan',
         'last_name': 'Belfort',
-        'institution_name': 'harvard-example.edu',
+        'institution_name': 'uvh.nl',
         'uid': '86877d2f465c7ae597798bd2f929568904af023f',
     },
     # teacher 3
     {
         'username': 'bbernanke',
-        'email': 'B.S.Bernanke@yale-uni-example.edu',
+        'email': 'B.S.Bernanke@hbot.nl',
         'first_name': 'Ben',
         'last_name': 'Bernake',
-        'institution_name': 'yale-uni-example.edu',
+        'institution_name': 'hbot.nl',
         'uid': '4f516a9d3c32c0a19a4e9fe05b3185feef43a5ae',
     },
 ]
@@ -186,28 +168,28 @@ teachers = [
     # professor 4
     {
         'username': 'g_ohm',
-        'email': 'georg.ohm@university-example.org',
+        'email': 'georg.ohm@tun.nb',
         'first_name': 'Georg',
         'last_name': 'Ohm',
-        'institution_name': 'university-example.org',
+        'institution_name': 'tun.nb',
         'uid': 'd2ba7c82a401a4c8f14b53d43af4d6c26712f971',
     },
     # teacher 1
     {
         'username': 'jstiglitz',
-        'email': 'Joseph.Stiglitz@harvard-example.edu',
+        'email': 'Joseph.Stiglitz@uvh.nl',
         'first_name': 'Joseph',
         'last_name': 'Stiglitzller',
-        'institution_name': 'harvard-example.edu',
+        'institution_name': 'uvh.nl',
         'uid': 'f981043d36d8fc3188275cc9fc3bad3ee492ea58',
     },
     # teacher 4
     {
         'username': 'agreenspan',
-        'email': 'A.Greenspan@yale-uni-example.edu',
+        'email': 'A.Greenspan@hbot.nl',
         'first_name': 'Alan',
         'last_name': 'Greenspan',
-        'institution_name': 'yale-uni-example.edu',
+        'institution_name': 'hbot.nl',
         'uid': '72c5c72c5fb00b0718366b45f9fbe14ececd3d6e',
     },
 ]
@@ -1022,10 +1004,10 @@ students = [
 def fetch_json_from_url(url):
     """
     Fetch JSON data from external URL with error handling.
-    
+
     Args:
         url (str): The URL to fetch JSON data from
-        
+
     Returns:
         dict or None: Parsed JSON data or None if error occurred
     """
@@ -1034,59 +1016,59 @@ def fetch_json_from_url(url):
             data = response.read().decode('utf-8')
             return json.loads(data)
     except urllib.error.URLError as e:
-        print(f"Error fetching data from {url}: {e}")
+        print(f'Error fetching data from {url}: {e}')
         return None
     except json.JSONDecodeError as e:
-        print(f"Error parsing JSON from {url}: {e}")
+        print(f'Error parsing JSON from {url}: {e}')
         return None
     except Exception as e:
-        print(f"Unexpected error fetching data from {url}: {e}")
+        print(f'Unexpected error fetching data from {url}: {e}')
         return None
 
 
 def extract_student_users_from_json(json_data):
     """
     Extract student users from JSON data based on eduPersonAffiliation.
-    
+
     Args:
         json_data (dict): JSON data containing user information
-        
+
     Returns:
         list: List of student user dictionaries formatted for create_student()
     """
     if not json_data or not isinstance(json_data, dict):
         return []
-    
+
     student_users = []
-    
+
     # Handle different possible JSON structures
     # Check for users in top-level 'users' key, or in IAM/SIS/HR sections
     all_users = []
-    
+
     if 'users' in json_data:
         all_users.extend(json_data['users'])
-    
+
     # Check for users in IAM, SIS, HR sections
     for section in ['IAM', 'SIS', 'HR']:
         if section in json_data and isinstance(json_data[section], list):
             all_users.extend(json_data[section])
-    
+
     # If no structured users found, assume the whole JSON is user data
     if not all_users and isinstance(json_data, dict) and any(key in json_data for key in ['uid', 'givenName', 'sn']):
         all_users = [json_data]
-    
+
     for user in all_users:
         if not isinstance(user, dict):
             continue
-            
+
         # Check if user has student affiliation
         affiliations = user.get('eduPersonAffiliation', [])
         if not isinstance(affiliations, list):
             affiliations = [affiliations] if affiliations else []
-        
+
         # Look for 'student' in any form within affiliations
         is_student = any('student' in str(aff).lower() for aff in affiliations)
-        
+
         if is_student:
             # Extract required fields
             username = user.get('uid', '')
@@ -1096,12 +1078,14 @@ def extract_student_users_from_json(json_data):
             eppn = user.get('eduPersonPrincipalName', '')
             schac_home = user.get('schacHomeOrganization', '')
             eduid = user.get('eduid', str(uuid.uuid4()))
-            
+
             # Skip if essential fields are missing
             if not all([username, first_name, last_name, email, eppn]):
-                print(f"Skipping user with missing essential fields: uid={username}, givenName={first_name}, sn={last_name}, mail={email}, eppn={eppn}")
+                print(
+                    f'Skipping user with missing essential fields: uid={username}, givenName={first_name}, sn={last_name}, mail={email}, eppn={eppn}'
+                )
                 continue
-                
+
             student_data = {
                 'username': username,
                 'first_name': first_name,
@@ -1115,42 +1099,42 @@ def extract_student_users_from_json(json_data):
                 'extra_data': {'eduid': eduid},
             }
             student_users.append(student_data)
-    
+
     return student_users
 
 
 def update_seed_data_from_url(url):
     """
     Fetch JSON from URL and create student users dynamically.
-    
+
     Args:
         url (str): URL to fetch JSON data from
-        
+
     Returns:
         int: Number of students created
     """
-    print(f"Fetching student data from: {url}")
+    print(f'Fetching student data from: {url}')
     json_data = fetch_json_from_url(url)
-    
+
     if not json_data:
-        print("Failed to fetch or parse JSON data")
+        print('Failed to fetch or parse JSON data')
         return 0
-        
+
     student_users = extract_student_users_from_json(json_data)
-    
+
     if not student_users:
-        print("No student users found in JSON data")
+        print('No student users found in JSON data')
         return 0
-        
-    print(f"Found {len(student_users)} student users, creating them...")
-    
+
+    print(f'Found {len(student_users)} student users, creating them...')
+
     for student in student_users:
         try:
             create_student(**student)
             print(f"Created student: {student['username']} ({student['email']})")
         except Exception as e:
             print(f"Error creating student {student['username']}: {e}")
-            
+
     return len(student_users)
 
 
