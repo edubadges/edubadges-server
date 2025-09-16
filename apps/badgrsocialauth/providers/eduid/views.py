@@ -106,6 +106,7 @@ def callback(request):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cache-Control': 'no-cache',
     }
+    logger.debug(f'Token request: {json.dumps(payload)}')
     token_response = requests.post(
         '{}/token'.format(settings.EDUID_PROVIDER_URL),
         data=urllib.parse.urlencode(payload),
@@ -118,7 +119,7 @@ def callback(request):
             'Server error: User info endpoint error (http %s). Try alternative login methods'
             % token_response.status_code
         )
-        logger.debug(error)
+        logger.error(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
 
     token_json = token_response.json()
@@ -149,20 +150,23 @@ def callback(request):
     }
 
     # TODO: find a way to determine if we get data from EduID IDP or from one of our EWI IDPs
+    # Is the TODO necessary?
     oidc_client = OidcClient.get_client_from_settings()
     if not social_account or not social_account.user.general_terms_accepted():
+        logger.debug('No social account and no general terms accepted')
         try:
             user_info = oidc_client.get_userinfo(access_token)
 
         except Exception as e:
-            error = f'Server error: {e}'
-            logger.debug(error)
+            error = f'Server error no social account: {e}'
+            logger.error(error)
             return render_authentication_error(request, EduIDProvider.id, error=error)
 
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
 
         if not user_info.has_validated_name():
+            logger.debug('User has no validated name')
             validate_redirect = signup_redirect.replace('signup', 'validate')
             return HttpResponseRedirect(f'{validate_redirect}?{args}')
 
