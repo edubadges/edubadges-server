@@ -112,7 +112,7 @@ def callback(request):
         headers=headers,
         timeout=60,
     )
-    logger.debug(f'Token response: {json.dumps(token_response)}')
+    logger.debug(f'Token response: {token_response}')
     if token_response.status_code != 200:
         error = (
             'Server error: User info endpoint error (http %s). Try alternative login methods'
