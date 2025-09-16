@@ -5,10 +5,12 @@ from django.conf import settings
 
 logger = logging.getLogger('Badgr.Debug')
 
+
 class OidcClient:
     """
     This class is used to store the openid connect authorization server metadata.
     """
+
     def __init__(self):
         self._userinfo_endpoint = None
         self._introspect_endpoint = None
@@ -23,7 +25,7 @@ class OidcClient:
             return SurfConextOidcClient()
         else:
             raise Exception(f'Unknown provider name {provider_name}')
-    
+
     def get_userinfo(self, access_token):
         """
         This function is used to get the userinfo from the OIDC provider.
@@ -50,17 +52,21 @@ class OidcClient:
         """
         raise NotImplementedError('This function should be implemented in the subclass')
 
+
 class EduIdOidcClient(OidcClient):
     """
     Overrides the userinfo endpoint for the eduid provider.
     """
+
     def __init__(self):
         super().__init__()
+        # Here is the issue, we should not connect to eduID!
         self._userinfo_endpoint = f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links'
         self._introspect_endpoint = None
 
     def normalize_userinfo(self, userinfo):
         return EduIdUserInfo(userinfo)
+
 
 class SurfConextOidcClient(OidcClient):
     """
@@ -68,6 +74,7 @@ class SurfConextOidcClient(OidcClient):
 
     The actual endpoints should be fetched from https://connect.test.surfconext.nl/oidc/.well-known/openid-configuration
     """
+
     def __init__(self):
         super().__init__()
         self._userinfo_endpoint = f'{settings.EDUID_PROVIDER_URL}/userinfo'
@@ -76,10 +83,12 @@ class SurfConextOidcClient(OidcClient):
     def normalize_userinfo(self, userinfo):
         return SurfConextUserInfo(userinfo)
 
+
 class UserInfo:
     """
     This class is used to store the userinfo from the OIDC provider.
     """
+
     def __init__(self):
         self._validated_names = []
 
@@ -113,21 +122,27 @@ class UserInfo:
         """
         raise NotImplementedError('This function should be implemented in the subclass')
 
+
 class EduIdUserInfo(UserInfo):
     """
     This class is used to store the userinfo from the eduid myconext api endpoint.
     """
+
     def __init__(self, eppn_json):
         super().__init__()
-        
+
         for info in eppn_json:
-            if not info.get('preferred', False): continue
-            if not 'validated_name' in info: continue
+            if not info.get('preferred', False):
+                continue
+            if not 'validated_name' in info:
+                continue
 
             self._validated_names.append(info['validated_name'])
 
         self._eppn = [info['eppn'] for info in eppn_json if 'eppn' in info]
-        self._schac_home_organization = [info['schac_home_organization'] for info in eppn_json if 'schac_home_organization' in info]
+        self._schac_home_organization = [
+            info['schac_home_organization'] for info in eppn_json if 'schac_home_organization' in info
+        ]
 
     def validated_names(self):
         return self._validated_names
@@ -138,10 +153,12 @@ class EduIdUserInfo(UserInfo):
     def schac_home_organization(self):
         return self._schac_home_organization[0] if self._schac_home_organization else None
 
+
 class SurfConextUserInfo(UserInfo):
     """
     This class is used to store the userinfo from the surfconext api endpoint.
     """
+
     def __init__(self, userinfo):
         super().__init__()
         ## How do we get the validated name from the surfconext userinfo?
