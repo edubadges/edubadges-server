@@ -64,8 +64,8 @@ def login(request):
         'response_type': 'code',
         'scope': 'openid eduid.nl/links profile',
         'redirect_uri': f'{settings.HTTP_ORIGIN}/account/eduid/login/callback/',
-        'claims': '{"id_token":{"preferred_username":null,"given_name":null,"family_name":null,"email":null,'
-        '"eduid":null, "eduperson_scoped_affiliation":null, "preferred_username":null, "uids":null}}',
+        'claims': '{"id_token":{"preferred_username":null, "given_name":null,"family_name":null,"email":null,'
+        '"eduid":null, "eduperson_scoped_affiliation":null, "eduperson_principal_name":null}}',
     }
     validate_name = request.GET.get('validateName')
     if validate_name and validate_name.lower() == 'true':
