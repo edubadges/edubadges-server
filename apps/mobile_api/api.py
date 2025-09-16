@@ -58,23 +58,23 @@ class Login(APIView):
                     OpenApiExample(
                         "User needs to agree to terms",
                         value={"email": "jdoe@example.com", "last_name": "Doe", "first_name": "John",
-                                "validated_name": "John Doe", "schac_homes": ["university-example.org"],
-                                "terms_agreed": False,
-                                "termsagreement_set": []},
+                               "validated_name": "John Doe", "schac_homes": ["university-example.org"],
+                               "terms_agreed": False,
+                               "termsagreement_set": []},
                         description="Show the terms and use the 'accept-general-terms' endpoint",
                         response_only=True,
                     ),
                     OpenApiExample(
                         "User valid",
                         value={"email": "jdoe@example.com", "last_name": "Doe", "first_name": "John",
-                                "validated_name": "John Doe", "schac_homes": ["university-example.org"],
-                                "terms_agreed": True, "termsagreement_set": [{"agreed": True, "agreed_version": 1,
-                                                                              "terms": {
-                                                                                  "terms_type": "service_agreement_student"}
-                                                                              }, {"agreed": True, "agreed_version": 1,
-                                                                                  "terms": {
-                                                                                      "terms_type": "terms_of_service",
-                                                                                      "institution": None}}]},
+                               "validated_name": "John Doe", "schac_homes": ["university-example.org"],
+                               "terms_agreed": True, "termsagreement_set": [{"agreed": True, "agreed_version": 1,
+                                                                             "terms": {
+                                                                                 "terms_type": "service_agreement_student"}
+                                                                             }, {"agreed": True, "agreed_version": 1,
+                                                                                 "terms": {
+                                                                                     "terms_type": "terms_of_service",
+                                                                                     "institution": None}}]},
                         description="The user is valid, proceed with fetching all badge-instances and OPEN direct-awards",
                         response_only=True,
                     ),
@@ -86,7 +86,6 @@ class Login(APIView):
         logger = logging.getLogger('Badgr.Debug')
 
         user = request.user
-        results = {}
         '''
         Check if the user is known, has agreed to the terms and has a validated_name. If the user is not known
         then check if there is a validate name and provision the user. If all is well, then return the user information
@@ -103,8 +102,7 @@ class Login(APIView):
             'Authorization': f'Bearer {bearer_token}',
         }
         url = f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links"
-        response = requests.get(url, headers=headers,
-                                timeout=60)
+        response = requests.get(url, headers=headers, timeout=60)
         if response.status_code != 200:
             error = f'Server error: eduID eppn endpoint error ({response.status_code})'
             logger.debug(error)
@@ -114,8 +112,7 @@ class Login(APIView):
         validated_names = [info['validated_name'] for info in eduid_response if 'validated_name' in info]
         if not validated_names:
             # The user must go back to eduID and link an account
-            results["status"] = "link-account"
-            return Response(data=results)
+            return Response(data={"status": "link-account"})
         if temporary_user:
             # User must be created / provisioned together with social account
             provider = EduIDProvider(request)
@@ -125,11 +122,9 @@ class Login(APIView):
         try:
             process_eduid_response(eduid_response, user)
         except RevalidatedNameException:
-            results["status"] = "revalidate-name"
-            return Response(data=results)
+            return Response(data={"status": "revalidate-name"})
         except NoValidatedNameException:
-            results["status"] = "link-account"
-            return Response(data=results)
+            return Response(data={"status": "link-account"})
 
         user.save()
         serializer = UserSerializer(user)
@@ -233,6 +228,7 @@ class UnclaimedDirectAwards(APIView):
         serializer = DirectAwardSerializer(direct_awards, many=True)
         return Response(serializer.data)
 
+
 class DirectAwardDetail(APIView):
     permission_classes = (MobileAPIPermission,)
 
@@ -265,6 +261,7 @@ class DirectAwardDetail(APIView):
         serializer = DirectAwardDetailSerializer(instance)
         data = serializer.data
         return Response(serializer.data)
+
 
 class Enrollments(APIView):
     permission_classes = (MobileAPIPermission,)

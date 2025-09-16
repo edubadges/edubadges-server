@@ -41,6 +41,7 @@ class BadgeClassExtensionSerializer(serializers.ModelSerializer):
 
     def get_value(self, obj):
         json_dict = json.loads(obj.original_json)
+        # Consistent naming convention enables to parse "type": ["Extension", "extensions:ECTSExtension"], "ECTS": 2.5}
         extension_key = json_dict["type"][1].split(":")[1].removesuffix("Extension")
         return json_dict[extension_key]
 
