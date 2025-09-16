@@ -31,6 +31,7 @@ from .oidc_client import OidcClient
 
 logger = logging.getLogger('Badgr.Debug')
 
+
 def encode(username, password):  # client_id, secret
     """Returns an HTTP basic authentication encrypted string given a valid
     username and password.
@@ -61,7 +62,7 @@ def login(request):
         'state': state,
         'client_id': settings.EDU_ID_CLIENT,
         'response_type': 'code',
-        'scope': 'openid eduid.nl/links',
+        'scope': 'openid eduid.nl/links profile',
         'redirect_uri': f'{settings.HTTP_ORIGIN}/account/eduid/login/callback/',
         'claims': '{"id_token":{"preferred_username":null,"given_name":null,"family_name":null,"email":null,'
         '"eduid":null, "eduperson_scoped_affiliation":null, "preferred_username":null, "uids":null}}',
@@ -113,7 +114,10 @@ def callback(request):
     )
     logger.debug(f'Token response: {token_response}')
     if token_response.status_code != 200:
-        error = 'Server error: User info endpoint error (http %s). Try alternative login methods' % token_response.status_code
+        error = (
+            'Server error: User info endpoint error (http %s). Try alternative login methods'
+            % token_response.status_code
+        )
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
 
@@ -220,7 +224,7 @@ def after_terms_agreement(request, **kwargs):
         logger.info(f'Stored validated name {payload["given_name"]} {payload["family_name"]}')
 
     access_token = kwargs.get('access_token', None)
-    
+
     oidc_client = OidcClient.get_client_from_settings()
     try:
         userinfo = oidc_client.get_userinfo(access_token)
@@ -231,15 +235,15 @@ def after_terms_agreement(request, **kwargs):
 
     request.user.clear_affiliations()
     if userinfo.eppn() and userinfo.schac_home_organization():  # Is ingeschreven bij instituut
-            request.user.add_affiliations(
-                [
-                    {
-                        'eppn': userinfo.eppn(),
-                        'schac_home': userinfo.schac_home_organization(),
-                    }
-                ]
-            )
-            logger.info(f'Stored affiliations {userinfo.eppn()} {userinfo.schac_home_organization()}')
+        request.user.add_affiliations(
+            [
+                {
+                    'eppn': userinfo.eppn(),
+                    'schac_home': userinfo.schac_home_organization(),
+                }
+            ]
+        )
+        logger.info(f'Stored affiliations {userinfo.eppn()} {userinfo.schac_home_organization()}')
 
     if request.user.validated_name and not userinfo.has_validated_name():
         ret = HttpResponseRedirect(ret.url + '&revalidate-name=true')
@@ -249,7 +253,7 @@ def after_terms_agreement(request, **kwargs):
             sender=request.user.__class__,
             user=request.user,
             old_validated_name=request.user.validated_name,
-            new_validated_name=userinfo.validated_name()
+            new_validated_name=userinfo.validated_name(),
         )
         request.user.validated_name = userinfo.validated_name()
     else:
@@ -259,7 +263,7 @@ def after_terms_agreement(request, **kwargs):
             old_validated_name=request.user.validated_name,
             new_validated_name=None,
         )
-        request.user.validated_name = None # Override with validated name from myconext endpoint
+        request.user.validated_name = None  # Override with validated name from myconext endpoint
     request.user.save()
 
     if not social_account:
@@ -303,6 +307,7 @@ def print_logout_message(sender, user, request, **kwargs):
 
 def print_login_message(sender, user, request, **kwargs):
     print('user logged in')
+
 
 user_logged_out.connect(print_logout_message)
 user_logged_in.connect(print_login_message)
