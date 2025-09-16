@@ -863,10 +863,10 @@ students = [
         'first_name': 'Gloria',
         'last_name': 'Binnendijk',
         'email': 'gbinnendijk.tun@dev.eduwallet.nl',
-        'uid': '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b@tun.nb',
+        'uid': '40a01af18892db9ccdce27e7ab1661ece5638fe08520ce814cb03cd629db9c5b@tun.nb',  # UID regenerated to fix duplicate
         'affiliation': {
             'schac_home': 'tun.nb',
-            'eppn': '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b@tun.nb',
+            'eppn': '40a01af18892db9ccdce27e7ab1661ece5638fe08520ce814cb03cd629db9c5b@tun.nb',
         },
         'extra_data': {'eduid': '50d04fe7-89cc-4fa3-84b0-56a806d99e16'},
     },
@@ -959,10 +959,10 @@ students = [
         'first_name': 'Kian',
         'last_name': 'Huisman',
         'email': 'khuisman.tun@dev.eduwallet.nl',
-        'uid': '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b@tun.nb',
+        'uid': 'c6cc8639b4f4487389ee4bc9cabcf5fa35c15e9059af9961d6ba8d53616e3333@tun.nb',  # UID regenerated to fix duplicate
         'affiliation': {
             'schac_home': 'tun.nb',
-            'eppn': '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b@tun.nb',
+            'eppn': 'c6cc8639b4f4487389ee4bc9cabcf5fa35c15e9059af9961d6ba8d53616e3333@tun.nb',
         },
         'extra_data': {'eduid': '65825447-1461-4d49-ba56-95d200ac10fc'},
     },
@@ -971,10 +971,10 @@ students = [
         'first_name': 'Bente',
         'last_name': 'Lagerweij',
         'email': 'blagerweij.tun@dev.eduwallet.nl',
-        'uid': 'd4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35@tun.nb',
+        'uid': '9233d48db669cfa8fc6431451a16bf581a14ff2e044af5e2a1a5fc1d9bd1619b@tun.nb',  # UID regenerated to fix duplicate
         'affiliation': {
             'schac_home': 'tun.nb',
-            'eppn': 'd4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35@tun.nb',
+            'eppn': '9233d48db669cfa8fc6431451a16bf581a14ff2e044af5e2a1a5fc1d9bd1619b@tun.nb',
         },
         'extra_data': {'eduid': 'cf59e590-4d8b-433e-944d-33f4e9ca00a4'},
     },
@@ -995,10 +995,10 @@ students = [
         'first_name': 'Kevin',
         'last_name': 'Hoppenbrouwer',
         'email': 'khoppenbrouwer.tun@dev.eduwallet.nl',
-        'uid': '2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3@tun.nb',
+        'uid': '43515a0ad540996c1276322501426901e156adfba73c672cbf23fb6bf6e079cc@tun.nb',  # UID regenerated to fix duplicate
         'affiliation': {
             'schac_home': 'tun.nb',
-            'eppn': '2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3@tun.nb',
+            'eppn': '43515a0ad540996c1276322501426901e156adfba73c672cbf23fb6bf6e079cc@tun.nb',
         },
         'extra_data': {'eduid': 'cafc6cf2-f029-49c2-bb11-3f1e8197e081'},
     },
@@ -1007,10 +1007,10 @@ students = [
         'first_name': 'Linde',
         'last_name': 'Roosenboom',
         'email': 'lroosenboom.tun@dev.eduwallet.nl',
-        'uid': '2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3@tun.nb',
+        'uid': '6534ed7c93d2bd29a3de45acf18b8e3ffa50c3175fd7ceee7acb0a638ab552da@tun.nb',  # UID regenerated to fix duplicate
         'affiliation': {
             'schac_home': 'tun.nb',
-            'eppn': '2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3@tun.nb',
+            'eppn': '6534ed7c93d2bd29a3de45acf18b8e3ffa50c3175fd7ceee7acb0a638ab552da@tun.nb',
         },
         'extra_data': {'eduid': 'bc6a1cdd-267e-4c22-98f1-0ee7714c14e6'},
     },
