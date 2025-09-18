@@ -8,30 +8,11 @@ from allauth.socialaccount.models import SocialAccount
 
 from badgeuser.models import BadgeUser, TermsAgreement, StudentAffiliation
 from institution.models import Institution
-from mainsite.seeds.constants import INSTITUTION_UNIVERSITY_EXAMPLE_ORG
 from staff.models import InstitutionStaff
 from .util import add_terms_institution
 
 # Institution
 institutions = [
-    {
-        'name_english': INSTITUTION_UNIVERSITY_EXAMPLE_ORG,
-        'description_english': 'The university example is always a good place to hang out',
-        'description_dutch': 'De university example is altijd een goede plek om rond te hangen (wat een vertaling)',
-        'institution_type': 'WO',
-    },
-    {
-        'name_english': 'harvard-example.edu',
-        'description_english': 'Harward Example',
-        'description_dutch': 'Hardward Example',
-        'institution_type': 'MBO',
-    },
-    {
-        'name_english': 'yale-uni-example.edu',
-        'description_english': 'Yale Uni Example',
-        'description_dutch': 'Yale Uni Example',
-        'institution_type': 'HBO',
-    },
     {
         'name_english': 'mbob.nl',
         'description_english': 'MBO Beek Institution',
@@ -173,9 +154,6 @@ institution_admins = [
         'institution_name': 'hbot.nl',
         'uid': '4f516a9d3c32c0a19a4e9fe05b3185feef43a5ae',
     },
-]
-
-teachers = [
     # professor 4
     {
         'username': 'g_ohm',
@@ -185,6 +163,9 @@ teachers = [
         'institution_name': 'tun.nb',
         'uid': 'd2ba7c82a401a4c8f14b53d43af4d6c26712f971',
     },
+]
+
+teachers = [
     # teacher 1
     {
         'username': 'jstiglitz',
