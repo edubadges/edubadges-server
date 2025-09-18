@@ -9,7 +9,6 @@ from django.db import connection
 from random import randrange
 from badgeuser.models import BadgeUser
 from mainsite.tests.base import SetupHelper
-from mainsite.seeds.constants import INSTITUTION_UNIVERSITY_EXAMPLE_ORG
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeInstance
 import badgrlog
@@ -78,7 +77,7 @@ def run_seeds():
 
 def run_scaled_seed(scale):
     setup_helper = SetupHelper()
-    institution = Institution.objects.get(identifier=INSTITUTION_UNIVERSITY_EXAMPLE_ORG)
+    institution = Institution.objects.get(identifier='hbot.nl')
     faculty_name = 'Many Assertions'
     faculty, _ = Faculty.objects.get_or_create(
         name_english=faculty_name,
@@ -93,7 +92,7 @@ def run_scaled_seed(scale):
         description_dutch=f'Beschrijving voor {issuer_name}',
         faculty=faculty,
         old_json='{}',
-        url_english=f'https://issuer',
+        url_english='https://issuer',
         email='issuer@info.nl',
         image_english='uploads/issuers/surf.png',
     )
