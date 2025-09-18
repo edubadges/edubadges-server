@@ -33,6 +33,46 @@ from .provider import SurfConextProvider
 logger = logging.getLogger('Badgr.Debug')
 
 
+def get_mapped_institution_identifier(original_identifier, user_id=None):
+    """
+    Map institution identifiers for staff logins via SURFconext.
+    
+    Args:
+        original_identifier: The original schac_home_organization value
+        user_id: The user ID (sub claim) for user-specific mappings
+    
+    Returns:
+        str: The mapped institution identifier or original if no mapping exists
+    """
+    
+    # General institution mappings
+    institution_mappings = {
+        'university-example.org': 'mbob.nl',
+        'harvard-example.edu': 'uvh.nl', 
+        'yale-uni-example.edu': 'hbot.nl',
+    }
+    
+    # User-specific mappings (user_id -> institution mapping)
+    user_specific_mappings = {
+        'd2ba7c82a401a4c8f14b53d43af4d6c26712f971': 'tun.nb',  # professor4 (g_ohm)
+    }
+    
+    # First check for user-specific mapping
+    if user_id and user_id in user_specific_mappings:
+        mapped_identifier = user_specific_mappings[user_id]
+        logger.info(f'Applied user-specific institution mapping for {user_id}: {original_identifier} -> {mapped_identifier}')
+        return mapped_identifier
+    
+    # Then check for general institution mapping
+    if original_identifier in institution_mappings:
+        mapped_identifier = institution_mappings[original_identifier]
+        logger.info(f'Applied institution mapping: {original_identifier} -> {mapped_identifier}')
+        return mapped_identifier
+    
+    # Return original if no mapping found
+    return original_identifier
+
+
 def login(request):
     """
     Redirect to login page of SURFconext openID, this is "Where are you from" page
@@ -161,7 +201,9 @@ def callback(request):
     ret = HttpResponseRedirect(new_url)
 
     if not request.user.is_anonymous:  # the social login succeeded
-        institution_identifier = payload['schac_home_organization']
+        original_institution_identifier = payload['schac_home_organization']
+        user_id = payload['sub']
+        institution_identifier = get_mapped_institution_identifier(original_institution_identifier, user_id)
         try:
             institution = Institution.objects.get(identifier=institution_identifier)
             # the institution exists
