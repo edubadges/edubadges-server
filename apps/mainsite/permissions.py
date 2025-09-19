@@ -35,7 +35,7 @@ class TeachPermission(permissions.BasePermission):
 
 class MobileAPIPermission(permissions.BasePermission):
     """
-    Allows access only to student
+    Allows access only to the mobile API
     """
 
     def has_permission(self, request, view):

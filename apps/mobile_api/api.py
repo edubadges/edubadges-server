@@ -105,7 +105,7 @@ class Login(APIView):
         response = requests.get(url, headers=headers, timeout=60)
         if response.status_code != 200:
             error = f'Server error: eduID eppn endpoint error ({response.status_code})'
-            logger.debug(error)
+            logger.error(error)
             return Response(data={"error": str(error)}, status=response.status_code)
 
         eduid_response = response.json()
@@ -175,7 +175,7 @@ class BadgeInstanceDetail(APIView):
 
     @extend_schema(
         methods=['GET'],
-        description='Get badge details for the user',
+        description='Get details for a badge instance',
         parameters=[
             OpenApiParameter(
                 name="entity_id",
@@ -395,10 +395,9 @@ class BadgeCollectionsDetailView(APIView):
         badge_collection = get_object_or_404(BadgeInstanceCollection, user=request.user, entity_id=entity_id)
         serializer = BadgeInstanceCollectionSerializer(badge_collection, data=request.data,
                                                        context={"request": request}, partial=False)
-        if serializer.is_valid():
-            badge_collection = serializer.save()
-            return Response(BadgeInstanceCollectionSerializer(badge_collection).data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        badge_collection = serializer.save()
+        return Response(BadgeInstanceCollectionSerializer(badge_collection).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=None,

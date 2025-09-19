@@ -8,6 +8,10 @@ from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 
+GENERAL_TERMS_PATH = "/mobile/api/accept-general-terms"
+
+API_LOGIN_PATH = "/mobile/api/login"
+
 
 class TemporaryUser:
 
@@ -55,12 +59,12 @@ class MobileAPIAuthentication(BaseAuthentication):
         if not introspect_json['active']:
             logger.info(f'MobileAPIAuthentication inactive introspect_json {introspect_json}')
             return None
-        if not 'eduid' in introspect_json:
-            logger.info(f'MobileAPIAuthentication return None as no eduid in introspect_json {introspect_json}')
+        if not settings.EDUID_IDENTIFIER in introspect_json:
+            logger.info(f'MobileAPIAuthentication return None as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}')
             return None
 
-        social_account = SocialAccount.objects.filter(uid=introspect_json['eduid']).first()
-        login_endpoint = request.path == "/mobile/api/login"
+        social_account = SocialAccount.objects.filter(uid=introspect_json[settings.EDUID_IDENTIFIER]).first()
+        login_endpoint = request.path == API_LOGIN_PATH
         if social_account is None:
             if login_endpoint:
                 # further logic is dealt with in /mobile/api/login
@@ -71,7 +75,7 @@ class MobileAPIAuthentication(BaseAuthentication):
                 return None
         # SocialAccount always has a User
         user = social_account.user
-        agree_terms_endpoint = request.path == "/mobile/api/accept-general-terms"
+        agree_terms_endpoint = request.path == GENERAL_TERMS_PATH
         if login_endpoint or agree_terms_endpoint:
             # further logic is dealt with in /mobile/api/login
             request.mobile_api_call = True
