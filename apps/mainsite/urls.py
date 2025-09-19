@@ -79,6 +79,8 @@ urlpatterns = [
     path('insights/', include('insights.api_urls')),
     # include queries endpoints
     path('queries/', include('queries.api_urls')),
+    # include mobile_api endpoints
+    path('mobile/api/', include('mobile_api.api_urls')),
     # ob3 poc, proxies impierce endpoints
     path('ob3/', include('ob3.api_urls')),
     # include badge_connect endpoints

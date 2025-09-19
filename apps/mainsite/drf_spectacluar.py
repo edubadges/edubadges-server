@@ -1,4 +1,6 @@
 import os
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter, \
+    OpenApiTypes
 
 included_endpoint_prefixes = [
     '/directaward/create',
@@ -19,6 +21,7 @@ included_endpoint_prefixes = [
     '/public/assertions',
     '/public/validator',
     '/public/institution',
+    '/mobile/api',
 ]
 
 excluded_keywords = ['pubkey', 'baked', 'image']
@@ -42,11 +45,25 @@ def custom_postprocessing_hook(result, generator, request, public):
     result['security'] = ([{'openId': []}],)
     url_ = os.environ['EDUID_PROVIDER_URL']
     result['components']['securitySchemes'] = {
-        'openId': {'type': 'openIdConnect', 'openIdConnectUrl': f'{url_}/.well-known/openid-configuration'}
+        'openId': {
+            'type': 'openIdConnect',
+            'openIdConnectUrl': f'{url_}/.well-known/openid-configuration'
+        }
+    }
+    mobile_parameter = {
+        "name": "x-requested-with",
+        "schema": {"type": "string", "enum": ["mobile"]},
+        "description": "x-requested-with header",
+        "in": "header",
+        "required": True
     }
     for path, details in result['paths'].items():
         for method, conf in details.items():
             conf['security'] = [{'openId': ['openid']}]
+            if path.startswith("/mobile/"):
+                parameters = conf.get("parameters", [])
+                parameters.append(mobile_parameter)
+                conf["parameters"] = parameters
     return result
 
 

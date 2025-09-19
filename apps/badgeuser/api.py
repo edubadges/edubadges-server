@@ -1,5 +1,7 @@
 import datetime
-
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter, \
+    OpenApiTypes
+from rest_framework import serializers
 from django.db.models import ProtectedError
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -123,6 +125,12 @@ class AcceptTermsView(APIView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ['post', 'delete']
 
+    @extend_schema(
+        methods=['POST'],
+        request=TermsAgreementSerializer,
+        responses=TermsAgreementSerializer,
+        description="Accept terms",
+    )
     def post(self, request, **kwargs):
         if request.data:
             serializer = TermsAgreementSerializer(data=request.data,
@@ -133,6 +141,16 @@ class AcceptTermsView(APIView):
             return Response(serializer.data, status=HTTP_201_CREATED)
         raise BadgrApiException400('Cannot accept terms, no data sent')
 
+    @extend_schema(
+        methods=['DELETE'],
+        request=inline_serializer(
+            name='AcceptTermsReject',
+            fields={
+                'terms_agreement_entity_id': serializers.CharField()
+            },
+        ),
+        description="Reject terms",
+    )
     def delete(self, request, **kwargs):
         if request.data:
             term_agreement = TermsAgreement.objects.get(entity_id=request.data['terms_agreement_entity_id'])

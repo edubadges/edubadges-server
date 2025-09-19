@@ -105,8 +105,9 @@ def callback(request):
         'Content-Type': 'application/x-www-form-urlencoded',
         'Cache-Control': 'no-cache',
     }
+    token_url = f"{settings.EDUID_PROVIDER_URL}/token"
     response = requests.post(
-        '{}/token'.format(settings.EDUID_PROVIDER_URL),
+        token_url,
         data=urllib.parse.urlencode(payload),
         headers=headers,
         timeout=60,
@@ -140,7 +141,8 @@ def callback(request):
             'Accept': 'application/json, application/json;charset=UTF-8',
             'Authorization': f'Bearer {access_token}',
         }
-        response = requests.get(f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links', headers=headers, timeout=60)
+        eduid_url = f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links'
+        response = requests.get(eduid_url, headers=headers, timeout=60)
         if response.status_code != 200:
             error = f'Server error: eduID eppn endpoint error ({response.status_code})'
             logger.debug(error)

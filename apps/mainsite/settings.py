@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'staff',
     'insights',
     'queries',
+    'mobile_api',
     'lti13',
     'ob3',
     'notifications',
@@ -430,6 +431,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'mainsite.mobile_api_authentication.MobileAPIAuthentication',
         'mainsite.oidc_authentication.OIDCAuthentication',
         'mainsite.authentication.BadgrOAuth2Authentication',
         'entity.authentication.ExplicitCSRFSessionAuthentication',

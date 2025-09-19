@@ -208,4 +208,5 @@ Set these values in your settings_local.py file to configure the application to 
 ### Swagger
 
 http://127.0.0.1:8000/api/schema/swagger-ui/
+https://api-test.edubadges.nl/api/schema/swagger-ui/#/mobile
 https://api.edubadges.nl/api/schema/swagger-ui
