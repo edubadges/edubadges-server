@@ -130,7 +130,10 @@ class Query(object):
     faculty = graphene.Field(FacultyType, id=graphene.String())
 
     def resolve_current_institution(self, info, **kwargs):
-        return info.context.user.institution
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            return None
+        return user.institution
 
     def resolve_issuers(self, info, **kwargs):
         user = info.context.user
@@ -138,9 +141,12 @@ class Query(object):
                 iss.has_permissions(user, ['may_update'])]
 
     def resolve_institutions(self, info, **kwargs):
-        is_superuser = hasattr(info.context.user, 'is_superuser') and info.context.user.is_superuser
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            return []
+        is_superuser = hasattr(user, 'is_superuser') and user.is_superuser
         return [inst for inst in Institution.objects.all() if
-                inst.has_permissions(info.context.user, ['may_read']) or is_superuser]
+                inst.has_permissions(user, ['may_read']) or is_superuser]
 
     def resolve_public_institution(self, info, **kwargs):
         id = kwargs.get('id')

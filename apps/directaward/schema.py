@@ -39,7 +39,10 @@ class Query(object):
     direct_award = graphene.Field(DirectAwardType, id=graphene.String())
 
     def resolve_direct_awards(self, info, **kwargs):
-        return list(info.context.user.direct_awards)
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            return []
+        return list(user.direct_awards)
 
     def resolve_direct_award(self, info, **kwargs):
         id = kwargs.get('id')
