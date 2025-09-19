@@ -13,7 +13,10 @@ def resolver_blocker_for_students(f):
 
     def wrapper(*args, **kwargs):
         info = args[1]
-        if not hasattr(info.context.user, 'is_teacher') or not getattr(info.context.user, 'is_teacher'):
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            raise GraphQLException('Authentication required to retrieve {} of {}'.format(info.field_name, info.parent_type))
+        if not hasattr(user, 'is_teacher') or not getattr(user, 'is_teacher'):
             raise GraphQLException('Student may not retrieve {} of {}'.format(info.field_name, info.parent_type))
         return f(*args, **kwargs)
 
@@ -26,8 +29,11 @@ def resolver_blocker_only_for_current_user(f):
     def wrapper(*args):
         instance = args[0]
         info = args[1]
-        if info.context.user == instance or (
-                hasattr(instance, 'user') and getattr(instance, 'user') == info.context.user):
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            raise GraphQLException('Authentication required for this call')
+        if user == instance or (
+                hasattr(instance, 'user') and getattr(instance, 'user') == user):
             return f(*args)
         raise GraphQLException('This call is only for the current user')
 
@@ -39,7 +45,10 @@ def resolver_blocker_for_super_user(f):
 
     def wrapper(*args, **kwargs):
         info = args[1]
-        if not getattr(info.context.user, 'is_superuser', False):
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            raise GraphQLException('Authentication required to retrieve {} of {}'.format(info.field_name, info.parent_type))
+        if not getattr(user, 'is_superuser', False):
             raise GraphQLException('Only super users may retrieve {} of {}'.format(info.field_name, info.parent_type))
         return f(*args, **kwargs)
 
