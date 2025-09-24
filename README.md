@@ -1,7 +1,31 @@
 ![Edubadges](logo.png)
 
-# Edubadges Server (Backend)
+# Product Overview
+Edubadges is a digital badge management platform for educational institutions, built on the Open Badges standard. Edubadges-server serves as the backend API for issuing, managing, and sharing digital credentials in educational contexts.
 
+## Core Functionality
+- **Badge Issuance**: Create and issue digital badges to students and learners
+- **Badge Management**: Comprehensive badge lifecycle management for issuers
+- **User Management**: Support for badge earners, issuers, and institutional administrators
+- **Integration**: LTI 1.3 support for learning management systems
+- **Authentication**: Multi-provider SSO including eduID and SURFConext
+- **Micro-credentials**: Support for smaller certification units beyond full diplomas
+
+## Key Concepts
+- **Badges**: Digital credentials following Open Badges specification
+- **Issuers**: Organizations or individuals who create and award badges  
+- **Earners**: Recipients of badges (students, learners)
+- **Institutions**: Educational organizations managing badge programs
+- **Direct Awards**: Mechanism for awarding badges directly to recipients
+- **Collections**: Groupings of related badges for portfolio management
+
+## Target Users
+- Educational institutions (universities, schools)
+- Students and learners earning credentials
+- Instructors and administrators issuing badges
+- HR departments recognizing skills and achievements
+
+# Edubadges Server (Backend)
 [![Build Status](https://travis-ci.com/edubadges/edubadges-server.svg?branch=master)](https://travis-ci.com/edubadges/edubadges-server)
 [![codecov](https://codecov.io/gh/edubadges/edubadges-server/branch/master/graph/badge.svg)](https://codecov.io/gh/edubadges/edubadges-server)
 
