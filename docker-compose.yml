@@ -30,7 +30,7 @@ services:
       - EDUID_IDENTIFIER=sub
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
       - EMAIL_USE_TLS=0
-      - EMAIL_HOST=mailhog
+      - EMAIL_HOST=localhost
       - EMAIL_PORT=1025
       - LTI_FRONTEND_URL=localhost
       - MEMCACHED=memcached:11211
@@ -52,6 +52,13 @@ services:
       - OB3_AGENT_URL_SPHEREON=https://agent.poc15.eduwallet.nl/oid4vci/admin/credentials
       - OB3_AGENT_AUTHZ_TOKEN_SPHEREON=${OB3_AGENT_AUTHZ_TOKEN_SPHEREON}
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
+      - USE_S3=True
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - AWS_S3_CUSTOM_DOMAIN=localhost:9000
+      - AWS_STORAGE_BUCKET_NAME=edubadges
+      - AWS_S3_USE_SSL=False
+      - AWS_S3_REGION_NAME=us-east-1
     networks:
       - shared-network
       - edubadges-server
@@ -61,6 +68,8 @@ services:
       memcached:
         condition: service_started
       mailhog:
+        condition: service_started
+      minio:
         condition: service_started
     ports:
       - "8000:8000"
@@ -74,7 +83,7 @@ services:
       POSTGRES_PASSWORD: ${BADGR_DB_PASSWORD}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "5434:5432"
     # Health check for PostgreSQL
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U badgr -d badgr"]
@@ -103,6 +112,21 @@ services:
     networks:
       - edubadges-server
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - edubadges-server
+
 networks:
   shared-network:
     external: true
@@ -112,3 +136,4 @@ networks:
 volumes:
   db-data:
   postgresql.conf:
+  minio-data:
