@@ -1,5 +1,5 @@
-# Use the official Python image from the Docker Hub
-FROM python:3.9
+# Use the official uv image with Python 3.9
+FROM ghcr.io/astral-sh/uv:python3.9-bookworm
 
 # Install system dependencies for cairo and MySQL client
 RUN apt-get update && apt-get install -y \
@@ -21,7 +21,7 @@ COPY ./docker/entrypoint-dev.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv pip install --system --no-cache -r requirements.txt
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
