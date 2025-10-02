@@ -334,6 +334,7 @@ class EmailMessageMaker:
             'badgeclass_name': badgeclass.name,
             'institution_name': badgeclass.issuer.faculty.institution.name,
             'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
+            'da_creationdate': direct_award.created_at.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
 
