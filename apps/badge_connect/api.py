@@ -47,7 +47,7 @@ class BadgeConnectView(APIView):
             raise PermissionDenied()
         email = introspect_json['email']
         badge_instance = BadgeInstance.objects.get(user__email=email, entity_id=kwargs.get('entity_id'))
-        if not badge_instance.public or badge_instance.revoked:
+        if badge_instance.revoked:
             raise Http404
 
         return Response({'validated': True}, status=status.HTTP_200_OK)

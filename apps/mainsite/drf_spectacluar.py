@@ -23,7 +23,6 @@ included_endpoint_prefixes = [
     '/issuer/revoke-assertions',
     '/public/institutions',
     '/public/issuers',
-    '/public/badges',
     '/public/assertions',
     '/public/validator',
     '/public/institution',

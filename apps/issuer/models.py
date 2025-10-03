@@ -1061,8 +1061,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
 
     signature = models.TextField(blank=True, null=True, default=None)
 
-    public = models.BooleanField(default=False)
-
     include_evidence = models.BooleanField(default=False)
     grade_achieved = models.CharField(max_length=254, blank=True, null=True, default=None)
     include_grade_achieved = models.BooleanField(default=False)
@@ -1136,6 +1134,10 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     def issuer_jsonld_id(self):
         return self.cached_issuer.jsonld_id
 
+    """ 
+    While the name suggests this returns a URL that can be used by anyone to access the badge instance, it
+    will return a URL even for private badge instances. 
+    """
     @property
     def public_url(self):
         return OriginSetting.HTTP + self.get_absolute_url()
@@ -1591,7 +1593,6 @@ class BadgeInstanceCollection(BaseAuditedModel, BaseVersionedEntity, CacheModel)
     name = models.CharField(max_length=255, blank=False, null=False, default=None)
     description = models.TextField(blank=True, null=True, default=None)
     user = models.ForeignKey('badgeuser.BadgeUser', blank=True, null=True, on_delete=models.CASCADE)
-    public = models.BooleanField(default=False)
     badge_instances = models.ManyToManyField('issuer.BadgeInstance', blank=True)
 
     def validate_unique(self, exclude=None):

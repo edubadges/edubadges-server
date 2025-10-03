@@ -159,7 +159,7 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         fields = ('id', 'entity_id', 'badgeclass', 'identifier', 'image', 'updated_at',
                   'recipient_identifier', 'recipient_type', 'revoked', 'issued_on',
                   'revocation_reason', 'expires_at', 'acceptance', 'created_at',
-                  'public', 'award_type', 'grade_achieved')
+                  'award_type', 'grade_achieved')
 
     def resolve_validation(self, info, **kwargs):
         return self.validate()
@@ -174,15 +174,11 @@ class BadgeInstanceCollectionType(DjangoObjectType, ):
 
     class Meta:
         model = BadgeInstanceCollection
-        fields = ('id', 'entity_id', 'name', 'description', 'public', 'updated_at', 'created_at')
+        fields = ('id', 'entity_id', 'name', 'description', 'updated_at', 'created_at')
 
     @resolver_blocker_only_for_current_user
     def resolve_badge_instances(self, info, **kwargs):
         return list(BadgeInstance.objects.filter(badgeinstancecollection=self))
-
-    def resolve_public_badge_instances(self, info, **kwargs):
-        return list(BadgeInstance.objects.filter(badgeinstancecollection=self, public=True, revoked=False))
-
 
 class BadgeInstanceConnection(Connection):
     class Meta:
@@ -389,9 +385,8 @@ class Query(object):
         id = kwargs.get('id')
         if id is not None:
             bc = BadgeInstanceCollection.objects.get(entity_id=id)
-            # Called anonymous in public collection page
-            user = info.context.user
-            if bc.public or (hasattr(user, 'is_authenticated') and user.is_authenticated and bc.user_id == user.id):
+            # Only allow access to current user
+            if bc.user_id == info.context.user.id:
                 return bc
         return None
 
