@@ -294,9 +294,9 @@ class EmailMessageMaker:
         badgeclass = direct_award.badgeclass
         template = 'email/earned_direct_award_new.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
-        en_end_date = (direct_award.expiration_date.strftime('%d %B %Y'),)
+        en_end_date = direct_award.expiration_date.strftime('%d %B %Y')
         locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
-        nl_end_date = (direct_award.expiration_date.created_at.strftime('%d %B %Y'),)
+        nl_end_date = direct_award.expiration_date.created_at.strftime('%d %B %Y')
         locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
         email_vars = {
             'badgeclass_image': badgeclass_image,
@@ -331,9 +331,9 @@ class EmailMessageMaker:
         template = 'email/reminder_direct_award_new.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
 
-        en_create_date = (direct_award.created_at.strftime('%d %B %Y'),)
+        en_create_date = direct_award.created_at.strftime('%d %B %Y')
         locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
-        nl_create_date = (direct_award.created_at.strftime('%d %B %Y'),)
+        nl_create_date = direct_award.created_at.strftime('%d %B %Y')
         locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
 
         email_vars = {
