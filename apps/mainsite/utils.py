@@ -332,8 +332,10 @@ class EmailMessageMaker:
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
 
         en_create_date = direct_award.created_at.strftime('%d %B %Y')
+        en_end_date = direct_award.expiration_date.strftime('%d %B %Y')
         locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
         nl_create_date = direct_award.created_at.strftime('%d %B %Y')
+        nl_end_date = direct_award.expiration_date.strftime('%d %B %Y')
         locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
 
         email_vars = {
@@ -345,7 +347,8 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': badgeclass.issuer.faculty.institution.name,
-            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
+            'da_enddate_nl': nl_end_date,
+            'da_enddate_en': en_end_date,
             'da_creationdate_nl': nl_create_date,
             'da_creationdate_en': en_create_date,
         }
