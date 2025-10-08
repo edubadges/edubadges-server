@@ -315,22 +315,36 @@ if USE_S3:
 
     # Media URL configuration
     if AWS_S3_CUSTOM_DOMAIN:
-        MEDIA_URL = f'{"https" if AWS_S3_USE_SSL else "http"}://{AWS_S3_CUSTOM_DOMAIN}/'
+        ENDPOINT_URL = f'{"https" if AWS_S3_USE_SSL else "http"}://{AWS_S3_CUSTOM_DOMAIN}/'
     else:
-        MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
+        ENDPOINT_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
         if AWS_S3_ENDPOINT_URL:  # MinIO case
             from urllib.parse import urlparse
 
             parsed = urlparse(AWS_S3_ENDPOINT_URL)
-            MEDIA_URL = f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
+            ENDPOINT_URL = f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
 
     STORAGES = {
         'default': {
             'BACKEND': 'storages.backends.s3.S3Storage',
-            'OPTIONS': {},
+            'OPTIONS': {
+                'access_key': AWS_ACCESS_KEY_ID,
+                'secret_key': AWS_SECRET_ACCESS_KEY,
+                'bucket_name': AWS_STORAGE_BUCKET_NAME,
+                'region_name': AWS_S3_REGION_NAME,
+                'endpoint_url': ENDPOINT_URL,
+                'use_ssl': AWS_S3_USE_SSL,
+                'signature_version': AWS_S3_SIGNATURE_VERSION,
+                'default_acl': AWS_DEFAULT_ACL,
+                'object_parameters': AWS_S3_OBJECT_PARAMETERS,
+                'custom_domain': AWS_S3_CUSTOM_DOMAIN,
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
         },
     }
- 
+
 ##
 #
 #   Fixtures
@@ -378,7 +392,7 @@ LOGGING = {
         },
         'django': {
             'handlers': ['console'],  # Replace stream and email handler with console
-            'level': LOG_LEVEL,
+            'level': logging.ERROR,
             'propagate': False,  # Don't propagate to root logger as that will cause duplicate logs
         },
     },
