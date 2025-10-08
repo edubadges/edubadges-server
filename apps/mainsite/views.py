@@ -1,24 +1,22 @@
 import base64
+import mimetypes
 import time
 
 from django import forms
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.files.storage import default_storage
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
-from django.http import HttpResponseForbidden
-from django.shortcuts import redirect
-from django.template import loader, TemplateDoesNotExist
+from django.http import FileResponse, HttpResponse, HttpResponseForbidden, HttpResponseNotFound, HttpResponseServerError
+from django.template import TemplateDoesNotExist, loader
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
-from django.views.generic import FormView, RedirectView
+from django.views.generic import FormView
 from django.views.static import serve
-
 from issuer.models import BadgeInstance
 from mainsite.admin_actions import clear_cache, send_application_report
-from mainsite.models import EmailBlacklist, BadgrApp
-
+from mainsite.models import EmailBlacklist
 
 ##
 #
@@ -33,9 +31,13 @@ def error404(request, exception):
         template = loader.get_template('error/404.html')
     except TemplateDoesNotExist:
         return HttpResponseServerError('<h1>Page not found (404)</h1>', content_type='text/html')
-    return HttpResponseNotFound(template.render({
-        'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
-    }))
+    return HttpResponseNotFound(
+        template.render(
+            {
+                'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
+            }
+        )
+    )
 
 
 @xframe_options_exempt
@@ -44,9 +46,14 @@ def error500(request):
         template = loader.get_template('error/500.html')
     except TemplateDoesNotExist:
         return HttpResponseServerError('<h1>Server Error (500)</h1>', content_type='text/html')
-    return HttpResponseServerError(template.render({
-        'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
-    }))
+    return HttpResponseServerError(
+        template.render(
+            {
+                'STATIC_URL': getattr(settings, 'STATIC_URL', '/static/'),
+            }
+        )
+    )
+
 
 def email_unsubscribe(request, *args, **kwargs):
     if time.time() > int(kwargs['expiration']):
@@ -66,8 +73,10 @@ def email_unsubscribe(request, *args, **kwargs):
     except IntegrityError:
         pass
 
-    return HttpResponse("You will no longer receive email notifications for \
-                        earned badges from this domain.")
+    return HttpResponse(
+        'You will no longer receive email notifications for \
+                        earned badges from this domain.'
+    )
 
 
 class SitewideActionForm(forms.Form):
@@ -78,12 +87,9 @@ class SitewideActionForm(forms.Form):
         ACTION_CLEAR_CACHE: clear_cache,
         ACTION_SEND_APP_REPORT: send_application_report,
     }
-    CHOICES = (
-        (ACTION_CLEAR_CACHE, 'Clear Cache'),
-        (ACTION_SEND_APP_REPORT, 'Send application Report')
-    )
+    CHOICES = ((ACTION_CLEAR_CACHE, 'Clear Cache'), (ACTION_SEND_APP_REPORT, 'Send application Report'))
 
-    action = forms.ChoiceField(choices=CHOICES, required=True, label="Pick an action")
+    action = forms.ChoiceField(choices=CHOICES, required=True, label='Pick an action')
     confirmed = forms.BooleanField(required=True, label='Are you sure you want to perform this action?')
 
 
@@ -91,13 +97,13 @@ class SitewideActionFormView(FormView):
     form_class = SitewideActionForm
     template_name = 'admin/sitewide_actions.html'
     success_url = reverse_lazy('admin:index')
-    
+
     def render_to_response(self, context, **response_kwargs):
         if self.request.user.is_superuser:
             return super(SitewideActionFormView, self).render_to_response(context, **response_kwargs)
         else:
             return HttpResponseForbidden()
-        
+
     @method_decorator(staff_member_required)
     def dispatch(self, request, *args, **kwargs):
         return super(SitewideActionFormView, self).dispatch(request, *args, **kwargs)
@@ -114,13 +120,53 @@ class SitewideActionFormView(FormView):
 
 
 def serve_protected_document(request, path, document_root):
+    """
+    Serves media files with access control.
+    When USE_S3 is enabled, fetches files from S3 storage and proxies them through Django.
+    Otherwise, serves files from local filesystem.
+    """
+    # Check access permissions for assertion images
     if 'assertion-' in path:
-        assertion = BadgeInstance.objects.get(image=path)
+        try:
+            assertion = BadgeInstance.objects.get(image=path)
+        except BadgeInstance.DoesNotExist:
+            return HttpResponseNotFound('File not found')
+
+        # Check if the assertion is public or user has permission
+        has_permission = False
         if assertion.public:
-            return serve(request, path, document_root)
-        else:
-            if request.user.is_authenticated:
-                if request.user is assertion.user or request.user.get_permissions(assertion)['may_read']:
-                    return serve(request, path, document_root)
-        return HttpResponseForbidden()
-    return serve(request, path, document_root)
+            has_permission = True
+        elif request.user.is_authenticated:
+            if request.user == assertion.user or request.user.get_permissions(assertion)['may_read']:
+                has_permission = True
+
+        if not has_permission:
+            return HttpResponseForbidden()
+
+    # Serve the file from S3 or local storage
+    if getattr(settings, 'USE_S3', False):
+        try:
+            if not default_storage.exists(path):
+                return HttpResponseNotFound('File not found')
+
+            # Open the file from S3
+            file_obj = default_storage.open(path, 'rb')
+
+            # Determine content type
+            content_type, _ = mimetypes.guess_type(path)
+            if content_type is None:
+                content_type = 'application/octet-stream'
+
+            # Create a streaming response
+            response = FileResponse(file_obj, content_type=content_type)
+
+            # Set content disposition for downloads
+            response['Content-Disposition'] = f'inline; filename="{path.split("/")[-1]}"'
+
+            return response
+
+        except Exception as e:
+            return HttpResponseServerError(f'Error serving file: {str(e)}')
+    else:
+        # Serve from local filesystem
+        return serve(request, path, document_root)
