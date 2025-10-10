@@ -34,20 +34,16 @@ def clear_data():
     with connection.cursor() as cursor:
         print('Wiping data... ', end='')
 
-        dbname = environ.get('BADGR_DB_NAME')
+        schema = 'public'
         migration_filled_tables = ('auth_permission', 'django_content_type', 'django_migrations')
+        
         sql = (
-            f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' "
-            f'AND table_name NOT IN {migration_filled_tables}'
+            f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}' "
+            f"AND table_name NOT IN {migration_filled_tables} AND table_type = 'BASE TABLE'"
         )
-
-        # cursor.execute("SET session_replication_role = 'replica';")
-        # try:
         cursor.execute(sql)
         for (table,) in cursor.fetchall():
-            cursor.execute('TRUNCATE TABLE ' + table + ' CASCADE')
-        # finally:
-        # cursor.execute("SET session_replication_role = 'origin';")
+            cursor.execute(f'TRUNCATE TABLE {schema}.{table} CASCADE')
 
         print('\033[92mdone!\033[0m')
 
