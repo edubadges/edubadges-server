@@ -1,0 +1,8 @@
+InstitutionIdentifier;name;shortcode;@context;type;id;description;url;email;image;InstitutionName
+11BR;MBO Beek;mbob;https://w3id.org/openbadges/v2;Issuer;https://api-acc.edubadges.nl/public/issuers/EhqCmkp_SEKy7fwOGRRvmg;Demo issuer for MBO Beek;https://mbob.dev.eduwallet.nl/;?;;mbob.dev.eduwallet.nl/
+41GM;Universiteit Harderwijk;uvh;https://w3id.org/openbadges/v3;Issuer;https://api-acc.edubadges.nl/public/issuers/EhqCmkp_SEKy7fwOGRRvmg;Demo issuer for Universiteit Harderwijk;https://uvh.dev.eduwallet.nl/;?;;uvh.dev.eduwallet.nl/
+XXID;Theed University Naboo;tun;https://w3id.org/openbadges/v4;Issuer;https://api-acc.edubadges.nl/public/issuers/EhqCmkp_SEKy7fwOGRRvmg;Demo issuer for Theed University Naboo;https://tub.dev.eduwallet.nl/;?;;tub.dev.eduwallet.nl/
+61PL;Erasmus Universiteit Rotterdam;eur;;;;;;;;
+57GL;Avans Hogeschool - Breda;ahb;;;;;;;;
+21FD;NHL Stenden Hogeschool;nhls;;;;;;;;
+87TS;Hogeschool Terschelling;hbot;;;;;;;;

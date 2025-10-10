@@ -8,10 +8,10 @@ from badgeuser.models import Terms, BadgeUser, TermsUrl
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.models import BadgrApp
-# BadgrApp
-from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, EDU_BADGES_ISSUER_NAME
-from .util import add_terms_institution, upload_initial_images_to_s3
 
+# BadgrApp
+from .constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, EDU_BADGES_ISSUER_NAME
+from .util import add_terms_institution, seed_image_for
 
 setattr(settings, 'SUPPRESS_EMAILS', 1)
 badgr_app_id = getattr(settings, 'BADGR_APP_ID')
@@ -57,8 +57,6 @@ surf_conext_app, _ = SocialApp.objects.get_or_create(
 edu_id_app.sites.add(site)
 surf_conext_app.sites.add(site)
 
-
-
 # Superuser
 superuser, _ = BadgeUser.objects.get_or_create(
     is_superuser=1,
@@ -75,8 +73,8 @@ surf_net_institution, _ = Institution.objects.get_or_create(name_english=SURF_IN
                                                             identifier=SURF_INSTITUTION_NAME,
                                                             description_english=SURF_INSTITUTION_NAME,
                                                             description_dutch=SURF_INSTITUTION_NAME,
-                                                            image_english="uploads/issuers/surf.png",
-                                                            image_dutch="uploads/issuers/surf.png",
+                                                            image_english=seed_image_for('institution', 'logo-surf.png'),
+                                                            image_dutch=seed_image_for('institution', 'logo-surf.png'),
                                                             ob3_ssi_agent_enabled=True,
                                                             micro_credentials_enabled=True,
                                                             )
@@ -103,7 +101,7 @@ edu_badges_faculty, _ = Faculty.objects.get_or_create(name_english=EDU_BADGES_FA
                                                       )
 surf_issuer, _ = Issuer.objects.get_or_create(name_english=EDU_BADGES_ISSUER_NAME,
                                               name_dutch=EDU_BADGES_ISSUER_NAME,
-                                              image_english="uploads/issuers/surf.png",
+                                              image_english=seed_image_for('issuers', 'logo-surf.png'),
                                               faculty=edu_badges_faculty,
                                               description_english="Team edubadges",
                                               description_dutch="Team edubadges",
@@ -135,7 +133,7 @@ badge_class, _ = BadgeClass.objects.get_or_create(
     criteria_text="https://www.surf.nl/edubadges",
     old_json="{}",
     formal=True,
-    image="uploads/badges/edubadge_student.png",
+    image=seed_image_for('badges', 'welcome.png')
 )
 for key, value in badge_class_extensions.items():
     BadgeClassExtension.objects.get_or_create(
@@ -143,6 +141,3 @@ for key, value in badge_class_extensions.items():
         original_json=json.dumps(value),
         badgeclass_id=badge_class.id
     )
-
-# Upload initial images to S3 if S3 storage is enabled
-upload_initial_images_to_s3()
