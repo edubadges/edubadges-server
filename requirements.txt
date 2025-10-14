@@ -41,8 +41,7 @@ rules==0.4
 django-oauth-toolkit==2.2.0
 
 # Some extras
-django-cors-headers==3.14.0
-django-cors-middleware==1.5.0
+django-cors-headers==4.9.0
 django-autoslug==1.9.8
 
 # wsgiref==0.1.2 # python3 incompatible

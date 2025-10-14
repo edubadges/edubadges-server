@@ -46,12 +46,13 @@ def clear_data():
             'institution_faculty',
             'issuer_issuer',
             'issuer_badgeclass',
+            'users',
         )
 
-        # cursor.execute("SET session_replication_role = 'replica';")
-        # try:
-        [cursor.execute('TRUNCATE TABLE ' + table + ' CASCADE') for table in seed_filled_tables]
-        # finally:
-        # cursor.execute("SET session_replication_role = 'origin';")
+        cursor.execute("SET session_replication_role = 'replica';")
+        try:
+            [cursor.execute('TRUNCATE TABLE ' + table + ' CASCADE') for table in seed_filled_tables]
+        finally:
+            cursor.execute("SET session_replication_role = 'origin';")
 
         print('\033[92mdone!\033[0m')

@@ -22,6 +22,7 @@ from django.utils import timezone
 from jsonfield import JSONField
 from openbadges_bakery import bake
 from rest_framework import serializers
+from mainsite.drf_fields import ValidImageField
 
 import badgrlog
 from cachemodel.decorators import cached_method
@@ -869,11 +870,11 @@ class BadgeClass(
             recipient.email_user(
                 subject='Je hebt een edubadge ontvangen! You received an edubadge!', html_message=message
             )
-        
+
         # Log the badge instance creation event
         logger = badgrlog.BadgrLogger()
         logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))
-        
+
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
@@ -890,11 +891,11 @@ class BadgeClass(
             **kwargs,
         )
         assertion.submit_for_timestamping(signer=signer)
-        
+
         # Log the badge instance creation event
         logger = badgrlog.BadgrLogger()
         logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))
-        
+
         return assertion
 
     def get_json(
@@ -1036,7 +1037,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
 
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
 
-    image = models.FileField(upload_to='uploads/badges', blank=True, null=True, db_index=True)
+    image = ValidImageField(required=False)
 
     revoked = models.BooleanField(default=False)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
