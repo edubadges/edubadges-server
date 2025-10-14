@@ -13,7 +13,7 @@ services:
       - ACCOUNT_SALT=secret
       - ALLOW_SEEDS=1
       - BADGR_APP_ID=1
-      - BADGR_DB_HOST=badgr_postgres_db
+      - BADGR_DB_HOST=postgres
       - BADGR_DB_NAME=badgr
       - BADGR_DB_PASSWORD=${BADGR_DB_PASSWORD}
       - BADGR_DB_PORT=5432
@@ -53,12 +53,11 @@ services:
       - OB3_AGENT_AUTHZ_TOKEN_SPHEREON=${OB3_AGENT_AUTHZ_TOKEN_SPHEREON}
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
       - USE_S3=True
-      - AWS_ACCESS_KEY_ID=minioadmin
-      - AWS_SECRET_ACCESS_KEY=minioadmin
-      - AWS_S3_CUSTOM_DOMAIN=localhost:9000
+      - AWS_ACCESS_KEY_ID=edubadges
+      - AWS_SECRET_ACCESS_KEY=edubadges123
+      - AWS_S3_CUSTOM_DOMAIN=minio:9000
       - AWS_STORAGE_BUCKET_NAME=edubadges
       - AWS_S3_USE_SSL=False
-      - AWS_S3_REGION_NAME=us-east-1
     networks:
       - shared-network
       - edubadges-server
@@ -69,14 +68,14 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
-      minio:
+      minio-init:
         condition: service_started
     ports:
       - "8000:8000"
       
   db:
     image: postgres:16 
-    container_name: badgr_postgres_db
+    container_name: postgres
     environment:
       POSTGRES_DB: badgr
       POSTGRES_USER: badgr
@@ -113,7 +112,7 @@ services:
       - edubadges-server
 
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: minio
     command: server /data --console-address ":9001"
     environment:
@@ -124,6 +123,26 @@ services:
       - "9001:9001"
     volumes:
       - minio-data:/data
+    networks:
+      - edubadges-server
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./docker/minio-init.sh:/minio-init.sh
+    entrypoint: /bin/sh
+    command: ["/minio-init.sh"]
+    environment:
+      - MC_HOST_minio=http://minioadmin:minioadmin@minio:9000
     networks:
       - edubadges-server
 
