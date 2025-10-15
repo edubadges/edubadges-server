@@ -24,8 +24,9 @@ services:
       - DOMAIN=0.0.0.0:8000
       - EDUID_PROVIDER_URL=https://connect.test.surfconext.nl/oidc
       - EDU_ID_CLIENT=ewi.backpack.edubadges
-      - EDU_ID_SECRET=${EDU_ID_SECRET}
       - EDUID_REGISTRATION_URL=https://login.test.eduid.nl/register
+      - EDU_ID_CLIENT=edubadges
+      - EDU_ID_SECRET=${EDU_ID_SECRET}
       - EDUID_IDENTIFIER=sub
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
       - EMAIL_USE_TLS=0
@@ -41,7 +42,8 @@ services:
       - SUPERUSER_EMAIL=superuser@example.com
       - SUPERUSER_NAME=superuser
       - SUPERUSER_PWD=secert
-      - SURF_CONEXT_CLIENT=ewi.issuer.edubadges
+      - SURF_CONEXT_CLIENT=test.edubadges.nl
+      - SURF_CONEXT_CLIENT=www.edubadges.nl
       - SURF_CONEXT_SECRET=${SURF_CONEXT_SECRET}
       - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
       - UI_URL=http://localhost:8080
