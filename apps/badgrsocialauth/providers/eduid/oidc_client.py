@@ -39,7 +39,7 @@ class OidcClient:
         }
         logger.debug(f'Calling userinfo endpoint {self._userinfo_endpoint}')
         response = requests.get(self._userinfo_endpoint, headers=headers)
-        logger.debug(f'Userinfo endpoint response {response}')
+        logger.debug(f'Userinfo response - Status Code: {response.status_code}, Headers: {dict(response.headers)}, Content: {response.text}')
         if response.status_code != 200:
             raise Exception(f'User info endpoint error (http {response.status_code}). Try alternative login methods')
 
