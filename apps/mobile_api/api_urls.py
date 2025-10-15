@@ -1,6 +1,7 @@
 from django.urls import path
 
-from backpack.api import BackpackAssertionDetail
+from backpack.api import BackpackAssertionDetail, ImportedAssertionList, ImportedAssertionDetail, \
+    ImportedAssertionDelete, ImportedAssertionValidate
 from badgeuser.api import AcceptTermsView
 from directaward.api import DirectAwardAccept
 from mobile_api.api import BadgeInstances, BadgeInstanceDetail, UnclaimedDirectAwards, Enrollments, EnrollmentDetail, \
@@ -22,5 +23,15 @@ urlpatterns = [
     path('enrollments/<str:entity_id>', EnrollmentDetail.as_view(), name='mobile_api_enrollment_detail'),
     path('login', Login.as_view(), name='mobile_api_login'),
     path('terms/accept', AcceptTermsView.as_view(), name='mobile_api_user_terms_accept'),
+    path('imported-assertions', ImportedAssertionList.as_view(), name='mobile_api_imported_assertions_list'),
+    path('imported-assertions/detail/<str:entity_id>', ImportedAssertionDetail.as_view(),
+         name='mobile_api_imported_assertion_detail', ),
+    path('imported-assertions/edit/<str:entity_id>', ImportedAssertionDetail.as_view(),
+         name='mobile_api_imported_assertions_edit', ),
+    path('imported/assertions/delete/<str:entity_id>', ImportedAssertionDelete.as_view(),
+         name='mobile_api_imported_assertions_delete', ),
+    path('imported/assertions/validate/<str:entity_id>', ImportedAssertionValidate.as_view(),
+         name='mobile_imported_assertion_validate',
+         ),
 
 ]
