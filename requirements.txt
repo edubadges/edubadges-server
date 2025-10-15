@@ -68,7 +68,7 @@ bleach==3.3.0
 
 # Open Badges related utilities
 # openbadges==1.1.2
-git+https://github.com/oharsta/openbadges-validator-core@develop#egg=openbadges
+git+https://github.com/edubadges/openbadges-validator-core@develop#egg=openbadges
 # openbadges-bakery==1.0.1
 
 celery==5.2.7
