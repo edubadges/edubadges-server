@@ -13,6 +13,7 @@ import pathlib
 import re
 import tempfile
 import urllib.parse
+import urllib.request
 import uuid
 import webbrowser
 from io import BytesIO
@@ -20,6 +21,9 @@ from xml.etree import cElementTree as ET
 
 import cairosvg
 import requests
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core import mail
@@ -101,7 +105,7 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
     :return: (status_code, new_storage_name)
     """
     store = DefaultStorage()
-    r = requests.get(remote_url, stream=True)
+    r = requests.get(remote_url, stream=True, verify=False)
     if r.status_code == 200:
         name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
         storage_name = '{upload_to}/cached/{filename}{ext}'.format(
@@ -151,21 +155,28 @@ def open_mail_in_browser(html):
 class EmailMessageMaker:
     @staticmethod
     def _create_example_image(badgeclass):
-        path = badgeclass.image.path
+        if not getattr(settings, 'USE_S3', False):
+            path = badgeclass.image.path
+        else:
+            path = badgeclass.image.url
         if path.endswith('.svg'):
             with open(path, 'rb') as input_svg:
                 svg = input_svg.read()
                 encoded = base64.b64encode(svg).decode()
                 return 'data:image/svg+xml;base64,{}'.format(encoded)
         else:
-            background = Image.open(badgeclass.image.path).convert('RGBA')
+            if not getattr(settings, 'USE_S3', False):
+                with badgeclass.image.storage.open(badgeclass.image.name, 'rb') as image_file:
+                    background = Image.open(image_file).convert('RGBA')
+            else:
+                background = Image.open(path).convert('RGBA')
 
         overlay = Image.open(finders.find('images/example_overlay.png')).convert('RGBA')
         if overlay.width != background.width:
             width_ratio = background.width / overlay.width
             new_background_height = background.height * width_ratio
             new_background_size = (overlay.width, new_background_height)
-            background.thumbnail((new_background_size), Image.LANCZOS)
+            background.thumbnail(new_background_size, Image.LANCZOS)
         position = (0, background.height // 4)
         background.paste(overlay, position, overlay)
         buffered = BytesIO()
@@ -310,9 +321,8 @@ class EmailMessageMaker:
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
-            'institution_name': institution_name,
-            'en_da_enddate': en_end_date,
-            'nl_da_enddate': nl_end_date,
+            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
 
@@ -351,11 +361,8 @@ class EmailMessageMaker:
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
-            'institution_name': institution_name,
-            'da_enddate_nl': nl_end_date,
-            'da_enddate_en': en_end_date,
-            'da_creationdate_nl': nl_create_date,
-            'da_creationdate_en': en_create_date,
+            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
 
@@ -474,10 +481,14 @@ def admin_list_linkify(field_name, label_param=None):
 
 def generate_image_url(image):
     if image.name:
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(image.name)
+        # When using S3, construct Django proxy URL instead of direct S3 URL
+        if getattr(settings, 'USE_S3', False):
+            return getattr(settings, 'HTTP_ORIGIN') + getattr(settings, 'MEDIA_URL') + image.name
+        # For local storage, use default_storage.url()
+        storage_url = default_storage.url(image.name)
+        if storage_url.startswith('http'):
+            return storage_url
+        return getattr(settings, 'HTTP_ORIGIN') + storage_url
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):

@@ -11,7 +11,6 @@ from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
 from django.urls import resolve, Resolver404
 from openbadges_bakery import bake
-from django.core.files.storage import default_storage
 
 import badgrlog
 from issuer.utils import UNVERSIONED_BAKED_VERSION
@@ -193,13 +192,11 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                 ),
                 output_file=new_image,
             )
-
-            file_content = new_image.read()
-            content_file = ContentFile(file_content)
-            s3_path = 'uploads/badges/assertion-{id}{ext}'.format(id=new_instance.entity_id, ext=ext)
-            default_storage.save(s3_path, content_file)
-            new_instance.image = new_image
-
+            new_instance.image.save(
+                name='assertion-{id}{ext}'.format(id=new_instance.entity_id, ext=ext),
+                content=ContentFile(new_image.read()),
+                save=False,
+            )
             new_instance.save()
 
             if evidence is not None:
@@ -220,7 +217,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         # Log the badge instance creation event
         logger = badgrlog.BadgrLogger()
         logger.event(badgrlog.BadgeInstanceCreatedEvent(new_instance))
-
+        
         return new_instance
 
 
