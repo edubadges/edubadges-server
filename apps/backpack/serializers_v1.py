@@ -35,7 +35,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
     assertion = serializers.CharField(required=False, write_only=True)
     recipient_identifier = serializers.CharField(required=False, read_only=True)
     acceptance = serializers.CharField(default='Accepted')
-    public = serializers.BooleanField(required=False, default=False)
     include_evidence = serializers.BooleanField(required=False, default=False)
     include_grade_achieved = serializers.BooleanField(required=False, default=False)
     narrative = MarkdownCharField(required=False, read_only=True)
@@ -107,16 +106,10 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
         return instance
 
     def update(self, instance, validated_data):
-        """ Updating acceptance status (to 'Accepted') is permitted as well as changing public status. """
+        """ Updating acceptance status (to 'Accepted') is permitted. """
         # Only locally issued badges will ever have an acceptance status other than 'Accepted'
         if instance.acceptance in ['Unaccepted', 'Rejected'] and validated_data.get('acceptance') == 'Accepted':
             instance.acceptance = 'Accepted'
-            instance.save()
-        public = validated_data.get('public', None)
-        if public is not None:
-            instance.public = public
-            instance.include_evidence = validated_data.get('include_evidence', False)
-            instance.include_grade_achieved = validated_data.get('include_grade_achieved', False)
             instance.save()
         return instance
 

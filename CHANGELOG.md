@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [unreleased]
 
 - Removed logging to loki, syslog and files. In k8s all logging goes to the default "console" - k8s then forwards to a.o. loki for us
+- Removed "public" and "private" flag for BadgeInstances. All badges are now private.
 
 ## [8.3.0] - 2025-07-14
 

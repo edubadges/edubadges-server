@@ -316,7 +316,7 @@ class IssuerJson(JSONComponentView):
     def log(self, obj):
         logger.event(badgrlog.IssuerRetrievedEvent(obj, self.request))
 
-    def get_json(self, request):
+    def get_json(self, request, **kwargs):
         expands = request.GET.getlist('expand', [])
         json = super(IssuerJson, self).get_json(request)
         obi_version = self._get_request_obi_version(request)

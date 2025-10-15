@@ -621,7 +621,6 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
 class BadgeInstanceCollectionSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=254)
     description = serializers.CharField(max_length=256, required=False, allow_null=True, allow_blank=True)
-    public = serializers.BooleanField(required=False, default=False)
     badge_instances = PrimaryKeyRelatedField(many=True, queryset=BadgeInstance.objects.all(), required=False)
 
     class Meta:
@@ -631,7 +630,6 @@ class BadgeInstanceCollectionSerializer(serializers.Serializer):
         instance = BadgeInstanceCollection.objects.create(
             name=validated_data['name'],
             description=validated_data.get('description'),
-            public=validated_data.get('public', False),
         )
         instance.user = self.context['request'].user
         instance.badge_instances.set(validated_data.get('badge_instances', []))
