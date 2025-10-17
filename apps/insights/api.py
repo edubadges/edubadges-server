@@ -368,16 +368,19 @@ class CountMicroCredentials(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-select ins.identifier, count(u.id) as user_count, (select count(bi.id) from issuer_badgeinstance bi where bi.user_id = u.id ) as assertion_count 
-from users u 
- inner join issuer_badgeinstance bi on bi.user_id = u.id
- inner join issuer_badgeclass b on b.id = bi.badgeclass_id
- inner join issuer_issuer i on i.id = b.issuer_id 
- inner join institution_faculty f on f.id = i.faculty_id 
- inner join institution_institution ins on ins.id = f.institution_id 
- where b.badge_class_type = 'micro_credential' and ins.institution_type is not null
- group by assertion_count, ins.identifier ;            
-            """,
+                select ins.identifier,
+                       count(u.id)                                                                as user_count,
+                       (select count(bi.id) from issuer_badgeinstance bi where bi.user_id = u.id) as assertion_count
+                from users u
+                         inner join issuer_badgeinstance bi on bi.user_id = u.id
+                         inner join issuer_badgeclass b on b.id = bi.badgeclass_id
+                         inner join issuer_issuer i on i.id = b.issuer_id
+                         inner join institution_faculty f on f.id = i.faculty_id
+                         inner join institution_institution ins on ins.id = f.institution_id
+                where b.badge_class_type = 'micro_credential'
+                  and ins.institution_type is not null
+                group by assertion_count, ins.identifier;
+                """,
                 [],
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -390,16 +393,23 @@ class MicroCredentialsBadgeOverview(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-select b.id, b.name as badgeclass_name, ins.name_english as institution_name, ins.identifier, b.created_at ,
-(select original_json from issuer_badgeclassextension where name = 'extensions:EQFExtension' and badgeclass_id = b.id limit 1) as eqf_value,
+                select b.id,
+                       b.name           as                                              badgeclass_name,
+                       ins.name_english as                                              institution_name,
+                       ins.identifier,
+                       b.created_at,
+                       (select original_json
+                        from issuer_badgeclassextension
+                        where name = 'extensions:EQFExtension' and badgeclass_id = b.id limit 1) as eqf_value,
 (select original_json from issuer_badgeclassextension where name = 'extensions:ECTSExtension' and badgeclass_id = b.id limit 1) as ects_value,
  (select original_json from issuer_badgeclassextension where name = 'extensions:StudyLoadExtension' and badgeclass_id = b.id limit 1) as study_load
- from issuer_badgeclass b
- inner join issuer_issuer i on i.id = b.issuer_id
- inner join institution_faculty f on f.id = i.faculty_id
- inner join institution_institution ins on ins.id = f.institution_id
- where b.badge_class_type = 'micro_credential' and ins.institution_type is not null;
-             """,
+                from issuer_badgeclass b
+                    inner join issuer_issuer i
+                on i.id = b.issuer_id
+                    inner join institution_faculty f on f.id = i.faculty_id
+                    inner join institution_institution ins on ins.id = f.institution_id
+                where b.badge_class_type = 'micro_credential' and ins.institution_type is not null;
+                """,
                 [],
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -415,36 +425,61 @@ class InstitutionBadgesOverview(APIView):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-select b.id as badge_class_id, bi.award_type, b.name as badge_name,  b.badge_class_type, bi.public as public_badge,
-bi.revoked, i.name_english as issuer_name, f.name_english as issuergroup_name, ins.name_english as institution_name,
-ins.institution_type as institution_type, count(bi.id) as backpack_count, 'N/A' as claim_rate, 0 as total_da_count,
-(SELECT count(1) FROM directaward_directawardaudittrail trail WHERE trail.action = 'CREATE' and trail.badgeclass_id = b.id and trail.user_agent_info like "Java-http-client%%") as awarded_via_sis,
-(SELECT count(1) FROM directaward_directawardaudittrail trail WHERE trail.action = 'CREATE' and trail.badgeclass_id = b.id and not trail.user_agent_info like "Java-http-client%%") as awarded_via_ui
-from issuer_badgeinstance bi
-inner join issuer_badgeclass b on b.id = bi.badgeclass_id
-inner join issuer_issuer i on i.id = b.issuer_id
-inner join institution_faculty f on f.id = i.faculty_id
-inner join institution_institution ins on ins.id = f.institution_id
-where (bi.expires_at >= CURDATE() or bi.expires_at is NULL) and ((ins.id = %(ins_id)s and not %(ins_id)s is null) or %(ins_id)s is null)
-group by b.id, bi.award_type, bi.public, bi.revoked;
-            """,
+                select b.id                                                        as badge_class_id,
+                       bi.award_type,
+                       b.name                                                      as badge_name,
+                       b.badge_class_type,
+                       bi.public                                                   as public_badge,
+                       bi.revoked,
+                       i.name_english                                              as issuer_name,
+                       f.name_english                                              as issuergroup_name,
+                       ins.name_english                                            as institution_name,
+                       ins.institution_type                                        as institution_type,
+                       count(bi.id)                                                as backpack_count,
+                       'N/A'                                                       as claim_rate,
+                       0                                                           as total_da_count,
+                       (SELECT count(1)
+                        FROM directaward_directawardaudittrail trail
+                        WHERE trail.action = 'CREATE'
+                          and trail.badgeclass_id = b.id
+                          and trail.user_agent_info like "Java-http-client%%")     as awarded_via_sis,
+                       (SELECT count(1)
+                        FROM directaward_directawardaudittrail trail
+                        WHERE trail.action = 'CREATE'
+                          and trail.badgeclass_id = b.id
+                          and not trail.user_agent_info like "Java-http-client%%") as awarded_via_ui
+                from issuer_badgeinstance bi
+                         inner join issuer_badgeclass b on b.id = bi.badgeclass_id
+                         inner join issuer_issuer i on i.id = b.issuer_id
+                         inner join institution_faculty f on f.id = i.faculty_id
+                         inner join institution_institution ins on ins.id = f.institution_id
+                where (bi.expires_at >= CURDATE() or bi.expires_at is NULL)
+                  and ((ins.id = %(ins_id)s and not %(ins_id)s is null) or %(ins_id)s is null)
+                group by b.id, bi.award_type, bi.public, bi.revoked;
+                """,
                 {'ins_id': institution_id},
             )
             badge_overview = dict_fetch_all(cursor)
 
             cursor.execute(
                 """
-select count(id) as da_count, badgeclass_id as badgeclass_id
-from directaward_directaward da where status <> 'Deleted' and status <> 'Revoked' and status <> 'Scheduled' group by badgeclass_id;
-                        """,
+                select count(id) as da_count, badgeclass_id as badgeclass_id
+                from directaward_directaward da
+                where status <> 'Deleted'
+                  and status <> 'Revoked'
+                  and status <> 'Scheduled'
+                group by badgeclass_id;
+                """,
                 [],
             )
             da_overview = dict_fetch_all(cursor)
 
             cursor.execute(
                 """
-            select sum(direct_award_expired_count) as expired_count, badgeclass_id from directaward_directawardbundle 
-            where direct_award_expired_count > 0 group by badgeclass_id;
+                select sum(direct_award_expired_count) as expired_count, badgeclass_id
+                from directaward_directawardbundle
+                where direct_award_expired_count > 0
+                group by badgeclass_id;
                 """,
                 [],
             )
@@ -479,7 +514,7 @@ from directaward_directaward da where status <> 'Deleted' and status <> 'Revoked
                     [da['expired_count'] for da in da_expired if str(da['badgeclass_id']) == str(key)]
                 )
                 total_da_count = (
-                    direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked +  direct_awards_expired
+                        direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked + direct_awards_expired
                 )
                 results.append(
                     {
@@ -510,6 +545,110 @@ from directaward_directaward da where status <> 'Deleted' and status <> 'Revoked
                 )
 
             sorted_results = sorted(results, key=lambda a: (a['Institution name'], a['BadgecClass name']))
+            return Response(sorted_results, status=status.HTTP_200_OK)
+
+
+class SectorBadgesOverview(APIView):
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                select ins.id               as institution_id,
+                       ins.name_dutch       as institution_name,
+                       ins.institution_type as institution_type,
+                       b.badge_class_type,
+                       bi.award_type,
+                       bi.revoked,
+                       count(bi.id)         as backpack_count
+                from issuer_badgeinstance bi
+                         inner join issuer_badgeclass b on b.id = bi.badgeclass_id
+                         inner join issuer_issuer i on i.id = b.issuer_id
+                         inner join institution_faculty f on f.id = i.faculty_id
+                         inner join institution_institution ins on ins.id = f.institution_id
+                where (bi.expires_at >= CURDATE() or bi.expires_at is NULL)
+                group by ins.id, ins.name_dutch, ins.institution_type, bi.revoked, bi.award_type, b.badge_class_type;
+                """,
+                [],
+            )
+            badge_overview = dict_fetch_all(cursor)
+
+            cursor.execute(
+                """
+                select count(da.id) as da_count, ins.id as institution_id
+                from directaward_directaward da
+                         inner join issuer_badgeclass b on b.id = da.badgeclass_id
+                         inner join issuer_issuer i on i.id = b.issuer_id
+                         inner join institution_faculty f on f.id = i.faculty_id
+                         inner join institution_institution ins on ins.id = f.institution_id
+                where da.status <> 'Deleted'
+                  and da.status <> 'Revoked'
+                  and da.status <> 'Scheduled'
+                group by ins.id;
+                """,
+                [],
+            )
+            da_overview = dict_fetch_all(cursor)
+
+            cursor.execute(
+                """
+                select sum(bundle.direct_award_expired_count) as expired_count, ins.id as institution_id
+                from directaward_directawardbundle bundle
+                         inner join issuer_badgeclass b on b.id = bundle.badgeclass_id
+                         inner join issuer_issuer i on i.id = b.issuer_id
+                         inner join institution_faculty f on f.id = i.faculty_id
+                         inner join institution_institution ins on ins.id = f.institution_id
+                where direct_award_expired_count > 0
+                group by institution_id;
+                """,
+                [],
+            )
+            da_expired = dict_fetch_all(cursor)
+
+            # Now group by institution_id and create final reporting dict
+            def key_func(k):
+                return str(k['institution_id'])
+
+            def claim_rate(total_direct_award_count, direct_award_accepted):
+                if total_direct_award_count == 0:
+                    return 'N/A'
+                return round((direct_award_accepted / total_direct_award_count) * 100)
+
+            # Known caveat is to forget sorting before groupby
+            sorted_assertions = sorted(badge_overview, key=key_func)
+            grouped_assertions = groupby(sorted_assertions, key_func)
+            results = []
+            for key, val in grouped_assertions:
+                values = list(val)
+                institution = values[0]
+                direct_awards_accepted = sum(
+                    [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and not b['revoked']]
+                )
+                direct_awards_assertions_revoked = sum(
+                    [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and b['revoked']]
+                )
+                direct_awards_rejected_or_unaccepted = sum(
+                    [da['da_count'] for da in da_overview if str(da['institution_id']) == str(key)]
+                )
+                direct_awards_expired = sum(
+                    [da['expired_count'] for da in da_expired if str(da['institution_id']) == str(key)]
+                )
+                total_da_count = (
+                        direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked + direct_awards_expired
+                )
+                results.append(
+                    {
+                        'Institution name': institution['institution_name'],
+                        'Sector': institution['institution_type'],
+                        'Type': institution['badge_class_type'],
+                        'Total edubadges in backpack': sum([b['backpack_count'] for b in values if not b['revoked']]),
+                        'Claim-rate': claim_rate(
+                            (total_da_count - direct_awards_assertions_revoked), direct_awards_accepted
+                        )
+                    }
+                )
+            sorted_results = sorted(results, key=lambda a: (a['Institution name'] or ''))
             return Response(sorted_results, status=status.HTTP_200_OK)
 
 
@@ -550,5 +689,5 @@ where {institution_part} si.may_update is not null and i.id is not null order by
                         'role': determine_role(row),
                     }
                 )
-            sorted_results = sorted(results, key=lambda a: (a['issuer_name'],))
+            sorted_results = sorted(results, key=lambda a: (a['issuer_name'] or '',))
             return Response(sorted_results, status=status.HTTP_200_OK)

@@ -8,7 +8,7 @@ from insights.api import (
     CountMicroCredentials,
     MicroCredentialsBadgeOverview,
     InstitutionBadgesOverview,
-    IssuerMembers,
+    IssuerMembers, SectorBadgesOverview,
 )
 
 urlpatterns = [
@@ -29,5 +29,6 @@ urlpatterns = [
         name='api_institution_micro_credentials_badges',
     ),
     path('institution/badges-overview', InstitutionBadgesOverview.as_view(), name='api_institution_badges_overview'),
+    path('institution/sector-overview', SectorBadgesOverview.as_view(), name='api_sector_badges_overview'),
     path('institution/issuer-members', IssuerMembers.as_view(), name='api_institution_issuer_members'),
 ]
