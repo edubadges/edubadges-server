@@ -112,7 +112,7 @@ django_mock_queries==2.1.5
 git+https://github.com/edubadges/pylti1.3@master#egg=PyLTI1p3
 
 # after python3 upgrade
-social-auth-app-django==5.6.0
+social-auth-app-django==5.4.2
 urllib3==1.26.19
 
 # graphql
