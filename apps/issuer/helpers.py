@@ -2,7 +2,7 @@
 
 
 import uuid
-from collections.abc import MutableMapping
+from collections import MutableMapping
 
 import openbadges
 from django.conf import settings
