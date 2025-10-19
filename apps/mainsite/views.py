@@ -13,7 +13,6 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import FormView
-from django.views.static import serve
 from issuer.models import BadgeInstance
 from mainsite.admin_actions import clear_cache, send_application_report
 from mainsite.models import EmailBlacklist
@@ -143,30 +142,25 @@ def serve_protected_document(request, path, document_root):
         if not has_permission:
             return HttpResponseForbidden()
 
-    # Serve the file from S3 or local storage
-    if getattr(settings, 'USE_S3', False):
-        try:
-            if not default_storage.exists(path):
-                return HttpResponseNotFound('File not found')
+    try:
+        if not default_storage.exists(path):
+            return HttpResponseNotFound('File not found')
 
-            # Open the file from S3
-            file_obj = default_storage.open(path, 'rb')
+        # Open the file from S3
+        file_obj = default_storage.open(path, 'rb')
 
-            # Determine content type
-            content_type, _ = mimetypes.guess_type(path)
-            if content_type is None:
-                content_type = 'application/octet-stream'
+        # Determine content type
+        content_type, _ = mimetypes.guess_type(path)
+        if content_type is None:
+            content_type = 'application/octet-stream'
 
-            # Create a streaming response
-            response = FileResponse(file_obj, content_type=content_type)
+        # Create a streaming response
+        response = FileResponse(file_obj, content_type=content_type)
 
-            # Set content disposition for downloads
-            response['Content-Disposition'] = f'inline; filename="{path.split("/")[-1]}"'
+        # Set content disposition for downloads
+        response['Content-Disposition'] = f'inline; filename="{path.split("/")[-1]}"'
 
-            return response
+        return response
 
-        except Exception as e:
-            return HttpResponseServerError(f'Error serving file: {str(e)}')
-    else:
-        # Serve from local filesystem
-        return serve(request, path, document_root)
+    except Exception as e:
+        return HttpResponseServerError(f'Error serving file: {str(e)}')

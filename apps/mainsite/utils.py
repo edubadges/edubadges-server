@@ -151,21 +151,15 @@ def open_mail_in_browser(html):
 class EmailMessageMaker:
     @staticmethod
     def _create_example_image(badgeclass):
-        if not getattr(settings, 'USE_S3', False):
-            path = badgeclass.image.path
-        else:
-            path = badgeclass.image.url
+        path = badgeclass.image.url
         if path.endswith('.svg'):
             with open(path, 'rb') as input_svg:
                 svg = input_svg.read()
                 encoded = base64.b64encode(svg).decode()
                 return 'data:image/svg+xml;base64,{}'.format(encoded)
         else:
-            if not getattr(settings, 'USE_S3', False):
-                with badgeclass.image.storage.open(badgeclass.image.name, 'rb') as image_file:
-                    background = Image.open(image_file).convert('RGBA')
-            else:
-                background = Image.open(path).convert('RGBA')
+            with badgeclass.image.storage.open(badgeclass.image.name, 'rb') as image_file:
+                background = Image.open(image_file).convert('RGBA')
 
         overlay = Image.open(finders.find('images/example_overlay.png')).convert('RGBA')
         if overlay.width != background.width:

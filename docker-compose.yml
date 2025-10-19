@@ -30,7 +30,7 @@ services:
       - EDUID_IDENTIFIER=sub
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
       - EMAIL_USE_TLS=0
-      - EMAIL_HOST=localhost
+      - EMAIL_HOST=mailhog
       - EMAIL_PORT=1025
       - LTI_FRONTEND_URL=localhost
       - MEMCACHED=memcached:11211
@@ -54,7 +54,7 @@ services:
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
       - USE_S3=True
       - AWS_ACCESS_KEY_ID=edubadges
-      - AWS_SECRET_ACCESS_KEY=edubadges123
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_S3_CUSTOM_DOMAIN=minio:9000
       - AWS_STORAGE_BUCKET_NAME=edubadges
       - AWS_S3_USE_SSL=False
@@ -72,9 +72,9 @@ services:
         condition: service_started
     ports:
       - "8000:8000"
-      
+
   db:
-    image: postgres:16 
+    image: postgres:16
     container_name: postgres
     environment:
       POSTGRES_DB: badgr
@@ -82,10 +82,10 @@ services:
       POSTGRES_PASSWORD: ${BADGR_DB_PASSWORD}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5434:5432"
+      - "5432:5432"
     # Health check for PostgreSQL
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U badgr -d badgr"]
+      test: [ "CMD-SHELL", "pg_isready -U badgr -d badgr" ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -126,7 +126,7 @@ services:
     networks:
       - edubadges-server
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: [ "CMD", "mc", "ready", "local" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -140,7 +140,7 @@ services:
     volumes:
       - ./docker/minio-init.sh:/minio-init.sh
     entrypoint: /bin/sh
-    command: ["/minio-init.sh"]
+    command: [ "/minio-init.sh" ]
     environment:
       - MC_HOST_minio=http://minioadmin:minioadmin@minio:9000
     networks:
