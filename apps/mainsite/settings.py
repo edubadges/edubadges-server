@@ -392,7 +392,7 @@ LOGGING = {
         },
         'django': {
             'handlers': ['console'],  # Replace stream and email handler with console
-            'level': logging.ERROR,
+            'level': LOG_LEVEL,
             'propagate': False,  # Don't propagate to root logger as that will cause duplicate logs
         },
     },
