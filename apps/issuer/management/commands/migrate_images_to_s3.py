@@ -27,12 +27,6 @@ class Command(BaseCommand):
         dry_run = options['dry_run']
         model_type = options['model']
         
-        if not getattr(settings, 'USE_S3', False):
-            self.stdout.write(
-                self.style.ERROR("S3 storage is not enabled. Set USE_S3=true in environment.")
-            )
-            return
-        
         self.stdout.write(f"{'DRY RUN: ' if dry_run else ''}Migrating images to S3/MinIO...")
         
         total_migrated = 0

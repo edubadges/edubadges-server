@@ -52,7 +52,6 @@ services:
       - OB3_AGENT_URL_SPHEREON=https://agent.poc15.eduwallet.nl/oid4vci/admin/credentials
       - OB3_AGENT_AUTHZ_TOKEN_SPHEREON=${OB3_AGENT_AUTHZ_TOKEN_SPHEREON}
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
-      - USE_S3=True
       - AWS_ACCESS_KEY_ID=edubadges
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_S3_CUSTOM_DOMAIN=minio:9000

@@ -10,10 +10,6 @@ def upload_initial_images_to_s3():
     Upload initial PNG images to S3 storage if S3 is enabled.
     This replaces the file copying done in entrypoint-k8s.sh
     """
-    if not getattr(settings, 'USE_S3', False):
-        print('S3 storage not enabled, skipping image upload')
-        return
-
     # Define source directory and files to upload
     source_dir = os.path.join(settings.TOP_DIR, 'uploads')
 
