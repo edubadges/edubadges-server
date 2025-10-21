@@ -132,9 +132,7 @@ def serve_protected_document(request, path, document_root):
 
         # Check if the assertion is public or user has permission
         has_permission = False
-        if assertion.public:
-            has_permission = True
-        elif request.user.is_authenticated:
+        if request.user.is_authenticated:
             if request.user == assertion.user or request.user.get_permissions(assertion)['may_read']:
                 has_permission = True
 
