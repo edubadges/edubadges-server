@@ -3,8 +3,6 @@ from collections import OrderedDict
 from PIL import Image
 from rest_framework import serializers
 
-from mainsite.utils import generate_image_url
-
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
     pixels = image.size[0] * image.size[1]
@@ -16,7 +14,7 @@ class ImageUrlGetterMixin(object):
     Model mixin to get image url
     """
     def image_url(self):
-        return generate_image_url(self.image)
+        return self.image.url
 
 
 class DefaultLanguageMixin(object):

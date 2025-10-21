@@ -5,7 +5,6 @@ from issuer.models import Issuer
 from issuer.schema import IssuerType
 from mainsite.graphql_utils import UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, StaffResolverMixin, \
     ImageResolverMixin, PermissionsResolverMixin, DefaultLanguageResolverMixin
-from mainsite.utils import generate_image_url
 from staff.schema import InstitutionStaffType, FacultyStaffType
 from .models import Institution, Faculty, BadgeClassTag
 
@@ -30,13 +29,13 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
     has_unrevoked_assertions = graphene.Boolean()
 
     def resolve_image_english(self, info):
-        return generate_image_url(self.image_english)
+        return self.image_english.url
 
     def resolve_image_dutch(self, info):
-        return generate_image_url(self.image_dutch)
+        return self.image_dutch.url
 
     def resolve_image(self, info):
-        return generate_image_url(self.image)
+        return self.image.url
 
     def resolve_name(self, info):
         return self.name
@@ -89,16 +88,16 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
     award_allowed_institutions = graphene.List(graphene.String)
 
     def resolve_image_english(self, info):
-        return generate_image_url(self.image_english)
+        return self.image_english.url
 
     def resolve_image_dutch(self, info):
-        return generate_image_url(self.image_dutch)
+        return self.image_dutch.url
 
     def resolve_name(self, info):
         return self.name
 
     def resolve_image(self, info):
-        return generate_image_url(self.image)
+        return self.image.url
 
     def resolve_tags(self, info):
         return list(self.badgeclasstag_set.all())
