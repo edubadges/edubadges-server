@@ -17,7 +17,6 @@ Set the following environment variables to enable S3 storage:
 
 #### Required Variables
 ```bash
-USE_S3=true
 AWS_ACCESS_KEY_ID=your_access_key_id
 AWS_SECRET_ACCESS_KEY=your_secret_access_key
 AWS_STORAGE_BUCKET_NAME=your_bucket_name
@@ -45,7 +44,6 @@ AWS_S3_CUSTOM_DOMAIN=cdn.yourdomain.com
 
 For a MinIO setup:
 ```bash
-USE_S3=true
 AWS_ACCESS_KEY_ID=minioadmin
 AWS_SECRET_ACCESS_KEY=minioadmin
 AWS_STORAGE_BUCKET_NAME=edubadges
@@ -58,7 +56,6 @@ AWS_S3_REGION_NAME=us-east-1
 
 For AWS S3:
 ```bash
-USE_S3=true
 AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 AWS_STORAGE_BUCKET_NAME=my-edubadges-bucket
