@@ -11,7 +11,6 @@ from lti_edu.schema import StudentsEnrolledType
 from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
     StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students, \
     DefaultLanguageResolverMixin, resolver_blocker_only_for_current_user
-from mainsite.utils import generate_image_url
 from staff.schema import IssuerStaffType, BadgeClassStaffType
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
     BadgeClassAlignment, BadgeInstanceEvidence, BadgeInstanceCollection
@@ -95,13 +94,13 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
     has_assertions = graphene.Boolean()
 
     def resolve_image_english(self, info):
-        return generate_image_url(self.image_english)
+        return self.image_english.url
 
     def resolve_image_dutch(self, info):
-        return generate_image_url(self.image_dutch)
+        return self.image_dutch.url
 
     def resolve_image(self, info):
-        return generate_image_url(self.image)
+        return self.image.url
 
     def resolve_name(self, info):
         return self.name

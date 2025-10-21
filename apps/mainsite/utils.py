@@ -12,7 +12,6 @@ import pathlib
 import re
 import tempfile
 import urllib.parse
-import urllib.request
 import uuid
 import webbrowser
 from io import BytesIO
@@ -20,9 +19,7 @@ from xml.etree import cElementTree as ET
 
 import cairosvg
 import requests
-import urllib3
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core import mail
@@ -452,11 +449,6 @@ def admin_list_linkify(field_name, label_param=None):
 
     _linkify.short_description = field_name  # Sets column name
     return _linkify
-
-
-def generate_image_url(image):
-    if image.name:
-        return getattr(settings, 'HTTP_ORIGIN') + getattr(settings, 'MEDIA_URL') + image.name
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
