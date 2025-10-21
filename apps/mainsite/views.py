@@ -121,8 +121,7 @@ class SitewideActionFormView(FormView):
 def serve_protected_document(request, path, document_root):
     """
     Serves media files with access control.
-    When USE_S3 is enabled, fetches files from S3 storage and proxies them through Django.
-    Otherwise, serves files from local filesystem.
+    Fetches files from S3 storage and proxies them through Django.
     """
     # Check access permissions for assertion images
     if 'assertion-' in path:

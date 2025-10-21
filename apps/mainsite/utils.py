@@ -475,14 +475,7 @@ def admin_list_linkify(field_name, label_param=None):
 
 def generate_image_url(image):
     if image.name:
-        # When using S3, construct Django proxy URL instead of direct S3 URL
-        if getattr(settings, 'USE_S3', False):
-            return getattr(settings, 'HTTP_ORIGIN') + getattr(settings, 'MEDIA_URL') + image.name
-        # For local storage, use default_storage.url()
-        storage_url = default_storage.url(image.name)
-        if storage_url.startswith('http'):
-            return storage_url
-        return getattr(settings, 'HTTP_ORIGIN') + storage_url
+        return getattr(settings, 'HTTP_ORIGIN') + getattr(settings, 'MEDIA_URL') + image.name
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):

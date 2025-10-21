@@ -288,62 +288,53 @@ ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 ##
 
 # S3/MinIO configuration for file storage
-USE_S3 = os.environ.get('USE_S3', 'False').lower() == 'true'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', None)  # For MinIO
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
 
-if USE_S3:
-    # STATICFILES_STORAGE = 'storages.backends.s3.S3Storage'
+# SSL and signature configuration
+AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'True').lower() == 'true'
+AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION', 's3v4')
 
-    # S3/MinIO settings
-    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', None)  # For MinIO
-    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+# Public read permissions for badge images
+AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
 
-    # SSL and signature configuration
-    AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'True').lower() == 'true'
-    AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION', 's3v4')
+# Use custom domain if provided (for MinIO or custom S3 setup)
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
 
-    # Public read permissions for badge images
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
-    }
+# Media URL configuration
+if AWS_S3_CUSTOM_DOMAIN:
+    ENDPOINT_URL = f'{"https" if AWS_S3_USE_SSL else "http"}://{AWS_S3_CUSTOM_DOMAIN}/'
+else:
+    ENDPOINT_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
+    if AWS_S3_ENDPOINT_URL:  # MinIO case
+        from urllib.parse import urlparse
 
-    # Use custom domain if provided (for MinIO or custom S3 setup)
-    AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
+        parsed = urlparse(AWS_S3_ENDPOINT_URL)
+        ENDPOINT_URL = f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
 
-    # Media URL configuration
-    if AWS_S3_CUSTOM_DOMAIN:
-        ENDPOINT_URL = f'{"https" if AWS_S3_USE_SSL else "http"}://{AWS_S3_CUSTOM_DOMAIN}/'
-    else:
-        ENDPOINT_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
-        if AWS_S3_ENDPOINT_URL:  # MinIO case
-            from urllib.parse import urlparse
-
-            parsed = urlparse(AWS_S3_ENDPOINT_URL)
-            ENDPOINT_URL = f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
-
-    STORAGES = {
-        'default': {
-            'BACKEND': 'storages.backends.s3.S3Storage',
-            'OPTIONS': {
-                'access_key': AWS_ACCESS_KEY_ID,
-                'secret_key': AWS_SECRET_ACCESS_KEY,
-                'bucket_name': AWS_STORAGE_BUCKET_NAME,
-                'region_name': AWS_S3_REGION_NAME,
-                'endpoint_url': ENDPOINT_URL,
-                'use_ssl': AWS_S3_USE_SSL,
-                'signature_version': AWS_S3_SIGNATURE_VERSION,
-                'default_acl': AWS_DEFAULT_ACL,
-                'object_parameters': AWS_S3_OBJECT_PARAMETERS,
-                'custom_domain': AWS_S3_CUSTOM_DOMAIN,
-            },
-        },
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+STORAGES = {
+    'default': {
+        'BACKEND': 'storages.backends.s3.S3Storage',
+        'OPTIONS': {
+            'access_key': AWS_ACCESS_KEY_ID,
+            'secret_key': AWS_SECRET_ACCESS_KEY,
+            'bucket_name': AWS_STORAGE_BUCKET_NAME,
+            'region_name': AWS_S3_REGION_NAME,
+            'endpoint_url': ENDPOINT_URL,
+            'use_ssl': AWS_S3_USE_SSL,
+            'signature_version': AWS_S3_SIGNATURE_VERSION,
+            'default_acl': AWS_DEFAULT_ACL,
+            'object_parameters': AWS_S3_OBJECT_PARAMETERS,
+            'custom_domain': AWS_S3_CUSTOM_DOMAIN,
         },
     }
+}
 
 ##
 #
