@@ -320,7 +320,7 @@ else:
 
 STORAGES = {
     'default': {
-        'BACKEND': 'storages.backends.s3.S3Storage',
+        'BACKEND': 'mainsite.proxied_s3_storage.ProxiedS3Storage',
         'OPTIONS': {
             'access_key': AWS_ACCESS_KEY_ID,
             'secret_key': AWS_SECRET_ACCESS_KEY,
