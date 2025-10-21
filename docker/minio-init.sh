@@ -14,7 +14,7 @@ mc mb minio/edubadges --ignore-existing
 echo "Bucket 'edubadges' created or already exists."
 
 # Create the edubadges user with access key and secret key
-mc admin user add minio edubadges edubadges123
+mc admin user add minio edubadges $AWS_SECRET_ACCESS_KEY
 
 # Create a policy for the edubadges bucket with read-write access
 cat > /tmp/edubadges-policy.json <<EOF
