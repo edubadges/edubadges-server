@@ -143,6 +143,7 @@ services:
     command: [ "/minio-init.sh" ]
     environment:
       - MC_HOST_minio=http://minioadmin:minioadmin@minio:9000
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     networks:
       - edubadges-server
 
