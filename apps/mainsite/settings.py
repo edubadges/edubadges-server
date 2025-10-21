@@ -16,7 +16,6 @@ env_settings()
 SESSION_COOKIE_AGE = 60 * 60  # 1 hour session validity
 SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
 SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 DEBUG = legacy_boolean_parsing('DEBUG', '0')
 
@@ -188,7 +187,6 @@ ACCOUNT_ADAPTER = 'mainsite.account_adapter.BadgrAccountAdapter'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
@@ -303,14 +301,16 @@ AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
 
 # Media URL configuration
 if AWS_S3_CUSTOM_DOMAIN:
-    ENDPOINT_URL = f'{"https" if AWS_S3_USE_SSL else "http"}://{AWS_S3_CUSTOM_DOMAIN}/'
-else:
-    ENDPOINT_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
-    if AWS_S3_ENDPOINT_URL:  # MinIO case
-        from urllib.parse import urlparse
+    _endpoint_url = f'{"https" if AWS_S3_USE_SSL else "http"}://{AWS_S3_CUSTOM_DOMAIN}/'
+elif AWS_S3_ENDPOINT_URL:  # MinIO config
+    from urllib.parse import urlparse
 
-        parsed = urlparse(AWS_S3_ENDPOINT_URL)
-        ENDPOINT_URL = f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
+    parsed = urlparse(AWS_S3_ENDPOINT_URL)
+    _endpoint_url = f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
+else:
+    _endpoint_url = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
+
+ENDPOINT_URL = _endpoint_url
 
 STORAGES = {
     'default': {
@@ -564,8 +564,6 @@ AUTHCODE_SECRET_KEY = Fernet.generate_key()
 
 AUTHCODE_EXPIRES_SECONDS = 600  # needs to be long enough to fetch information from socialauth providers
 
-SESSION_COOKIE_SAMESITE = None
-
 GRAPHENE = {'SCHEMA': 'apps.mainsite.schema.schema'}
 
 # Database
@@ -611,7 +609,6 @@ SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
 EDUID_BADGE_CLASS_NAME = 'Edubadge account complete'
 
 # Debug
-DEBUG = legacy_boolean_parsing('DEBUG', '0')
 TEMPLATE_DEBUG = DEBUG
 DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG
