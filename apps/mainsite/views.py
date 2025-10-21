@@ -128,7 +128,7 @@ def serve_protected_document(request, path, document_root):
         try:
             assertion = BadgeInstance.objects.get(image=path)
         except BadgeInstance.DoesNotExist:
-            return HttpResponseNotFound('File not found')
+            return HttpResponseNotFound(content='File not found'.encode('utf-8'))
 
         # Check if the assertion is public or user has permission
         has_permission = False
@@ -143,7 +143,7 @@ def serve_protected_document(request, path, document_root):
 
     try:
         if not default_storage.exists(path):
-            return HttpResponseNotFound('File not found')
+            return HttpResponseNotFound(content='File not found'.encode('utf-8'))
 
         # Open the file from S3
         file_obj = default_storage.open(path, 'rb')
@@ -162,4 +162,4 @@ def serve_protected_document(request, path, document_root):
         return response
 
     except Exception as e:
-        return HttpResponseServerError(f'Error serving file: {str(e)}')
+        return HttpResponseServerError(content=f'Error serving file: {str(e)}'.encode('utf-8'))
