@@ -77,7 +77,6 @@ services:
       POSTGRES_DB: badgr
       POSTGRES_USER: badgr
       POSTGRES_PASSWORD: ${BADGR_DB_PASSWORD}
-      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     # Health check for PostgreSQL
@@ -88,7 +87,7 @@ services:
       start_period: 30s
       timeout: 10s
     volumes:
-      - postgresql.conf:/etc/postgresql.conf
+      # Note: PG 17 and up this path will change: https://hub.docker.com/_/postgres#pgdata
       - db-data:/var/lib/postgresql/data
     networks:
       - edubadges-server
@@ -152,5 +151,4 @@ networks:
 
 volumes:
   db-data:
-  postgresql.conf:
   minio-data:
