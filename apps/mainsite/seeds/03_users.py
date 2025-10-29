@@ -7,14 +7,15 @@ from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
 
 from badgeuser.models import BadgeUser, StudentAffiliation
+from institution.models import Institution
 
-from mainsite.seeds.util import read_seed_csv
+from mainsite.seeds.util import read_seed_csv, reformat_email
 
 # Users - Students
 default_extra_data = {'eduid': str(uuid.uuid4())}
 
 
-def create_student(username, first_name, last_name, email, uid, **kwargs):
+def create_student(username: str, first_name: str, last_name: str, email: str, uid: str, **kwargs):
     user, _ = BadgeUser.objects.get_or_create(
         username=username,
         email=email,
@@ -39,29 +40,27 @@ all_users = read_seed_csv('pba')
 # Filter on Profession is "Student"
 csv_students = [u for u in all_users if u['Profession'] == 'Student']
 
-
-def shac_home_for_shortcode(institution_shortcode: str) -> str:
-    shortcode_to_home_map = {
-        'hbot': 'hbot.nl',
-        'mbob': 'mbob.nl',
-        'tun': 'tun.nb',
-        'uvh': 'uvh.nl',
-    }
-    return shortcode_to_home_map[institution_shortcode]
-
+institution_shac_homes = Institution.objects.all().values_list('identifier', flat=True)
 
 for student_row in csv_students:
-    shac_home = shac_home_for_shortcode(student_row['Institution'].lower())
-    student_attributes = {
-        'username': student_row['NonDiacriticalName'],
-        'first_name': student_row['GivenName'],
-        'last_name': student_row['Surname'],
-        'email': student_row['EmailAddress'],
-        'uid': student_row['UUID'],
-        'affiliation': {'schac_home': shac_home, 'eppn': f'{student_row["UUID"]}@{shac_home}'},
-        'extra_data': {'eduid': student_row['eduID']},
-    }
-    create_student(**student_attributes)
+    for shac_home in institution_shac_homes:
+        if not shac_home:
+            continue
+            
+        institution_code = shac_home.split('.')[0]
+        email = reformat_email(student_row['EmailAddress'], institution_code)
+        username = f'{student_row["NonDiacriticalName"]}.{institution_code}'
+        global_uuid = f'{student_row["UUID"]}@{shac_home}'
+
+        create_student(
+            username=username,
+            first_name=student_row['GivenName'],
+            last_name=student_row['Surname'],
+            email=email,
+            uid=global_uuid,
+            affiliation={'schac_home': shac_home, 'eppn': f'{student_row["UUID"]}@{shac_home}'},
+            extra_data={'eduid': student_row['eduID']},
+        )
 
 
 def fetch_json_from_url(url):
