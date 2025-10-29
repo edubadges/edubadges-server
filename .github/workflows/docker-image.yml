@@ -82,6 +82,7 @@ jobs:
           push-to-registry: true
 
       - name: Generate artifact attestation for latest-test
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: cr.surf.nl/edubadges-edubadges/edubadges/edubadges-server
