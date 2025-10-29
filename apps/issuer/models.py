@@ -8,43 +8,42 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from urllib.parse import urljoin
 
+import badgrlog
 import requests
 from auditlog.registry import auditlog
+from cachemodel.decorators import cached_method
+from cachemodel.managers import CacheModelManager
+from cachemodel.models import CacheModel
+from directaward.models import DirectAward, DirectAwardBundle
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.db import models, transaction, IntegrityError
+from django.db import models, transaction
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
+from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
+from issuer.managers import BadgeClassManager, BadgeInstanceEvidenceManager, BadgeInstanceManager, IssuerManager
 from jsonfield import JSONField
+from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
+from mainsite.mixins import DefaultLanguageMixin, ImageUrlGetterMixin
+from mainsite.models import ArchiveMixin, BadgrApp, BaseAuditedModel
+from mainsite.utils import EmailMessageMaker, OriginSetting, generate_entity_uri, send_mail
 from openbadges_bakery import bake
 from rest_framework import serializers
-
-import badgrlog
-from cachemodel.decorators import cached_method
-from cachemodel.managers import CacheModelManager
-from cachemodel.models import CacheModel
-from directaward.models import DirectAward, DirectAwardBundle
-from entity.models import BaseVersionedEntity, EntityUserProvisionmentMixin
-from issuer.managers import BadgeInstanceManager, IssuerManager, BadgeClassManager, BadgeInstanceEvidenceManager
-from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError, BadgrValidationMultipleFieldError
-from mainsite.mixins import ImageUrlGetterMixin, DefaultLanguageMixin
-from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
-from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker, send_mail
 from signing import tsob
-from signing.models import AssertionTimeStamp, PublicKeyIssuer
-from signing.models import PublicKey
+from signing.models import AssertionTimeStamp, PublicKey, PublicKeyIssuer
 from staff.mixins import PermissionedModelMixin
 from staff.models import BadgeClassStaff, IssuerStaff
+
 from .utils import (
-    generate_sha256_hashstring,
     CURRENT_OBI_VERSION,
-    get_obi_context,
-    add_obi_version_ifneeded,
     UNVERSIONED_BAKED_VERSION,
+    add_obi_version_ifneeded,
+    generate_sha256_hashstring,
+    get_obi_context,
 )
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -864,16 +863,17 @@ class BadgeClass(
             extensions=extensions,
             **kwargs,
         )
-        message = EmailMessageMaker.create_earned_badge_mail(assertion)
+
         if send_email:
+            message = EmailMessageMaker.create_earned_badge_mail(assertion)
             recipient.email_user(
                 subject='Je hebt een edubadge ontvangen! You received an edubadge!', html_message=message
             )
-        
+
         # Log the badge instance creation event
         logger = badgrlog.BadgrLogger()
         logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))
-        
+
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
@@ -890,11 +890,11 @@ class BadgeClass(
             **kwargs,
         )
         assertion.submit_for_timestamping(signer=signer)
-        
+
         # Log the badge instance creation event
         logger = badgrlog.BadgrLogger()
         logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))
-        
+
         return assertion
 
     def get_json(

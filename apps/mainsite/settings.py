@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
@@ -16,7 +16,6 @@ env_settings()
 SESSION_COOKIE_AGE = 60 * 60  # 1 hour session validity
 SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
 SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 DEBUG = legacy_boolean_parsing('DEBUG', '0')
 
@@ -188,7 +187,6 @@ ACCOUNT_ADAPTER = 'mainsite.account_adapter.BadgrAccountAdapter'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
@@ -282,41 +280,55 @@ ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 ##
 
 # S3/MinIO configuration for file storage
-USE_S3 = os.environ.get('USE_S3', 'False').lower() == 'true'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', None)  # For MinIO
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
 
-if USE_S3:
-    # S3/MinIO settings
-    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', None)  # For MinIO
-    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
-    
-    # SSL and signature configuration
-    AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'True').lower() == 'true'
-    AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION', 's3v4')
-    
-    # Public read permissions for badge images
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
+# SSL and signature configuration
+AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'True').lower() == 'true'
+AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION', 's3v4')
+
+# Public read permissions for badge images
+AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+
+# Use custom domain if provided (for MinIO or custom S3 setup)
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
+
+# Media URL configuration
+if AWS_S3_CUSTOM_DOMAIN:
+    _endpoint_url = f'{"https" if AWS_S3_USE_SSL else "http"}://{AWS_S3_CUSTOM_DOMAIN}/'
+elif AWS_S3_ENDPOINT_URL:  # MinIO config
+    from urllib.parse import urlparse
+
+    parsed = urlparse(AWS_S3_ENDPOINT_URL)
+    _endpoint_url = f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
+else:
+    _endpoint_url = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
+
+ENDPOINT_URL = _endpoint_url
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'mainsite.proxied_s3_storage.ProxiedS3Storage',
+        'OPTIONS': {
+            'access_key': AWS_ACCESS_KEY_ID,
+            'secret_key': AWS_SECRET_ACCESS_KEY,
+            'bucket_name': AWS_STORAGE_BUCKET_NAME,
+            'region_name': AWS_S3_REGION_NAME,
+            'endpoint_url': ENDPOINT_URL,
+            'use_ssl': AWS_S3_USE_SSL,
+            'signature_version': AWS_S3_SIGNATURE_VERSION,
+            'default_acl': AWS_DEFAULT_ACL,
+            'object_parameters': AWS_S3_OBJECT_PARAMETERS,
+            'custom_domain': AWS_S3_CUSTOM_DOMAIN,
+        },
     }
-    
-    # Use custom domain if provided (for MinIO or custom S3 setup)
-    AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
-    
-    # Storage configuration
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    
-    # Media URL configuration
-    if AWS_S3_CUSTOM_DOMAIN:
-        MEDIA_URL = f"{'https' if AWS_S3_USE_SSL else 'http'}://{AWS_S3_CUSTOM_DOMAIN}/"
-    else:
-        MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/"
-        if AWS_S3_ENDPOINT_URL:  # MinIO case
-            from urllib.parse import urlparse
-            parsed = urlparse(AWS_S3_ENDPOINT_URL)
-            MEDIA_URL = f"{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/"
+}
 
 ##
 #
@@ -532,6 +544,7 @@ BADGR_PUBLIC_BOT_USERAGENTS_WIDE = [
 # Allow use of weaker CAs (1024 bits) to avoid problem with chained certificates used by accounts.google.com
 # Ideally this environment variable would be set on a per-environment basis, only where needed
 import os
+
 import certifi
 
 os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
@@ -550,8 +563,6 @@ PAGINATION_SECRET_KEY = Fernet.generate_key()
 AUTHCODE_SECRET_KEY = Fernet.generate_key()
 
 AUTHCODE_EXPIRES_SECONDS = 600  # needs to be long enough to fetch information from socialauth providers
-
-SESSION_COOKIE_SAMESITE = None
 
 GRAPHENE = {'SCHEMA': 'apps.mainsite.schema.schema'}
 
@@ -598,7 +609,6 @@ SUPERUSER_PWD = os.environ.get('SUPERUSER_PWD', '')
 EDUID_BADGE_CLASS_NAME = 'Edubadge account complete'
 
 # Debug
-DEBUG = legacy_boolean_parsing('DEBUG', '0')
 TEMPLATE_DEBUG = DEBUG
 DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG

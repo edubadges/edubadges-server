@@ -13,22 +13,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("Testing S3/MinIO storage configuration...")
         
-        # Check if S3 is enabled
-        use_s3 = getattr(settings, 'USE_S3', False)
-        if use_s3:
-            self.stdout.write(
-                self.style.SUCCESS("✓ S3 storage is enabled in settings")
-            )
-            
-            # Print S3 configuration
-            self.stdout.write(f"Storage backend: {settings.DEFAULT_FILE_STORAGE}")
-            self.stdout.write(f"Bucket: {getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'Not configured')}")
-            self.stdout.write(f"Endpoint: {getattr(settings, 'AWS_S3_ENDPOINT_URL', 'Default AWS')}")
-            
-        else:
-            self.stdout.write(
-                self.style.WARNING("⚠ S3 storage is disabled. Using local file storage.")
-            )
+        self.stdout.write(
+            self.style.SUCCESS("✓ S3 storage is enabled in settings")
+        )
+        
+        # Print S3 configuration
+        self.stdout.write(f"Storage backend: {settings.DEFAULT_FILE_STORAGE}")
+        self.stdout.write(f"Bucket: {getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'Not configured')}")
+        self.stdout.write(f"Endpoint: {getattr(settings, 'AWS_S3_ENDPOINT_URL', 'Default AWS')}")
         
         # Test file upload
         self.stdout.write("\nTesting file upload...")
@@ -106,11 +98,9 @@ class Command(BaseCommand):
             self.style.SUCCESS("\nS3 storage test completed!")
         )
         
-        if use_s3:
-            self.stdout.write("\nTo use S3 storage, ensure these environment variables are set:")
-            self.stdout.write("- USE_S3=true")
-            self.stdout.write("- AWS_ACCESS_KEY_ID=your_access_key")
-            self.stdout.write("- AWS_SECRET_ACCESS_KEY=your_secret_key")
-            self.stdout.write("- AWS_STORAGE_BUCKET_NAME=your_bucket_name")
-            self.stdout.write("- AWS_S3_ENDPOINT_URL=http://your-minio-host:9000 (for MinIO)")
-            self.stdout.write("- AWS_S3_REGION_NAME=us-east-1 (or your region)")
+        self.stdout.write("\nTo use S3 storage, ensure these environment variables are set:")
+        self.stdout.write("- AWS_ACCESS_KEY_ID=your_access_key")
+        self.stdout.write("- AWS_SECRET_ACCESS_KEY=your_secret_key")
+        self.stdout.write("- AWS_STORAGE_BUCKET_NAME=your_bucket_name")
+        self.stdout.write("- AWS_S3_ENDPOINT_URL=http://your-minio-host:9000 (for MinIO)")
+        self.stdout.write("- AWS_S3_REGION_NAME=us-east-1 (or your region)")

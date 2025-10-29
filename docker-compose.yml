@@ -6,14 +6,14 @@ services:
       dockerfile: ./docker/dev.Dockerfile
     container_name: badgr
     volumes:
-      - .:/app
+      - .:/app:Z
     working_dir: /app
     environment:
       # Be sure to set BADGR_DB_PASSWORD when running docker-compose
       - ACCOUNT_SALT=secret
       - ALLOW_SEEDS=1
       - BADGR_APP_ID=1
-      - BADGR_DB_HOST=badgr_postgres_db
+      - BADGR_DB_HOST=postgres
       - BADGR_DB_NAME=badgr
       - BADGR_DB_PASSWORD=${BADGR_DB_PASSWORD}
       - BADGR_DB_PORT=5432
@@ -24,9 +24,8 @@ services:
       - DOMAIN=0.0.0.0:8000
       - EDUID_PROVIDER_URL=https://connect.test.surfconext.nl/oidc
       - EDU_ID_CLIENT=ewi.backpack.edubadges
-      - EDUID_REGISTRATION_URL=https://login.test.eduid.nl/register
-      - EDU_ID_CLIENT=edubadges
       - EDU_ID_SECRET=${EDU_ID_SECRET}
+      - EDUID_REGISTRATION_URL=https://login.test.eduid.nl/register
       - EDUID_IDENTIFIER=sub
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
       - EMAIL_USE_TLS=0
@@ -42,8 +41,7 @@ services:
       - SUPERUSER_EMAIL=superuser@example.com
       - SUPERUSER_NAME=superuser
       - SUPERUSER_PWD=secert
-      - SURF_CONEXT_CLIENT=test.edubadges.nl
-      - SURF_CONEXT_CLIENT=www.edubadges.nl
+      - SURF_CONEXT_CLIENT=ewi.issuer.edubadges
       - SURF_CONEXT_SECRET=${SURF_CONEXT_SECRET}
       - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
       - UI_URL=http://0.0.0.0:8080
@@ -52,6 +50,11 @@ services:
       - OB3_AGENT_URL_SPHEREON=https://agent.poc15.eduwallet.nl/oid4vci/admin/credentials
       - OB3_AGENT_AUTHZ_TOKEN_SPHEREON=${OB3_AGENT_AUTHZ_TOKEN_SPHEREON}
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
+      - AWS_ACCESS_KEY_ID=edubadges
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_S3_CUSTOM_DOMAIN=minio:9000
+      - AWS_STORAGE_BUCKET_NAME=edubadges
+      - AWS_S3_USE_SSL=False
     networks:
       - shared-network
       - edubadges-server
@@ -62,12 +65,14 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
+      minio-init:
+        condition: service_started
     ports:
       - "8000:8000"
-      
+
   db:
-    image: postgres:16 
-    container_name: badgr_postgres_db
+    image: postgres:16
+    container_name: postgres
     environment:
       POSTGRES_DB: badgr
       POSTGRES_USER: badgr
@@ -77,7 +82,7 @@ services:
       - "5432:5432"
     # Health check for PostgreSQL
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U badgr -d badgr"]
+      test: [ "CMD-SHELL", "pg_isready -U badgr -d badgr" ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -103,6 +108,42 @@ services:
     networks:
       - edubadges-server
 
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - edubadges-server
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./docker/minio-init.sh:/minio-init.sh
+    entrypoint: /bin/sh
+    command: [ "/minio-init.sh" ]
+    environment:
+      - MC_HOST_minio=http://minioadmin:minioadmin@minio:9000
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - edubadges-server
+
 networks:
   shared-network:
     external: true
@@ -112,3 +153,4 @@ networks:
 volumes:
   db-data:
   postgresql.conf:
+  minio-data:

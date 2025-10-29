@@ -1,9 +1,8 @@
-import traceback
 import sys
+import traceback
 
 from django.core.management.base import BaseCommand
 from django.db import connection
-
 from mainsite.models import BadgrApp
 
 
@@ -37,21 +36,6 @@ def clear_data():
     with connection.cursor() as cursor:
         print('Wiping data... ', end='')
 
-        seed_filled_tables = (
-            'badgeuser_termsversion',
-            'socialaccount_socialapp',
-            'django_site',
-            'mainsite_badgrapp',
-            'institution_institution',
-            'institution_faculty',
-            'issuer_issuer',
-            'issuer_badgeclass',
-        )
-
-        # cursor.execute("SET session_replication_role = 'replica';")
-        # try:
-        [cursor.execute('TRUNCATE TABLE ' + table + ' CASCADE') for table in seed_filled_tables]
-        # finally:
-        # cursor.execute("SET session_replication_role = 'origin';")
+        # TODO: Add Ber's version
 
         print('\033[92mdone!\033[0m')

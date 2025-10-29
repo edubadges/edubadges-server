@@ -19,7 +19,7 @@ from xml.etree import cElementTree as ET
 
 import cairosvg
 import requests
-from PIL import Image, ImageDraw, ImageFont, ImageEnhance
+
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core import mail
@@ -29,6 +29,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.template.loader import render_to_string
 from django.urls import get_callable, reverse
 from django.utils.html import format_html
+from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 from premailer import transform
 from resizeimage.resizeimage import resize_contain
 
@@ -97,7 +98,7 @@ def fetch_remote_file_to_storage(remote_url, upload_to=''):
     :return: (status_code, new_storage_name)
     """
     store = DefaultStorage()
-    r = requests.get(remote_url, stream=True)
+    r = requests.get(remote_url, stream=True, verify=False)
     if r.status_code == 200:
         name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
         storage_name = '{upload_to}/cached/{filename}{ext}'.format(
@@ -147,21 +148,22 @@ def open_mail_in_browser(html):
 class EmailMessageMaker:
     @staticmethod
     def _create_example_image(badgeclass):
-        path = badgeclass.image.path
+        path = badgeclass.image.url
         if path.endswith('.svg'):
             with open(path, 'rb') as input_svg:
                 svg = input_svg.read()
                 encoded = base64.b64encode(svg).decode()
                 return 'data:image/svg+xml;base64,{}'.format(encoded)
         else:
-            background = Image.open(badgeclass.image.path).convert('RGBA')
+            with badgeclass.image.storage.open(badgeclass.image.name, 'rb') as image_file:
+                background = Image.open(image_file).convert('RGBA')
 
         overlay = Image.open(finders.find('images/example_overlay.png')).convert('RGBA')
         if overlay.width != background.width:
             width_ratio = background.width / overlay.width
             new_background_height = background.height * width_ratio
             new_background_size = (overlay.width, new_background_height)
-            background.thumbnail((new_background_size), Image.LANCZOS)
+            background.thumbnail(new_background_size, Image.LANCZOS)
         position = (0, background.height // 4)
         background.paste(overlay, position, overlay)
         buffered = BytesIO()
@@ -301,7 +303,7 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': badgeclass.issuer.faculty.institution.name,
-            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y')
+            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
 
@@ -332,7 +334,7 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': badgeclass.issuer.faculty.institution.name,
-            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y')
+            'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
 
@@ -350,7 +352,7 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': badgeclass.issuer.faculty.institution.name,
-            'da_enddate': direct_award.expiration_date
+            'da_enddate': direct_award.expiration_date,
         }
         return render_to_string(template, email_vars)
 
@@ -447,14 +449,6 @@ def admin_list_linkify(field_name, label_param=None):
 
     _linkify.short_description = field_name  # Sets column name
     return _linkify
-
-
-def generate_image_url(image):
-    if image.name:
-        if getattr(settings, 'MEDIA_URL').startswith('http'):
-            return default_storage.url(image.name)
-        else:
-            return getattr(settings, 'HTTP_ORIGIN') + default_storage.url(image.name)
 
 
 def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
