@@ -7,7 +7,7 @@ services:
     container_name: badgr
     command: "./docker/entrypoint.sh"
     volumes:
-      - .:/app
+      - .:/app:Z
     working_dir: /app
     environment:
       # Be sure to set BADGR_DB_PASSWORD when running docker-compose
