@@ -1,28 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 
 from badgeuser.models import UserProvisionment
-from mainsite.seeds.util import institution_by_shortcode, read_seed_csv
-
-
-def reformat_email(email: str, institution_id: str) -> str:
-    """
-    Emails in PBA differ from what the output uses. It unclear why. Probably out of date or a bug in the data processing by
-    the PBA team.
-    We need to manually fix these emails:
-        carl.linnaeus@dev.eduwallet.nl to clinnaeus.uvh@dev.eduwallet.nl
-        serge.delic@dev.eduwallet.nl to sdelic.uvh@dev.eduwallet.nl
-        juliette.klerks@dev.eduwallet.nl to jklerks.hbot@dev.eduwallet.nl
-
-    The .uvh or .hbot comes from the institution shortcode.
-    """
-    user, domain = email.split('@')
-
-    first_name, last_name = user.split('.')
-    first_letter = first_name[0]
-    new_user = f'{first_letter}{last_name}'
-
-    return f'{new_user}.{institution_id}@{domain}'
-
+from mainsite.seeds.util import institution_by_shortcode, read_seed_csv, reformat_email
 
 # Load CSV
 all_users = read_seed_csv('pba')

@@ -1,5 +1,6 @@
 import os
 import csv
+from typing_extensions import Optional
 
 from django.core.files import File
 
@@ -80,7 +81,7 @@ def institution_by_shortcode(shortcode: str) -> Institution:
     return Institution.objects.get(identifier=institution_id_by_shortcode(shortcode))
 
 
-def institution_id_by_shortcode(shortcode: str) -> str:
+def institution_id_by_shortcode(shortcode: str) -> Optional[str]:
     map = {
         'mbob': 'mbob.nl',
         'uvh': 'uvh.nl',
@@ -94,7 +95,7 @@ def institution_id_by_shortcode(shortcode: str) -> str:
     return map.get(shortcode)
 
 
-def institution_id_by_pba_id(identifier: str) -> str:
+def institution_id_by_pba_id(identifier: str) -> Optional[str]:
     map = {
         '11BR': 'mbob.nl',
         '41GM': 'uvh.nl',
@@ -106,3 +107,23 @@ def institution_id_by_pba_id(identifier: str) -> str:
     #     '57GL': 'ahb.nl',
     #     '21FD': 'nhls.nl',
     return map.get(identifier)
+
+
+def reformat_email(email: str, institution_id: str) -> str:
+    """
+    Emails in PBA differ from what the output uses. It unclear why. Probably out of date or a bug in the data processing by
+    the PBA team.
+    We need to manually fix these emails:
+        carl.linnaeus@dev.eduwallet.nl to clinnaeus.uvh@dev.eduwallet.nl
+        serge.delic@dev.eduwallet.nl to sdelic.uvh@dev.eduwallet.nl
+        juliette.klerks@dev.eduwallet.nl to jklerks.hbot@dev.eduwallet.nl
+
+    The .uvh or .hbot comes from the institution shortcode.
+    """
+    user, domain = email.split('@')
+
+    first_name, last_name = user.split('.')
+    first_letter = first_name[0]
+    new_user = f'{first_letter}{last_name}'
+
+    return f'{new_user}.{institution_id}@{domain}'
