@@ -349,7 +349,8 @@ FIXTURE_DIRS = [
 #  We set the log level, based on the DEBUG flag: DEBUG if DEBUG else INFO This is default Django behaviour
 #  The container runner will add timestamp and container name to the logs
 ##
-LOG_LEVEL = logging.DEBUG if DEBUG else logging.INFO
+DEFAULT_LOG_LEVEL = logging.DEBUG if DEBUG else logging.INFO
+LOG_LEVEL = os.environ.get('LOG_LEVEL', DEFAULT_LOG_LEVEL)
 
 LOGGING = {
     'version': 1,
