@@ -29,7 +29,7 @@ djangorestframework==3.15.2
 
 # Django Allauth
 django-allauth==0.51.0
-oauthlib==3.2.2
+oauthlib==3.3.1
 requests==2.32.4
 requests-oauthlib==1.3.1
 
@@ -50,7 +50,7 @@ netaddr
 django-extensions==3.2.3
 
 # Utilities for working with badges
-jsonschema==2.6.0
+jsonschema==4.25.1
 simplejson==3.6.4
 
 # JSON-LD
@@ -62,14 +62,12 @@ rfc3987==1.3.4
 jsonfield==3.1.0
 
 # markdown support
-Markdown==2.6.8
+Markdown==3.9
 django-markdownify==0.1.0
-bleach==3.3.0
+bleach==6.2.0
 
 # Open Badges related utilities
-# openbadges==1.1.2
-git+https://github.com/edubadges/openbadges-validator-core@develop#egg=openbadges
-# openbadges-bakery==1.0.1
+git+https://github.com/edubadges/openbadges-validator-core@upd_requirements#egg=openbadges
 
 celery==5.2.7
 django-celery-results==2.4.0
@@ -77,11 +75,9 @@ importlib-metadata==4.13.0
 python-json-logger==0.1.2
 
 # SSL Support
-cffi==1.14.5
-cryptography==44.0.1
-enum34==1.1.6
+cffi==2.0.0
+cryptography==46.0.3
 idna==3.10
-ipaddress==1.0.16
 pyasn1==0.1.9
 pycparser==2.14
 six==1.13.0
@@ -93,14 +89,11 @@ cssselect==0.9.2
 tinycss==0.4
 # pycairo==1.19.1
 
-# Backport of Python 3.0 CSV package with Unicode support
-backports.csv==1.0.4
-
 # EncryptedCursorPagination dependencies
 more-itertools==2.5.0
 #more-itertools==8.12.0
 
-responses==0.8.1
+responses==0.25.8
 ## FW django_mock_queries==2.0.0
 django_mock_queries==2.1.5
 
