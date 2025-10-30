@@ -19,13 +19,15 @@ services:
       - BADGR_DB_PORT=5432
       - BADGR_DB_USER=badgr
       - DEBUG=1
+      - LOG_LEVEL=INFO
       - DEFAULT_DOMAIN=http://0.0.0.0:8000
       - DEFAULT_FROM_EMAIL=noreply@surf.nl
       - DOMAIN=0.0.0.0:8000
       - EDUID_PROVIDER_URL=https://connect.test.surfconext.nl/oidc
       - EDU_ID_CLIENT=ewi.backpack.edubadges
-      - EDU_ID_SECRET=${EDU_ID_SECRET}
       - EDUID_REGISTRATION_URL=https://login.test.eduid.nl/register
+      - EDU_ID_CLIENT=edubadges
+      - EDU_ID_SECRET=${EDU_ID_SECRET}
       - EDUID_IDENTIFIER=sub
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
       - EMAIL_USE_TLS=0
@@ -41,10 +43,11 @@ services:
       - SUPERUSER_EMAIL=superuser@example.com
       - SUPERUSER_NAME=superuser
       - SUPERUSER_PWD=secert
-      - SURF_CONEXT_CLIENT=ewi.issuer.edubadges
+      - SURF_CONEXT_CLIENT=test.edubadges.nl
+      - SURF_CONEXT_CLIENT=www.edubadges.nl
       - SURF_CONEXT_SECRET=${SURF_CONEXT_SECRET}
       - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
-      - UI_URL=http://0.0.0.0:8080
+      - UI_URL=http://localhost:8080
       - UNSUBSCRIBE_SECRET_KEY=secret
       - OB3_AGENT_URL_UNIME=https://agent.poc9.eduwallet.nl/v0/offers
       - OB3_AGENT_URL_SPHEREON=https://agent.poc15.eduwallet.nl/oid4vci/admin/credentials
@@ -77,7 +80,6 @@ services:
       POSTGRES_DB: badgr
       POSTGRES_USER: badgr
       POSTGRES_PASSWORD: ${BADGR_DB_PASSWORD}
-      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     # Health check for PostgreSQL
@@ -88,7 +90,7 @@ services:
       start_period: 30s
       timeout: 10s
     volumes:
-      - postgresql.conf:/etc/postgresql.conf
+      # Note: PG 17 and up this path will change: https://hub.docker.com/_/postgres#pgdata
       - db-data:/var/lib/postgresql/data
     networks:
       - edubadges-server
@@ -152,5 +154,4 @@ networks:
 
 volumes:
   db-data:
-  postgresql.conf:
   minio-data:

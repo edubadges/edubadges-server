@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection
 from random import randrange
 from badgeuser.models import BadgeUser
+from mainsite.seeds.util import seed_image_for
 from mainsite.tests.base import SetupHelper
 from institution.models import Institution, Faculty
 from issuer.models import Issuer, BadgeClass, BadgeInstance
@@ -34,20 +35,16 @@ def clear_data():
     with connection.cursor() as cursor:
         print('Wiping data... ', end='')
 
-        dbname = environ.get('BADGR_DB_NAME')
+        schema = 'public'
         migration_filled_tables = ('auth_permission', 'django_content_type', 'django_migrations')
+        
         sql = (
-            f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' "
-            f'AND table_name NOT IN {migration_filled_tables}'
+            f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}' "
+            f"AND table_name NOT IN {migration_filled_tables} AND table_type = 'BASE TABLE'"
         )
-
-        # cursor.execute("SET session_replication_role = 'replica';")
-        # try:
         cursor.execute(sql)
         for (table,) in cursor.fetchall():
-            cursor.execute('TRUNCATE TABLE ' + table + ' CASCADE')
-        # finally:
-        # cursor.execute("SET session_replication_role = 'origin';")
+            cursor.execute(f'TRUNCATE TABLE {schema}.{table} CASCADE')
 
         print('\033[92mdone!\033[0m')
 
@@ -77,7 +74,7 @@ def run_seeds():
 
 def run_scaled_seed(scale):
     setup_helper = SetupHelper()
-    institution = Institution.objects.get(identifier='hbot.nl')
+    institution = Institution.objects.get(identifier='SURF')
     faculty_name = 'Many Assertions'
     faculty, _ = Faculty.objects.get_or_create(
         name_english=faculty_name,
@@ -94,7 +91,7 @@ def run_scaled_seed(scale):
         old_json='{}',
         url_english='https://issuer',
         email='issuer@info.nl',
-        image_english='uploads/issuers/surf.png',
+        image_english=seed_image_for('issuers', 'logo-surf.png'),
     )
     badgeclass, _ = BadgeClass.objects.get_or_create(
         name='Many Assertions',
@@ -102,7 +99,7 @@ def run_scaled_seed(scale):
         description='Description',
         formal=True,
         old_json='{}',
-        image='uploads/badges/eduid.png',
+        image=seed_image_for('badges', 'welcome.png'),
     )
 
     issuing_teacher = BadgeUser.objects.get(first_name='Joseph', last_name='Wheeler')
