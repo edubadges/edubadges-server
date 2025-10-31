@@ -33,6 +33,8 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 from premailer import transform
 from resizeimage.resizeimage import resize_contain
 
+from institution.testfiles.helper import institution_image
+
 slugify_function_path = getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
 
 slugify = get_callable(slugify_function_path)
@@ -298,15 +300,17 @@ class EmailMessageMaker:
         locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
         nl_end_date = direct_award.expiration_date.strftime('%d %B %Y')
         locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
+        faculty = badgeclass.issuer.faculty
+        institution_name = faculty.name if faculty.on_behalf_of else faculty.institution.name
         email_vars = {
             'badgeclass_image': badgeclass_image,
             'issuer_image': badgeclass.issuer.image_url(),
             'issuer_name': badgeclass.issuer.name,
-            'faculty_name': badgeclass.issuer.faculty.name,
+            'faculty_name': faculty.name,
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
-            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'institution_name': institution_name,
             'en_da_enddate': en_end_date,
             'nl_da_enddate': nl_end_date,
         }
