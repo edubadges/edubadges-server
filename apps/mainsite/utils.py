@@ -341,16 +341,17 @@ class EmailMessageMaker:
         nl_create_date = direct_award.created_at.strftime('%d %B %Y')
         nl_end_date = direct_award.expiration_date.strftime('%d %B %Y')
         locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
-
+        faculty = badgeclass.issuer.faculty
+        institution_name = faculty.name if faculty.on_behalf_of else faculty.institution.name
         email_vars = {
             'badgeclass_image': badgeclass_image,
             'issuer_image': badgeclass.issuer.image_url(),
             'issuer_name': badgeclass.issuer.name,
-            'faculty_name': badgeclass.issuer.faculty.name,
+            'faculty_name': faculty.name,
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
-            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'institution_name': institution_name,
             'da_enddate_nl': nl_end_date,
             'da_enddate_en': en_end_date,
             'da_creationdate_nl': nl_create_date,
