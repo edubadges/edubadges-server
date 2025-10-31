@@ -293,7 +293,6 @@ AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
 
 # SSL and signature configuration
-AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'True').lower() == 'true'
 AWS_S3_SIGNATURE_VERSION = os.environ.get('AWS_S3_SIGNATURE_VERSION', 's3v4')
 
 # Public read permissions for badge images
@@ -307,7 +306,7 @@ AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN', None)
 
 # Media URL configuration
 if AWS_S3_CUSTOM_DOMAIN:
-    _endpoint_url = f'{"https" if AWS_S3_USE_SSL else "http"}://{AWS_S3_CUSTOM_DOMAIN}/'
+    _endpoint_url = AWS_S3_CUSTOM_DOMAIN
 elif AWS_S3_ENDPOINT_URL:  # MinIO config
     from urllib.parse import urlparse
 
@@ -327,7 +326,6 @@ STORAGES = {
             'bucket_name': AWS_STORAGE_BUCKET_NAME,
             'region_name': AWS_S3_REGION_NAME,
             'endpoint_url': ENDPOINT_URL,
-            'use_ssl': AWS_S3_USE_SSL,
             'signature_version': AWS_S3_SIGNATURE_VERSION,
             'default_acl': AWS_DEFAULT_ACL,
             'object_parameters': AWS_S3_OBJECT_PARAMETERS,

@@ -55,9 +55,8 @@ services:
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
       - AWS_ACCESS_KEY_ID=edubadges
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_S3_CUSTOM_DOMAIN=minio:9000
+      - AWS_S3_CUSTOM_DOMAIN=http://minio:9000
       - AWS_STORAGE_BUCKET_NAME=edubadges
-      - AWS_S3_USE_SSL=False
     networks:
       - shared-network
       - edubadges-server

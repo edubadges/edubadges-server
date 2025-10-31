@@ -5,6 +5,7 @@ This document describes how to configure and use S3 or MinIO storage for BadgeCl
 ## Overview
 
 The application now supports storing uploaded files (BadgeClass images, Issuer images, etc.) in S3-compatible storage systems including:
+
 - Amazon S3
 - MinIO
 - Other S3-compatible storage services
@@ -16,6 +17,7 @@ The application now supports storing uploaded files (BadgeClass images, Issuer i
 Set the following environment variables to enable S3 storage:
 
 #### Required Variables
+
 ```bash
 AWS_ACCESS_KEY_ID=your_access_key_id
 AWS_SECRET_ACCESS_KEY=your_secret_access_key
@@ -23,15 +25,13 @@ AWS_STORAGE_BUCKET_NAME=your_bucket_name
 ```
 
 #### Optional Variables
+
 ```bash
 # For MinIO or custom S3 endpoint
 AWS_S3_ENDPOINT_URL=http://your-minio-host:9000
 
 # AWS region (default: us-east-1)
 AWS_S3_REGION_NAME=us-east-1
-
-# SSL settings (default: true)
-AWS_S3_USE_SSL=true
 
 # Signature version (default: s3v4)
 AWS_S3_SIGNATURE_VERSION=s3v4
@@ -43,18 +43,19 @@ AWS_S3_CUSTOM_DOMAIN=cdn.yourdomain.com
 ### MinIO Configuration Example
 
 For a MinIO setup:
+
 ```bash
 AWS_ACCESS_KEY_ID=minioadmin
 AWS_SECRET_ACCESS_KEY=minioadmin
 AWS_STORAGE_BUCKET_NAME=edubadges
 AWS_S3_ENDPOINT_URL=http://minio:9000
-AWS_S3_USE_SSL=false
 AWS_S3_REGION_NAME=us-east-1
 ```
 
 ### AWS S3 Configuration Example
 
 For AWS S3:
+
 ```bash
 AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
@@ -72,6 +73,7 @@ boto3==1.34.162
 ```
 
 Install them with:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -85,6 +87,7 @@ python manage.py test_s3_storage
 ```
 
 This command will:
+
 - Check if S3 is enabled
 - Test file upload/download
 - Verify URL generation
@@ -104,13 +107,14 @@ python manage.py migrate_images_to_s3
 # Migrate only BadgeClass images
 python manage.py migrate_images_to_s3 --model badgeclass
 
-# Migrate only BadgeInstance images  
+# Migrate only BadgeInstance images
 python manage.py migrate_images_to_s3 --model badgeinstance
 ```
 
 ## File Structure in S3
 
 Files will be stored in S3 with the following structure:
+
 ```
 bucket/
 ├── uploads/
@@ -134,40 +138,41 @@ The S3 bucket should have appropriate permissions. For public read access to bad
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "PublicReadGetObject",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::your-bucket-name/*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadGetObject",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::your-bucket-name/*"
+    }
+  ]
 }
 ```
 
 ### IAM Permissions
 
 The AWS user/role needs these permissions:
+
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:DeleteObject",
-                "s3:ListBucket"
-            ],
-            "Resource": [
-                "arn:aws:s3:::your-bucket-name",
-                "arn:aws:s3:::your-bucket-name/*"
-            ]
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::your-bucket-name",
+        "arn:aws:s3:::your-bucket-name/*"
+      ]
+    }
+  ]
 }
 ```
 
@@ -177,8 +182,7 @@ The AWS user/role needs these permissions:
 
 1. **Connection errors**: Check your endpoint URL and credentials
 2. **Permission errors**: Verify bucket policies and IAM permissions
-3. **SSL errors**: For MinIO, ensure `AWS_S3_USE_SSL=false` if using HTTP
-4. **URL generation issues**: Check `AWS_S3_CUSTOM_DOMAIN` setting
+3. **URL generation issues**: Check `AWS_S3_CUSTOM_DOMAIN` setting
 
 ### Debug Commands
 
@@ -196,6 +200,7 @@ python manage.py shell
 ### Logs
 
 Enable debug logging to see S3 operations:
+
 ```python
 LOGGING = {
     'loggers': {
