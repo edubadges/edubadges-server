@@ -17,6 +17,9 @@ SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
 SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# Increase allowed redirect URL length for OAuth/OIDC callbacks with long state parameters
+ALLOWED_REDIRECT_URL_LENGTH = 4096
+
 ##
 #
 #  Important Stuff
@@ -311,7 +314,7 @@ handlers = {
         'class': 'logging.StreamHandler',
     },
     'null': {
-            'class': 'logging.NullHandler',  # Use fully qualified class name
+        'class': 'logging.NullHandler',  # Use fully qualified class name
     },
 }
 
