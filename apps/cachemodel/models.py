@@ -32,7 +32,13 @@ class CacheModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        #find all the denormalized fields and update them
+        # When using DummyCache, we don't want to perform any cache operations as is common with Django.
+        # The CacheModel will denormalize, save, and run publish, all of which are very expensive operations.
+        # So we skip them if using DummyCache.
+        if cache._connections[cache._alias].__class__.__name__ == 'DummyCache':
+            return super(CacheModel, self).save(*args, **kwargs)
+
+        # find all the denormalized fields and update them
         self.denormalize()
 
         # save ourselves to the database
