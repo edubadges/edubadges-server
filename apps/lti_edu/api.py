@@ -2,7 +2,8 @@ import threading
 
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from lxml.etree import strip_tags
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
@@ -58,6 +59,32 @@ class StudentsEnrolledList(BaseEntityListView):
     model = StudentsEnrolled
     http_method_names = ['post']
 
+    @extend_schema(
+        methods=['POST'],
+        description='Request a badge',
+        request=inline_serializer(
+            name='BadgeRequest',
+            fields={'badgeclass_slug': serializers.CharField()},
+        ),
+        responses={
+            201: inline_serializer(
+                name='BadgeRequestResponse',
+                fields={
+                    'entity_id': serializers.CharField(),
+                    'status': serializers.CharField()
+                },
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                'BadgeRequest Example',
+                value={
+                    'badgeclass_slug': 'JSsFqMQATRmtKjJAtg',
+                },
+                request_only=True,
+            ),
+        ],
+    )
     def post(self, request, **kwargs):
         if 'badgeclass_slug' not in request.data:
             raise BadgrApiException400("Missing badgeclass id", 208)
