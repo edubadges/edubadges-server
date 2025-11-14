@@ -5,6 +5,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [8.3.2] - 2025-11-14
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.3.1...v8.3.2</br>
+
+- Added enrollment endpoint for mobile API
+- Merge pull request #210 from edubadges/dependabot/pip/django-4.2.26
+- Bump django from 4.2.25 to 4.2.26
+- Also apply virtual organization name for reminders
+- Merge pull request #209 from edubadges/feature/mail-virtual-organization
+- Fix for virtual organization DA email https://trello.com/c/8xUKHT9C/1116-virtuele-organisatie-wordt-niet-getoond-in-de-e-mail
+- Fixed CMD in Dockerfile
+- Added SELinux flag to app volume, made entrypoint executable
+
+## [8.3.1] - 2025-10-28
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.3.0...v8.3.1</br>
+
+- WIP for 8zmfgqmL - edubadges per sector
+- Transferred openbadges-validator-core to edubadges repo
+- Wip for mobile API
+- Merge pull request #201 from edubadges/dependabot/pip/django-4.2.25
+- Updated reminder mail template to include creation date, improved ear… (#203)
+- Bump django from 4.2.24 to 4.2.25
+- Merge pull request #199 from edubadges/feature/mobile-api
+- Added more mobile endpoints
+- Added mobile DirectAward detail endpoint
+- Added mobile/api/login example responses
+- Merge branch 'develop' into feature/mobile-api
+- Merge pull request #200 from edubadges/dependabot/pip/django-4.2.24
+- WIP for provisioning users mobile API
+- Bump django from 4.2.22 to 4.2.24
+- WIP for provisioning users mobile API
+- Added default parameters in post processor
+- Merge branch 'feature/reminder_unit_test' into develop
+- Added discussion questions
+- Added endpoint for unclaimed direct awards
+- Added badge instance detail endpoint
+- First WIP commit for new mobile API https://trello.com/c/WYW0JiGA/1105-changes-needed-for-making-apis-mobile-app-ready
+- Fixed test cmd in README
+- Updated README to include how to run tests
+- Merge pull request #190 from edubadges/feature/impierce_update
+- refactor: Move logic for presenting expires_at to serializer
+- chore: move tests to the correct place in directory hierarchy
+- refactor: Ensure the ExpiresAt can be "never" which isn't a valid datetime
+- feat: Only allow unime for demo
+- fix: Bring serialized payload in line with reqs for new unime-core
+- feat: Add expires_at that is required with new impierce version
+- Added missing init file
+- Fixed unit tests, updated tests for reminders DA.
+- Need to encode string before hashing
+- Started adding tests for reminders_direct_awards
+- Merge pull request #194 from edubadges/bug/reminders-direct-awards
+- Fixed bug in reminders_direct_awards
+- Set the issued_on date for accepted assertions When a requested badge is accepted, set the issued_on date of the new assertion with the value of the creation date of the enrollment
+- Use preferred linked account for validated name
+- Added stdout messages for running reminders_direct_award directly
+
 ## [8.3.0] - 2025-07-14
 
 #### Full GitHub changelogs:
@@ -27,7 +88,7 @@ Backend: https://github.com/edubadges/edubadges-server/compare/v8.2.0...v8.3.0</
 - Badgeclass met dezelfde naam toestaan https://trello.com/c/PyAwVAyJ/1087-badgeclass-met-dezelfde-naam-toestaan-binnen-issuer
 - Bump requests from 2.32.0 to 2.32.4
 - Bump django from 4.2.21 to 4.2.22
-  
+
 ## [8.2.0] - 2025-06-06
 
 #### Full GitHub changelogs:
