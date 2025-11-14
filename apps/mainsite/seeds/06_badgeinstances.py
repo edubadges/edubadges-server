@@ -1,15 +1,15 @@
 from cmath import exp
-from venv import logger
 from datetime import timedelta
-from django.conf import settings
-from django.utils import timezone
+from venv import logger
 
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser, StudentAffiliation
+from django.conf import settings
+from django.db.models import QuerySet
+from django.utils import timezone
+from institution.models import Faculty, Institution
 from issuer.models import BadgeClass, BadgeInstance, Issuer
-from institution.models import Institution, Faculty
 from lti_edu.models import StudentsEnrolled
 from mainsite.models import BadgrApp
-from django.db.models import QuerySet
 
 super_user = BadgeUser.objects.get(username=getattr(settings, 'SUPERUSER_NAME'))
 
@@ -17,11 +17,12 @@ super_user = BadgeUser.objects.get(username=getattr(settings, 'SUPERUSER_NAME'))
 months_ahead = 6
 
 
-def all_students() -> QuerySet[BadgeUser]:
+def all_students_in(institution: Institution) -> QuerySet[BadgeUser]:
     return BadgeUser.objects.filter(
         is_active=True,
         is_superuser=False,
         is_staff=False,
+        id__in=StudentAffiliation.objects.filter(schac_home=institution.identifier).values('user_id'),
     )
 
 
@@ -37,7 +38,7 @@ def all_badge_classes_in(institution: Institution) -> QuerySet[BadgeClass]:
 
 for institution in Institution.objects.all():
     badge_classes = all_badge_classes_in(institution)
-    users = all_students()
+    users = all_students_in(institution)
 
     logger.debug(
         f'Generating {len(users)} x {len(badge_classes)} = {len(users) * len(badge_classes)} badge instances in {institution.name}'
@@ -70,4 +71,5 @@ for institution in Institution.objects.all():
                 revoked=revoked,
                 expires_at=expires_at,
                 send_email=False,
+                # publish_parent=False
             )

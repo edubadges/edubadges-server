@@ -2,6 +2,7 @@ import traceback
 import sys
 from os import listdir, environ
 from os.path import dirname, basename, isfile, join
+from django.test.utils import override_settings
 from django.utils import timezone
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -21,7 +22,14 @@ class Command(BaseCommand):
         parser.add_argument('-as', '--add_assertions', type=int)
 
     def handle(self, *args, **options):
-        if settings.ALLOW_SEEDS:
+        if not settings.ALLOW_SEEDS:
+            return
+            
+        with override_settings(CACHES={
+            'default': {
+                'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            }
+        }):
             if options['clean']:
                 clear_data()
 
