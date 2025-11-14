@@ -22,6 +22,7 @@ def all_students_in(institution: Institution) -> QuerySet[BadgeUser]:
         is_active=True,
         is_superuser=False,
         is_staff=False,
+        id__in=StudentAffiliation.objects.filter(schac_home=institution.identifier).values('user_id'),
     )
 
 
