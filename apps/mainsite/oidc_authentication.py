@@ -20,8 +20,8 @@ class OIDCAuthentication(BaseAuthentication):
         """
         logger = logging.getLogger('Badgr.Debug')
         x_requested_with = request.headers.get('x-requested-with')
-        if x_requested_with and x_requested_with.lower() == 'client':
-            logger.info('Skipping OIDCAuthentication as HTTP_X_REQUESTED_WITH = client')
+        if x_requested_with and (x_requested_with.lower() == 'client' or x_requested_with.lower() == 'mobile'):
+            logger.info(f"Skipping OIDCAuthentication as HTTP_X_REQUESTED_WITH = {x_requested_with}")
             return None
 
         logger.info(f'OIDCAuthentication {request.META}')
