@@ -644,8 +644,8 @@ AUDITLOG_DISABLE_REMOTE_ADDR = True
 
 API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
 
-# Django 5.2.8 and CVE-2025-64458 / CVE-2025-27556 added a strong enforcement of 2048 characters
+# Django 4.2.6 and CVE-2025-64458 / CVE-2025-27556 added a strong enforcement of 2048 characters
 # as the maximum for a URL to redirect to, mostly for running on windows.
 # However our URLs can easily exceed that with OAuth/SAML Query parameters or hash values
-# 8192 should cover most cases..
-http_response.MAX_URL_LENGTH = http_response.MAX_URL_LENGTH * 4
+# 16384 should cover most cases..
+http_response.MAX_URL_LENGTH = http_response.MAX_URL_LENGTH * 8
