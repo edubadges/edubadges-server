@@ -331,7 +331,10 @@ STORAGES = {
             'object_parameters': AWS_S3_OBJECT_PARAMETERS,
             'custom_domain': AWS_S3_CUSTOM_DOMAIN,
         },
-    }
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
 }
 
 ##
