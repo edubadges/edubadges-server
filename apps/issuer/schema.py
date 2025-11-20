@@ -369,16 +369,19 @@ class Query(object):
         if id is not None:
             bc = BadgeClass.objects.get(entity_id=id)
             # Students who are logged in need to access this to start the enrollment and copy public data is allowed
-            if (hasattr(info.context.user, 'is_student') and info.context.user.is_student) or (
-                    hasattr(info.context.user, 'is_teacher') and info.context.user.is_teacher):
-                return bc
+            user = info.context.user
+            if hasattr(user, 'is_authenticated') and user.is_authenticated:
+                if (hasattr(user, 'is_student') and user.is_student) or (
+                        hasattr(user, 'is_teacher') and user.is_teacher):
+                    return bc
         return None
 
     def resolve_badge_instance(self, info, **kwargs):
         id = kwargs.get('id')
         if id is not None:
             bc = BadgeInstance.objects.get(entity_id=id)
-            if bc.user_id == info.context.user.id:
+            user = info.context.user
+            if hasattr(user, 'is_authenticated') and user.is_authenticated and bc.user_id == user.id:
                 return bc
         return None
 
@@ -387,18 +390,28 @@ class Query(object):
         if id is not None:
             bc = BadgeInstanceCollection.objects.get(entity_id=id)
             # Called anonymous in public collection page
-            if bc.public or bc.user_id == info.context.user.id:
+            user = info.context.user
+            if bc.public or (hasattr(user, 'is_authenticated') and user.is_authenticated and bc.user_id == user.id):
                 return bc
         return None
 
     def resolve_badge_instance_collections(self, info, **kwargs):
-        return BadgeInstanceCollection.objects.filter(user=info.context.user)
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            return BadgeInstanceCollection.objects.none()
+        return BadgeInstanceCollection.objects.filter(user=user)
 
     def resolve_badge_instances(self, info, **kwargs):
-        return info.context.user.cached_badgeinstances()
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            return []
+        return user.cached_badgeinstances()
 
     def resolve_revoked_badge_instances(self, info, **kwargs):
-        return list(filter(lambda bi: bi.revoked == True, info.context.user.cached_badgeinstances()))
+        user = info.context.user
+        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+            return []
+        return list(filter(lambda bi: bi.revoked == True, user.cached_badgeinstances()))
 
     def resolve_badge_instances_count(self, info):
         surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution

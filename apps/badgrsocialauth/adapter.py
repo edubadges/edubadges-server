@@ -12,19 +12,25 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from rest_framework.exceptions import AuthenticationFailed
 
 from badgeuser.authcode import accesstoken_for_authcode
-from badgrsocialauth.utils import set_session_verification_email, get_session_badgr_app, get_session_authcode, \
-    AuthErrorCode
+from badgrsocialauth.utils import (
+    set_session_verification_email,
+    get_session_badgr_app,
+    get_session_authcode,
+    AuthErrorCode,
+)
+from django.http import Http404
 
 
 class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
-
     def authentication_error(self, request, provider_id, error=None, exception=None, extra_context={}):
         badgr_app = get_session_badgr_app(self.request)
-        extra_context["authError"] = error
-        if "code" not in extra_context:
-            extra_context["code"] = AuthErrorCode.UNKNOWN_CODE
+        if badgr_app is None:
+            raise Http404
+        extra_context['authError'] = error
+        if 'code' not in extra_context:
+            extra_context['code'] = AuthErrorCode.UNKNOWN_CODE
         args = urllib.parse.urlencode(extra_context)
-        redirect_url = f"{badgr_app.ui_login_redirect}?{args}"
+        redirect_url = f'{badgr_app.ui_login_redirect}?{args}'
         raise ImmediateHttpResponse(HttpResponseRedirect(redirect_to=redirect_url))
 
     def _update_session(self, request, sociallogin):
@@ -55,10 +61,12 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
                 request.user = accesstoken.user
                 if sociallogin.is_existing and accesstoken.user != sociallogin.user:
                     badgr_app = get_session_badgr_app(self.request)
-                    redirect_url = "{url}?authError={message}".format(
+                    redirect_url = '{url}?authError={message}'.format(
                         url=badgr_app.ui_connect_success_redirect,
                         message=urllib.parse.quote(
-                            "Could not add social login. This account is already associated with a user."))
+                            'Could not add social login. This account is already associated with a user.'
+                        ),
+                    )
                     raise ImmediateHttpResponse(HttpResponseRedirect(redirect_to=redirect_url))
         except AuthenticationFailed as e:
             raise ImmediateHttpResponse(HttpResponseForbidden(e.detail))

@@ -117,9 +117,12 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 #
 ##
 
+SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(SETTINGS_PATH, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -165,6 +168,7 @@ STATIC_URL = HTTP_ORIGIN + '/static/'
 STATICFILES_DIRS = [
     os.path.join(TOP_DIR, 'apps', 'mainsite', 'static'),
 ]
+
 
 ##
 #
