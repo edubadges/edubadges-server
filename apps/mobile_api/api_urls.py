@@ -4,6 +4,7 @@ from backpack.api import BackpackAssertionDetail, ImportedAssertionList, Importe
     ImportedAssertionDelete, ImportedAssertionValidate
 from badgeuser.api import AcceptTermsView
 from directaward.api import DirectAwardAccept
+from lti_edu.api import StudentsEnrolledList
 from mobile_api.api import BadgeInstances, BadgeInstanceDetail, UnclaimedDirectAwards, Enrollments, EnrollmentDetail, \
     BadgeCollectionsListView, BadgeCollectionsDetailView, Login, AcceptGeneralTerms, DirectAwardDetail
 
@@ -33,5 +34,6 @@ urlpatterns = [
     path('imported/assertions/validate/<str:entity_id>', ImportedAssertionValidate.as_view(),
          name='mobile_imported_assertion_validate',
          ),
+    path('enroll', StudentsEnrolledList.as_view(), name='mobile_api_lti_edu_enroll_student'),
 
 ]
