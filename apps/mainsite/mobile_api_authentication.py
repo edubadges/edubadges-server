@@ -63,26 +63,33 @@ class MobileAPIAuthentication(BaseAuthentication):
             logger.info(f'MobileAPIAuthentication return None as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}')
             return None
 
-        social_account = SocialAccount.objects.filter(uid=introspect_json[settings.EDUID_IDENTIFIER]).first()
+        identifier_ = introspect_json[settings.EDUID_IDENTIFIER]
+        social_account = SocialAccount.objects.filter(uid=identifier_).first()
         login_endpoint = request.path == API_LOGIN_PATH
         if social_account is None:
             if login_endpoint:
                 # further logic is dealt with in /mobile/api/login
                 request.mobile_api_call = True
+                logger.info(f'MobileAPIAuthentication created TemporaryUser {introspect_json["email"]} for login')
                 return TemporaryUser(introspect_json, bearer_token), bearer_token
             else:
                 # If not heading to login-endpoint, we return None resulting in 403
+                logger.info(f'MobileAPIAuthentication TemporaryUser {introspect_json["email"]} not allowed to access {request.path}')
                 return None
         # SocialAccount always has a User
         user = social_account.user
         agree_terms_endpoint = request.path == GENERAL_TERMS_PATH
         if login_endpoint or agree_terms_endpoint:
             # further logic is dealt with in /mobile/api/login
+            logger.info(f'MobileAPIAuthentication User {user.email} allowed to access {request.path}')
             request.mobile_api_call = True
             return user, bearer_token
         elif not user.general_terms_accepted() or not user.validated_name:
             # If not heading to login-endpoint or agree-terms, we return None resulting in 403
+            logger.info(f'MobileAPIAuthentication User {user.email} has not accepted the general terms. '
+                        f'Not allowed to access {request.path}')
             return None
 
+        logger.info(f'MobileAPIAuthentication forwarding User {user.email} to {request.path}')
         request.mobile_api_call = True
         return user, bearer_token
