@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.db import connection
 from rest_framework import status, permissions
 from rest_framework.response import Response
@@ -310,9 +311,10 @@ class Users(APIView):
 
     def get(self, request, **kwargs):
         all_institutions = request.GET.get("all")
-        filter_by_institution = True
-        if all_institutions and hasattr(request.user, 'is_superuser') and request.user.is_superuser:
-            filter_by_institution = False
+        is_super_user = hasattr(request.user, 'is_superuser') and request.user.is_superuser
+        if all_institutions and not is_super_user:
+            raise PermissionDenied()
+        filter_by_institution = False if all_institutions and is_super_user else True
 
         with connection.cursor() as cursor:
             query_ = """
