@@ -53,10 +53,22 @@ class SlugToEntityIdRedirectMixin(object):
     slugToEntityIdRedirect = False
 
     def get_entity_id_by_slug(self, slug):
+        """
+        Legacy method for slug-to-entity_id redirect.
+        Note: Slug fields were removed from all models in March 2020.
+        This method is kept for backward compatibility but will always return None
+        since no models have slug fields anymore.
+        """
         try:
+            # Check if the model has a slug field before attempting the query
+            if not hasattr(self.model, '_meta') or 'slug' not in [f.name for f in self.model._meta.get_fields()]:
+                return None
             object = self.model.cached.get(slug=slug)
             return getattr(object, 'entity_id', None)
         except self.model.DoesNotExist:
+            return None
+        except Exception:
+            # Catch any other exceptions (like FieldError) and return None
             return None
 
     def get_slug_to_entity_id_redirect_url(self, slug):

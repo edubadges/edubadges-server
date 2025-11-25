@@ -107,8 +107,11 @@ class Query(object):
     user = graphene.Field(BadgeUserType, id=graphene.String())
 
     def resolve_user(self, info, **kwargs):
+        current_user = info.context.user
+        if not hasattr(current_user, 'is_authenticated') or not current_user.is_authenticated:
+            raise GraphQLException('Authentication required to query user')
         user = BadgeUser.objects.get(entity_id=kwargs.get('id'))
-        if info.context.user.institution != user.institution:
+        if current_user.institution != user.institution:
             raise GraphQLException('Cannot query user outside your institution')
         return user
 
