@@ -48,15 +48,13 @@ def encode(username, password):  # client_id, secret
 
 
 def login(request):
-    # the only thing set in state is the referer (frontend, or staff) , this is not the referer url.
-    referer = json.dumps(urlparse(request.headers['referer']).path.split('/')[1:])
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
         badgr_app_pk = settings.BADGR_APP_ID
 
-    state = json.dumps([referer, badgr_app_pk])
+    state = json.dumps([badgr_app_pk])
 
     params = {
         'state': state,
@@ -88,7 +86,7 @@ def callback(request):
         error = request.GET.get('error_description', 'Server error: eduID login failed')
         return render_authentication_error(request, EduIDProvider.id, error=error)
     state = json.loads(state_param)
-    referer, badgr_app_pk = state
+    badgr_app_pk = state[0]
     code = request.GET.get('code', None)  # access codes to access user info endpoint
     if code is None:  # check if code is given
         error = 'Server error: No userToken found in callback'
@@ -146,7 +144,7 @@ def callback(request):
         'access_token': access_token,
         'provider': 'eduid',
         'eduperson_scoped_affiliation': payload.get('eduperson_scoped_affiliation', []),
-        'state': json.dumps([str(badgr_app_pk), 'edu_id'] + [json.loads(referer)]),
+        'state': json.dumps([str(badgr_app_pk), 'edu_id']),
         'role': 'student',
     }
 
@@ -166,7 +164,7 @@ def after_terms_agreement(request, **kwargs):
     """
     this is the second part of the callback, after consent has been given, or is user already exists
     """
-    badgr_app_pk, _login_type, _referer = json.loads(kwargs['state'])
+    badgr_app_pk, _login_type = json.loads(kwargs['state'])
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
