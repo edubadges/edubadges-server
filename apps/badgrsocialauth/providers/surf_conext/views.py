@@ -42,7 +42,6 @@ def login(request):
     # state contains the data required for the redirect after the login via SURFconext,
     # it contains the user token, type of process and which badge_app
 
-    referer = request.headers['referer'].split('/')[3]
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     try:
         badgr_app_pk = int(badgr_app_pk)
@@ -53,7 +52,6 @@ def login(request):
             request.GET.get('process', 'login'),
             get_session_authcode(request),
             badgr_app_pk,
-            referer,
         ]
     )
 
@@ -102,7 +100,7 @@ def callback(request):
         error = 'Server error: No state found in callback'
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
-    process, auth_token, badgr_app_pk, referer = json.loads(state)
+    process, auth_token, badgr_app_pk = json.loads(state)
 
     code = request.GET.get('code', None)
     if code is None:
@@ -220,7 +218,4 @@ def callback(request):
 
     request.user.accept_general_terms()
 
-    # override the response with a redirect to staff dashboard if the login came from there
-    if referer == 'staff':
-        return HttpResponseRedirect(reverse('admin:index'))
     return ret
