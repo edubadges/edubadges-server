@@ -164,7 +164,7 @@ def after_terms_agreement(request, **kwargs):
     """
     this is the second part of the callback, after consent has been given, or is user already exists
     """
-    badgr_app_pk, _login_type, _referer = json.loads(kwargs['state'])
+    badgr_app_pk, _login_type = json.loads(kwargs['state'])
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
