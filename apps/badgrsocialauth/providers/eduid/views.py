@@ -1,38 +1,36 @@
 import json
 import logging
-import urllib.error
 import urllib.parse
-import urllib.request
 from base64 import b64encode
-from urllib.parse import urlparse
 
 import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import (
-    render_authentication_error,
     complete_social_login,
+    render_authentication_error,
 )
-from django.conf import settings
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-from jose import jwt
-
 from badgeuser.models import BadgeUser
 from badgrsocialauth.providers.eduid.signals import val_name_audit_trail_signal
 from badgrsocialauth.utils import (
-    set_session_badgr_app,
     get_social_account,
+    set_session_badgr_app,
     update_user_params,
 )
+from django.conf import settings
+from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.http import HttpRequest, HttpResponseRedirect
+from django.shortcuts import redirect
 from issuer.models import BadgeClass, BadgeInstance
+from jose import jwt
 from mainsite.models import BadgrApp
-from .provider import EduIDProvider
+
 from .oidc_client import OidcClient
+from .provider import EduIDProvider
 
 logger = logging.getLogger('Badgr.Debug')
 
 
-def encode(username, password):  # client_id, secret
+def encode(username: str, password: str) -> str:  # client_id, secret
     """Returns an HTTP basic authentication encrypted string given a valid
     username and password.
     """
@@ -47,7 +45,7 @@ def encode(username, password):  # client_id, secret
     return 'Basic ' + b64encode(username_password.encode()).decode()
 
 
-def login(request):
+def login(request: HttpRequest):
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     try:
         badgr_app_pk = int(badgr_app_pk)
@@ -111,12 +109,13 @@ def callback(request):
         headers=headers,
         timeout=60,
     )
-    
-    logger.debug(f'Token response - Status Code: {token_response.status_code}, Headers: {dict(token_response.headers)}, Content: {token_response.text}')
+
+    logger.debug(
+        f'Token response - Status Code: {token_response.status_code}, Headers: {dict(token_response.headers)}, Content: {token_response.text}'
+    )
     if token_response.status_code != 200:
         error = (
-            'Server error: Token endpoint error (http %s). Try alternative login methods'
-            % token_response.status_code
+            'Server error: Token endpoint error (http %s). Try alternative login methods' % token_response.status_code
         )
         logger.error(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
@@ -137,8 +136,6 @@ def callback(request):
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
 
-    badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
-
     keyword_arguments = {
         'id_token': id_token,
         'access_token': access_token,
@@ -151,11 +148,6 @@ def callback(request):
     if not social_account or not social_account.user.general_terms_accepted():
         logger.debug('No social account and no general terms accepted')
         logger.debug(f'Keyword arguments: {keyword_arguments}')
-        #        signup_redirect = badgr_app.signup_redirect
-        #        args = urllib.parse.urlencode(keyword_arguments)
-        #        keyword_arguments['re_sign'] = False if not social_account else True
-        #        logger.debug(f'Redirecting to {signup_redirect}?{args}')
-        #        return HttpResponseRedirect(f'{signup_redirect}?{args}')
 
     return after_terms_agreement(request, **keyword_arguments)
 
@@ -263,8 +255,6 @@ def after_terms_agreement(request, **kwargs):
         except BadgeUser.DoesNotExist:
             pass
 
-        # We don't create welcome badges anymore
-
     return ret
 
 
@@ -284,9 +274,6 @@ def create_edu_id_badge_instance(social_login):
         extensions=None,
     )
     logger.info(f'Assertion created for {user.email} based on {badge_class.name}')
-
-
-from django.contrib.auth.signals import user_logged_out, user_logged_in
 
 
 def print_logout_message(sender, user, request, **kwargs):
