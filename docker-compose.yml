@@ -45,7 +45,7 @@ services:
       - SURF_CONEXT_CLIENT=www.edubadges.nl
       - SURF_CONEXT_SECRET=${SURF_CONEXT_SECRET}
       - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
-      - UI_URL=http://0.0.0.0:8080
+      - UI_URL=http://localhost:8080
       - UNSUBSCRIBE_SECRET_KEY=secret
       - OB3_AGENT_URL_UNIME=https://agent.poc9.eduwallet.nl
       - OB3_AGENT_URL_SPHEREON=http://veramo-agent:3000
