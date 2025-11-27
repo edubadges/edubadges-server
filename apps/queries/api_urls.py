@@ -1,7 +1,7 @@
 from django.urls import re_path
 
 from queries.api import DirectAwards, BadgeClasses, CatalogBadgeClasses, CurrentInstitution, Issuers, Faculties, Users, \
-    Notifications, IssuersOverview, EndorsementBadgeClasses
+    Notifications, IssuersOverview, EndorsementBadgeClasses, Permissions
 
 urlpatterns = [
     re_path(r'^direct-awards', DirectAwards.as_view(), name='api_queries_da'),
@@ -9,6 +9,7 @@ urlpatterns = [
     re_path(r'^issuers', Issuers.as_view(), name='api_queries_iss'),
     re_path(r'^overview-issuers', IssuersOverview.as_view(), name='api_queries_overview_iss'),
     re_path(r'^faculties', Faculties.as_view(), name='api_queries_fac'),
+    re_path(r'^permissions', Permissions.as_view(), name='api_queries_permissions'),
     re_path(r'^users', Users.as_view(), name='api_queries_users'),
     re_path(r'^notifications', Notifications.as_view(), name='api_queries_notifications'),
     re_path(r'^endorsement-badge-classes', EndorsementBadgeClasses.as_view(), name='api_queries_endorsement_badge_classes'),

@@ -458,3 +458,22 @@ class EndorsementBadgeClasses(APIView):
             badge_classes = dict_fetch_all(cursor)
 
             return Response(badge_classes, status=status.HTTP_200_OK)
+
+class Permissions(APIView):
+    permission_classes = (TeachPermission,)
+
+    def get(self, request, **kwargs):
+        with connection.cursor() as cursor:
+            query_ = f"""
+            select bc.name, bc.entity_id as entityId, bc.id as badgeclass_id, bc.image,
+            ins.entity_id as institution_entity_id, ins.id as institution_id
+            from  issuer_badgeclass bc
+            inner join issuer_issuer i on i.id = bc.issuer_id
+            inner join institution_faculty f on f.id = i.faculty_id
+            inner join institution_institution ins on ins.id = f.institution_id
+            where ins.id = %(ins_id)s and bc.archived = 0 and {permissions_query} 
+"""
+            cursor.execute(query_, {"u_id": request.user.id, "ins_id": request.user.institution.id})
+            badge_classes = dict_fetch_all(cursor)
+
+            return Response(badge_classes, status=status.HTTP_200_OK)
