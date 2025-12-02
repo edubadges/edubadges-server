@@ -915,7 +915,7 @@ class Users(APIView):
         },
     )
     def get(self, request, **kwargs):
-        all_institutions = request.GET.get("all")
+        all_institutions = request.GET.get('all')
         filter_by_institution = True
         if all_institutions and hasattr(request.user, 'is_superuser') and request.user.is_superuser:
             filter_by_institution = False

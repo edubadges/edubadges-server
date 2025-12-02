@@ -1,5 +1,5 @@
 # Django stuff
-Django==4.2.26
+Django==4.2.25
 semver==2.6.0
 pytz==2022.2.1
 
