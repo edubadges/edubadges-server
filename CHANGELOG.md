@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [8.3.3] - 2025-12-02
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.3.2...v8.3.3</br>
+
+- Update to Django 4.2.26
+- Updating swagger annotations
+- Remove referer header requirement from auth provider views
+- Merge pull request #215 from edubadges/feature/reduce_error_logs
+- Only allow for super-users to perform impersonation
+- Added extra logging to MobileAPIAuthentication
+- Slug fields were removed in 2020 from all models
+- Catch TypeError when trying to load JSON from imported badge
+- Adding DIRS var to TEMPLATES object
+- Return 404 in case badgr app is none
+- Added is_authenticated checks
+- Increase MAX_URL_LENGTH even more, to 16384
+- Increased MAX_URL_LENGTH times 4 to be able to exceed 2048 chars which is to low for our use-cases
+- Quick fix for Unsafe redirect exceeding 2048 characters
+- Do not use SIS authentication for mobile flow
+
 ## [8.3.2] - 2025-11-14
 
 #### Full GitHub changelogs:
