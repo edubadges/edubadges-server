@@ -42,7 +42,7 @@ services:
       - SUPERUSER_EMAIL=superuser@example.com
       - SUPERUSER_NAME=superuser
       - SUPERUSER_PWD=secert
-      - SURF_CONEXT_CLIENT=test.edubadges.nl
+      - SURF_CONEXT_CLIENT=ewi.issuer.edubadges
       - SURF_CONEXT_SECRET=${SURF_CONEXT_SECRET}
       - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
       - UI_URL=http://localhost:8080
