@@ -1,5 +1,6 @@
 from typing import Optional
 import uuid
+from urllib.parse import urljoin
 
 import requests
 import logging
@@ -68,13 +69,13 @@ class CredentialsView(APIView):
         
         return Response({"offer": offer}, status=status.HTTP_201_CREATED)
 
-    def __badge_instance(self, badge_id, user):
+    def __badge_instance(self, badge_id, user) -> BadgeInstance:
         try:
             return BadgeInstance.objects.get(id=badge_id, user=user)
         except ObjectDoesNotExist:
             raise Http404
 
-    def __issue_sphereon_badge(self, credential_offer_request):
+    def __issue_sphereon_badge(self, credential_offer_request) -> str:
         logger.debug(f"Requesting credential issuance: {OB3_AGENT_URL_SPHEREON} {credential_offer_request}")
         response = requests.post(
                 timeout=5,
@@ -83,6 +84,7 @@ class CredentialsView(APIView):
                 headers={'Accept': 'application/json',
                          "Authorization": f"Bearer {OB3_AGENT_AUTHZ_TOKEN_SPHEREON}"}
         )
+        logger.debug(f"Response: {response.status_code} {response.text}")
 
         if response.status_code >= 400:
             msg = f"Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}"
@@ -90,26 +92,28 @@ class CredentialsView(APIView):
 
         return response.text
 
-    def __issue_unime_badge(self, credential):
-        url = OB3_AGENT_URL_UNIME
+    def __issue_unime_badge(self, credential) -> str:
+        url = urljoin(OB3_AGENT_URL_UNIME, 'credentials')
         headers = { 'Accept': 'application/json' }
         payload = credential
 
         logger.debug(f"Requesting credential issuance: {url} {headers} {payload}")
-        resp = requests.post(
+        response = requests.post(
                 timeout=5,
                 json=payload,
                 url=url,
                 headers=headers
         )
-        logger.debug(f"Response: {resp.status_code} {resp.text}")
+        logger.debug(f"Response: {response.status_code} {response.text}")
 
-        if resp.status_code >= 400:
-            msg = f"Failed to issue badge:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
+        if response.status_code >= 400:
+            msg = f"Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}"
             raise BadRequest(msg)
+            
+        return response.text
 
-    def __get_unime_offer(self, offer_id):
-        url = f"{OB3_AGENT_URL_UNIME}"
+    def __get_unime_offer(self, offer_id: str) -> str:
+        url = urljoin(OB3_AGENT_URL_UNIME, 'offers')
         headers = { 'Accept': 'application/json' }
         payload = { "offerId": offer_id }
 
@@ -121,5 +125,10 @@ class CredentialsView(APIView):
                 headers=headers
         )
         logger.debug(f"Response: {response.status_code} {response.text}")
+        
+        if response.status_code >= 400:
+            msg = f"Failed to get offer:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}"
+            raise BadRequest(msg)
+
 
         return response.text
