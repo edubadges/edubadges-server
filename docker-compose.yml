@@ -27,7 +27,7 @@ services:
       - EDU_ID_CLIENT=ewi.backpack.edubadges
       - EDU_ID_SECRET=${EDU_ID_SECRET}
       - EDUID_REGISTRATION_URL=https://login.test.eduid.nl/register
-      - EDUID_IDENTIFIER=sub
+      - EDUID_IDENTIFIER=eduperson_principal_name
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
       - EMAIL_USE_TLS=0
       - EMAIL_HOST=mailhog

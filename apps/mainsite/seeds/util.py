@@ -1,11 +1,12 @@
-import os
 import csv
-from typing_extensions import Optional
-
-from django.core.files import File
+import glob
+import json
+import os
 
 from badgeuser.models import Terms, TermsUrl
+from django.core.files import File
 from institution.models import Institution
+from typing_extensions import Optional
 
 
 def seed_image_for(type: str, name: str) -> File:
@@ -77,22 +78,21 @@ def read_seed_csv(csv_name: str) -> list[dict[str, str]]:
         return list(reader)
 
 
-def institution_by_shortcode(shortcode: str) -> Institution:
-    return Institution.objects.get(identifier=institution_id_by_shortcode(shortcode))
+def read_seed_jsons(pattern: str) -> list[dict[str, str]]:
+    files = glob.glob(f'apps/mainsite/seeds/data/{pattern}')
+
+    # All files contain arrays at the .iam attribute, merge and return these
+    merged = []
+    for file in files:
+        with open(file, 'r') as f:
+            data = json.load(f)
+            merged.extend(data['iam'])
+
+    return merged
 
 
-def institution_id_by_shortcode(shortcode: str) -> Optional[str]:
-    map = {
-        'mbob': 'mbob.nl',
-        'uvh': 'uvh.nl',
-        'tun': 'tun.nb',
-        'hbot': 'hbot.nl',
-    }
-    # NOTE: following don't have an url identifier defined in the PBA yet
-    # 'eur': '61PL',
-    # 'ah': '57GL',
-    # 'nhls': '21FD',
-    return map.get(shortcode)
+def institution_by_identifier(identifier: str) -> Institution:
+    return Institution.objects.get(identifier=identifier)
 
 
 def institution_id_by_pba_id(identifier: str) -> Optional[str]:
@@ -107,23 +107,3 @@ def institution_id_by_pba_id(identifier: str) -> Optional[str]:
     #     '57GL': 'ahb.nl',
     #     '21FD': 'nhls.nl',
     return map.get(identifier)
-
-
-def reformat_email(email: str, institution_id: str) -> str:
-    """
-    Emails in PBA differ from what the output uses. It unclear why. Probably out of date or a bug in the data processing by
-    the PBA team.
-    We need to manually fix these emails:
-        carl.linnaeus@dev.eduwallet.nl to clinnaeus.uvh@dev.eduwallet.nl
-        serge.delic@dev.eduwallet.nl to sdelic.uvh@dev.eduwallet.nl
-        juliette.klerks@dev.eduwallet.nl to jklerks.hbot@dev.eduwallet.nl
-
-    The .uvh or .hbot comes from the institution shortcode.
-    """
-    user, domain = email.split('@')
-
-    first_name, last_name = user.split('.')
-    first_letter = first_name[0]
-    new_user = f'{first_letter}{last_name}'
-
-    return f'{new_user}.{institution_id}@{domain}'

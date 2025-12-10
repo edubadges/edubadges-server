@@ -1,0 +1,1184 @@
+{
+    "iam": [
+        {
+            "_ID": "f2cb63a9-e044-4ce4-88d1-43202214d915",
+            "uid": "999990068",
+            "eduPersonUniqueId": "b9c6ea3fcac72125a882dbf4764101b0defcad4b98c1c6f05154f591fb8c9416@tun.nb",
+            "eduPersonPrincipalName": "b9c6ea3fcac72125a882dbf4764101b0defcad4b98c1c6f05154f591fb8c9416@tun.nb",
+            "givenName": "Dinanda",
+            "sn": "Haagen",
+            "displayName": "Dinanda Haagen",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "dhaagen.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "103680000"
+        },
+        {
+            "_ID": "6b1b7217-09f4-4d57-bf64-d8797f5e471f",
+            "uid": "999990081",
+            "eduPersonUniqueId": "64aa15b1df32266fca37dc1d6d7702ca6477eb9e3b8c6acc54c15055f16b9be8@tun.nb",
+            "eduPersonPrincipalName": "64aa15b1df32266fca37dc1d6d7702ca6477eb9e3b8c6acc54c15055f16b9be8@tun.nb",
+            "givenName": "Vibeke",
+            "sn": "Rijkers",
+            "displayName": "Vibeke Rijkers",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "vrijkers.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example",
+                "urn:x-surf:entitlement:dyslexia"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "93312000"
+        },
+        {
+            "_ID": "099c16fc-8262-4dc0-baa5-4bc639aad4ec",
+            "uid": "999990093",
+            "eduPersonUniqueId": "4286e5d2866b4a51ced701d31420252ef1c4e029a600af6e3d4eb57b650551b4@tun.nb",
+            "eduPersonPrincipalName": "4286e5d2866b4a51ced701d31420252ef1c4e029a600af6e3d4eb57b650551b4@tun.nb",
+            "givenName": "Markus",
+            "sn": "Kuester",
+            "displayName": "Markus Kuester",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "mkuester.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "50d04fe7-89cc-4fa3-84b0-56a806d99e16",
+            "uid": "999990111",
+            "eduPersonUniqueId": "da72e888e928d55829741511be22167f62bf212e0e1cf160a3a074914d6efea2@tun.nb",
+            "eduPersonPrincipalName": "da72e888e928d55829741511be22167f62bf212e0e1cf160a3a074914d6efea2@tun.nb",
+            "givenName": "Gloria",
+            "sn": "Binnendijk",
+            "displayName": "Gloria Binnendijk",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "gbinnendijk.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "124416000"
+        },
+        {
+            "_ID": "5fd1b534-89c3-4c2d-a2eb-f9f85853ded4",
+            "uid": "NABOO-719-94190",
+            "eduPersonUniqueId": "be53c1c76c624ff94d7e44e29346586968607489a2a7a30e90ae33b6f2249be3@tun.nb",
+            "eduPersonPrincipalName": "be53c1c76c624ff94d7e44e29346586968607489a2a7a30e90ae33b6f2249be3@tun.nb",
+            "givenName": "Krala",
+            "sn": "Rahnaz",
+            "displayName": "Krala Rahnaz",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "krahnaz.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "employee",
+                "faculty",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "employee@tun.nb",
+                "faculty@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "15571dbd-b3c6-4101-bfd0-67b75f35dc8b",
+            "uid": "NABOO-719-88115",
+            "eduPersonUniqueId": "a49904450c5e105dd6724492ce4e9652887341db64432a3c406744e71406ccd2@tun.nb",
+            "eduPersonPrincipalName": "a49904450c5e105dd6724492ce4e9652887341db64432a3c406744e71406ccd2@tun.nb",
+            "givenName": "K'tal",
+            "sn": "K'mpec",
+            "displayName": "K'tal K'mpec",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "kkmpec.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "employee",
+                "faculty",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "employee@tun.nb",
+                "faculty@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "eb4b9c5a-6403-4491-b526-3f3d0964a0cd",
+            "uid": "NABOO-719-24649",
+            "eduPersonUniqueId": "87737eb9cdf640db931d9ed370cc7c2f7a35c4d6cb25359e9ddede7c00e1c2b7@tun.nb",
+            "eduPersonPrincipalName": "87737eb9cdf640db931d9ed370cc7c2f7a35c4d6cb25359e9ddede7c00e1c2b7@tun.nb",
+            "givenName": "J'Syna",
+            "sn": "Adion",
+            "displayName": "J'Syna Adion",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "jadion.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "employee",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "employee@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "b5baa089-3898-4460-b359-7d7b24acc0e4",
+            "uid": "NABOO-719-76749",
+            "eduPersonUniqueId": "0e8e0009ec2949c58fed05073d99346ccd15fcf0dc696be81af814cf6efb0684@tun.nb",
+            "eduPersonPrincipalName": "0e8e0009ec2949c58fed05073d99346ccd15fcf0dc696be81af814cf6efb0684@tun.nb",
+            "givenName": "Kita",
+            "sn": "Toral",
+            "displayName": "Kita Toral",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "ktoral.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "employee",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "employee@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example",
+                "urn:x-surf:entitlement:dyslexia"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "20a817e7-ee71-4794-af45-7045711a69f6",
+            "uid": "NABOO-719-90700",
+            "eduPersonUniqueId": "47e8c09320fd9d1434c8078f5e1a554a1f0a227843fee636fb57798cb6111509@tun.nb",
+            "eduPersonPrincipalName": "47e8c09320fd9d1434c8078f5e1a554a1f0a227843fee636fb57798cb6111509@tun.nb",
+            "givenName": "Kev",
+            "sn": "Roc",
+            "displayName": "Kev Roc",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "kroc.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "80352000"
+        },
+        {
+            "_ID": "3bc06b53-21b9-4959-8262-6bd866925abc",
+            "uid": "NABOO-719-46548",
+            "eduPersonUniqueId": "f8f8a94a4f6df98684e12e165a84ec346dc2d8b4cbe5f7f182d8acab9b5b821e@tun.nb",
+            "eduPersonPrincipalName": "f8f8a94a4f6df98684e12e165a84ec346dc2d8b4cbe5f7f182d8acab9b5b821e@tun.nb",
+            "givenName": "Ehleyr",
+            "sn": "Zalcveg",
+            "displayName": "Ehleyr Zalcveg",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "ezalcveg.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "139968000"
+        },
+        {
+            "_ID": "2d052550-355f-4bfe-b7e4-f20bb43198a0",
+            "uid": "NABOO-719-54026",
+            "eduPersonUniqueId": "628d57f2cf5c1a181fb79efda227357c204a0c6ee95984f72ece248d4762e922@tun.nb",
+            "eduPersonPrincipalName": "628d57f2cf5c1a181fb79efda227357c204a0c6ee95984f72ece248d4762e922@tun.nb",
+            "givenName": "J'Tali",
+            "sn": "Kurr",
+            "displayName": "J'Tali Kurr",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "jkurr.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example",
+                "urn:x-surf:entitlement:dyslexia"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "3600"
+        },
+        {
+            "_ID": "e9c68e4a-d0a9-4b52-ba7d-1a3afe5370da",
+            "uid": "NABOO-719-61253",
+            "eduPersonUniqueId": "71084a1d2ecca18c7c56d83dca31c0eefb5dc44aa98288dfb0bcc6613814f97e@tun.nb",
+            "eduPersonPrincipalName": "71084a1d2ecca18c7c56d83dca31c0eefb5dc44aa98288dfb0bcc6613814f97e@tun.nb",
+            "givenName": "K'Mara",
+            "sn": "Oparai",
+            "displayName": "K'Mara Oparai",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "koparai.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "employee",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "employee@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "127008000"
+        },
+        {
+            "_ID": "cd01e481-d3bc-4566-ab9a-9bbdf344a114",
+            "uid": "NABOO-719-21020",
+            "eduPersonUniqueId": "98088f2c54a5f4531fb8269232229a1270783584988261e7259102b76b564b9d@tun.nb",
+            "eduPersonPrincipalName": "98088f2c54a5f4531fb8269232229a1270783584988261e7259102b76b564b9d@tun.nb",
+            "givenName": "W'Anar",
+            "sn": "Targesh",
+            "displayName": "W'Anar Targesh",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "wtargesh.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "employee",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "employee@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "80352000"
+        },
+        {
+            "_ID": "a0fcd65d-a0ed-4e8f-850a-1ac526258324",
+            "uid": "999990184",
+            "eduPersonUniqueId": "f555f847521c1c7c85155061d80324d098ff93c0f709cd19c7c84695a4d7c608@tun.nb",
+            "eduPersonPrincipalName": "f555f847521c1c7c85155061d80324d098ff93c0f709cd19c7c84695a4d7c608@tun.nb",
+            "givenName": "Anya",
+            "sn": "van Nieuwkerk",
+            "displayName": "Anya van Nieuwkerk",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "avannieuwkerk.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "43e27e05-a688-41df-ab1e-b74271fe02c6",
+            "uid": "999990196",
+            "eduPersonUniqueId": "6c6eec7c298678360f2446bee6151dbf2dc91c6f3069a623979eaa3c65f9d272@tun.nb",
+            "eduPersonPrincipalName": "6c6eec7c298678360f2446bee6151dbf2dc91c6f3069a623979eaa3c65f9d272@tun.nb",
+            "givenName": "Sharon",
+            "sn": "Hankins",
+            "displayName": "Sharon Hankins",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "shankins.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "80352000"
+        },
+        {
+            "_ID": "99a43a80-44c9-456c-b9e5-a3b799d96258",
+            "uid": "999990202",
+            "eduPersonUniqueId": "be72128fe2625257bb58689b559f32fe35d6ba37b0982488f8d4affc1b800963@tun.nb",
+            "eduPersonPrincipalName": "be72128fe2625257bb58689b559f32fe35d6ba37b0982488f8d4affc1b800963@tun.nb",
+            "givenName": "Ludovica",
+            "sn": "G\u00f3mez Llarnas",
+            "displayName": "Ludovica G\u00f3mez Llarnas",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "lgomezllarnas.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example",
+                "urn:x-surf:entitlement:dyslexia"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "300"
+        },
+        {
+            "_ID": "6bed301f-1be7-4a39-ab6c-fa73769fe179",
+            "uid": "999990238",
+            "eduPersonUniqueId": "e4cdeacff36427c08304c2d724c7850beae21e563fe6a9b907c911a5f523b7b4@tun.nb",
+            "eduPersonPrincipalName": "e4cdeacff36427c08304c2d724c7850beae21e563fe6a9b907c911a5f523b7b4@tun.nb",
+            "givenName": "Esmee",
+            "sn": "Lamore",
+            "displayName": "Esmee Lamore",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "elamore.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "80352000"
+        },
+        {
+            "_ID": "65825447-1461-4d49-ba56-95d200ac10fc",
+            "uid": "999990251",
+            "eduPersonUniqueId": "8955d687889f5f5069e57c84bb896505a6b1f4fcc40f27b1f56ab7e4251d5700@tun.nb",
+            "eduPersonPrincipalName": "8955d687889f5f5069e57c84bb896505a6b1f4fcc40f27b1f56ab7e4251d5700@tun.nb",
+            "givenName": "Kian",
+            "sn": "Huisman",
+            "displayName": "Kian Huisman",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "khuisman.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example",
+                "urn:x-surf:entitlement:dyslexia"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "cf59e590-4d8b-433e-944d-33f4e9ca00a4",
+            "uid": "999990263",
+            "eduPersonUniqueId": "58303aa2f65d848793996532213984e00797ca729289405d0d2a3b6c8f15c14d@tun.nb",
+            "eduPersonPrincipalName": "58303aa2f65d848793996532213984e00797ca729289405d0d2a3b6c8f15c14d@tun.nb",
+            "givenName": "Bente",
+            "sn": "Lagerweij",
+            "displayName": "Bente Lagerweij",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "blagerweij.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "d62f36f2-2d0e-436e-9e16-fcc1304af514",
+            "uid": "999990317",
+            "eduPersonUniqueId": "ee5702731eea02db1306d9b24668f9e7caa66080a2de1692c9b518d449fb90a6@tun.nb",
+            "eduPersonPrincipalName": "ee5702731eea02db1306d9b24668f9e7caa66080a2de1692c9b518d449fb90a6@tun.nb",
+            "givenName": "Fay",
+            "sn": "Matthews",
+            "displayName": "Fay Matthews",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "fmatthews.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "72576000"
+        },
+        {
+            "_ID": "cafc6cf2-f029-49c2-bb11-3f1e8197e081",
+            "uid": "999990329",
+            "eduPersonUniqueId": "2dc8ee799e6dbd38a0d8d931bb7ff65ce92d3e71d231bf2aef4d4f58d3f11f9f@tun.nb",
+            "eduPersonPrincipalName": "2dc8ee799e6dbd38a0d8d931bb7ff65ce92d3e71d231bf2aef4d4f58d3f11f9f@tun.nb",
+            "givenName": "Kevin",
+            "sn": "Hoppenbrouwer",
+            "displayName": "Kevin Hoppenbrouwer",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "khoppenbrouwer.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "31104000"
+        },
+        {
+            "_ID": "bc6a1cdd-267e-4c22-98f1-0ee7714c14e6",
+            "uid": "999990330",
+            "eduPersonUniqueId": "88a46422907973e2ae5166c00078c55d3f34fd95cb5ade187e47a44c41d89e0f@tun.nb",
+            "eduPersonPrincipalName": "88a46422907973e2ae5166c00078c55d3f34fd95cb5ade187e47a44c41d89e0f@tun.nb",
+            "givenName": "Linde",
+            "sn": "Roosenboom",
+            "displayName": "Linde Roosenboom",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "lroosenboom.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "72576000"
+        },
+        {
+            "_ID": "96191997-604d-4b89-b223-208e10517437",
+            "uid": "999991772",
+            "eduPersonUniqueId": "4c1937ccee6c65e1c56870dbc1c6873ac6b34dbba53a3484ad8f9e1556994384@tun.nb",
+            "eduPersonPrincipalName": "4c1937ccee6c65e1c56870dbc1c6873ac6b34dbba53a3484ad8f9e1556994384@tun.nb",
+            "givenName": "Froukje",
+            "sn": "Jansen",
+            "displayName": "Froukje Jansen",
+            "schacHomeOrganization": "tun.nb",
+            "mail": "fjansen.tun@dev.eduwallet.nl",
+            "eduPersonAffiliation": [
+                "student",
+                "member"
+            ],
+            "eduPersonScopedAffiliation": [
+                "student@tun.nb",
+                "member@tun.nb"
+            ],
+            "eduPersonEntitlement": [
+                "urn:mace:dir:entitlement:common-lib-terms-example"
+            ],
+            "eduPersonAssurance": [
+                "https://refeds.org/assurance",
+                "https://refeds.org/assurance/ID/unique",
+                "https://refeds.org/assurance/IAP/medium",
+                "https://refeds.org/assurance/IAP/local-enterprise",
+                "https://refeds.org/assurance/ATP/ePA-1m"
+            ],
+            "_ttl": "72576000"
+        }
+    ],
+    "sis": [
+        {
+            "_ID": "f2cb63a9-e044-4ce4-88d1-43202214d915",
+            "Student_ID": "999990068",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Dinanda",
+            "Surname": "Haagen",
+            "Type": "Student",
+            "StreetAddress": "De Meeren 123",
+            "City": "Waalre",
+            "ZipCode": "5580 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "dinanda.haagen@dev.eduwallet.nl",
+            "TelephoneNumber": "06-70616848",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990068",
+            "Nationality": "Dutch",
+            "DoB": "2007-05-19",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "6b1b7217-09f4-4d57-bf64-d8797f5e471f",
+            "Student_ID": "999990081",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Vibeke",
+            "Surname": "Rijkers",
+            "Type": "Student",
+            "StreetAddress": "Klembergerweg 160",
+            "City": "Epse",
+            "ZipCode": "7210 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "vibeke.rijkers@dev.eduwallet.nl",
+            "TelephoneNumber": "06-35745085",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990081",
+            "Nationality": "Dutch",
+            "DoB": "2003-09-28",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "099c16fc-8262-4dc0-baa5-4bc639aad4ec",
+            "Student_ID": "999990093",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "male",
+            "GivenName": "Markus",
+            "Surname": "Kuester",
+            "Type": "Student",
+            "StreetAddress": "Ripsestraat 86",
+            "City": "Rips",
+            "ZipCode": "5760 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "markus.kuester@dev.eduwallet.nl",
+            "TelephoneNumber": "06-19269505",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990093",
+            "Nationality": "Dutch",
+            "DoB": "2002-06-08",
+            "_PBD": ""
+        },
+        {
+            "_ID": "50d04fe7-89cc-4fa3-84b0-56a806d99e16",
+            "Student_ID": "999990111",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Gloria",
+            "Surname": "Binnendijk",
+            "Type": "Student",
+            "StreetAddress": "Wetterkoelenweg 4",
+            "City": "Collendoorn",
+            "ZipCode": "7790 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "gloria.binnendijk@dev.eduwallet.nl",
+            "TelephoneNumber": "06-70686251",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990111",
+            "Nationality": "Dutch",
+            "DoB": "2008-09-24",
+            "_PBD": ""
+        },
+        {
+            "_ID": "20a817e7-ee71-4794-af45-7045711a69f6",
+            "Student_ID": "NABOO-719-90700",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "male",
+            "GivenName": "Kev",
+            "Surname": "Roc",
+            "Type": "Student",
+            "StreetAddress": "Doctor Struyckenstraat 66",
+            "City": "Breda",
+            "ZipCode": "4810 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "kev.roc@dev.eduwallet.nl",
+            "TelephoneNumber": "06-94650878",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-90700",
+            "Nationality": "Naboolian",
+            "DoB": "2002-02-26",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "3bc06b53-21b9-4959-8262-6bd866925abc",
+            "Student_ID": "NABOO-719-46548",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Ehleyr",
+            "Surname": "Zalcveg",
+            "Type": "Student",
+            "StreetAddress": "Kromvenweg 154",
+            "City": "Lierop",
+            "ZipCode": "5710 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "ehleyr.zalcveg@dev.eduwallet.nl",
+            "TelephoneNumber": "06-95464330",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-46548",
+            "Nationality": "Naboolian",
+            "DoB": "2001-03-07",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "2d052550-355f-4bfe-b7e4-f20bb43198a0",
+            "Student_ID": "NABOO-719-54026",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "J'Tali",
+            "Surname": "Kurr",
+            "Type": "Student",
+            "StreetAddress": "Taagstraat 47",
+            "City": "Lelystad",
+            "ZipCode": "8220 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "jtali.kurr@dev.eduwallet.nl",
+            "TelephoneNumber": "06-10461080",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-54026",
+            "Nationality": "Naboolian",
+            "DoB": "1998-10-17",
+            "_PBD": ""
+        },
+        {
+            "_ID": "a0fcd65d-a0ed-4e8f-850a-1ac526258324",
+            "Student_ID": "999990184",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Anya",
+            "Surname": "van Nieuwkerk",
+            "Type": "Student",
+            "StreetAddress": "Van Brakelvliet 52",
+            "City": "Barendrecht",
+            "ZipCode": "2990 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "anya.vannieuwkerk@dev.eduwallet.nl",
+            "TelephoneNumber": "06-86829737",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990184",
+            "Nationality": "Dutch",
+            "DoB": "2006-03-19",
+            "_PBD": ""
+        },
+        {
+            "_ID": "43e27e05-a688-41df-ab1e-b74271fe02c6",
+            "Student_ID": "999990196",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Sharon",
+            "Surname": "Hankins",
+            "Type": "Student",
+            "StreetAddress": "Bovenboer 28",
+            "City": "Veeningen",
+            "ZipCode": "7920 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "sharon.hankins@dev.eduwallet.nl",
+            "TelephoneNumber": "06-73522755",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990196",
+            "Nationality": "Dutch",
+            "DoB": "2004-07-06",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "99a43a80-44c9-456c-b9e5-a3b799d96258",
+            "Student_ID": "999990202",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Ludovica",
+            "Surname": "G\u00f3mez Llarnas",
+            "Type": "Student",
+            "StreetAddress": "Nieuwstraat 106",
+            "City": "Culemborg",
+            "ZipCode": "4100 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "ludovica.gomezllarnas@dev.eduwallet.nl",
+            "TelephoneNumber": "06-85561657",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990202",
+            "Nationality": "Dutch",
+            "DoB": "2002-10-13",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "6bed301f-1be7-4a39-ab6c-fa73769fe179",
+            "Student_ID": "999990238",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Esmee",
+            "Surname": "Lamore",
+            "Type": "Student",
+            "StreetAddress": "Lotbaan 06",
+            "City": "Katwoude",
+            "ZipCode": "1080 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "esmee.lamore@dev.eduwallet.nl",
+            "TelephoneNumber": "06-69193316",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990238",
+            "Nationality": "Dutch",
+            "DoB": "2003-09-28",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "65825447-1461-4d49-ba56-95d200ac10fc",
+            "Student_ID": "999990251",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "male",
+            "GivenName": "Kian",
+            "Surname": "Huisman",
+            "Type": "Student",
+            "StreetAddress": "Emmadreef 2",
+            "City": "Braamt",
+            "ZipCode": "2480 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "kian.huisman@dev.eduwallet.nl",
+            "TelephoneNumber": "06-71501819",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990251",
+            "Nationality": "Dutch",
+            "DoB": "2002-06-08",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "cf59e590-4d8b-433e-944d-33f4e9ca00a4",
+            "Student_ID": "999990263",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Bente",
+            "Surname": "Lagerweij",
+            "Type": "Student",
+            "StreetAddress": "Ivysingel 67",
+            "City": "H\u00fans",
+            "ZipCode": "7480 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "bente.lagerweij@dev.eduwallet.nl",
+            "TelephoneNumber": "06-96853579",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990263",
+            "Nationality": "Dutch",
+            "DoB": "2008-09-24",
+            "_PBD": ""
+        },
+        {
+            "_ID": "d62f36f2-2d0e-436e-9e16-fcc1304af514",
+            "Student_ID": "999990317",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Fay",
+            "Surname": "Matthews",
+            "Type": "Student",
+            "StreetAddress": "Samhof 183",
+            "City": "De Koog",
+            "ZipCode": "2320 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "fay.matthews@dev.eduwallet.nl",
+            "TelephoneNumber": "06-96214597",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990317",
+            "Nationality": "Dutch",
+            "DoB": "2001-07-06",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "cafc6cf2-f029-49c2-bb11-3f1e8197e081",
+            "Student_ID": "999990329",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "male",
+            "GivenName": "Kevin",
+            "Surname": "Hoppenbrouwer",
+            "Type": "Student",
+            "StreetAddress": "Jornbaan 1",
+            "City": "Scheemda",
+            "ZipCode": "9290 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "kevin.hoppenbrouwer@dev.eduwallet.nl",
+            "TelephoneNumber": "06-84448618",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990329",
+            "Nationality": "Dutch",
+            "DoB": "2004-07-06",
+            "_PBD": ""
+        },
+        {
+            "_ID": "bc6a1cdd-267e-4c22-98f1-0ee7714c14e6",
+            "Student_ID": "999990330",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Linde",
+            "Surname": "Roosenboom",
+            "Type": "Student",
+            "StreetAddress": "Isabellestraat 8",
+            "City": "Ellertshaar",
+            "ZipCode": "9090 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "linde.roosenboom@dev.eduwallet.nl",
+            "TelephoneNumber": "06-16760420",
+            "TelephoneCountryCode": "31",
+            "BSN": "999990330",
+            "Nationality": "Dutch",
+            "DoB": "2002-02-26",
+            "_PBD": ""
+        },
+        {
+            "_ID": "96191997-604d-4b89-b223-208e10517437",
+            "Student_ID": "999991772",
+            "IsStudent": "True",
+            "StudentType": "fulltime",
+            "Gender": "female",
+            "GivenName": "Froukje",
+            "Surname": "Jansen",
+            "Type": "Student",
+            "StreetAddress": "Van Wijngaerdenstraat 1",
+            "City": "Toetsoog",
+            "ZipCode": "2590 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "froukje.jansen@dev.eduwallet.nl",
+            "TelephoneNumber": "06-87912300",
+            "TelephoneCountryCode": "31",
+            "BSN": "999991772",
+            "Nationality": "Dutch",
+            "DoB": "2000-03-24",
+            "_PBD": ""
+        }
+    ],
+    "hr": [
+        {
+            "_ID": "5fd1b534-89c3-4c2d-a2eb-f9f85853ded4",
+            "Employee_ID": "NABOO-719-94190",
+            "IsEmployee": "True",
+            "EmployeeType": "Professor",
+            "Gender": "female",
+            "GivenName": "Krala",
+            "Surname": "Rahnaz",
+            "StreetAddress": "Leliestraat 120",
+            "City": "Sneek",
+            "ZipCode": "8600 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "krala.rahnaz@dev.eduwallet.nl",
+            "TelephoneNumber": "06-13445640",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-94190",
+            "Nationality": "Naboolian",
+            "DoB": "1977-03-24",
+            "_PBD": ""
+        },
+        {
+            "_ID": "15571dbd-b3c6-4101-bfd0-67b75f35dc8b",
+            "Employee_ID": "NABOO-719-88115",
+            "IsEmployee": "True",
+            "EmployeeType": "Professor",
+            "Gender": "male",
+            "GivenName": "K'tal",
+            "Surname": "K'mpec",
+            "StreetAddress": "Puttendijk 122",
+            "City": "Bergeijk",
+            "ZipCode": "5570 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "ktal.kmpec@dev.eduwallet.nl",
+            "TelephoneNumber": "06-81969604",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-88115",
+            "Nationality": "Naboolian",
+            "DoB": "1964-09-04",
+            "_PBD": "eduID"
+        },
+        {
+            "_ID": "eb4b9c5a-6403-4491-b526-3f3d0964a0cd",
+            "Employee_ID": "NABOO-719-24649",
+            "IsEmployee": "True",
+            "EmployeeType": "Staff",
+            "Gender": "female",
+            "GivenName": "J'Syna",
+            "Surname": "Adion",
+            "StreetAddress": "Zaalboslaan 79",
+            "City": "Velp",
+            "ZipCode": "6880 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "jsyna.adion@dev.eduwallet.nl",
+            "TelephoneNumber": "06-45600466",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-24649",
+            "Nationality": "Naboolian",
+            "DoB": "1985-12-25",
+            "_PBD": ""
+        },
+        {
+            "_ID": "b5baa089-3898-4460-b359-7d7b24acc0e4",
+            "Employee_ID": "NABOO-719-76749",
+            "IsEmployee": "True",
+            "EmployeeType": "Staff",
+            "Gender": "male",
+            "GivenName": "Kita",
+            "Surname": "Toral",
+            "StreetAddress": "Pruimengaarde 189",
+            "City": "Zoetermeer",
+            "ZipCode": "2720 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "kita.toral@dev.eduwallet.nl",
+            "TelephoneNumber": "06-22722364",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-76749",
+            "Nationality": "Naboolian",
+            "DoB": "1986-01-11",
+            "_PBD": ""
+        },
+        {
+            "_ID": "e9c68e4a-d0a9-4b52-ba7d-1a3afe5370da",
+            "Employee_ID": "NABOO-719-61253",
+            "IsEmployee": "True",
+            "EmployeeType": "Teacher",
+            "Gender": "female",
+            "GivenName": "K'Mara",
+            "Surname": "Oparai",
+            "StreetAddress": "Roekenbos 20",
+            "City": "Hoofddorp",
+            "ZipCode": "2130 II",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "kmara.oparai@dev.eduwallet.nl",
+            "TelephoneNumber": "06-16279302",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-61253",
+            "Nationality": "Naboolian",
+            "DoB": "1994-03-16",
+            "_PBD": ""
+        },
+        {
+            "_ID": "cd01e481-d3bc-4566-ab9a-9bbdf344a114",
+            "Employee_ID": "NABOO-719-21020",
+            "IsEmployee": "True",
+            "EmployeeType": "Teacher",
+            "Gender": "male",
+            "GivenName": "W'Anar",
+            "Surname": "Targesh",
+            "StreetAddress": "Scharwouderstraat 67",
+            "City": "Amsterdam",
+            "ZipCode": "1020 OO",
+            "CountryFull": "The Netherlands",
+            "PrivateEmailAddress": "wanar.targesh@dev.eduwallet.nl",
+            "TelephoneNumber": "06-59844187",
+            "TelephoneCountryCode": "31",
+            "BSN": "NABOO-719-21020",
+            "Nationality": "Naboolian",
+            "DoB": "1994-05-18",
+            "_PBD": ""
+        }
+    ]
+}

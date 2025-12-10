@@ -1,4 +1,3 @@
-from cmath import exp
 from datetime import timedelta
 from venv import logger
 
@@ -9,7 +8,6 @@ from django.utils import timezone
 from institution.models import Faculty, Institution
 from issuer.models import BadgeClass, BadgeInstance, Issuer
 from lti_edu.models import StudentsEnrolled
-from mainsite.models import BadgrApp
 
 super_user = BadgeUser.objects.get(username=getattr(settings, 'SUPERUSER_NAME'))
 
