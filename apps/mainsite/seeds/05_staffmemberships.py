@@ -1,24 +1,18 @@
-from django.contrib.contenttypes.models import ContentType
-
 from badgeuser.models import UserProvisionment
-from mainsite.seeds.util import institution_by_shortcode, read_seed_csv, reformat_email
+from django.contrib.contenttypes.models import ContentType
+from mainsite.seeds.util import institution_by_identifier, read_seed_jsons
 
 # Load CSV
-all_users = read_seed_csv('pba')
+all_users = read_seed_jsons('pba_*.json')
 
-# filter on Profession is "Lecturer", "Staff" or "Professor"
-professions = ['Lecturer', 'Staff', 'Professor']
-staff = [u for u in all_users if u['Profession'] in professions]
+staff = [u for u in all_users if 'employee' in u['eduPersonAffiliation']]
 
 for member in staff:
     content_type = ContentType.objects.get(model='institution')
-    shortcode = member['Institution'].lower()
-    institution = institution_by_shortcode(shortcode)
-
-    email = reformat_email(member['EmailAddress'], shortcode)
+    institution = institution_by_identifier(member['schacHomeOrganization'])
 
     UserProvisionment.objects.get_or_create(
-        email=email,
+        email=member['mail'],
         defaults={
             'content_type': content_type,
             'object_id': institution.id,
