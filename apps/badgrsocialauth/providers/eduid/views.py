@@ -30,21 +30,6 @@ from .provider import EduIDProvider
 logger = logging.getLogger('Badgr.Debug')
 
 
-def encode(username: str, password: str) -> str:  # client_id, secret
-    """Returns an HTTP basic authentication encrypted string given a valid
-    username and password.
-    """
-    if ':' in username:
-        message = {
-            'message': 'Found a ":" in username, this is not allowed',
-            'source': 'eduID login encoding',
-        }
-        logger.error(message)
-        raise Exception(message)
-    username_password = '%s:%s' % (username, password)
-    return 'Basic ' + b64encode(username_password.encode()).decode()
-
-
 def login(request: HttpRequest):
     badgr_app_pk = request.session.get('badgr_app_pk', None)
     try:
