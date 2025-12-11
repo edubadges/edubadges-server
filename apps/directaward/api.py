@@ -1,5 +1,4 @@
 import datetime
-import threading
 
 from django.core.exceptions import BadRequest
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter
@@ -8,9 +7,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from directaward.models import DirectAward, DirectAwardBundle
+from badgrsocialauth.permissions import IsSuperUser
+from directaward.models import DirectAward, DirectAwardBundle, DirectAwardAuditTrail
 from directaward.permissions import IsDirectAwardOwner
-from directaward.serializer import DirectAwardBundleSerializer
+from directaward.serializer import DirectAwardBundleSerializer, DirectAwardAuditTrailSerializer
 from directaward.signals import audit_trail_signal
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from mainsite import settings
@@ -678,3 +678,37 @@ class DirectAwardDelete(BaseEntityDetailView):
         return Response(
             {'result': 'ok', 'un_successful_direct_awards': un_successful_direct_awards}, status=status.HTTP_200_OK
         )
+
+
+class DirectAwardAuditTrailView(APIView):
+    permission_classes = (IsSuperUser,)
+
+    @extend_schema(
+        description='Get all direct award audit trail entries (superuser only)',
+        methods=['GET'],
+        responses={
+            200: OpenApiResponse(
+                response=DirectAwardAuditTrailSerializer(many=True),
+                examples=[
+                    OpenApiExample(
+                        'Successful Response',
+                        value=[
+                            {
+                                'action_datetime': '2025-01-15T10:30:00Z',
+                                'user': 'john.doe@example.edu',
+                                'badgeclass_name': 'Introduction to Python Programming',
+                                'institution_name': 'Example University',
+                                'recipient_email': 'student19example@gmail.com',
+                                'recipient_eppn': 'student19@example',
+                            }
+                        ],
+                    )
+                ],
+            ),
+            403: permission_denied_response,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        audit_trails = DirectAwardAuditTrail.objects.all().order_by('-action_datetime')
+        serializer = DirectAwardAuditTrailSerializer(audit_trails, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
