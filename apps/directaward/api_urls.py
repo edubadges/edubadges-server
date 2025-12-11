@@ -7,6 +7,7 @@ from directaward.api import (
     DirectAwardRevoke,
     DirectAwardDelete,
     DirectAwardBundleView,
+    DirectAwardAuditTrailView,
 )
 
 urlpatterns = [
@@ -15,4 +16,5 @@ urlpatterns = [
     path('accept/<str:entity_id>', DirectAwardAccept.as_view(), name='direct_award_accept'),
     path('revoke-direct-awards', DirectAwardRevoke.as_view(), name='direct_award_revoke'),
     path('delete-direct-awards', DirectAwardDelete.as_view(), name='direct_award_delete'),
+    path('audittrail', DirectAwardAuditTrailView.as_view(), name='direct_award_audittrail'),
 ]

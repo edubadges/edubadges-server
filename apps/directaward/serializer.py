@@ -6,8 +6,9 @@ from django.core.exceptions import ValidationError, BadRequest
 from django.db import transaction
 from rest_framework import serializers
 
-from directaward.models import DirectAward, DirectAwardBundle
+from directaward.models import DirectAward, DirectAwardBundle, DirectAwardAuditTrail
 from directaward.signals import audit_trail_signal
+from issuer.models import BadgeClass
 from issuer.serializers import BadgeClassSlugRelatedField
 from mainsite import settings
 from mainsite.exceptions import BadgrValidationError
@@ -164,3 +165,64 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         if hasattr(instance, 'un_successful_direct_award'):
             data['un_successful_direct_award'] = instance.un_successful_direct_award
         return data
+
+
+class DirectAwardAuditTrailSerializer(serializers.ModelSerializer):
+    badgeclass_name = serializers.SerializerMethodField()
+    institution_name = serializers.SerializerMethodField()
+    recipient_email = serializers.SerializerMethodField()
+    recipient_eppn = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DirectAwardAuditTrail
+        fields = [
+            'action_datetime',
+            'user',
+            'badgeclass_name',
+            'institution_name',
+            'recipient_email',
+            'recipient_eppn',
+        ]
+
+    def get_badgeclass_name(self, obj):
+        """Get the badge class name from the badgeclass_id"""
+        if obj.badgeclass_id:
+            try:
+                badgeclass = BadgeClass.objects.get(id=obj.badgeclass_id)
+                return badgeclass.name
+            except BadgeClass.DoesNotExist:
+                return None
+        return None
+
+    def get_institution_name(self, obj):
+        """Get the institution name from the badgeclass"""
+        if obj.badgeclass_id:
+            try:
+                badgeclass = BadgeClass.objects.get(id=obj.badgeclass_id)
+                institution = badgeclass.institution
+                return institution.name if institution else None
+            except BadgeClass.DoesNotExist:
+                return None
+        return None
+
+    def get_recipient_email(self, obj):
+        """Get the recipient email from the direct award"""
+        if obj.badgeclass_id:
+            try:
+                directaward = DirectAward.objects.get(entity_id=obj.direct_award_id)
+                recipient_email = directaward.recipient_email
+                return recipient_email if directaward else None
+            except DirectAward.DoesNotExist:
+                return None
+        return None
+
+    def get_recipient_eppn(self, obj):
+        """Get the recipient eppn from the direct award"""
+        if obj.badgeclass_id:
+            try:
+                directaward = DirectAward.objects.get(entity_id=obj.direct_award_id)
+                eppn = directaward.eppn
+                return eppn if eppn else ''
+            except DirectAward.DoesNotExist:
+                return None
+        return None
