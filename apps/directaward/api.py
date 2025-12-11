@@ -709,6 +709,6 @@ class DirectAwardAuditTrailView(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
-        audit_trails = DirectAwardAuditTrail.objects.filter(method='CREATE').order_by('-action_datetime')
+        audit_trails = DirectAwardAuditTrail.objects.filter(action='CREATE').order_by('-action_datetime')
         serializer = DirectAwardAuditTrailSerializer(audit_trails, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
