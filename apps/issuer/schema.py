@@ -307,7 +307,7 @@ class Query(object):
     badge_classes_to_award = graphene.List(BadgeClassType)
     enrollments_to_award = graphene.List(StudentsEnrolledType)
     public_badge_classes = graphene.List(BadgeClassType)
-    badge_instances = graphene.List(BadgeInstanceType)
+    badge_instances = graphene.List(BadgeInstanceType, badgeclass_entity_ids=graphene.List(graphene.String))
     revoked_badge_instances = graphene.List(BadgeInstanceType)
     badge_instance_collections = graphene.List(BadgeInstanceCollectionType)
     issuer = graphene.Field(IssuerType, id=graphene.String())
@@ -396,10 +396,10 @@ class Query(object):
         return BadgeInstanceCollection.objects.filter(user=user)
 
     def resolve_badge_instances(self, info, **kwargs):
-        user = info.context.user
-        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
-            return []
-        return user.cached_badgeinstances()
+        badgeclass_entity_ids = kwargs.get('badgeclass_entity_ids')
+        if badgeclass_entity_ids:
+            return BadgeInstance.objects.filter(user=info.context.user, badgeclass__entity_id__in=badgeclass_entity_ids)
+        return info.context.user.cached_badgeinstances()
 
     def resolve_revoked_badge_instances(self, info, **kwargs):
         user = info.context.user
