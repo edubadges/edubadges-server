@@ -1,22 +1,23 @@
-from auditlog.mixins import LogAccessMixin
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
-from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT
-
 import badgrlog
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, BaseArchiveView
-from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceCollection
+from auditlog.mixins import LogAccessMixin
+from badgrsocialauth.permissions import IsSuperUser
+from django.db.models import Count
+from drf_spectacular.utils import extend_schema, inline_serializer
+from entity.api import BaseArchiveView, BaseEntityDetailView, BaseEntityListView, BaseEntityView, VersionedObjectMixin
+from issuer.models import BadgeClass, BadgeInstance, BadgeInstanceCollection, Issuer
 from issuer.serializers import (
-    IssuerSerializer,
+    BadgeClassAuditLogSerializer,
     BadgeClassSerializer,
-    BadgeInstanceSerializer,
     BadgeInstanceCollectionSerializer,
+    BadgeInstanceSerializer,
+    IssuerSerializer,
 )
 from mainsite.exceptions import BadgrApiException400, BadgrValidationFieldError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from rest_framework import serializers, status
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from signing import tsob
 from signing.models import AssertionTimeStamp
 from signing.permissions import MaySignAssertions
@@ -272,3 +273,24 @@ class BadgeInstanceCollectionDetailList(BaseEntityListView):
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     serializer_class = BadgeInstanceCollectionSerializer
     http_method_names = ['post']
+
+
+class BadgeClassAuditLog(BaseEntityView):
+    model = BadgeClass
+    permission_classes = (IsSuperUser,)
+
+    def get(self, request, **kwargs):
+        # Make queryset to get only if history count is greater than 0 on object
+        queryset = (
+            BadgeClass.objects.annotate(history_count=Count('history'))
+            .filter(history_count__gt=0)
+            .select_related('updated_by')
+        )
+
+        # Serialize the BadgeClass objects
+        serializer = BadgeClassAuditLogSerializer(queryset, many=True)
+
+        # Flatten history one level up
+        flat_history = [history_item for badge in serializer.data for history_item in badge['history']]
+
+        return Response(flat_history)

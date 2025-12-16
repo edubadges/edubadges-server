@@ -5,6 +5,7 @@ import uuid
 from collections import OrderedDict
 from itertools import chain
 
+from badgeuser.serializers import BadgeUserIdentifierField
 from django.apps import apps
 from django.conf import settings
 from django.core.validators import URLValidator
@@ -12,12 +13,7 @@ from django.db import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
-from rest_framework import serializers
-from rest_framework.exceptions import ErrorDetail, ValidationError
-from rest_framework.serializers import PrimaryKeyRelatedField
-
-from badgeuser.serializers import BadgeUserIdentifierField
-from institution.models import Institution, BadgeClassTag
+from institution.models import BadgeClassTag, Institution
 from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
@@ -25,14 +21,18 @@ from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.models import BadgrApp
 from mainsite.serializers import (
-    StripTagsCharField,
+    BaseSlugRelatedField,
     MarkdownCharField,
     OriginalJsonSerializerMixin,
-    BaseSlugRelatedField,
+    StripTagsCharField,
 )
-from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
+from mainsite.utils import OriginSetting, add_watermark, resize_image, scrub_svg_image, verify_svg
 from mainsite.validators import BadgeExtensionValidator
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceCollection
+from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail, ValidationError
+from rest_framework.serializers import PrimaryKeyRelatedField
+
+from .models import BadgeClass, BadgeClassExtension, BadgeInstance, BadgeInstanceCollection, Issuer, IssuerExtension
 
 
 class IssuerSlugRelatedField(BaseSlugRelatedField):
@@ -639,3 +639,25 @@ class BadgeInstanceCollectionSerializer(serializers.Serializer):
             if bc.user != user:
                 raise IntegrityError('BadgeInstance must be owned by the current user.')
         return badge_instances
+
+
+class BadgeClassAuditLogSerializer(serializers.ModelSerializer):
+    history = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BadgeClass
+        fields = ['history']
+
+    def get_history(self, obj):
+        # Convert related history objects into plain data
+        updated_by = obj.updated_by.username if obj.updated_by else None
+        history_items = obj.history.values()
+
+        # Inject updated_by into each history record
+        return [
+            {
+                **item,
+                'updated_by': updated_by,
+            }
+            for item in history_items
+        ]

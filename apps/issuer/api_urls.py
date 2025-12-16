@@ -1,20 +1,20 @@
 from django.urls import path
-
 from issuer.api import (
-    IssuerDetail,
-    BadgeClassDetail,
-    BatchAwardEnrollments,
-    TimestampedBadgeInstanceList,
-    BatchSignAssertions,
-    BadgeClassList,
-    IssuerList,
-    IssuerDeleteView,
+    BadgeClassArchiveView,
+    BadgeClassAuditLog,
     BadgeClassDeleteView,
-    BadgeInstanceRevoke,
+    BadgeClassDetail,
+    BadgeClassList,
     BadgeInstanceCollectionDetail,
     BadgeInstanceCollectionDetailList,
-    BadgeClassArchiveView,
+    BadgeInstanceRevoke,
+    BatchAwardEnrollments,
+    BatchSignAssertions,
     IssuerArchiveView,
+    IssuerDeleteView,
+    IssuerDetail,
+    IssuerList,
+    TimestampedBadgeInstanceList,
 )
 
 urlpatterns = [
@@ -23,6 +23,7 @@ urlpatterns = [
     path('delete/<str:entity_id>', IssuerDeleteView.as_view(), name='issuer_delete'),
     path('badgeclasses/create', BadgeClassList.as_view(), name='badgeclass_list'),
     path('badgeclasses/edit/<str:entity_id>', BadgeClassDetail.as_view(), name='badgeclass_detail'),
+    path('badgeclasses/auditlog', BadgeClassAuditLog.as_view(), name='badgeclass_auditlog'),
     path('badgeclasses/delete/<str:entity_id>', BadgeClassDeleteView.as_view(), name='badgeclass_delete'),
     path('badgeclasses/archive/<str:entity_id>', BadgeClassArchiveView.as_view(), name='badgeclass_archive'),
     path('issuers/archive/<str:entity_id>', IssuerArchiveView.as_view(), name='issuer_archive'),
