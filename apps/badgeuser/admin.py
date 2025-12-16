@@ -4,11 +4,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.forms import ModelForm
 from django.urls import reverse
 from django.utils.html import format_html
+
 from mainsite.admin import badgr_admin
 from mainsite.utils import admin_list_linkify
 from staff.models import PermissionedRelationshipBase
 from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl, \
-    ImportBadgeAllowedUrl, StudentAffiliation, TermsAgreement
+    StudentAffiliation, TermsAgreement
 
 
 class EmailAddressInline(TabularInline):
@@ -23,8 +24,8 @@ class TermsAgreementInline(TabularInline):
     fk_name = 'user'
     can_delete = False
     extra = 0
-    fields = ['agreed','term_type', 'institution','admin_link',]
-    readonly_fields = ['agreed','term_type', 'institution','admin_link',]
+    fields = ['agreed', 'term_type', 'institution', 'admin_link', ]
+    readonly_fields = ['agreed', 'term_type', 'institution', 'admin_link', ]
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -34,14 +35,16 @@ class TermsAgreementInline(TabularInline):
         return format_html('<a href="{}">View</a>', url)
 
     admin_link.short_description = "Details"
+
     def term_type(self, obj):
         return obj.terms.terms_type if obj.terms else '-'
+
     term_type.short_description = "Term Type"
 
     def institution(self, obj):
         return obj.terms.institution.name_english
-    institution.short_description = "Institution"
 
+    institution.short_description = "Institution"
 
 
 class BadgeUserAdmin(UserAdmin):
@@ -149,10 +152,3 @@ class UserProvisionmentAdmin(ModelAdmin):
 
 
 badgr_admin.register(UserProvisionment, UserProvisionmentAdmin)
-
-
-class ImportBadgeAllowedUrlAdmin(ModelAdmin):
-    list_display = ('url',)
-
-
-badgr_admin.register(ImportBadgeAllowedUrl, ImportBadgeAllowedUrlAdmin)

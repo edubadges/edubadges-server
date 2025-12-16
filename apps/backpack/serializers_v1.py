@@ -1,31 +1,18 @@
 import datetime
-import hashlib
-import json
-import random
-import string
-from json import JSONDecodeError
 
-from django.conf import settings
-import requests
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.urls import reverse
 from django.utils.dateparse import parse_datetime, parse_date
-from django.utils.html import strip_tags
-from openbadges_bakery import unbake
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.fields import SkipField
 
 import badgrlog
-from backpack.models import ImportedAssertion
-from badgeuser.models import ImportBadgeAllowedUrl
 from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeInstance
-from mainsite.drf_fields import Base64FileField, ValidImageField
-from mainsite.serializers import MarkdownCharField, StripTagsCharField
+from mainsite.drf_fields import Base64FileField
+from mainsite.serializers import MarkdownCharField
 from mainsite.utils import OriginSetting
-from mainsite.utils import send_mail, EmailMessageMaker
-from jose import jwt, jws
 
 logger = badgrlog.BadgrLogger()
 
@@ -300,90 +287,3 @@ class V1BadgeInstanceSerializer(V1InstanceSerializer):
             'recipient': instance.recipient_identifier,
         }
         return super(V1BadgeInstanceSerializer, self).to_representation(localbadgeinstance_json)
-
-
-class ImportedAssertionSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
-    import_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
-    image = ValidImageField(required=False, allow_null=True)
-    created_at = serializers.DateTimeField(required=False, allow_null=True)
-    entity_id = StripTagsCharField(max_length=255, read_only=True)
-    verified = serializers.BooleanField(required=False, default=False)
-
-    def to_representation(self, obj):
-        representation = super(ImportedAssertionSerializer, self).to_representation(obj)
-        external_badge = requests.get(representation['import_url']).json()
-        representation['issuedOn'] = external_badge['issuedOn']
-        representation['importedBadge'] = external_badge
-        external_badge_class = requests.get(external_badge['badge']).json()
-        representation['badgeclass'] = external_badge_class
-        external_issuer = requests.get(external_badge_class['issuer']).json()
-        representation['badgeclass']['issuer'] = external_issuer
-        return representation
-
-    def validate(self, data):
-        """
-        Ensure only one assertion input field given.
-        """
-        if not data.get('image') and not data.get('import_url'):
-            raise serializers.ValidationError('import_url or image required.')
-        if not data.get('email'):
-            raise serializers.ValidationError('email required.')
-        return data
-
-    def create(self, validated_data, **kwargs):
-        verify_url = validated_data['import_url']
-        if not verify_url:
-            image_file = validated_data['image']
-            image_file.seek(0)
-            assertion = unbake(image_file)
-            if image_file.name.endswith('svg'):
-                verify_url = assertion.decode()
-            else:
-                try:
-                    data = json.loads(assertion)
-                    verify_url = data['id']
-                except JSONDecodeError:
-                    headers = jwt.get_unverified_header(assertion)
-                    payload = jwt.get_unverified_claims(assertion)
-                    verification_url = payload.get('verification').get('url')
-                    key = requests.get(verification_url).text
-                    # This will raise JWSSignatureError if not valid
-                    jws.verify(assertion, key, headers.get('alg'))
-                    verify_url = payload['id']
-                except TypeError:
-                    raise serializers.ValidationError('Invalid JSON data within image')
-
-        valid_domain_name = False
-        allowed_urls = [allowed_url.url for allowed_url in ImportBadgeAllowedUrl.objects.all()]
-        for allowed_url in allowed_urls:
-            valid_domain_name = valid_domain_name or verify_url.startswith(allowed_url.strip())
-        if not valid_domain_name:
-            raise serializers.ValidationError(f'Invalid URL {verify_url}. Allowed are {allowed_urls}')
-        assertion = requests.get(verify_url).json()
-        # make sure the email address matches
-        recipient = assertion['recipient']
-        if recipient['type'] != 'email':
-            raise serializers.ValidationError('Only recipient email is supported')
-        user = validated_data['created_by']
-        email = validated_data['email']
-        if recipient.get('hashed'):
-            salt = recipient.get('salt', '')
-            value = 'sha256$' + hashlib.sha256(email.encode() + salt.encode()).hexdigest()
-        else:
-            value = email
-        if recipient['identity'] != value:
-            raise serializers.ValidationError('email mismatch', 409)
-        if email == user.email:
-            return ImportedAssertion.objects.create(user=user, import_url=verify_url, verified=True, email=email)
-
-        code = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
-        imported_assertion = ImportedAssertion.objects.create(
-            user=user, import_url=verify_url, verified=False, code=code, email=email
-        )
-        badge = requests.get(assertion['badge']).json()
-        issuer = requests.get(badge['issuer']).json()
-        subject = f'Email validation for Badge {badge["name"]}'
-        message = EmailMessageMaker.create_email_validation_mail(code, user, badge, issuer)
-        send_mail(subject, message=strip_tags(message), html_message=message, recipient_list=[email])
-        return imported_assertion
