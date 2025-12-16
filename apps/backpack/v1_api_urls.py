@@ -5,10 +5,6 @@ from backpack.api import (
     BackpackAssertionDetail,
     BackpackAssertionDetailImage,
     ShareBackpackAssertion,
-    ImportedAssertionList,
-    ImportedAssertionDetail,
-    ImportedAssertionDelete,
-    ImportedAssertionValidate,
 )
 
 urlpatterns = [
@@ -19,26 +15,4 @@ urlpatterns = [
     ),
     # legacy v1 endpoints
     path('share/badge/<str:entity_id>', ShareBackpackAssertion.as_view(), name='v1_api_analytics_share_badge'),
-    # imported assertions
-    path('imported/assertions', ImportedAssertionList.as_view(), name='api_imported_assertions_list'),
-    path(
-        'imported/assertions/detail/<str:entity_id>',
-        ImportedAssertionDetail.as_view(),
-        name='api_imported_assertion_detail',
-    ),
-    path(
-        'imported/assertions/edit/<str:entity_id>',
-        ImportedAssertionDetail.as_view(),
-        name='api_imported_assertions_edit',
-    ),
-    path(
-        'imported/assertions/delete/<str:entity_id>',
-        ImportedAssertionDelete.as_view(),
-        name='api_imported_assertions_delete',
-    ),
-    path(
-        'imported/assertions/validate/<str:entity_id>',
-        ImportedAssertionValidate.as_view(),
-        name='imported_assertion_validate',
-    ),
 ]
