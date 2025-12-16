@@ -63,10 +63,15 @@ for course in read_seed_csv('courses'):
         logger.debug(f'Using fallback image. Seed image for {course["Name"]} cannot be found: {e}')
         image = seed_image_for('badges', 'fallback.png')
 
+    # Entity IDs aren't allowed to contain periods as seen in
+    # apps/public/public_api_urls.py regexes
+    entity_id = course['CourseID'].replace('.', '-')
+
     badgeclass, _ = BadgeClass.objects.get_or_create(
         name=course['Name'],
         issuer=issuer,
         defaults={
+            'entity_id': entity_id,
             'description': course['Description'],
             'image': image,
             'criteria_text': course['Criteria'],
