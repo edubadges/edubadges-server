@@ -1,7 +1,7 @@
 from django.urls import path
 
 from backpack.api import BackpackAssertionDetail
-from badgeuser.api import AcceptTermsView
+from badgeuser.api import AcceptTermsView, BadgeUserDetail
 from directaward.api import DirectAwardAccept
 from lti_edu.api import StudentsEnrolledList
 from mobile_api.api import BadgeInstances, BadgeInstanceDetail, UnclaimedDirectAwards, Enrollments, EnrollmentDetail, \
@@ -24,5 +24,5 @@ urlpatterns = [
     path('login', Login.as_view(), name='mobile_api_login'),
     path('terms/accept', AcceptTermsView.as_view(), name='mobile_api_user_terms_accept'),
     path('enroll', StudentsEnrolledList.as_view(), name='mobile_api_lti_edu_enroll_student'),
-
+    path('profile', BadgeUserDetail.as_view(), name='mobile_api_user_profile'),
 ]
