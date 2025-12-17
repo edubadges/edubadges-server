@@ -137,6 +137,8 @@ class Issuer(
     entity_class_name = 'Issuer'
     DUTCH_NAME = 'issuer'
 
+    history = AuditlogHistoryField()
+
     staff = models.ManyToManyField('badgeuser.BadgeUser', through='staff.IssuerStaff')
     badgrapp = models.ForeignKey('mainsite.BadgrApp', on_delete=models.SET_NULL, blank=True, null=True, default=None)
     name_english = models.CharField(max_length=512, null=True)  # either this name,

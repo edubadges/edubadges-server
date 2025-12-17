@@ -97,6 +97,8 @@ urlpatterns = [
     path('signing/', include(('signing.api_urls', 'signing'), namespace='signing_apis')),
     # include staff endpoints
     path('staff-membership/', include('staff.api_urls')),
+    # include auditlog endpoints
+    path('auditlog/', include('mainsite.auditlog_urls')),
     path('', include('django_prometheus.urls')),
 ]
 

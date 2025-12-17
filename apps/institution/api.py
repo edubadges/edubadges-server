@@ -5,7 +5,8 @@ from rest_framework.views import APIView
 
 from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView, BaseArchiveView
 from institution.models import Faculty, Institution, BadgeClassTag
-from institution.serializers import FacultySerializer, InstitutionSerializer
+from institution.serializers import FacultySerializer, InstitutionSerializer, InstitutionAuditLogSerializer, FacultyAuditLogSerializer
+from mainsite.auditlog_api import BaseAuditLogView
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.permissions import HasObjectPermission
 
@@ -106,3 +107,13 @@ class InstitutionsTagUsage(APIView):
             .all()
         data = [{"name": bc.name} for bc in badge_classes]
         return Response(data, status=HTTP_200_OK)
+
+
+class InstitutionAuditLog(BaseAuditLogView):
+    model = Institution
+    serializer_class = InstitutionAuditLogSerializer
+
+
+class FacultyAuditLog(BaseAuditLogView):
+    model = Faculty
+    serializer_class = FacultyAuditLogSerializer

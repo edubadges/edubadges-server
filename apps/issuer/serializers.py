@@ -16,6 +16,7 @@ from django.utils.html import strip_tags
 from institution.models import BadgeClassTag, Institution
 from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
+from mainsite.auditlog_api import BaseAuditLogSerializer
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.mixins import InternalValueErrorOverrideMixin
@@ -641,23 +642,13 @@ class BadgeInstanceCollectionSerializer(serializers.Serializer):
         return badge_instances
 
 
-class BadgeClassAuditLogSerializer(serializers.ModelSerializer):
-    history = serializers.SerializerMethodField()
-
+class BadgeClassAuditLogSerializer(BaseAuditLogSerializer):
     class Meta:
         model = BadgeClass
         fields = ['history']
 
-    def get_history(self, obj):
-        # Convert related history objects into plain data
-        updated_by = obj.updated_by.username if obj.updated_by else None
-        history_items = obj.history.values()
 
-        # Inject updated_by into each history record
-        return [
-            {
-                **item,
-                'updated_by': updated_by,
-            }
-            for item in history_items
-        ]
+class IssuerAuditLogSerializer(BaseAuditLogSerializer):
+    class Meta:
+        model = Issuer
+        fields = ['history']

@@ -1,6 +1,7 @@
 import re
 from collections import OrderedDict
 
+from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -24,6 +25,8 @@ class Institution(
         return self.name or ''
 
     DUTCH_NAME = 'instelling'
+
+    history = AuditlogHistoryField()
 
     identifier = models.CharField(
         max_length=255, unique=True, null=True, help_text='This is the schac_home, must be set when creating'
@@ -358,6 +361,9 @@ class Faculty(
         verbose_name_plural = 'faculties'
 
     DUTCH_NAME = 'issuer group'
+
+    history = AuditlogHistoryField()
+
     name_dutch = models.CharField(max_length=512, null=True)
     name_english = models.CharField(max_length=512, null=True)
     image_english = models.FileField(upload_to='uploads/faculties', blank=True, null=True)

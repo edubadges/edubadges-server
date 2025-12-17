@@ -1,5 +1,6 @@
 import urllib
 
+from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 from django.conf import settings
 from django.db import models
@@ -147,6 +148,8 @@ class InstitutionStaff(PermissionedRelationshipBase):
     Many2Many realtionship between Institution and users, with permissions added to the relationship
     """
 
+    history = AuditlogHistoryField()
+
     institution = models.ForeignKey('institution.Institution', on_delete=models.CASCADE)
 
     class Meta:
@@ -181,6 +184,8 @@ class FacultyStaff(PermissionedRelationshipBase):
     Many2Many realtionship between Faculty and users, with permissions added to the relationship
     """
 
+    history = AuditlogHistoryField()
+
     faculty = models.ForeignKey('institution.Faculty', on_delete=models.CASCADE)
 
     class Meta:
@@ -195,6 +200,8 @@ class IssuerStaff(PermissionedRelationshipBase):
     """
     Many2Many realtionship between Issuer and users, with permissions added to the relationship
     """
+
+    history = AuditlogHistoryField()
 
     issuer = models.ForeignKey('issuer.Issuer', on_delete=models.CASCADE)
 
@@ -216,6 +223,8 @@ class IssuerStaff(PermissionedRelationshipBase):
 
 
 class BadgeClassStaff(PermissionedRelationshipBase):
+    history = AuditlogHistoryField()
+
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
 
     class Meta:

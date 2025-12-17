@@ -5,11 +5,16 @@ import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from institution.models import Faculty, Institution
 from issuer.models import Issuer, BadgeClass
+from mainsite.auditlog_api import BaseAuditLogView
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 from staff.permissions import HasObjectPermission, StaffMembershipWithinScope
 from staff.serializers import (
+    BadgeClassStaffAuditLogSerializer,
     BadgeClassStaffSerializer,
+    FacultyStaffAuditLogSerializer,
+    InstitutionStaffAuditLogSerializer,
+    IssuerStaffAuditLogSerializer,
     IssuerStaffSerializer,
     FacultyStaffSerializer,
     InstitutionStaffSerializer,
@@ -132,3 +137,23 @@ class BadgeClassStaffDetail(StaffDetailViewBase):
     """
 
     model = BadgeClassStaff  # used by get_object()
+
+
+class InstitutionStaffAuditLog(BaseAuditLogView):
+    model = InstitutionStaff
+    serializer_class = InstitutionStaffAuditLogSerializer
+
+
+class FacultyStaffAuditLog(BaseAuditLogView):
+    model = FacultyStaff
+    serializer_class = FacultyStaffAuditLogSerializer
+
+
+class IssuerStaffAuditLog(BaseAuditLogView):
+    model = IssuerStaff
+    serializer_class = IssuerStaffAuditLogSerializer
+
+
+class BadgeClassStaffAuditLog(BaseAuditLogView):
+    model = BadgeClassStaff
+    serializer_class = BadgeClassStaffAuditLogSerializer

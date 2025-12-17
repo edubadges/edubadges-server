@@ -8,6 +8,7 @@ from rest_framework.serializers import PrimaryKeyRelatedField
 
 from badgeuser.models import BadgeUser
 
+from mainsite.auditlog_api import BaseAuditLogSerializer
 from mainsite.drf_fields import ValidImageField
 from mainsite.exceptions import BadgrValidationError
 from mainsite.mixins import InternalValueErrorOverrideMixin
@@ -201,3 +202,15 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
             return new_faculty
         else:
             BadgrValidationError("You don't have the necessary permissions", 100)
+
+
+class InstitutionAuditLogSerializer(BaseAuditLogSerializer):
+    class Meta:
+        model = Institution
+        fields = ['history']
+
+
+class FacultyAuditLogSerializer(BaseAuditLogSerializer):
+    class Meta:
+        model = Faculty
+        fields = ['history']

@@ -4,6 +4,7 @@ import badgrlog
 from badgeuser.serializers import UserSlugRelatedField
 from institution.serializers import InstitutionSlugRelatedField, FacultySlugRelatedField
 from issuer.serializers import IssuerSlugRelatedField, BadgeClassSlugRelatedField
+from mainsite.auditlog_api import BaseAuditLogSerializer
 from mainsite.utils import EmailMessageMaker
 from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
@@ -112,4 +113,28 @@ class BadgeClassStaffSerializer(BaseStaffCreateSerializer):
 
     def create(self, validated_data):
         return self._base_create(validated_data, 'badgeclass', BadgeClassStaff)
+
+
+class InstitutionStaffAuditLogSerializer(BaseAuditLogSerializer):
+    class Meta:
+        model = InstitutionStaff
+        fields = ['history']
+
+
+class FacultyStaffAuditLogSerializer(BaseAuditLogSerializer):
+    class Meta:
+        model = FacultyStaff
+        fields = ['history']
+
+
+class IssuerStaffAuditLogSerializer(BaseAuditLogSerializer):
+    class Meta:
+        model = IssuerStaff
+        fields = ['history']
+
+
+class BadgeClassStaffAuditLogSerializer(BaseAuditLogSerializer):
+    class Meta:
+        model = BadgeClassStaff
+        fields = ['history']
 
