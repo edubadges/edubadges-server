@@ -6,7 +6,7 @@
 AppleDouble
 *.sqlite*
 *.sass-cache
-env_vars.sh
+*env_vars*.sh
 .env
 .env.*
 staticfiles*
@@ -54,3 +54,5 @@ pipdeptree.txt
 pyrightconfig.json
 start.fish
 sourceandcharm.sh
+CLAUDE.md
+.zed
