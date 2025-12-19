@@ -1,6 +1,6 @@
 import urllib
 import uuid
-
+import datetime
 from django.conf import settings
 from django.db import models, IntegrityError
 from django.utils.html import strip_tags
@@ -109,11 +109,18 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                     'name': self.name,
                 }
             ]
+        expires_at = None
+        if self.badgeclass.expiration_period:
+            expires_at = (
+                    datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+                    + self.badgeclass.expiration_period
+            )
         assertion = self.badgeclass.issue(
             recipient=recipient,
             created_by=self.created_by,
             acceptance=BadgeInstance.ACCEPTANCE_ACCEPTED,
             recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
+            expires_at=expires_at,
             send_email=False,
             issued_on=self.created_at,
             award_type=BadgeInstance.AWARD_TYPE_DIRECT_AWARD,
