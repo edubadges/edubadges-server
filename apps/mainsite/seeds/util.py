@@ -3,7 +3,7 @@ import glob
 import json
 import os
 from dataclasses import fields
-from typing import Type, TypeVar, get_type_hints
+from typing import Type, TypeVar, Union, get_args, get_origin
 
 from badgeuser.models import Terms, TermsUrl
 from django.core.files import File
@@ -112,8 +112,8 @@ def read_typed_seed_csv(csv_name: str, schema_class: Type[T]) -> list[T]:
     """
     file_path = os.path.join('apps/mainsite/seeds/data', f'{csv_name}.csv')
     
-    # Get type hints from the schema class
-    type_hints = get_type_hints(schema_class)
+    # Get type information from the dataclass fields
+    field_types = {field.name: field.type for field in fields(schema_class)}
     
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file, delimiter=';', strict=True)
@@ -125,17 +125,20 @@ def read_typed_seed_csv(csv_name: str, schema_class: Type[T]) -> list[T]:
             for field in fields(schema_class):
                 field_name = field.name
                 csv_value = row_dict.get(field_name, '')
-                field_type = type_hints.get(field_name, str)
+                field_type = field_types.get(field_name, str)
                 
-                # Handle Optional types
-                is_optional = hasattr(field_type, '__origin__') and field_type.__origin__ is type(None) | type
-                if is_optional:
-                    # Extract the actual type from Optional[T]
-                    actual_type = field_type.__args__[0] if hasattr(field_type, '__args__') else str
+                # Handle Optional types (Optional[T] is Union[T, None])
+                origin = get_origin(field_type)
+                if origin is Union:
+                    # Get the non-None type from Union[T, None]
+                    type_args = get_args(field_type)
+                    # Filter out NoneType to get the actual type
+                    actual_types = [t for t in type_args if t is not type(None)]
                     if csv_value == '':
                         converted_row[field_name] = None
                         continue
-                    field_type = actual_type
+                    # Use the first non-None type for conversion
+                    field_type = actual_types[0] if actual_types else str
                 
                 # Convert the value based on the field type
                 try:
