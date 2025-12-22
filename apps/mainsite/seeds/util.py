@@ -2,6 +2,8 @@ import csv
 import glob
 import json
 import os
+from dataclasses import fields
+from typing import Type, TypeVar, get_type_hints
 
 from badgeuser.models import Terms, TermsUrl
 from django.core.files import File
@@ -76,6 +78,82 @@ def read_seed_csv(csv_name: str) -> list[dict[str, str]]:
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file, delimiter=';', strict=True)
         return list(reader)
+
+
+T = TypeVar('T')
+
+
+def read_typed_seed_csv(csv_name: str, schema_class: Type[T]) -> list[T]:
+    """
+    Read a CSV file and return a list of typed objects based on the provided schema class.
+    
+    The schema class should be a dataclass with type annotations. This function will:
+    1. Read the CSV file
+    2. Convert string values to the appropriate types based on the dataclass annotations
+    3. Return a list of instances of the schema class
+    
+    Type conversion rules:
+    - int: Converts to integer, empty strings become 0
+    - float: Converts to float, empty strings become 0.0
+    - bool: Converts 'yes'/'no' (case insensitive) to True/False
+    - str: Keeps as string (default)
+    - Optional[T]: Converts to T or None if empty string
+    
+    Example:
+        @dataclass
+        class CourseSchema:
+            name: str
+            ects: float
+            eqf: int
+            supervised: bool
+            
+        courses = read_typed_seed_csv('courses', CourseSchema)
+        # courses[0].ects will be a float, not a string
+    """
+    file_path = os.path.join('apps/mainsite/seeds/data', f'{csv_name}.csv')
+    
+    # Get type hints from the schema class
+    type_hints = get_type_hints(schema_class)
+    
+    with open(file_path, 'r') as file:
+        reader = csv.DictReader(file, delimiter=';', strict=True)
+        rows = []
+        
+        for row_dict in reader:
+            converted_row = {}
+            
+            for field in fields(schema_class):
+                field_name = field.name
+                csv_value = row_dict.get(field_name, '')
+                field_type = type_hints.get(field_name, str)
+                
+                # Handle Optional types
+                is_optional = hasattr(field_type, '__origin__') and field_type.__origin__ is type(None) | type
+                if is_optional:
+                    # Extract the actual type from Optional[T]
+                    actual_type = field_type.__args__[0] if hasattr(field_type, '__args__') else str
+                    if csv_value == '':
+                        converted_row[field_name] = None
+                        continue
+                    field_type = actual_type
+                
+                # Convert the value based on the field type
+                try:
+                    if field_type == int:
+                        converted_row[field_name] = int(csv_value) if csv_value else 0
+                    elif field_type == float:
+                        converted_row[field_name] = float(csv_value) if csv_value else 0.0
+                    elif field_type == bool:
+                        converted_row[field_name] = csv_value.lower() == 'yes' if csv_value else False
+                    else:
+                        converted_row[field_name] = csv_value
+                except (ValueError, AttributeError) as e:
+                    # If conversion fails, keep the original string value
+                    converted_row[field_name] = csv_value
+            
+            rows.append(schema_class(**converted_row))
+        
+        return rows
 
 
 def read_seed_jsons(pattern: str) -> list[dict[str, str]]:
