@@ -1,18 +1,8 @@
 # encoding: utf-8
-
-
 from .settings import *
 
 # disable logging for tests
-LOGGING = {}
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'badgr_server',
-        'OPTIONS': {},
-    }
-}
+LOGGING = { }
 
 CELERY_ALWAYS_EAGER = True
 SECRET_KEY = 'aninsecurekeyusedfortesting'

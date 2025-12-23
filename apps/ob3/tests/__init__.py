@@ -1,1 +1,0 @@
-from ob3.tests import *
