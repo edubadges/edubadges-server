@@ -3,10 +3,10 @@ from django.test import SimpleTestCase
 
 from datetime import datetime as DateTime
 
-from .models import ImpierceOfferRequest as OfferRequest, IdentityObject
-from .serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
+from ob3.models import ImpierceOfferRequest as OfferRequest, IdentityObject
+from ob3.serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
 
-from  mainsite.settings import UI_URL
+from mainsite.settings import UI_URL
 
 class BadgeClassMock:
     def __init__(self):
