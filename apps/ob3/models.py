@@ -3,6 +3,8 @@
 from hashlib import sha256
 from typing import Optional
 
+from issuer.models import BadgeInstance
+
 
 def generate_sha256_hashstring(identifier: str, salt: Optional[str] = None):
     """
@@ -117,7 +119,7 @@ class AchievementSubject:
         self.identifier = identifier
 
     @staticmethod
-    def from_badge_instance(badge_instance):
+    def from_badge_instance(badge_instance: BadgeInstance) -> 'AchievementSubject':
         achievement = Achievement.from_badge_instance(badge_instance)
         if badge_instance.recipient_identifier and badge_instance.salt:
             # Hardcoded to one element. The spec allows more, but we don't need it.
@@ -161,7 +163,7 @@ class Achievement(StructFieldsMixin):
     ]
 
     @staticmethod
-    def from_badge_instance(badge_instance):
+    def from_badge_instance(badge_instance: BadgeInstance) -> 'Achievement':
         badge_class = badge_instance.badgeclass
         in_language = None
         ects = None
