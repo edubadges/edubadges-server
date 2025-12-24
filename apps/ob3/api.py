@@ -1,18 +1,19 @@
 import logging
 import uuid
+from collections.abc import Sequence
 from pprint import pformat
-from typing import Optional, Sequence
+from typing import Optional
 from urllib.parse import urljoin
 
-from django.contrib.auth.models import Permission
-
 import badgrlog
-import requests
+from badgrsocialauth.utils import get_social_account
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from django.http import Http404
 from issuer.models import BadgeInstance
 from mainsite.settings import OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_SPHEREON, OB3_AGENT_URL_UNIME
+from requests import Request, post
 from rest_framework import permissions, status
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -76,7 +77,7 @@ class CredentialsView(APIView):
 
     def __issue_sphereon_badge(self, credential_offer_request) -> str:
         logger.debug(f'Requesting credential issuance: {OB3_AGENT_URL_SPHEREON} {credential_offer_request}')
-        response = requests.post(
+        response = post(
             timeout=5,
             url=OB3_AGENT_URL_SPHEREON,
             json=credential_offer_request,
@@ -96,7 +97,7 @@ class CredentialsView(APIView):
         payload = credential
 
         logger.debug(f'Requesting credential issuance: {url} {headers} {payload}')
-        response = requests.post(timeout=5, json=payload, url=url, headers=headers)
+        response = post(timeout=5, json=payload, url=url, headers=headers)
         logger.debug(f'Response: {response.status_code} {response.text}')
 
         if response.status_code >= 400:
@@ -111,7 +112,7 @@ class CredentialsView(APIView):
         payload = {'offerId': offer_id}
 
         logger.debug(f'Requesting offer: {url} {headers} {payload}')
-        response = requests.post(timeout=5, url=url, json=payload, headers=headers)
+        response = post(timeout=5, url=url, json=payload, headers=headers)
         logger.debug(f'Response: {response.status_code} {response.text}')
 
         if response.status_code >= 400:
@@ -123,13 +124,38 @@ class CredentialsView(APIView):
 
 class OB3CallbackView(APIView):
     permission_classes: tuple[type[permissions.BasePermission]] = (permissions.AllowAny,)
-    http_method_names: Sequence[str]  = ['post']
+    http_method_names: Sequence[str] = ['post']
 
-    def post(self, _, entity_id: str):
+    def post(self, request: Request):
+        entity_id, social_uuid = self.__parse_body(request)
         badge_instance = self.__get_badge_instance(entity_id)
+
+        self.__authorize(badge_instance, social_uuid)
+
         credential = self.__create_credential(badge_instance)
         serializer = CredentialSerializer(credential)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def __parse_body(self, request: Request) -> tuple[str, str]:
+        state = request.data.get('state')  # pyright: ignore[reportAny]
+        user_id = request.data.get('user_id')  # pyright: ignore[reportAny]
+
+        if not isinstance(state, str) or not state:
+            raise BadRequest('state parameter is required')
+
+        if not isinstance(user_id, str) or not user_id:
+            raise BadRequest('user_id parameter is required')
+
+        return state, user_id
+
+    def __authorize(self, badge_instance: BadgeInstance, social_uuid: str):
+        # Verify that the badge instance was issued to the user associated with the provided social account UUID
+        social_account = get_social_account(social_uuid)
+        if not social_account:
+            raise AuthenticationFailed('Invalid user')
+
+        if social_account.user_id != badge_instance.user_id:  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue] We need django-stubs first
+            raise AuthenticationFailed('Invalid user')
 
     def __get_badge_instance(self, entity_id: str) -> BadgeInstance:
         try:

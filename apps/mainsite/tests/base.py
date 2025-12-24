@@ -47,7 +47,7 @@ class SetupHelper(object):
     def get_test_image_path_too_large(self):
         return os.path.join(self.get_testfiles_path(), 'too_large_test_image.png')
 
-    def add_eduid_socialaccount(self, user):
+    def add_eduid_socialaccount(self, user) -> SocialAccount:
         random_eduid = (
             'urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{}c14-b952-4d7e-85fd-{}ac5c6f18'.format(
                 random.randint(1, 99999), random.randint(1, 9999)
@@ -63,6 +63,8 @@ class SetupHelper(object):
         socialaccount = SocialAccount(extra_data=extra_data, uid=random_eduid, provider='edu_id', user=user)
         socialaccount.save()
         user.remove_cached_data(['cached_affiliations'])
+        
+        return socialaccount
 
     def _add_surfconext_socialaccount(self, user):
         random_surfconext_id = str(uuid.uuid4())
