@@ -1,8 +1,10 @@
 import logging
 import uuid
 from pprint import pformat
-from typing import Optional
+from typing import Optional, Sequence
 from urllib.parse import urljoin
+
+from django.contrib.auth.models import Permission
 
 import badgrlog
 import requests
@@ -14,8 +16,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import ImpierceOfferRequest, SphereonOfferRequest
-from .serializers import ImpierceOfferRequestSerializer, SphereonOfferRequestSerializer
+from .models import AchievementSubject, Credential, ImpierceOfferRequest, SphereonOfferRequest
+from .serializers import CredentialSerializer, ImpierceOfferRequestSerializer, SphereonOfferRequestSerializer
 
 logger = logging.getLogger('django')
 
@@ -117,3 +119,34 @@ class CredentialsView(APIView):
             raise BadRequest(msg)
 
         return response.text
+
+
+class OB3CallbackView(APIView):
+    permission_classes: tuple[type[permissions.BasePermission]] = (permissions.AllowAny,)
+    http_method_names: Sequence[str]  = ['post']
+
+    def post(self, _, entity_id: str):
+        badge_instance = self.__get_badge_instance(entity_id)
+        credential = self.__create_credential(badge_instance)
+        serializer = CredentialSerializer(credential)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def __get_badge_instance(self, entity_id: str) -> BadgeInstance:
+        try:
+            return BadgeInstance.objects.get(entity_id=entity_id)
+        except ObjectDoesNotExist:
+            raise Http404
+
+    def __create_credential(self, badge_instance: BadgeInstance) -> Credential:
+        credential_subject = AchievementSubject.from_badge_instance(badge_instance)
+        credential = Credential(
+            entity_id=badge_instance.entity_id,
+            issuer=badge_instance.badgeclass.issuer,
+            valid_from=badge_instance.issued_on,
+            credential_subject=credential_subject,
+        )
+
+        if badge_instance.expires_at:
+            credential.valid_until = badge_instance.expires_at
+
+        return credential
