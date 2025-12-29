@@ -7,13 +7,12 @@ from urllib.parse import urljoin
 
 import badgrlog
 from badgrsocialauth.utils import get_social_account
-from django.core.exceptions import BadRequest, ObjectDoesNotExist
-from django.http import Http404
+from django.core.exceptions import ObjectDoesNotExist
 from issuer.models import BadgeInstance
 from mainsite.settings import OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_SPHEREON, OB3_AGENT_URL_UNIME
 from requests import post
 from rest_framework import permissions, status
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, ValidationError, NotFound
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -72,7 +71,7 @@ class CredentialsView(APIView):
         try:
             return BadgeInstance.objects.get(id=badge_id, user=user)
         except ObjectDoesNotExist:
-            raise Http404
+            raise NotFound(f'Badge instance with id {badge_id} not found')
 
     def __issue_sphereon_badge(self, credential_offer_request) -> str:
         logger.debug(f'Requesting credential issuance: {OB3_AGENT_URL_SPHEREON} {credential_offer_request}')
@@ -86,7 +85,7 @@ class CredentialsView(APIView):
 
         if response.status_code >= 400:
             msg = f'Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
-            raise BadRequest(msg)
+            raise ValidationError(msg)
 
         return response.text
 
@@ -101,7 +100,7 @@ class CredentialsView(APIView):
 
         if response.status_code >= 400:
             msg = f'Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
-            raise BadRequest(msg)
+            raise ValidationError(msg)
 
         return response.text
 
@@ -116,7 +115,7 @@ class CredentialsView(APIView):
 
         if response.status_code >= 400:
             msg = f'Failed to get offer:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
-            raise BadRequest(msg)
+            raise ValidationError(msg)
 
         return response.text
 
@@ -140,10 +139,10 @@ class OB3CallbackView(APIView):
         user_id = request.data.get('user_id')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
 
         if not isinstance(state, str) or not state:
-            raise BadRequest('state parameter is required')
+            raise ValidationError('state parameter is required')
 
         if not isinstance(user_id, str) or not user_id:
-            raise BadRequest('user_id parameter is required')
+            raise ValidationError('user_id parameter is required')
 
         return state, user_id
 
@@ -154,13 +153,13 @@ class OB3CallbackView(APIView):
             raise AuthenticationFailed('Invalid user')
 
         if social_account.user_id != badge_instance.user_id:  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue] We need django-stubs first
-            raise AuthenticationFailed('Invalid user')
+            raise PermissionDenied('Invalid user')
 
     def __get_badge_instance(self, entity_id: str) -> BadgeInstance:
         try:
             return BadgeInstance.objects.get(entity_id=entity_id)
         except ObjectDoesNotExist:
-            raise Http404
+            raise NotFound
 
     def __create_credential(self, badge_instance: BadgeInstance) -> Credential:
         credential_subject = AchievementSubject.from_badge_instance(badge_instance)
