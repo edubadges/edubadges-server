@@ -210,6 +210,41 @@ class SphereonOfferRequest(OfferRequest):
         return response.text
 
 
+class VeramoOfferRequest(OfferRequest):
+    """
+    A Veramo offer request that doesn't send the initial credential payload.
+    This is used for the /api/create-offer endpoint.
+    """
+
+    def __init__(self, credential_configuration_id, badge_instance):
+        self.credentials = [credential_configuration_id]
+        self.grants = {'authorization_code': {'issuer_state': badge_instance.entity_id}}
+
+    @override
+    def call(self) -> str:
+        """
+        Create an offer for the credential.
+        Returns:
+            The response text from the HTTP call containing the offer URI
+        """
+        headers = {'Accept': 'application/json'}
+        if self._get_authz_token():
+            headers['Authorization'] = f'Bearer {self._get_authz_token()}'
+
+        payload = {'credentials': self.credentials, 'grants': self.grants}
+
+        url = self._get_url()
+        logger.debug(f'Requesting offer creation: {url} {headers} {payload}')
+        response = requests.post(timeout=5, json=payload, url=url, headers=headers)
+        logger.debug(f'Response: {response.status_code} {response.text}')
+
+        if response.status_code >= 400:
+            msg = f'Failed to create offer:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
+            raise Exception(msg)
+
+        return response.text
+
+
 class Credential:
     def __init__(self, entity_id, issuer, valid_from, credential_subject, **kwargs):
         self.id = entity_id

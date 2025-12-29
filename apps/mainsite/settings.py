@@ -230,6 +230,7 @@ DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETI
 OB3_AGENT_URL_SPHEREON = os.environ.get('OB3_AGENT_URL_SPHEREON', '')
 OB3_AGENT_AUTHZ_TOKEN_SPHEREON = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_SPHEREON', '')
 OB3_AGENT_URL_UNIME = os.environ.get('OB3_AGENT_URL_UNIME', '')
+OB3_AGENT_URL_VERAMO = os.environ.get('OB3_AGENT_URL_VERAMO', 'https://issuer.example.com/edubadges/api/create-offer')
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'

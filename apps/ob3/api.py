@@ -8,15 +8,20 @@ import badgrlog
 from badgrsocialauth.utils import get_social_account
 from django.core.exceptions import ObjectDoesNotExist
 from issuer.models import BadgeInstance
-from mainsite.settings import OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_SPHEREON, OB3_AGENT_URL_UNIME
+from mainsite.settings import (
+    OB3_AGENT_AUTHZ_TOKEN_SPHEREON,
+    OB3_AGENT_URL_SPHEREON,
+    OB3_AGENT_URL_UNIME,
+    OB3_AGENT_URL_VERAMO,
+)
 from rest_framework import permissions, status
 from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied, ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import AchievementSubject, Credential, ImpierceOfferRequest, SphereonOfferRequest
-from .serializers import CredentialSerializer
+from .models import AchievementSubject, Credential, ImpierceOfferRequest, SphereonOfferRequest, VeramoOfferRequest
+from .serializers import CredentialSerializer, VeramoOfferRequestSerializer
 
 logger = logging.getLogger('django')
 
@@ -57,6 +62,9 @@ class CredentialsView(APIView):
         elif variant == 'preauthorized':
             credential = ImpierceOfferRequest(offer_id, 'openbadge_credential', badge_instance)
             credential.set_url(OB3_AGENT_URL_UNIME)
+        elif variant == 'veramo':
+            credential = VeramoOfferRequest('OpenBadgeCredential', badge_instance)
+            credential.set_url(OB3_AGENT_URL_VERAMO)
         else:
             raise ValidationError('Invalid variant')
 
