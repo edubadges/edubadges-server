@@ -266,6 +266,20 @@ class OB3CredentialsViewAPITest(BadgrTestCase):
             response = self._post_credentials(assertion.id, 'authorization')
             self.assertResponseCode(response, 404)
 
+    def test_credentials_endpoint_returns_offer_for_veramo_variant(self):
+        """
+        Test that the credentials endpoint returns an offer for the veramo variant.
+        """
+        assertion = self._setup_assertion_with_relations()
+
+        # Mock the HTTP calls to avoid actual network requests
+        with self._with_mock_endpoints():
+            response = self._post_credentials(assertion.id, 'veramo')
+
+            self.assertEqual(response.status_code, 201)
+            response_data = response.json()
+            self.assertIn('offer', response_data)
+
     def assertResponseCode(self, response, expected_code):
         self.assertEqual(
             response.status_code,
