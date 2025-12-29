@@ -1,18 +1,11 @@
 import codecs
-import urllib.error
 import urllib.parse
-import urllib.parse
-import urllib.request
 
-from django.conf import settings
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.providers.base import ProviderAccount
-from rest_framework.authentication import TokenAuthentication
-
-# from badgeuser.models import TermsVersion
+from django.conf import settings
 from mainsite.models import BadgrApp
-# from mainsite.views import TermsAndConditionsView
-from theming.models import Theme
+from rest_framework.authentication import TokenAuthentication
 
 
 class AuthErrorCode(object):

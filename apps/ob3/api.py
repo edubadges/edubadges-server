@@ -3,22 +3,20 @@ import uuid
 from collections.abc import Sequence
 from pprint import pformat
 from typing import Optional
-from urllib.parse import urljoin
 
 import badgrlog
 from badgrsocialauth.utils import get_social_account
 from django.core.exceptions import ObjectDoesNotExist
 from issuer.models import BadgeInstance
 from mainsite.settings import OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_SPHEREON, OB3_AGENT_URL_UNIME
-from requests import post
 from rest_framework import permissions, status
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, ValidationError, NotFound
+from rest_framework.exceptions import AuthenticationFailed, NotFound, PermissionDenied, ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import AchievementSubject, Credential, ImpierceOfferRequest, SphereonOfferRequest
-from .serializers import CredentialSerializer, ImpierceOfferRequestSerializer, SphereonOfferRequestSerializer
+from .serializers import CredentialSerializer
 
 logger = logging.getLogger('django')
 
@@ -27,11 +25,18 @@ class CredentialsView(APIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ['post']
 
-    def post(self, request: Request, _):
+    def post(self, request: Request, **kwargs):
+        _ = kwargs
         offer: Optional[str] = None
         offer_id = str(uuid.uuid4())
         badge_id = request.data.get('badge_id')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
         variant = request.data.get('variant')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+
+        if not request.user.is_authenticated:
+            raise PermissionDenied('User must be authenticated')
+
+        if not badge_id:
+            raise ValidationError('Badge ID is required')
 
         badge_instance = self.__badge_instance(badge_id, request.user)
         logger.debug(f'Badge instance: {pformat(badge_instance.__dict__)}')
@@ -47,17 +52,19 @@ class CredentialsView(APIView):
                 request.user.last_name,
                 request.user.first_name,
             )
-            serializer = SphereonOfferRequestSerializer(credential)
-            logger.debug(f'Credential: {pformat(serializer.data)}')
-            offer = self.__issue_sphereon_badge(serializer.data)
-            logger.debug(f'Sphereon offer: {offer}')
+            credential.set_url(OB3_AGENT_URL_SPHEREON)
+            credential.set_authz_token(OB3_AGENT_AUTHZ_TOKEN_SPHEREON)
         elif variant == 'preauthorized':
             credential = ImpierceOfferRequest(offer_id, 'openbadge_credential', badge_instance)
-            serializer = ImpierceOfferRequestSerializer(credential)
-            logger.debug(f'Credential: {pformat(serializer.data)}')
-            self.__issue_unime_badge(serializer.data)
-            offer = self.__get_unime_offer(offer_id)
-            logger.debug(f'Unime offer: {offer}')
+            credential.set_url(OB3_AGENT_URL_UNIME)
+        else:
+            raise ValidationError('Invalid variant')
+
+        try:
+            offer = credential.call()
+            logger.debug(f'Offer: {offer}')
+        except Exception as error:
+            raise ValidationError(str(error))
 
         logger.info(f'Issued credential for badge {badge_id} with offer_id {offer_id}')
 
@@ -72,52 +79,6 @@ class CredentialsView(APIView):
             return BadgeInstance.objects.get(id=badge_id, user=user)
         except ObjectDoesNotExist:
             raise NotFound(f'Badge instance with id {badge_id} not found')
-
-    def __issue_sphereon_badge(self, credential_offer_request) -> str:
-        logger.debug(f'Requesting credential issuance: {OB3_AGENT_URL_SPHEREON} {credential_offer_request}')
-        response = post(
-            timeout=5,
-            url=OB3_AGENT_URL_SPHEREON,
-            json=credential_offer_request,
-            headers={'Accept': 'application/json', 'Authorization': f'Bearer {OB3_AGENT_AUTHZ_TOKEN_SPHEREON}'},
-        )
-        logger.debug(f'Response: {response.status_code} {response.text}')
-
-        if response.status_code >= 400:
-            msg = f'Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
-            raise ValidationError(msg)
-
-        return response.text
-
-    def __issue_unime_badge(self, credential) -> str:
-        url = urljoin(OB3_AGENT_URL_UNIME, 'credentials')
-        headers = {'Accept': 'application/json'}
-        payload = credential
-
-        logger.debug(f'Requesting credential issuance: {url} {headers} {payload}')
-        response = post(timeout=5, json=payload, url=url, headers=headers)
-        logger.debug(f'Response: {response.status_code} {response.text}')
-
-        if response.status_code >= 400:
-            msg = f'Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
-            raise ValidationError(msg)
-
-        return response.text
-
-    def __get_unime_offer(self, offer_id: str) -> str:
-        url = urljoin(OB3_AGENT_URL_UNIME, 'offers')
-        headers = {'Accept': 'application/json'}
-        payload = {'offerId': offer_id}
-
-        logger.debug(f'Requesting offer: {url} {headers} {payload}')
-        response = post(timeout=5, url=url, json=payload, headers=headers)
-        logger.debug(f'Response: {response.status_code} {response.text}')
-
-        if response.status_code >= 400:
-            msg = f'Failed to get offer:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
-            raise ValidationError(msg)
-
-        return response.text
 
 
 class OB3CallbackView(APIView):
