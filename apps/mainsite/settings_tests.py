@@ -2,7 +2,7 @@
 from .settings import *
 
 # disable logging for tests
-LOGGING = { }
+LOGGING = {}
 
 CELERY_ALWAYS_EAGER = True
 SECRET_KEY = 'aninsecurekeyusedfortesting'

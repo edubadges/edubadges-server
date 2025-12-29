@@ -118,7 +118,7 @@ class OB3CallbackAPITest(BadgrTestCase):
         response = self.client.post('/ob3/v1/ob3/callback', {'state': '123'})
         self.assertEqual(response.status_code, 400)
 
-    def test_callback_endpoint_must_be_for_user(self):
+    def test_callback_endpoint_must_be_for_recipient_user(self):
         """
         Test that the callback endpoint must be for the user who initiated the request.
         If the user_id parameter does not match the uuid of the socialaccount
@@ -132,15 +132,25 @@ class OB3CallbackAPITest(BadgrTestCase):
         )
         self.assertEqual(response.status_code, 403)
 
-    def test_callback_endpoint_can_be_for_any_socialaccount_uuid(self):
+    def test_callback_endpoint_must_be_for_existing_user(self):
         """
-        Test that the callback endpoint must be for any socialaccount uuid of the user who initiated the request.
+        Test that the callback endpoint must be for an existing user.
         If the user_id parameter does not match the uuid of any socialaccount for the user who initiated the request,
         should return 403 Forbidden.
         """
         assertion = self._setup_assertion_with_relations()
-        second_social_account = self.add_eduid_socialaccount(assertion.user)
+        response = self.client.post(
+            '/ob3/v1/ob3/callback', {'state': assertion.entity_id, 'user_id': 'userdoesnotexist'}
+        )
+        self.assertEqual(response.status_code, 403)
 
+    def test_callback_endpoint_can_be_for_any_socialaccount_uuid(self):
+        """
+        Test that the callback endpoint accepts any socialaccount UUID belonging to the user who initiated the request.
+        If the user_id parameter matches the UUID of any of the user's socialaccounts, the request should succeed (200 OK).
+        """
+        assertion = self._setup_assertion_with_relations()
+        second_social_account = self.add_eduid_socialaccount(assertion.user)
         self.assertEqual(SocialAccount.objects.filter(user=assertion.user).count(), 2)
         response = self.client.post(
             '/ob3/v1/ob3/callback', {'state': assertion.entity_id, 'user_id': second_social_account.uid}
