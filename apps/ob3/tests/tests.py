@@ -1,9 +1,14 @@
 from typing import List, Optional
 from django.test import SimpleTestCase
+from unittest.mock import patch
 
 from datetime import datetime as DateTime
 
-from ob3.models import ImpierceOfferRequest as OfferRequest, IdentityObject
+from ob3.models import (
+    ImpierceOfferRequest,
+    SphereonOfferRequest as SphereonOfferRequest,
+    IdentityObject
+)
 from ob3.serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
 
 from mainsite.settings import UI_URL
@@ -207,7 +212,7 @@ class TestCredentialsSerializers(SimpleTestCase):
 
     def _serialize_it(self, badge_instance: BadgeInstanceMock):
        # TODO: We should test both impierce and sphereon models and serializers
-       edu_credential = OfferRequest("offer_id", "credential_configuration_id", badge_instance)
+       edu_credential = ImpierceOfferRequest("offer_id", "credential_configuration_id", badge_instance)
        return dict(OfferRequestSerializer(edu_credential).data)
 
 class TestCredentialModels(SimpleTestCase):
@@ -228,3 +233,179 @@ class TestCredentialModels(SimpleTestCase):
         subject_lower = IdentityObject("1234abc123abc", "s@lt")
         subject_upper = IdentityObject("1234ABC123ABC", "s@lt")
         self.assertEqual(subject_lower.identity_hash, subject_upper.identity_hash)
+
+
+class TestOfferRequestCallMethods(SimpleTestCase):
+    """Test the call() methods of the OfferRequest classes."""
+    
+    def test_sphereon_offer_request_call_method(self):
+        """Test that SphereonOfferRequest.call() makes the correct HTTP call."""
+        badge_instance = BadgeInstanceMock()
+        
+        # Create a SphereonOfferRequest
+        offer_request = SphereonOfferRequest(
+            offer_id="test-offer-id",
+            credential_configuration_id="OpenBadgeCredential",
+            badge_instance=badge_instance,
+            edu_id="test-edu-id",
+            email="test@example.com",
+            eppn="test-eppn",
+            family_name="Test",
+            given_name="User"
+        )
+        
+        # Set the URL and auth token
+        offer_request.set_url("https://test-sphereon-url.com")
+        offer_request.set_authz_token("test-auth-token")
+        
+        # Mock the requests.post method
+        with patch('ob3.models.requests.post') as mock_post:
+            mock_response = type('MockResponse', (), {
+                'status_code': 200,
+                'text': 'mock-offer-response'
+            })()
+            mock_post.return_value = mock_response
+            
+            # Call the method
+            result = offer_request.call()
+            
+            # Verify the HTTP call was made correctly
+            mock_post.assert_called_once()
+            call_args = mock_post.call_args
+            
+            # Check URL
+            self.assertEqual(call_args[1]['url'], "https://test-sphereon-url.com")
+            
+            # Check headers
+            headers = call_args[1]['headers']
+            self.assertEqual(headers['Accept'], 'application/json')
+            self.assertEqual(headers['Authorization'], 'Bearer test-auth-token')
+            
+            # Check timeout
+            self.assertEqual(call_args[1]['timeout'], 5)
+            
+            # Check that serializer was used (indirectly by checking the payload structure)
+            payload = call_args[1]['json']
+            self.assertIn('credential_configuration_ids', payload)
+            self.assertIn('grants', payload)
+            self.assertIn('eduId', payload)
+            
+            # Check result
+            self.assertEqual(result, 'mock-offer-response')
+
+    def test_impierce_offer_request_call_method(self):
+        """Test that ImpierceOfferRequest.call() makes the correct HTTP calls."""
+        badge_instance = BadgeInstanceMock()
+        
+        # Create an ImpierceOfferRequest
+        offer_request = ImpierceOfferRequest(
+            offer_id="test-offer-id",
+            credential_configuration_id="openbadge_credential",
+            badge_instance=badge_instance
+        )
+        
+        # Set the URL
+        offer_request.set_url("https://test-unime-url.com")
+        
+        # Mock the requests.post method
+        with patch('ob3.models.requests.post') as mock_post:
+            # First call (issue credential)
+            mock_response1 = type('MockResponse', (), {
+                'status_code': 200,
+                'text': 'mock-credential-response'
+            })()
+            
+            # Second call (get offer)
+            mock_response2 = type('MockResponse', (), {
+                'status_code': 200,
+                'text': 'mock-offer-response'
+            })()
+            
+            mock_post.side_effect = [mock_response1, mock_response2]
+            
+            # Call the method
+            result = offer_request.call()
+            
+            # Verify two HTTP calls were made
+            self.assertEqual(mock_post.call_count, 2)
+            
+            # Check first call (issue credential)
+            first_call = mock_post.call_args_list[0]
+            self.assertIn('/credentials', first_call[1]['url'])
+            self.assertEqual(first_call[1]['headers']['Accept'], 'application/json')
+            
+            # Check second call (get offer)
+            second_call = mock_post.call_args_list[1]
+            self.assertIn('/offers', second_call[1]['url'])
+            self.assertEqual(second_call[1]['json']['offerId'], 'test-offer-id')
+            
+            # Check result
+            self.assertEqual(result, 'mock-offer-response')
+
+    def test_sphereon_offer_request_call_method_error_handling(self):
+        """Test that SphereonOfferRequest.call() handles HTTP errors correctly."""
+        badge_instance = BadgeInstanceMock()
+        
+        # Create a SphereonOfferRequest
+        offer_request = SphereonOfferRequest(
+            offer_id="test-offer-id",
+            credential_configuration_id="OpenBadgeCredential",
+            badge_instance=badge_instance,
+            edu_id="test-edu-id",
+            email="test@example.com",
+            eppn="test-eppn",
+            family_name="Test",
+            given_name="User"
+        )
+        
+        # Set the URL and auth token
+        offer_request.set_url("https://test-sphereon-url.com")
+        offer_request.set_authz_token("test-auth-token")
+        
+        # Mock the requests.post method to return an error
+        with patch('ob3.models.requests.post') as mock_post:
+            mock_response = type('MockResponse', (), {
+                'status_code': 400,
+                'text': 'mock-error-response'
+            })()
+            mock_post.return_value = mock_response
+            
+            # Verify that an exception is raised
+            with self.assertRaises(Exception) as context:
+                offer_request.call()
+            
+            # Check the exception message
+            self.assertIn('Failed to issue badge', str(context.exception))
+            self.assertIn('400', str(context.exception))
+            self.assertIn('mock-error-response', str(context.exception))
+
+    def test_impierce_offer_request_call_method_error_handling(self):
+        """Test that ImpierceOfferRequest.call() handles HTTP errors correctly."""
+        badge_instance = BadgeInstanceMock()
+        
+        # Create an ImpierceOfferRequest
+        offer_request = ImpierceOfferRequest(
+            offer_id="test-offer-id",
+            credential_configuration_id="openbadge_credential",
+            badge_instance=badge_instance
+        )
+        
+        # Set the URL
+        offer_request.set_url("https://test-unime-url.com")
+        
+        # Mock the requests.post method to return an error on the first call
+        with patch('ob3.models.requests.post') as mock_post:
+            mock_response = type('MockResponse', (), {
+                'status_code': 500,
+                'text': 'mock-server-error'
+            })()
+            mock_post.return_value = mock_response
+            
+            # Verify that an exception is raised
+            with self.assertRaises(Exception) as context:
+                offer_request.call()
+            
+            # Check the exception message
+            self.assertIn('Failed to issue badge', str(context.exception))
+            self.assertIn('500', str(context.exception))
+            self.assertIn('mock-server-error', str(context.exception))
