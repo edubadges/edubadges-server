@@ -11,9 +11,10 @@ from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from django.http import Http404
 from issuer.models import BadgeInstance
 from mainsite.settings import OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_SPHEREON, OB3_AGENT_URL_UNIME
-from requests import Request, post
+from requests import post
 from rest_framework import permissions, status
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -27,13 +28,11 @@ class CredentialsView(APIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ['post']
 
-    def post(self, request, **_kwargs):
-        _ = _kwargs  # explicitly ignore kwargs
-
+    def post(self, request: Request, _):
         offer: Optional[str] = None
         offer_id = str(uuid.uuid4())
-        badge_id = request.data.get('badge_id')
-        variant = request.data.get('variant')
+        badge_id = request.data.get('badge_id')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        variant = request.data.get('variant')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
 
         badge_instance = self.__badge_instance(badge_id, request.user)
         logger.debug(f'Badge instance: {pformat(badge_instance.__dict__)}')
@@ -137,8 +136,8 @@ class OB3CallbackView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def __parse_body(self, request: Request) -> tuple[str, str]:
-        state = request.data.get('state')  # pyright: ignore[reportAny]
-        user_id = request.data.get('user_id')  # pyright: ignore[reportAny]
+        state = request.data.get('state')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        user_id = request.data.get('user_id')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
 
         if not isinstance(state, str) or not state:
             raise BadRequest('state parameter is required')
