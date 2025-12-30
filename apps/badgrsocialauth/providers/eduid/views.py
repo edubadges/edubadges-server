@@ -1,7 +1,6 @@
 import json
 import logging
 import urllib.parse
-from base64 import b64encode
 
 import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
@@ -141,7 +140,7 @@ def after_terms_agreement(request, **kwargs):
     """
     this is the second part of the callback, after consent has been given, or is user already exists
     """
-    badgr_app_pk, _login_type = json.loads(kwargs['state'])
+    badgr_app_pk = json.loads(kwargs['state'])[0]
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
