@@ -143,8 +143,7 @@ def after_terms_agreement(request, **kwargs):
     """
     this is the second part of the callback, after consent has been given, or is user already exists
     """
-    # Next is base64 encoded and kept that way here to avoid the redirect interpreting the value as part of the URL.
-    # The frontend is responsible for base64 decoding this value before using it for navigation/redirection.
+    # Next is base64 encoded, we keep it that way to avoid the redirect interpreting the value as part of the URL.
     badgr_app_pk, next = json.loads(kwargs['state'])
     try:
         badgr_app_pk = int(badgr_app_pk)
