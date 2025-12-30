@@ -573,6 +573,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
                 + badgeclass.expiration_period
             )
+        expires_at = min(expires_at, EWI_PILOT_EXPIRATION_DATE)
 
         if enrollment.badge_instance:
             raise BadgrValidationError("Can't award enrollment, it has already been awarded", 213)

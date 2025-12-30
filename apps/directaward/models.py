@@ -117,6 +117,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                 datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
                 + self.badgeclass.expiration_period
             )
+        expires_at = min(expires_at, EWI_PILOT_EXPIRATION_DATE)
 
         assertion = self.badgeclass.issue(
             recipient=recipient,
