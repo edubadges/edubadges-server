@@ -201,3 +201,4 @@ class ImpierceOfferRequestSerializer(serializers.Serializer):
 class VeramoOfferRequestSerializer(serializers.Serializer):
     credentials = serializers.ListField()
     grants = serializers.DictField()
+    credential_callback = serializers.URLField(source='callback_url')

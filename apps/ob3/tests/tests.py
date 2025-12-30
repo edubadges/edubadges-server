@@ -3,7 +3,8 @@ from typing import List, Optional
 from unittest.mock import patch
 
 from django.test import SimpleTestCase
-from mainsite.settings import UI_URL
+from django.urls import reverse
+from mainsite.settings import DEFAULT_DOMAIN, UI_URL
 from ob3.models import IdentityObject, ImpierceOfferRequest, VeramoOfferRequest
 from ob3.models import SphereonOfferRequest as SphereonOfferRequest
 from ob3.serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
@@ -338,8 +339,18 @@ class TestOfferRequestCallMethods(SimpleTestCase):
     def test_veramo_offer_request_call_method(self):
         """Test that VeramoOfferRequest.call() works correctly."""
         badge_instance = BadgeInstanceMock()
-        offer_request = VeramoOfferRequest('test-credential-config-id', badge_instance)
+        callback_url = DEFAULT_DOMAIN + reverse('ob3_callback')
+        # sanity check
+        expected_callback_url = 'http://0.0.0.0:8000/ob3/v1/ob3/callback'
+        self.assertEqual(
+            callback_url,
+            expected_callback_url,
+            "Callback URL does not match. Probably DEFAULT_DOMAIN set to something other than 'http://0.0.0.0:8000'",
+        )
+
+        offer_request = VeramoOfferRequest('test-credential-config-id', badge_instance, callback_url)  # pyright: ignore[reportArgumentType] BK: Our mocks don't inherit from the class they mock nor do both implement an interface or superclass
         offer_request.set_url('http://test-url.com')
+
         with patch('ob3.models.requests.post') as mock_post:
             mock_response = type('MockResponse', (), {'status_code': 200, 'text': '{"uri": "test-offer-uri"}'})()
             mock_post.return_value = mock_response
@@ -351,13 +362,16 @@ class TestOfferRequestCallMethods(SimpleTestCase):
                 {
                     'credentials': ['test-credential-config-id'],
                     'grants': {'authorization_code': {'issuer_state': badge_instance.entity_id}},
+                    'credential_callback': expected_callback_url,
                 },
             )
 
     def test_veramo_offer_request_call_method_error_handling(self):
         """Test that VeramoOfferRequest.call() handles errors correctly."""
         badge_instance = BadgeInstanceMock()
-        offer_request = VeramoOfferRequest('test-credential-config-id', badge_instance)
+        offer_request = VeramoOfferRequest(
+            'test-credential-config-id', badge_instance, 'http://not-relevant.example.com/'
+        )
         offer_request.set_url('http://test-url.com')
         with patch('ob3.models.requests.post') as mock_post:
             mock_response = type('MockResponse', (), {'status_code': 400, 'text': 'mock-error-response'})()
