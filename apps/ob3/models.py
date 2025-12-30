@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 
 import requests
 from issuer.models import BadgeInstance
-from ob3.serializers import ImpierceOfferRequestSerializer, SphereonOfferRequestSerializer
+from ob3.serializers import ImpierceOfferRequestSerializer, SphereonOfferRequestSerializer, VeramoOfferRequestSerializer
 from typing_extensions import override
 
 logger = logging.getLogger('django')
@@ -216,9 +216,10 @@ class VeramoOfferRequest(OfferRequest):
     This is used for the /api/create-offer endpoint.
     """
 
-    def __init__(self, credential_configuration_id, badge_instance):
-        self.credentials = [credential_configuration_id]
-        self.grants = {'authorization_code': {'issuer_state': badge_instance.entity_id}}
+    def __init__(self, credential_configuration_id: str, badge_instance: BadgeInstance, callback_url: str):
+        self.credentials: list[str] = [credential_configuration_id]
+        self.grants: dict[str, dict[str, str]] = {'authorization_code': {'issuer_state': badge_instance.entity_id}}
+        self.callback_url: str = callback_url
 
     @override
     def call(self) -> str:
@@ -231,7 +232,7 @@ class VeramoOfferRequest(OfferRequest):
         if self._get_authz_token():
             headers['Authorization'] = f'Bearer {self._get_authz_token()}'
 
-        payload = {'credentials': self.credentials, 'grants': self.grants}
+        payload = VeramoOfferRequestSerializer(self).data
 
         url = self._get_url()
         logger.debug(f'Requesting offer creation: {url} {headers} {payload}')
@@ -242,7 +243,10 @@ class VeramoOfferRequest(OfferRequest):
             msg = f'Failed to create offer:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
             raise Exception(msg)
 
-        return response.text
+        offer_uri = str(response.json()['uri'])
+        logger.debug(f'Offer URI: {offer_uri}')
+
+        return offer_uri
 
 
 class Credential:
