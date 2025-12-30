@@ -576,6 +576,7 @@ class BadgeClass(
     objects = BadgeClassManager()
     cached = CacheModelManager()
     staff = models.ManyToManyField('badgeuser.BadgeUser', through='staff.BadgeClassStaff')
+    # Note: in the Pilot, "null" means it expires at the end of the pilot. But in normal badgr, "null" meant "never".
     expiration_period = models.DurationField(null=True)
     award_allowed_institutions = models.ManyToManyField(
         'institution.Institution', blank=True, help_text='Allow awards to this institutions'

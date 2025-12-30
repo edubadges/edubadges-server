@@ -1,9 +1,9 @@
 import logging
 import os
+from datetime import datetime
 
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
-from django.http import response as http_response
 
 
 def legacy_boolean_parsing(env_key, default_value):
@@ -230,6 +230,9 @@ DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETI
 OB3_AGENT_URL_SPHEREON = os.environ.get('OB3_AGENT_URL_SPHEREON', '')
 OB3_AGENT_AUTHZ_TOKEN_SPHEREON = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_SPHEREON', '')
 OB3_AGENT_URL_UNIME = os.environ.get('OB3_AGENT_URL_UNIME', '')
+
+# Note: Changing this value will not have any effect on already issued badges.
+EWI_PILOT_EXPIRATION_DATE = datetime.strptime('2026-12-31', '%Y-%m-%d')
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'

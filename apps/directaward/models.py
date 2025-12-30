@@ -10,6 +10,7 @@ from cachemodel.models import CacheModel
 from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BaseAuditedModel
+from mainsite.settings import EWI_PILOT_EXPIRATION_DATE
 from mainsite.utils import send_mail, EmailMessageMaker
 
 
@@ -109,12 +110,14 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                     'name': self.name,
                 }
             ]
-        expires_at = None
+
+        expires_at = EWI_PILOT_EXPIRATION_DATE
         if self.badgeclass.expiration_period:
             expires_at = (
-                    datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
-                    + self.badgeclass.expiration_period
+                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+                + self.badgeclass.expiration_period
             )
+
         assertion = self.badgeclass.issue(
             recipient=recipient,
             created_by=self.created_by,

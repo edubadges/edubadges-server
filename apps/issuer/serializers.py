@@ -32,6 +32,7 @@ from mainsite.serializers import (
     OriginalJsonSerializerMixin,
     BaseSlugRelatedField,
 )
+from mainsite.settings import EWI_PILOT_EXPIRATION_DATE
 from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
 from mainsite.validators import BadgeExtensionValidator
 from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceCollection
@@ -566,12 +567,13 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_entity_id'))
         da = badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns)
 
-        expires_at = None
+        expires_at = EWI_PILOT_EXPIRATION_DATE
         if badgeclass.expiration_period:
             expires_at = (
                 datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
                 + badgeclass.expiration_period
             )
+
         if enrollment.badge_instance:
             raise BadgrValidationError("Can't award enrollment, it has already been awarded", 213)
         if self.context['request'].data.get('issue_signed', False):
