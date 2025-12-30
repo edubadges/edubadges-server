@@ -7,8 +7,10 @@ from typing import Optional
 import badgrlog
 from badgrsocialauth.utils import get_social_account
 from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
 from issuer.models import BadgeInstance
 from mainsite.settings import (
+    DEFAULT_DOMAIN,
     OB3_AGENT_AUTHZ_TOKEN_SPHEREON,
     OB3_AGENT_URL_SPHEREON,
     OB3_AGENT_URL_UNIME,
@@ -63,7 +65,9 @@ class CredentialsView(APIView):
             credential = ImpierceOfferRequest(offer_id, 'openbadge_credential', badge_instance)
             credential.set_url(OB3_AGENT_URL_UNIME)
         elif variant == 'veramo':
-            credential = VeramoOfferRequest('OpenBadgeCredential', badge_instance)
+            # Get our Application URL, then find the callback url from apps.ob3.api_urls.py
+            callback_url: str = DEFAULT_DOMAIN + reverse('ob3:callback')
+            credential = VeramoOfferRequest('OpenBadgeCredential', badge_instance, callback_url)
             credential.set_url(OB3_AGENT_URL_VERAMO)
         else:
             raise ValidationError('Invalid variant')
@@ -76,7 +80,6 @@ class CredentialsView(APIView):
 
         logger.info(f'Issued credential for badge {badge_id} with offer_id {offer_id}')
 
-        # Log the credential issuance event
         badgr_logger = badgrlog.BadgrLogger()
         badgr_logger.event(badgrlog.CredentialIssuedEvent(badge_instance, request.user, offer_id, variant))
 
