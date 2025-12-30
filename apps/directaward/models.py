@@ -1,17 +1,17 @@
 import urllib
 import uuid
-import datetime
-from django.conf import settings
-from django.db import models, IntegrityError
-from django.utils.html import strip_tags
 
 from cachemodel.decorators import cached_method
 from cachemodel.models import CacheModel
+from django.conf import settings
+from django.db import IntegrityError, models
+from django.utils import timezone
+from django.utils.html import strip_tags
 from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BaseAuditedModel
 from mainsite.settings import EWI_PILOT_EXPIRATION_DATE
-from mainsite.utils import send_mail, EmailMessageMaker
+from mainsite.utils import EmailMessageMaker, send_mail
 
 
 class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
@@ -111,13 +111,14 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                 }
             ]
 
-        expires_at = EWI_PILOT_EXPIRATION_DATE
+        max_expiration = EWI_PILOT_EXPIRATION_DATE
         if self.badgeclass.expiration_period:
-            expires_at = (
-                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
-                + self.badgeclass.expiration_period
+            badge_expiration = (
+                timezone.now().replace(microsecond=0, second=0, minute=0, hour=0) + self.badgeclass.expiration_period
             )
-        expires_at = min(expires_at, EWI_PILOT_EXPIRATION_DATE)
+            expires_at = min(badge_expiration, max_expiration)
+        else:
+            expires_at = max_expiration
 
         assertion = self.badgeclass.issue(
             recipient=recipient,

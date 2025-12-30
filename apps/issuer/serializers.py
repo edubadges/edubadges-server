@@ -5,6 +5,8 @@ import uuid
 from collections import OrderedDict
 from itertools import chain
 
+import badgrlog
+from badgeuser.serializers import BadgeUserIdentifierField
 from django.apps import apps
 from django.conf import settings
 from django.core.validators import URLValidator
@@ -12,14 +14,7 @@ from django.db import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
-from rest_framework import serializers
-
-import badgrlog
-from rest_framework.exceptions import ErrorDetail, ValidationError
-from rest_framework.serializers import PrimaryKeyRelatedField
-
-from badgeuser.serializers import BadgeUserIdentifierField
-from institution.models import Institution, BadgeClassTag
+from institution.models import BadgeClassTag, Institution
 from institution.serializers import FacultySlugRelatedField
 from lti_edu.models import StudentsEnrolled
 from mainsite.drf_fields import ValidImageField
@@ -27,15 +22,19 @@ from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError
 from mainsite.mixins import InternalValueErrorOverrideMixin
 from mainsite.models import BadgrApp
 from mainsite.serializers import (
-    StripTagsCharField,
+    BaseSlugRelatedField,
     MarkdownCharField,
     OriginalJsonSerializerMixin,
-    BaseSlugRelatedField,
+    StripTagsCharField,
 )
 from mainsite.settings import EWI_PILOT_EXPIRATION_DATE
-from mainsite.utils import OriginSetting, scrub_svg_image, resize_image, verify_svg, add_watermark
+from mainsite.utils import OriginSetting, add_watermark, resize_image, scrub_svg_image, verify_svg
 from mainsite.validators import BadgeExtensionValidator
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceCollection
+from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail, ValidationError
+from rest_framework.serializers import PrimaryKeyRelatedField
+
+from .models import BadgeClass, BadgeClassExtension, BadgeInstance, BadgeInstanceCollection, Issuer, IssuerExtension
 
 
 class IssuerSlugRelatedField(BaseSlugRelatedField):
@@ -567,13 +566,14 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get('enrollment_entity_id'))
         da = badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns)
 
-        expires_at = EWI_PILOT_EXPIRATION_DATE
+        max_expiration = EWI_PILOT_EXPIRATION_DATE
         if badgeclass.expiration_period:
-            expires_at = (
-                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
-                + badgeclass.expiration_period
+            badge_expiration = (
+                timezone.now().replace(microsecond=0, second=0, minute=0, hour=0) + badgeclass.expiration_period
             )
-        expires_at = min(expires_at, EWI_PILOT_EXPIRATION_DATE)
+            expires_at = min(badge_expiration, max_expiration)
+        else:
+            expires_at = max_expiration
 
         if enrollment.badge_instance:
             raise BadgrValidationError("Can't award enrollment, it has already been awarded", 213)
