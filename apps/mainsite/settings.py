@@ -635,6 +635,10 @@ REDIRECT_URL_LENGTH_LIMIT = 6144
 
 REPORT_RECEIVER_EMAIL = os.environ.get('REPORT_RECEIVER_EMAIL', '')
 
+# Watermark text for demo environments
+# Keep it short and capitalize it; longer text will be scaled down to fit.
+WATERMARK_TEXT = os.environ.get('WATERMARK_TEXT', 'DEMO')
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'eduBadges API',
     'DESCRIPTION': 'Edubadges are digital certificates which show that the owner has acquired certain skills or knowledge',

@@ -474,7 +474,7 @@ def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
 
 
 def add_watermark(uploaded_image, is_svg):
-    text = 'DEMO'
+    text = settings.WATERMARK_TEXT
     angle = 45
     opacity = 0.85
     absolute = pathlib.Path().absolute()
