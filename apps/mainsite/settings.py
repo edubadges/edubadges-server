@@ -3,7 +3,6 @@ import os
 
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
-from django.http import response as http_response
 
 
 def legacy_boolean_parsing(env_key, default_value):
