@@ -38,7 +38,6 @@ slugify_function_path = getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug
 
 slugify = get_callable(slugify_function_path)
 
-
 def client_ip_from_request(request):
     """Returns the IP of the request, accounting for the possibility of being behind a proxy."""
     ip = request.headers.get('x-forwarded-for', None)
@@ -474,7 +473,7 @@ def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
 
 
 def add_watermark(uploaded_image, is_svg):
-    text = 'DEMO'
+    text: str = settings.WATERMARK_TEXT
     angle = 45
     opacity = 0.85
     absolute = pathlib.Path().absolute()
