@@ -637,7 +637,7 @@ REPORT_RECEIVER_EMAIL = os.environ.get('REPORT_RECEIVER_EMAIL', '')
 
 # Watermark text for demo environments
 # Keep it short, and capitalize it. Anything over 4 characters will be truncated.
-WATERMARK_TEXT: str = os.environ.get('WATERMARK_TEXT', 'DEMO')
+WATERMARK_TEXT = os.environ.get('WATERMARK_TEXT', 'DEMO')
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'eduBadges API',
