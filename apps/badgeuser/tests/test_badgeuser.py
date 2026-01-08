@@ -477,7 +477,7 @@ class BadgeuserGraphqlTest(BadgrTestCase):
 
     def test_userprovisionment_exposed_in_entities(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_update=True, may_administrate_users=True)
         new_teacher = self.setup_teacher(institution=teacher1.institution)
         institution = teacher1.institution
         faculty = self.setup_faculty(institution=teacher1.institution)

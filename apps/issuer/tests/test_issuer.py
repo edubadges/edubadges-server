@@ -470,7 +470,7 @@ class IssuerModelsTest(BadgrTestCase):
 class IssuerSchemaTest(BadgrTestCase):
     def test_issuer_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_update=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         self.setup_issuer(teacher1, faculty=faculty)
         query = 'query foo {issuers {entityId contentTypeId}}'
