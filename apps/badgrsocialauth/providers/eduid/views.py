@@ -301,6 +301,6 @@ def print_logout_message(sender, user, request, **kwargs):
 def print_login_message(sender, user, request, **kwargs):
     print('user logged in')
 
-
-user_logged_out.connect(print_logout_message)
-user_logged_in.connect(print_login_message)
+if not getattr(settings, 'DISABLE_AUTH_SIGNALS', False):
+    user_logged_out.connect(print_logout_message)
+    user_logged_in.connect(print_login_message)

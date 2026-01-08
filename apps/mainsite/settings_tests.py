@@ -5,3 +5,4 @@ from .settings import *
 
 # disable logging for tests
 LOGGING = {}
+DISABLE_AUTH_SIGNALS = True
