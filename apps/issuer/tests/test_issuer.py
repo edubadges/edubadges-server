@@ -9,6 +9,7 @@ from django.urls import reverse
 from institution.models import Institution
 from issuer.models import Issuer
 from issuer.testfiles.helper import badgeclass_json, issuer_json
+from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.tests import BadgrTestCase
 
@@ -282,8 +283,12 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(
             teacher1, teacher1.institution, may_award=True, may_read=True, may_create=True, may_update=True
         )
-        enrollment = self.enroll_user(student, badgeclass)
-        response = self.client.put(reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}))
+        enrollment = StudentsEnrolled.objects.create(user=student, badge_class=badgeclass)
+        response = self.client.put(
+            reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}),
+            data={'denyReason': 'Not eligible'},
+            content_type='application/json',
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_award_badge_expiration_date(self):

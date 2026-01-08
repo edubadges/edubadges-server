@@ -7,7 +7,6 @@ from lti_edu.models import StudentsEnrolled
 
 
 class DirectAwardTest(BadgrTestCase):
-
     def test_create_direct_award_bundle(self):
         teacher1 = self.setup_teacher(authenticate=True, )
         self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
@@ -56,7 +55,7 @@ class DirectAwardTest(BadgrTestCase):
         student = self.setup_student(authenticate=True,
                                      affiliated_institutions=[teacher1.institution])
         student.add_affiliations([{'eppn': 'some_eppn', 'schac_home': 'some_home'}])
-        enrollment = self.enroll_user(student, badgeclass)  # add enrollment, this one should be removed after accepting direct award
+        enrollment = StudentsEnrolled.objects.create(user=student, badge_class=badgeclass)  # add enrollment, this one should be removed after accepting direct award
         direct_award_bundle = DirectAwardBundle.objects.get(entity_id=response.data['entity_id'])
         response = self.client.post('/directaward/accept/{}'.format(direct_award_bundle.directaward_set.all()[0].entity_id),
                                     json.dumps({'accept': True}),
