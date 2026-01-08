@@ -1,4 +1,6 @@
-{% extends 'email/base.html' %} {% block style %}
+{% extends 'email/base.html' %}
+{% load i18n %}
+{% block style %}
 <style>
   .main {
     text-align: center;
@@ -100,19 +102,25 @@
     color: #772583;
   }
 </style>
-{% endblock %} {% block title %}
+{% endblock %}
+
+{% block title %}
+{% language "en" %}
 <title>
   REMINDER: Je hebt een edubadge ontvangen. You received an edubadge. Claim
-  before {{da_enddate}}
+  before {{ da_enddate|date:"d F Y" }}
 </title>
-{% endblock %} {% block content %}
+{% endlanguage %}
+{% endblock %}
 
+{% block content %}
 <div><p>For the English version, see below.</p></div>
 
+{% language "nl" %}
 <p class="title">
-  {{institution_name}} heeft je op {{da_creationdate_nl}} een edubadge
+  {{institution_name}} heeft je op {{ da_creationdate|date:"d F Y" }} een edubadge
   gestuurd.<br />
-  Claim deze voor {{da_enddate_nl}}!
+  Claim deze voor {{ da_enddate|date:"d F Y" }}!
 </p>
 <div class="message_container">
   <p class="text text_header">Hoe krijg ik de edubadge in mijn bezit?</p>
@@ -124,7 +132,7 @@
     href="https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/142573610/Ontvanger+student+lerende"
     >Handleiding edubadges</a
   >
-  <br /><br /><b>Let op! Je kunt tot {{da_enddate_nl}} je edubadge claimen</b>
+  <br /><br /><b>Let op! Je kunt tot {{ da_enddate|date:"d F Y" }} je edubadge claimen</b>
 
   <a class="button" target="_blank" rel="noopener noreferrer" href="{{ui_url}}">
     Claim deze edubadge in je backpack</a
@@ -134,7 +142,7 @@
     <img class="badgeclass_image" src="{{badgeclass_image}}" />
     <p class="text badge_name">{{badgeclass_name}}</p>
     <div class="issuer_container">
-      <p>Uitgegeven op {{da_creationdate_nl}}</p>
+      <p>Uitgegeven op {{ da_creationdate|date:"d F Y" }}</p>
       <img class="issuer_image" src="{{issuer_image}}" />
       <div class="issuer_description">
         <p>Uitgegeven door</p>
@@ -145,9 +153,12 @@
     </div>
   </div>
 </div>
+{% endlanguage %}
+
+{% language "en" %}
 <p class="title">
-  {{institution_name}} has sent you an edubadge on {{da_creationdate_en}}.<br />
-  Claim it before {{da_enddate_en}}!
+  {{institution_name}} has sent you an edubadge on {{ da_creationdate|date:"d F Y" }}.<br />
+  Claim it before {{ da_enddate|date:"d F Y" }}!
 </p>
 <div class="message_container">
   <p class="text text_header">How do I obtain this edubadge?</p>
@@ -160,7 +171,7 @@
     >Manual edubadges</a
   >
   <br /><br /><b
-    >Please note! You can claim your edubadge until {{da_enddate_en}}</b
+    >Please note! You can claim your edubadge until {{ da_enddate|date:"d F Y" }}</b
   >
 
   <a class="button" target="_blank" rel="noopener noreferrer" href="{{ui_url}}">
@@ -172,7 +183,7 @@
     <p class="text badge_name">{{badgeclass_name}}</p>
     <div class="issuer_container">
       <img class="issuer_image" src="{{issuer_image}}" />
-      <p>Issued on {{da_creationdate_en}}</p>
+      <p>Issued on {{ da_creationdate|date:"d F Y" }}</p>
       <div class="issuer_description">
         <p>Issued by</p>
         <p>{{issuer_name}}</p>
@@ -182,4 +193,5 @@
     </div>
   </div>
 </div>
+{% endlanguage %}
 {% endblock %}
