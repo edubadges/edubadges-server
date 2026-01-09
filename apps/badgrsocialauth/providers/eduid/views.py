@@ -1,7 +1,6 @@
 import json
 import logging
 import urllib.parse
-from base64 import urlsafe_b64encode
 
 import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
@@ -37,11 +36,8 @@ def login(request: HttpRequest):
     except:
         badgr_app_pk = settings.BADGR_APP_ID
 
-    next_url = request.GET.get('next', '/')
-    # We base64 encode the next URL to avoid surfconext or our middleware to interpret it as part of the URL.
-    # Technically, urlencoded should be safe, but e.g. Django will decode it magically for us, causing broken urls
-    next = urlsafe_b64encode(next_url.encode('utf-8')).decode('utf-8')
-    state = json.dumps([badgr_app_pk, next])
+    state = json.dumps([badgr_app_pk])
+
     params = {
         'state': state,
         'client_id': settings.EDU_ID_CLIENT,
@@ -71,7 +67,8 @@ def callback(request):
     if not state_param:
         error = request.GET.get('error_description', 'Server error: eduID login failed')
         return render_authentication_error(request, EduIDProvider.id, error=error)
-    badgr_app_pk, next = json.loads(state_param)
+    state = json.loads(state_param)
+    badgr_app_pk = state[0]
     code = request.GET.get('code', None)  # access codes to access user info endpoint
     if code is None:  # check if code is given
         error = 'Server error: No userToken found in callback'
@@ -128,7 +125,7 @@ def callback(request):
         'access_token': access_token,
         'provider': 'eduid',
         'eduperson_scoped_affiliation': payload.get('eduperson_scoped_affiliation', []),
-        'state': json.dumps([str(badgr_app_pk), str(next)]),
+        'state': json.dumps([str(badgr_app_pk), 'edu_id']),
         'role': 'student',
     }
 
@@ -143,9 +140,7 @@ def after_terms_agreement(request, **kwargs):
     """
     this is the second part of the callback, after consent has been given, or is user already exists
     """
-    # Next is base64 encoded and kept that way here to avoid the redirect interpreting the value as part of the URL.
-    # The frontend is responsible for base64 decoding this value before using it for navigation/redirection.
-    badgr_app_pk, next = json.loads(kwargs['state'])
+    badgr_app_pk = json.loads(kwargs['state'])[0]
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
@@ -178,8 +173,8 @@ def after_terms_agreement(request, **kwargs):
     provider = EduIDProvider(request)
     login = provider.sociallogin_from_response(request, payload)
 
-    login_response = complete_social_login(request, login)
-    new_url = f'{login_response.url}&role=student&next={next}'
+    ret = complete_social_login(request, login)
+    new_url = ret.url + '&role=student'
     ret = HttpResponseRedirect(new_url)
 
     set_session_badgr_app(request, badgr_app)
