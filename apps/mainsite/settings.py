@@ -1,9 +1,9 @@
 import logging
 import os
 
+from django.http import response as http_response
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
-from django.http import response as http_response
 
 
 def legacy_boolean_parsing(env_key, default_value):
@@ -490,7 +490,6 @@ LANGUAGE_CODE = 'en-us'
 # Markdownify
 #
 ##
-
 MARKDOWNIFY_WHITELIST_TAGS = [
     'h1',
     'h2',
@@ -498,9 +497,6 @@ MARKDOWNIFY_WHITELIST_TAGS = [
     'h4',
     'h5',
     'h6',
-    'a',
-    'abbr',
-    'acronym',
     'b',
     'blockquote',
     'em',
@@ -510,10 +506,9 @@ MARKDOWNIFY_WHITELIST_TAGS = [
     'p',
     'strong',
     'ul',
-    'code',
-    'pre',
     'hr',
 ]
+MARKDOWNIFY_WHITELIST_ATTRS = []
 
 OAUTH2_PROVIDER = {
     'SCOPES': {
