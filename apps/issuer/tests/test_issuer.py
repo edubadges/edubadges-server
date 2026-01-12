@@ -7,8 +7,9 @@ from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
 from institution.models import Institution
-from issuer.models import Issuer
+from issuer.models import Issuer, BadgeClass
 from issuer.testfiles.helper import badgeclass_json, issuer_json
+from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
 from mainsite.tests import BadgrTestCase
 
@@ -57,6 +58,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_create=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
@@ -69,6 +71,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_create=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         alignment_json = [
             {
                 'target_name': 'name',
@@ -94,6 +97,7 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['formal'] = True
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
@@ -140,6 +144,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_read=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
@@ -170,10 +175,15 @@ class IssuerAPITest(BadgrTestCase):
             '/issuer/delete/{}'.format(issuer.entity_id), content_type='application/json'
         )
         self.assertEqual(issuer_response.status_code, 204)
-        # and its child badgeclass is not gettable, as it has been archived
+        # and its child badgeclass is still gettable, even though it has been archived
         query = 'query foo{badgeClass(id: "' + badgeclass.entity_id + '") { entityId name } }'
         response = self.graphene_post(teacher1, query)
-        self.assertEqual(response['data']['badgeClass'], None)
+        badgeclass_data = response['data']['badgeClass']
+
+        self.assertIsNotNone(badgeclass_data)
+        self.assertEqual(badgeclass_data['entityId'], badgeclass.entity_id)
+        self.assertEqual(badgeclass_data['name'], badgeclass.name)
+
         self.assertTrue(self.reload_from_db(issuer).archived)
         self.assertTrue(self.reload_from_db(badgeclass).archived)
 
@@ -282,8 +292,12 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(
             teacher1, teacher1.institution, may_award=True, may_read=True, may_create=True, may_update=True
         )
-        enrollment = self.enroll_user(student, badgeclass)
-        response = self.client.put(reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}))
+        enrollment = StudentsEnrolled.objects.create(user=student, badge_class=badgeclass)
+        response = self.client.put(
+            reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}),
+            data=json.dumps({'denyReason': 'Not eligible'}),
+            content_type='application/json',
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_award_badge_expiration_date(self):
@@ -403,7 +417,9 @@ class IssuerModelsTest(BadgrTestCase):
         issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
         setup_badgeclass_kwargs = {'created_by': teacher1, 'issuer': issuer, 'name': 'The same'}
         badgeclass = self.setup_badgeclass(**setup_badgeclass_kwargs)
-        self.assertRaises(IntegrityError, self.setup_badgeclass, **setup_badgeclass_kwargs)
+        # setting up another badgeclass with same name and other kwargs should be possible
+        self.setup_badgeclass(**setup_badgeclass_kwargs)
+        # setting up another badgeclass with same kwargs but archived should also be possible
         setup_badgeclass_kwargs['archived'] = True
         self.setup_badgeclass(**setup_badgeclass_kwargs)
         badgeclass.archive()
@@ -443,9 +459,9 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertTrue(self.reload_from_db(badgeclass).archived)
         self.assertTrue(self.instance_is_removed(staff))
         self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
-        self.assertEqual(faculty.cached_issuers().__len__(), 0)
-        self.assertEqual(issuer.cached_badgeclasses().__len__(), 0)
-        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
+        self.assertEqual(faculty.cached_issuers().__len__(), 1)
+        self.assertEqual(issuer.cached_badgeclasses().__len__(), 1)
+        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 1)
 
     def test_badgeinstance_get_json(self):
         teacher1 = self.setup_teacher()
@@ -465,7 +481,7 @@ class IssuerModelsTest(BadgrTestCase):
 class IssuerSchemaTest(BadgrTestCase):
     def test_issuer_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_update=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         self.setup_issuer(teacher1, faculty=faculty)
         query = 'query foo {issuers {entityId contentTypeId}}'
