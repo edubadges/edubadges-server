@@ -295,7 +295,7 @@ class IssuerAPITest(BadgrTestCase):
         enrollment = StudentsEnrolled.objects.create(user=student, badge_class=badgeclass)
         response = self.client.put(
             reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}),
-            data={'denyReason': 'Not eligible'},
+            data=json.dumps({'denyReason': 'Not eligible'}),
             content_type='application/json',
         )
         self.assertEqual(response.status_code, 200)
