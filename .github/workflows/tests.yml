@@ -51,6 +51,13 @@ jobs:
             echo "Waiting for MySQL..."
             sleep 2
           done
+          
+      - name: Grant MySQL test database privileges
+        run: |
+          mysql -h 127.0.0.1 -u root -proot <<'EOF'
+          GRANT ALL PRIVILEGES ON test_badgr.* TO 'badgr'@'%';
+          FLUSH PRIVILEGES;
+          EOF
 
       - name: Run Django tests
         env:
