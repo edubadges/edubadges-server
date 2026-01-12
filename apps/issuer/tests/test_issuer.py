@@ -417,7 +417,9 @@ class IssuerModelsTest(BadgrTestCase):
         issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
         setup_badgeclass_kwargs = {'created_by': teacher1, 'issuer': issuer, 'name': 'The same'}
         badgeclass = self.setup_badgeclass(**setup_badgeclass_kwargs)
-        self.assertRaises(IntegrityError, self.setup_badgeclass, **setup_badgeclass_kwargs)
+        # setting up another badgeclass with same name and other kwargs should be possible
+        self.setup_badgeclass(**setup_badgeclass_kwargs)
+        # setting up another badgeclass with same kwargs but archived should also be possible
         setup_badgeclass_kwargs['archived'] = True
         self.setup_badgeclass(**setup_badgeclass_kwargs)
         badgeclass.archive()
@@ -457,9 +459,9 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertTrue(self.reload_from_db(badgeclass).archived)
         self.assertTrue(self.instance_is_removed(staff))
         self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
-        self.assertEqual(faculty.cached_issuers().__len__(), 0)
-        self.assertEqual(issuer.cached_badgeclasses().__len__(), 0)
-        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
+        self.assertEqual(faculty.cached_issuers().__len__(), 1)
+        self.assertEqual(issuer.cached_badgeclasses().__len__(), 1)
+        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 1)
 
     def test_badgeinstance_get_json(self):
         teacher1 = self.setup_teacher()
