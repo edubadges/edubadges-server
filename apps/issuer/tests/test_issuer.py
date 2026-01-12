@@ -7,7 +7,7 @@ from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
 from institution.models import Institution
-from issuer.models import Issuer
+from issuer.models import Issuer, BadgeClass
 from issuer.testfiles.helper import badgeclass_json, issuer_json
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
@@ -58,6 +58,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_create=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
@@ -70,6 +71,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_create=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         alignment_json = [
             {
                 'target_name': 'name',
@@ -95,6 +97,7 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['formal'] = True
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
@@ -141,6 +144,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_read=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
