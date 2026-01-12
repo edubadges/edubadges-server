@@ -171,10 +171,15 @@ class IssuerAPITest(BadgrTestCase):
             '/issuer/delete/{}'.format(issuer.entity_id), content_type='application/json'
         )
         self.assertEqual(issuer_response.status_code, 204)
-        # and its child badgeclass is not gettable, as it has been archived
+        # and its child badgeclass is still gettable, even though it has been archived
         query = 'query foo{badgeClass(id: "' + badgeclass.entity_id + '") { entityId name } }'
         response = self.graphene_post(teacher1, query)
-        self.assertEqual(response['data']['badgeClass'], None)
+        badgeclass_data = response['data']['badgeClass']
+
+        self.assertIsNotNone(badgeclass_data)
+        self.assertEqual(badgeclass_data['entityId'], badgeclass.entity_id)
+        self.assertEqual(badgeclass_data['name'], badgeclass.name)
+
         self.assertTrue(self.reload_from_db(issuer).archived)
         self.assertTrue(self.reload_from_db(badgeclass).archived)
 
