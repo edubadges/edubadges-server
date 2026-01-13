@@ -1,5 +1,8 @@
 import logging
 import os
+from datetime import datetime
+from graphql.pyutils.awaitable_or_value import T
+import pytz
 
 from django.http import response as http_response
 from mainsite import TOP_DIR
@@ -19,6 +22,16 @@ SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
 SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
 
 DEBUG = legacy_boolean_parsing('DEBUG', '0')
+
+##
+# Locale and Timezone settings
+##
+
+USE_I18N = True
+USE_L10N = False
+USE_TZ = True
+TIME_ZONE = 'Europe/Amsterdam'
+LANGUAGE_CODE = 'en-us'
 
 ##
 #
@@ -230,6 +243,9 @@ DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETI
 OB3_AGENT_URL_SPHEREON = os.environ.get('OB3_AGENT_URL_SPHEREON', '')
 OB3_AGENT_AUTHZ_TOKEN_SPHEREON = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_SPHEREON', '')
 OB3_AGENT_URL_UNIME = os.environ.get('OB3_AGENT_URL_UNIME', '')
+
+# Note: Changing this value will not have any effect on already issued badges.
+EWI_PILOT_EXPIRATION_DATE = datetime.strptime('2026-12-31', '%Y-%m-%d').astimezone(pytz.timezone(TIME_ZONE))
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'
@@ -475,15 +491,8 @@ LTI_STORE_IN_SESSION = False
 TIME_STAMPED_OPEN_BADGES_BASE_URL = os.environ['TIME_STAMPED_OPEN_BADGES_BASE_URL']
 CAIROSVG_VERSION_SUFFIX = '2'
 
-USE_I18N = True
-USE_L10N = False
-USE_TZ = True
-
 SITE_ID = int(os.environ.get('SITE_ID', 1))
 BADGR_APP_ID = int(os.environ.get('BADGR_APP_ID', 1))
-
-TIME_ZONE = 'Europe/Amsterdam'
-LANGUAGE_CODE = 'en-us'
 
 ##
 #
