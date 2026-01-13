@@ -25,7 +25,7 @@ from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core import mail
 from django.core.exceptions import ValidationError
-from django.core.files.storage import DefaultStorage, default_storage
+from django.core.files.storage import DefaultStorage
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.template.loader import render_to_string
 from django.urls import get_callable, reverse
@@ -33,8 +33,6 @@ from django.utils.html import format_html
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 from premailer import transform
 from resizeimage.resizeimage import resize_contain
-
-from institution.testfiles.helper import institution_image
 
 slugify_function_path = getattr(settings, 'AUTOSLUG_SLUGIFY_FUNCTION', 'autoslug.utils.slugify')
 
@@ -476,7 +474,7 @@ def _decompression_bomb_check(image, max_pixels=Image.MAX_IMAGE_PIXELS):
 
 
 def add_watermark(uploaded_image, is_svg):
-    text = 'DEMO'
+    text = settings.WATERMARK_TEXT
     angle = 45
     opacity = 0.85
     absolute = pathlib.Path().absolute()
