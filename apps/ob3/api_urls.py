@@ -1,7 +1,8 @@
-from django.urls import re_path
+from django.urls import path, re_path
 
-from ob3.api import CredentialsView
+from ob3.api import CredentialsView, OB3CallbackView
 
 urlpatterns = [
-    re_path(r'^v1/ob3', CredentialsView.as_view(), name='credentials'),
+    path('v1/ob3/callback', OB3CallbackView.as_view(), name='ob3_callback'),
+    re_path(r'^v1/ob3$', CredentialsView.as_view(), name='credentials'),
 ]

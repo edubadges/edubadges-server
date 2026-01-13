@@ -261,11 +261,11 @@ def create_edu_id_badge_instance(social_login):
 
 
 def print_logout_message(sender, user, request, **kwargs):
-    print('user logged out')
+    logger.info('user logged out')
 
 
 def print_login_message(sender, user, request, **kwargs):
-    print('user logged in')
+    logger.info('user logged in')
 
 
 user_logged_out.connect(print_logout_message)
