@@ -1,4 +1,4 @@
-import urllib
+import urllib.parse
 import uuid
 import datetime
 from django.conf import settings
