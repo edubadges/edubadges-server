@@ -9,6 +9,7 @@ from xml.etree import cElementTree as ET
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase, RequestFactory
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
 
 from apps.mainsite.utils import (
@@ -361,8 +362,8 @@ class TestScrubSvgImage(TestCase):
         mock_file.name = 'test.svg'
         
         result = scrub_svg_image(mock_file)
-        
-        self.assertIsInstance(result, type(mock_file))
+
+        self.assertIsInstance(result, InMemoryUploadedFile)
         self.assertEqual(result.name, 'test.svg')
     
     def test_removes_onload_attributes(self):
@@ -376,8 +377,9 @@ class TestScrubSvgImage(TestCase):
         mock_file.name = 'test.svg'
         
         result = scrub_svg_image(mock_file)
-        
-        self.assertIsInstance(result, type(mock_file))
+
+        self.assertIsInstance(result, InMemoryUploadedFile)
+        self.assertEqual(result.name, 'test.svg')
 
 
 if __name__ == '__main__':

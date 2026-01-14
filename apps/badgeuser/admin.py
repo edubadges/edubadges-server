@@ -4,11 +4,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.forms import ModelForm
 from django.urls import reverse
 from django.utils.html import format_html
+
 from mainsite.admin import badgr_admin
 from mainsite.utils import admin_list_linkify
 from staff.models import PermissionedRelationshipBase
 from .models import BadgeUser, EmailAddressVariant, Terms, CachedEmailAddress, UserProvisionment, TermsUrl, \
-    ImportBadgeAllowedUrl, StudentAffiliation, TermsAgreement
+    StudentAffiliation, TermsAgreement
 
 
 class EmailAddressInline(TabularInline):
@@ -23,8 +24,8 @@ class TermsAgreementInline(TabularInline):
     fk_name = 'user'
     can_delete = False
     extra = 0
-    fields = ['agreed','term_type', 'institution','admin_link',]
-    readonly_fields = ['agreed','term_type', 'institution','admin_link',]
+    fields = ['agreed', 'term_type', 'institution', 'admin_link', ]
+    readonly_fields = ['agreed', 'term_type', 'institution', 'admin_link', ]
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -34,29 +35,38 @@ class TermsAgreementInline(TabularInline):
         return format_html('<a href="{}">View</a>', url)
 
     admin_link.short_description = "Details"
+
     def term_type(self, obj):
         return obj.terms.terms_type if obj.terms else '-'
+
     term_type.short_description = "Term Type"
 
     def institution(self, obj):
         return obj.terms.institution.name_english
+
     institution.short_description = "Institution"
 
 
-
 class BadgeUserAdmin(UserAdmin):
-    readonly_fields = (
-        'email', 'first_name', 'last_name', 'entity_id', 'date_joined', 'last_login', 'username', 'entity_id')
+    # Fields shown when editing an existing user
+    fieldsets = (
+        (None, {"fields": ("username", "password", 'email', 'first_name', 'last_name', "is_teacher",
+                           'institution')}),
+        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions", )}),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
+    )
+
+    # Fields shown when adding a new user
+    add_fieldsets = (
+        (None, {
+            "classes": ("wide",),
+            "fields": ("username", "password1", "password2", "email", "first_name", "last_name"),
+        }),
+    )
     list_display = ('last_name', 'first_name', 'email', 'eppn', 'date_joined',
                     admin_list_linkify('institution', 'name'))
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
-    fieldsets = (
-        ('Metadata', {'fields': ('entity_id', 'username', 'date_joined',), 'classes': ('collapse',)}),
-        (None, {'fields': ('email', 'first_name', 'last_name')}),
-        ('Access', {'fields': ('is_active', 'is_staff', 'is_superuser', 'password')}),
-        ('Permissions', {'fields': ('groups',)}),
-    )
     filter_horizontal = ('groups', 'user_permissions', 'faculty',)
     inlines = [
         EmailAddressInline, TermsAgreementInline
@@ -149,10 +159,3 @@ class UserProvisionmentAdmin(ModelAdmin):
 
 
 badgr_admin.register(UserProvisionment, UserProvisionmentAdmin)
-
-
-class ImportBadgeAllowedUrlAdmin(ModelAdmin):
-    list_display = ('url',)
-
-
-badgr_admin.register(ImportBadgeAllowedUrl, ImportBadgeAllowedUrlAdmin)

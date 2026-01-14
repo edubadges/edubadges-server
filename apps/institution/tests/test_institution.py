@@ -27,9 +27,9 @@ class InstitutionTest(BadgrTestCase):
         self.assertEqual(response.status_code, 200)
         institution = Institution.objects.get(pk=teacher1.institution.pk)
         self.assertEqual(institution.description_english, description)
-        response = self.client.delete("/institution/edit/".format(teacher1.institution.entity_id),
+        response = self.client.delete("/institution/edit/{}".format(teacher1.institution.entity_id),
                                       content_type='application/json')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 405)
 
     def test_check_institutions_validity(self):
         teacher1 = self.setup_teacher()
@@ -52,7 +52,7 @@ class InstitutionTest(BadgrTestCase):
         assertion = self.setup_assertion(recipient=student,
                                          badgeclass=badgeclass,
                                          created_by=teacher1)
-        response_fail = self.client.delete("/issuer/faculty/delete/{}".format(faculty.entity_id),
+        response_fail = self.client.delete("/institution/faculties/delete/{}".format(faculty.entity_id),
                                                  content_type='application/json')
         self.assertEqual(response_fail.status_code, 404)
         assertion.delete()

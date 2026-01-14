@@ -898,8 +898,4 @@ class StudentAffiliation(models.Model):
     eppn = models.CharField(max_length=254)
 
 
-class ImportBadgeAllowedUrl(models.Model):
-    url = models.URLField()
-
-
 auditlog.register(BadgeUser, exclude_fields=['last_login', 'password'])

@@ -6,7 +6,6 @@ import base64
 import datetime
 import hashlib
 import io
-import locale
 import math
 import os
 import pathlib
@@ -296,10 +295,6 @@ class EmailMessageMaker:
         badgeclass = direct_award.badgeclass
         template = 'email/earned_direct_award_new.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
-        en_end_date = direct_award.expiration_date.strftime('%d %B %Y')
-        locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
-        nl_end_date = direct_award.expiration_date.strftime('%d %B %Y')
-        locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
         faculty = badgeclass.issuer.faculty
         institution_name = faculty.name if faculty.on_behalf_of else faculty.institution.name
         email_vars = {
@@ -311,8 +306,7 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': institution_name,
-            'en_da_enddate': en_end_date,
-            'nl_da_enddate': nl_end_date,
+            'da_enddate': direct_award.expiration_date,
         }
         return render_to_string(template, email_vars)
 
@@ -335,12 +329,6 @@ class EmailMessageMaker:
         template = 'email/reminder_direct_award_new.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
 
-        en_create_date = direct_award.created_at.strftime('%d %B %Y')
-        en_end_date = direct_award.expiration_date.strftime('%d %B %Y')
-        locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
-        nl_create_date = direct_award.created_at.strftime('%d %B %Y')
-        nl_end_date = direct_award.expiration_date.strftime('%d %B %Y')
-        locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
         faculty = badgeclass.issuer.faculty
         institution_name = faculty.name if faculty.on_behalf_of else faculty.institution.name
         email_vars = {
@@ -352,10 +340,8 @@ class EmailMessageMaker:
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
             'institution_name': institution_name,
-            'da_enddate_nl': nl_end_date,
-            'da_enddate_en': en_end_date,
-            'da_creationdate_nl': nl_create_date,
-            'da_creationdate_en': en_create_date,
+            'da_creationdate': direct_award.created_at,
+            'da_enddate': direct_award.expiration_date,
         }
         return render_to_string(template, email_vars)
 
