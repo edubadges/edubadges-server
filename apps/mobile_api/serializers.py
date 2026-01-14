@@ -1,5 +1,6 @@
 from rest_framework import serializers
 import json
+from urllib.parse import urlencode
 
 from badgeuser.models import BadgeUser, UserProvisionment, TermsAgreement, Terms, TermsUrl
 from directaward.models import DirectAward
@@ -76,12 +77,51 @@ class BadgeInstanceSerializer(serializers.ModelSerializer):
 
 class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassDetailSerializer()
+    linkedin_url = serializers.SerializerMethodField()
 
     class Meta:
         model = BadgeInstance
         fields = ["id", "created_at", "entity_id", "issued_on", "award_type", "revoked", "expires_at", "acceptance",
-                  "public", "badgeclass"]
+                  "public", "badgeclass", "linkedin_url"]
 
+    def _get_linkedin_org_id(self, badgeclass):
+        issuer = badgeclass.issuer
+        faculty = getattr(issuer, "faculty", None)
+        if not faculty:
+            return 206815
+
+        if getattr(faculty, "linkedin_org_identifier", None):
+            return faculty.linkedin_org_identifier
+
+        institution = getattr(faculty, "institution", None)
+        if getattr(institution, "linkedin_org_identifier", None):
+            return institution.linkedin_org_identifier
+
+        return 206815
+
+    def get_linkedin_url(self, obj):
+        request = self.context.get("request")
+        if not request or not obj.issued_on:
+            return None
+
+        organization_id = self._get_linkedin_org_id(obj.badgeclass)
+
+        cert_url = request.build_absolute_uri(
+            f"/public/assertions/{obj.entity_id}"
+        )
+
+        params = {
+            "startTask": "CERTIFICATION_NAME",
+            "name": obj.badgeclass.name,
+            "organizationId": organization_id,
+            "issueYear": obj.issued_on.year,
+            "issueMonth": obj.issued_on.month,
+            "certUrl": cert_url,
+            "certId": obj.entity_id,
+            "original_referer": request.build_absolute_uri("/"),
+        }
+
+        return f"https://www.linkedin.com/profile/add?{urlencode(params)}"
 
 class DirectAwardSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassSerializer()
