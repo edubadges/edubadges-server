@@ -85,10 +85,7 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
                   "public", "badgeclass", "linkedin_url"]
 
     def _get_linkedin_org_id(self, badgeclass):
-        issuer = badgeclass.issuer
-        faculty = getattr(issuer, "faculty", None)
-        if not faculty:
-            return 206815
+        faculty = badgeclass.issuer.faculty
 
         if getattr(faculty, "linkedin_org_identifier", None):
             return faculty.linkedin_org_identifier
