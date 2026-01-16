@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [8.4] - 2026-01-14
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.3.3...v8.4</br>
+
+- Merge pull request #239 from edubadges/dependabot/pip/urllib3-2.6.3
+- Merge pull request #241 from edubadges/chore/run-django-tests-in-ci-cd
+- Update import of urllib
+- Bump urllib3 from 1.26.19 to 2.6.3
+- Grant privileges to test db user
+- Add workflow to run django tests
+- Merge pull request #240 from edubadges/chore/fix-tests
+- Fix tests for removed constraint for badgeclass
+- Fix request data that was no valid json
+- Add required badgeclass type to request data
+- Disable extension validation in tests
+- Fix assertion for showing archived badges in issuer response
+- Fix urls and expected response code in institution test
+- Remove edit directaward functionality from tests
+- Assert correct type
+- Fix staff permission in test to show issuers
+- Fix broken test helpers for enrollment setup
+- Disable auth signals and logging in tests
+- Add dedicated settings for testing
+- Suppress cssutils CSS validation errors in test environment
+- Fix naive datetime defaults in legacy migrations
+- Remove setlocale usage and localize email dates in templates
+- Fix for MA7QDbnn Added expiration date based on the badgeclass when a user claims a DA See https://trello.com/c/MA7QDbnn/1143-vervallen-edubadge-werkt-niet
+- WIP for https://trello.com/c/tsJHRy6A/ After the user is created, the correct staffs can be added as super-user
+- Added delete account endpoint for mobile API https://trello.com/c/WYW0JiGA/1105-changes-needed-for-making-apis-mobile-app-ready
+- Merge pull request #226 from edubadges/feature/remove-imported-badge-functionality
+- Fixes remove-imported-badge-functionality See https://trello.com/c/W4o0VLeC/1132-remove-imported-badge-functionality
+- Not needed anymore to increase MAX_URL_LENGTH as Django 4.2.27 fixes this.
+- Merge pull request #220 from edubadges/dependabot/pip/django-4.2.27
+- Ignore .serena directory
+- DA audit traiL: action instead of method
+- Filter DA audit trail with method CREATE
+- Merge pull request #224 from edubadges/feature/da_audittrail_view
+- feat: adding direct award audit trail API used by super users
+- Bump django from 4.2.26 to 4.2.27
+- Updated CHANGELOG for 8.3.3 release
+
 ## [8.3.3] - 2025-12-02
 
 #### Full GitHub changelogs:
