@@ -174,7 +174,23 @@ class AcceptGeneralTerms(APIView):
     @extend_schema(
         methods=['GET'],
         description='Accept the general terms',
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description='Terms accepted successfully',
+                response=inline_serializer(
+                    name='AcceptGeneralTermsResponse', fields={'status': serializers.CharField()}
+                ),
+                examples=[
+                    OpenApiExample(
+                        'Terms Accepted',
+                        value={'status': 'ok'},
+                        description='User has successfully accepted the general terms',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def get(self, request, **kwargs):
         logger = logging.getLogger('Badgr.Debug')
@@ -191,7 +207,33 @@ class BadgeInstances(APIView):
     @extend_schema(
         methods=['GET'],
         description='Get all assertions for the user',
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description='List of badge instances',
+                response=BadgeInstanceSerializer(many=True),
+                examples=[
+                    OpenApiExample(
+                        'Badge Instances List',
+                        value=[
+                            {
+                                'entity_id': '123e4567-e89b-12d3-a456-426614174000',
+                                'badgeclass': {
+                                    'entity_id': 'badgeclass-123',
+                                    'name': 'Python Programming',
+                                    'description': 'Completed Python programming course',
+                                    'image': 'https://example.com/badge-image.png',
+                                },
+                                'issued_on': '2023-01-15T10:30:00Z',
+                                'recipient_identifier': 'user@example.com',
+                            },
+                        ],
+                        description='Array of badge instances belonging to the user',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def get(self, request, **kwargs):
         # ForeignKey / OneToOneField → select_related
@@ -223,7 +265,45 @@ class BadgeInstanceDetail(APIView):
                 description='entity_id of the badge instance',
             )
         ],
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description='Badge instance details',
+                response=BadgeInstanceDetailSerializer,
+                examples=[
+                    OpenApiExample(
+                        'Badge Instance Details',
+                        value={
+                            'entity_id': '123e4567-e89b-12d3-a456-426614174000',
+                            'badgeclass': {
+                                'entity_id': 'badgeclass-123',
+                                'name': 'Python Programming',
+                                'description': 'Completed Python programming course',
+                                'image': 'https://example.com/badge-image.png',
+                                'criteria': 'https://example.com/criteria',
+                            },
+                            'issued_on': '2023-01-15T10:30:00Z',
+                            'recipient_identifier': 'user@example.com',
+                            'evidence': 'https://example.com/evidence',
+                            'narrative': 'User completed all assignments and final project',
+                        },
+                        description='Detailed information about a specific badge instance',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            404: OpenApiResponse(
+                description='Badge instance not found',
+                examples=[
+                    OpenApiExample(
+                        'Not Found',
+                        value={'detail': 'Badge instance not found'},
+                        description='The requested badge instance does not exist or user does not have access',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def get(self, request, entity_id, **kwargs):
         instance = (
@@ -246,7 +326,34 @@ class UnclaimedDirectAwards(APIView):
     @extend_schema(
         methods=['GET'],
         description='Get all unclaimed awarded badges for the user',
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description='List of unclaimed direct awards',
+                response=DirectAwardSerializer(many=True),
+                examples=[
+                    OpenApiExample(
+                        'Unclaimed Direct Awards',
+                        value=[
+                            {
+                                'entity_id': 'direct-award-123',
+                                'badgeclass': {
+                                    'entity_id': 'badgeclass-456',
+                                    'name': 'Data Science Certificate',
+                                    'description': 'Awarded for completing data science program',
+                                    'image': 'https://example.com/data-science-badge.png',
+                                },
+                                'status': 'Unaccepted',
+                                'created_at': '2023-02-20T09:15:00Z',
+                                'recipient_email': 'user@example.com',
+                            },
+                        ],
+                        description='Array of unclaimed direct awards available to the user',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def get(self, request, **kwargs):
         # ForeignKey / OneToOneField → select_related
@@ -284,7 +391,69 @@ class DirectAwardDetail(APIView):
                 description='entity_id of the direct award',
             )
         ],
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description='Direct award details',
+                response=DirectAwardDetailSerializer,
+                examples=[
+                    OpenApiExample(
+                        'Direct Award Details',
+                        value=[
+                            {
+                                'id': 9596,
+                                'created_at': '2026-01-16T10:56:44.293475+01:00',
+                                'entity_id': 'y8uStIzMQ--JY59DIKnvWw',
+                                'badgeclass': {
+                                    'id': 6,
+                                    'name': 'test direct award',
+                                    'entity_id': 'B3uWEIZSTh6wniHBbzVtbA',
+                                    'image_url': 'https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_6c3b5f04-292b-41fa-8df6-d5029386bd3f.png',
+                                    'issuer': {
+                                        'name_dutch': 'SURF Edubadges',
+                                        'name_english': 'SURF Edubadges',
+                                        'image_dutch': 'null',
+                                        'image_english': '/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png',
+                                        'faculty': {
+                                            'name_dutch': 'SURF',
+                                            'name_english': 'SURF',
+                                            'image_dutch': 'null',
+                                            'image_english': 'null',
+                                            'on_behalf_of': 'false',
+                                            'on_behalf_of_display_name': 'null',
+                                            'on_behalf_of_url': 'null',
+                                            'institution': {
+                                                'name_dutch': 'University Voorbeeld',
+                                                'name_english': 'University Example',
+                                                'image_dutch': '/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png',
+                                                'image_english': '/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png',
+                                                'identifier': 'university-example.org',
+                                                'alternative_identifier': 'university-example.org.tempguestidp.edubadges.nl',
+                                                'grondslag_formeel': 'gerechtvaardigd_belang',
+                                                'grondslag_informeel': 'gerechtvaardigd_belang',
+                                            },
+                                        },
+                                    },
+                                },
+                            }
+                        ],
+                        description='Detailed information about a specific direct award',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            404: OpenApiResponse(
+                description='Direct award not found',
+                examples=[
+                    OpenApiExample(
+                        'Not Found',
+                        value={'detail': 'Direct award not found'},
+                        description='The requested direct award does not exist or user does not have access',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     # ForeignKey / OneToOneField → select_related
     # ManyToManyField / reverse FK → prefetch_related
@@ -300,7 +469,6 @@ class DirectAwardDetail(APIView):
             .get()
         )
         serializer = DirectAwardDetailSerializer(instance)
-        data = serializer.data
         return Response(serializer.data)
 
 
@@ -310,7 +478,34 @@ class Enrollments(APIView):
     @extend_schema(
         methods=['GET'],
         description='Get all enrollments for the user',
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description='List of enrollments',
+                response=StudentsEnrolledSerializer(many=True),
+                examples=[
+                    OpenApiExample(
+                        'Enrollments List',
+                        value=[
+                            {
+                                'entity_id': 'enrollment-123',
+                                'badge_class': {
+                                    'entity_id': 'badgeclass-789',
+                                    'name': 'Advanced Machine Learning',
+                                    'description': 'Enrolled in advanced ML course',
+                                },
+                                'user': 'user@example.com',
+                                'date_enrolled': '2023-03-10T14:25:00Z',
+                                'date_awarded': None,
+                                'status': 'Active',
+                            },
+                        ],
+                        description='Array of course enrollments for the user',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def get(self, request, **kwargs):
         # ForeignKey / OneToOneField → select_related
@@ -342,7 +537,49 @@ class EnrollmentDetail(APIView):
                 description='entity_id of the enrollment',
             )
         ],
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description='Enrollment details',
+                response=StudentsEnrolledDetailSerializer,
+                examples=[
+                    OpenApiExample(
+                        'Enrollment Details',
+                        value={
+                            'entity_id': 'enrollment-123',
+                            'badge_class': {
+                                'entity_id': 'badgeclass-789',
+                                'name': 'Advanced Machine Learning',
+                                'description': 'Enrolled in advanced ML course',
+                                'image': 'https://example.com/ml-badge.png',
+                                'criteria': 'https://example.com/criteria',
+                            },
+                            'user': 'user@example.com',
+                            'date_enrolled': '2023-03-10T14:25:00Z',
+                            'date_awarded': None,
+                            'status': 'Active',
+                            'issuer': {
+                                'name': 'University of Example',
+                                'url': 'https://example.edu',
+                            },
+                        },
+                        description='Detailed information about a specific enrollment',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            404: OpenApiResponse(
+                description='Enrollment not found',
+                examples=[
+                    OpenApiExample(
+                        'Not Found',
+                        value={'detail': 'Enrollment not found'},
+                        description='The requested enrollment does not exist or user does not have access',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     # ForeignKey / OneToOneField → select_related
     # ManyToManyField / reverse FK → prefetch_related
@@ -372,7 +609,42 @@ class EnrollmentDetail(APIView):
                 description='entity_id of the enrollment',
             )
         ],
-        examples=[],
+        responses={
+            204: OpenApiResponse(
+                description='Enrollment deleted successfully',
+                examples=[
+                    OpenApiExample(
+                        'Deleted',
+                        value=None,
+                        description='Enrollment was successfully deleted',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            404: OpenApiResponse(
+                description='Enrollment not found',
+                examples=[
+                    OpenApiExample(
+                        'Not Found',
+                        value={'detail': 'Enrollment not found'},
+                        description='The requested enrollment does not exist',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            400: OpenApiResponse(
+                description='Cannot delete awarded enrollment',
+                examples=[
+                    OpenApiExample(
+                        'Awarded Enrollment',
+                        value={'detail': 'Awarded enrollments cannot be withdrawn'},
+                        description='Cannot delete an enrollment that has already been awarded',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def delete(self, request, entity_id, **kwargs):
         enrollment = get_object_or_404(StudentsEnrolled, user=request.user, entity_id=entity_id)
@@ -388,7 +660,28 @@ class BadgeCollectionsListView(APIView):
     @extend_schema(
         methods=['GET'],
         description='Get all badge collections for the user',
-        examples=[],
+        responses={
+            200: OpenApiResponse(
+                description='List of badge collections',
+                response=BadgeCollectionSerializer(many=True),
+                examples=[
+                    OpenApiExample(
+                        'Badge Collections List',
+                        value=[
+                            {
+                                'entity_id': 'YpQpVLu6QsmXiWZ7YhrSPQ',
+                                'name': 'My Achievements',
+                                'desacription': 'Collection of my programming achievements',
+                                'badge_instances': [311, 312],
+                            },
+                        ],
+                        description='Array of badge collections created by the user',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def get(self, request, **kwargs):
         collections = BadgeInstanceCollection.objects.filter(user=request.user)
@@ -397,17 +690,38 @@ class BadgeCollectionsListView(APIView):
 
     @extend_schema(
         request=BadgeInstanceCollectionSerializer,
-        responses=BadgeInstanceCollectionSerializer,
         description='Create a new BadgeInstanceCollection',
-        parameters=[
-            OpenApiParameter(
-                name='entity_id',
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                required=True,
-                description='entity_id of the enrollment',
-            )
-        ],
+        responses={
+            201: OpenApiResponse(
+                description='Badge collection created successfully',
+                response=BadgeInstanceCollectionSerializer,
+                examples=[
+                    OpenApiExample(
+                        'Created Collection',
+                        value={
+                            'entity_id': 'collection-123',
+                            'name': 'My Achievements',
+                            'description': 'Collection of my programming achievements',
+                            'badge_instances': [311],
+                        },
+                        description='Newly created badge collection',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            400: OpenApiResponse(
+                description='Invalid request data',
+                examples=[
+                    OpenApiExample(
+                        'Invalid Data',
+                        value={'name': ['This field is required.']},
+                        description='Validation errors in the request data',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def post(self, request):
         serializer = BadgeInstanceCollectionSerializer(data=request.data, context={'request': request})
@@ -421,7 +735,6 @@ class BadgeCollectionsDetailView(APIView):
 
     @extend_schema(
         request=BadgeInstanceCollectionSerializer,
-        responses=BadgeInstanceCollectionSerializer,
         description='Update an existing BadgeInstanceCollection by ID',
         parameters=[
             OpenApiParameter(
@@ -429,9 +742,56 @@ class BadgeCollectionsDetailView(APIView):
                 type=OpenApiTypes.STR,
                 location=OpenApiParameter.PATH,
                 required=True,
-                description='entity_id of the enrollment',
+                description='entity_id of the collection',
             )
         ],
+        responses={
+            200: OpenApiResponse(
+                description='Badge collection updated successfully',
+                response=BadgeInstanceCollectionSerializer,
+                examples=[
+                    OpenApiExample(
+                        'Updated Collection',
+                        value={
+                            'entity_id': 'collection-123',
+                            'name': 'My Updated Achievements',
+                            'description': 'Updated collection of my programming achievements',
+                            'badge_instances': [
+                                {
+                                    'entity_id': 'badge-456',
+                                    'name': 'Python Programming',
+                                },
+                            ],
+                        },
+                        description='Updated badge collection',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            404: OpenApiResponse(
+                description='Badge collection not found',
+                examples=[
+                    OpenApiExample(
+                        'Not Found',
+                        value={'detail': 'Badge collection not found'},
+                        description='The requested badge collection does not exist',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            400: OpenApiResponse(
+                description='Invalid request data',
+                examples=[
+                    OpenApiExample(
+                        'Invalid Data',
+                        value={'name': ['This field is required.']},
+                        description='Validation errors in the request data',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def put(self, request, entity_id):
         badge_collection = get_object_or_404(BadgeInstanceCollection, user=request.user, entity_id=entity_id)
@@ -444,7 +804,6 @@ class BadgeCollectionsDetailView(APIView):
 
     @extend_schema(
         request=None,
-        responses={204: None},
         description='Delete a BadgeInstanceCollection by ID',
         parameters=[
             OpenApiParameter(
@@ -455,6 +814,31 @@ class BadgeCollectionsDetailView(APIView):
                 description='entity_id of the enrollment',
             )
         ],
+        responses={
+            204: OpenApiResponse(
+                description='Badge collection deleted successfully',
+                examples=[
+                    OpenApiExample(
+                        'Deleted',
+                        value=None,
+                        description='Badge collection was successfully deleted',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            404: OpenApiResponse(
+                description='Badge collection not found',
+                examples=[
+                    OpenApiExample(
+                        'Not Found',
+                        value={'detail': 'Badge collection not found'},
+                        description='The requested badge collection does not exist',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
     )
     def delete(self, request, entity_id):
         badge_collection = get_object_or_404(BadgeInstanceCollection, entity_id=entity_id, user=request.user)
