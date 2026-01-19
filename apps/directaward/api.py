@@ -716,6 +716,12 @@ class DirectAwardAuditTrailListView(ListAPIView):
             DirectAwardAuditTrail.objects
             .filter(
                 action='CREATE',
+                direct_award__isnull=False,
+            )
+            .select_related(
+                'direct_award',
+                'badgeclass',
+                'badgeclass__institution',
             )
             .order_by('-action_datetime')
         )
