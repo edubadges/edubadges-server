@@ -4,6 +4,7 @@ from django.core.exceptions import BadRequest
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse, OpenApiParameter
 from rest_framework import serializers
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -680,8 +681,9 @@ class DirectAwardDelete(BaseEntityDetailView):
         )
 
 
-class DirectAwardAuditTrailView(APIView):
+class DirectAwardAuditTrailListView(ListAPIView):
     permission_classes = (IsSuperUser,)
+    serializer_class = DirectAwardAuditTrailSerializer
 
     @extend_schema(
         description='Get all direct award audit trail entries (superuser only)',
@@ -708,7 +710,12 @@ class DirectAwardAuditTrailView(APIView):
             403: permission_denied_response,
         },
     )
-    def get(self, request, *args, **kwargs):
-        audit_trails = DirectAwardAuditTrail.objects.filter(action='CREATE').order_by('-action_datetime')
-        serializer = DirectAwardAuditTrailSerializer(audit_trails, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def get_queryset(self):
+        return (
+            DirectAwardAuditTrail.objects
+            .filter(
+                action='CREATE',
+            )
+            .order_by('-action_datetime')
+        )
