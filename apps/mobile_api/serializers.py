@@ -72,7 +72,7 @@ class BadgeInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeInstance
         fields = ["id", "created_at", "entity_id", "issued_on", "award_type", "revoked", "expires_at", "acceptance",
-                  "public", "badgeclass"]
+                  "public", "badgeclass", "grade_achieved"]
 
 
 class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
