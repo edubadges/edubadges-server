@@ -62,7 +62,7 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeClass
         fields = ["id", "name", "entity_id", "image", "description", "formal", "participation", "assessment_type",
-                  "assessment_id_verified", "assessment_supervised", "quality_assurance_name",
+                  "assessment_id_verified", "assessment_supervised", "quality_assurance_name", "stackable",
                   "badgeclassextension_set", "issuer"]
 
 
