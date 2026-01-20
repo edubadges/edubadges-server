@@ -173,7 +173,7 @@ class DirectAwardAuditTrailSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     institution_name = serializers.CharField(
-        source='badgeclass.institution.name',
+        source='badgeclass.issuer.faculty.institution.name',
         read_only=True,
     )
     recipient_email = serializers.EmailField(

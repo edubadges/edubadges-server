@@ -721,7 +721,7 @@ class DirectAwardAuditTrailListView(ListAPIView):
             .select_related(
                 'direct_award',
                 'badgeclass',
-                'badgeclass__institution',
+                'badgeclass__issuer__faculty__institution',
             )
             .order_by('-action_datetime')
         )
