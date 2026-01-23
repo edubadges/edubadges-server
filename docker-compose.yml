@@ -65,8 +65,8 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
-      minio-init:
-        condition: service_completed_successfully
+      minio:
+        condition: service_started
     ports:
       - "8000:8000"
 
