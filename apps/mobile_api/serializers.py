@@ -12,8 +12,16 @@ from lti_edu.models import StudentsEnrolled
 class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institution
-        fields = ["name_dutch", "name_english", "image_dutch", "image_english",
-                  "identifier", "alternative_identifier", "grondslag_formeel", "grondslag_informeel"]
+        fields = [
+            'name_dutch',
+            'name_english',
+            'image_dutch',
+            'image_english',
+            'identifier',
+            'alternative_identifier',
+            'grondslag_formeel',
+            'grondslag_informeel',
+        ]
 
 
 class FacultySerializer(serializers.ModelSerializer):
@@ -21,8 +29,16 @@ class FacultySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Faculty
-        fields = ["name_dutch", "name_english", "image_dutch", "image_english", "on_behalf_of",
-                  "on_behalf_of_display_name", "on_behalf_of_url", "institution"]
+        fields = [
+            'name_dutch',
+            'name_english',
+            'image_dutch',
+            'image_english',
+            'on_behalf_of',
+            'on_behalf_of_display_name',
+            'on_behalf_of_url',
+            'institution',
+        ]
 
 
 class IssuerSerializer(serializers.ModelSerializer):
@@ -30,7 +46,7 @@ class IssuerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issuer
-        fields = ["name_dutch", "name_english", "image_dutch", "image_english", "faculty"]
+        fields = ['name_dutch', 'name_english', 'image_dutch', 'image_english', 'faculty']
 
 
 class BadgeClassExtensionSerializer(serializers.ModelSerializer):
@@ -38,12 +54,12 @@ class BadgeClassExtensionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeClassExtension
-        fields = ["name", "value"]
+        fields = ['name', 'value']
 
     def get_value(self, obj):
         json_dict = json.loads(obj.original_json)
         # Consistent naming convention enables to parse "type": ["Extension", "extensions:ECTSExtension"], "ECTS": 2.5}
-        extension_key = json_dict["type"][1].split(":")[1].removesuffix("Extension")
+        extension_key = json_dict['type'][1].split(':')[1].removesuffix('Extension')
         return json_dict[extension_key]
 
 
@@ -52,7 +68,7 @@ class BadgeClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeClass
-        fields = ["id", "name", "entity_id", "image_url", "issuer"]
+        fields = ['id', 'name', 'entity_id', 'image_url', 'issuer']
 
 
 class BadgeClassDetailSerializer(serializers.ModelSerializer):
@@ -61,9 +77,24 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeClass
-        fields = ["id", "name", "entity_id", "image", "description", "formal", "participation", "assessment_type",
-                  "assessment_id_verified", "assessment_supervised", "quality_assurance_name", "stackable",
-                  "badgeclassextension_set", "issuer", "badge_class_type", "expiration_period"]
+        fields = [
+            'id',
+            'name',
+            'entity_id',
+            'image',
+            'description',
+            'formal',
+            'participation',
+            'assessment_type',
+            'assessment_id_verified',
+            'assessment_supervised',
+            'quality_assurance_name',
+            'stackable',
+            'badgeclassextension_set',
+            'issuer',
+            'badge_class_type', 
+            'expiration_period',
+        ]
 
 
 class BadgeInstanceSerializer(serializers.ModelSerializer):
@@ -71,8 +102,19 @@ class BadgeInstanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeInstance
-        fields = ["id", "created_at", "entity_id", "issued_on", "award_type", "revoked", "expires_at", "acceptance",
-                  "public", "badgeclass", "grade_achieved"]
+        fields = [
+            'id',
+            'created_at',
+            'entity_id',
+            'issued_on',
+            'award_type',
+            'revoked',
+            'expires_at',
+            'acceptance',
+            'public',
+            'badgeclass',
+            'grade_achieved',
+        ]
 
 
 class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
@@ -81,8 +123,19 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeInstance
-        fields = ["id", "created_at", "entity_id", "issued_on", "award_type", "revoked", "expires_at", "acceptance",
-                  "public", "badgeclass", "linkedin_url"]
+        fields = [
+            'id',
+            'created_at',
+            'entity_id',
+            'issued_on',
+            'award_type',
+            'revoked',
+            'expires_at',
+            'acceptance',
+            'public',
+            'badgeclass',
+            'linkedin_url',
+        ]
 
     def _get_linkedin_org_id(self, badgeclass):
         faculty = badgeclass.issuer.faculty
@@ -125,7 +178,7 @@ class DirectAwardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectAward
-        fields = ["id", "created_at", "entity_id", "badgeclass"]
+        fields = ['id', 'created_at', 'entity_id', 'badgeclass']
 
 
 class DirectAwardDetailSerializer(serializers.ModelSerializer):
@@ -134,7 +187,7 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectAward
-        fields = ["id", "created_at", "status", "entity_id", "badgeclass", "terms"]
+        fields = ['id', 'created_at', 'status', 'entity_id', 'badgeclass', 'terms']
 
     def get_terms(self, obj):
         institution_terms = obj.badgeclass.issuer.faculty.institution.terms.all()
@@ -147,7 +200,7 @@ class StudentsEnrolledSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentsEnrolled
-        fields = ["id", "entity_id", "date_created", "denied", "date_awarded", "badge_class"]
+        fields = ['id', 'entity_id', 'date_created', 'denied', 'date_awarded', 'badge_class']
 
 
 class StudentsEnrolledDetailSerializer(serializers.ModelSerializer):
@@ -155,21 +208,25 @@ class StudentsEnrolledDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentsEnrolled
-        fields = ["id", "entity_id", "date_created", "denied", "date_awarded", "badge_class"]
+        fields = ['id', 'entity_id', 'date_created', 'denied', 'date_awarded', 'badge_class']
 
 
 class BadgeCollectionSerializer(serializers.ModelSerializer):
-    badge_instances = serializers.PrimaryKeyRelatedField(many=True, queryset=BadgeInstance.objects.all())
+    badge_instances = serializers.SerializerMethodField()
 
     class Meta:
         model = BadgeInstanceCollection
-        fields = ["id", "created_at", "entity_id", "badge_instances", "name", "public", "description"]
+        fields = ['id', 'created_at', 'entity_id', 'badge_instances', 'name', 'public', 'description']
+
+    def get_badge_instances(self, obj):
+        """Return entity_id instead of database id for badge instances"""
+        return [badge_instance.entity_id for badge_instance in obj.badge_instances.all()]
 
 
 class TermsUrlSerializer(serializers.ModelSerializer):
     class Meta:
         model = TermsUrl
-        fields = ["url", "language", "excerpt"]
+        fields = ['url', 'language', 'excerpt']
 
 
 class TermsSerializer(serializers.ModelSerializer):
@@ -178,7 +235,7 @@ class TermsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Terms
-        fields = ["entity_id", "terms_type", "institution", "terms_urls"]
+        fields = ['entity_id', 'terms_type', 'institution', 'terms_urls']
 
 
 class TermsAgreementSerializer(serializers.ModelSerializer):
@@ -186,7 +243,7 @@ class TermsAgreementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TermsAgreement
-        fields = ["entity_id", "agreed", "agreed_version", "terms"]
+        fields = ['entity_id', 'agreed', 'agreed_version', 'terms']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -195,8 +252,16 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeUser
-        fields = ["id", "email", "last_name", "first_name", "validated_name", "schac_homes", "terms_agreed",
-                  "termsagreement_set"]
+        fields = [
+            'id',
+            'email',
+            'last_name',
+            'first_name',
+            'validated_name',
+            'schac_homes',
+            'terms_agreed',
+            'termsagreement_set',
+        ]
 
     def get_terms_agreed(self, obj):
         return obj.general_terms_accepted()
