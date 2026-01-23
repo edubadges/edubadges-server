@@ -1,12 +1,12 @@
-from rest_framework import serializers
 import json
 from urllib.parse import urlencode
 
-from badgeuser.models import BadgeUser, UserProvisionment, TermsAgreement, Terms, TermsUrl
+from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
-from issuer.models import BadgeInstance, BadgeClass, BadgeClassExtension, Issuer, BadgeInstanceCollection
+from issuer.models import BadgeClass, BadgeClassExtension, BadgeInstance, BadgeInstanceCollection, Issuer
 from lti_edu.models import StudentsEnrolled
+from rest_framework import serializers
 
 
 class InstitutionSerializer(serializers.ModelSerializer):

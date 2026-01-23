@@ -389,7 +389,7 @@ class BadgeInstanceDetail(APIView):
 
     @extend_schema(
         methods=['PUT'],
-        description='Update a badge instance',
+        description='Update badge instance acceptance status and public visibility',
         parameters=[
             OpenApiParameter(
                 name='entity_id',
@@ -399,7 +399,24 @@ class BadgeInstanceDetail(APIView):
                 description='entity_id of the badge instance',
             )
         ],
-        request=BadgeInstanceDetailSerializer,
+        request=inline_serializer(
+            name='BadgeInstanceUpdateRequest',
+            fields={
+                'acceptance': serializers.CharField(required=False, help_text='Acceptance status of the badge'),
+                'public': serializers.BooleanField(required=False, help_text='Whether the badge should be public'),
+            },
+        ),
+        examples=[
+            OpenApiExample(
+                'Update Badge Instance Request',
+                value={
+                    'acceptance': 'Accepted',
+                    'public': True,
+                },
+                description='Example request to update badge acceptance and public status',
+                request_only=True,
+            ),
+        ],
         responses={
             200: OpenApiResponse(
                 description='Badge instance updated successfully',
@@ -467,10 +484,29 @@ class BadgeInstanceDetail(APIView):
             .get()
         )
 
-        serializer = BadgeInstanceDetailSerializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        # Only allow updating acceptance and public fields
+        acceptance = request.data.get('acceptance')
+        public = request.data.get('public')
 
+        # Validate acceptance field if provided
+        if acceptance is not None:
+            if acceptance not in ['Accepted', 'Unaccepted', 'Rejected']:
+                return Response(
+                    {'detail': 'Invalid acceptance value. Must be one of: Accepted, Unaccepted, Rejected'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # Only allow changing to 'Accepted' if currently not accepted
+            if instance.acceptance in ['Unaccepted', 'Rejected'] and acceptance == 'Accepted':
+                instance.acceptance = 'Accepted'
+
+        # Update public field if provided
+        if public is not None:
+            instance.public = public
+
+        instance.save()
+
+        # Return the updated instance with full details
+        serializer = BadgeInstanceDetailSerializer(instance)
         return Response(serializer.data)
 
 
