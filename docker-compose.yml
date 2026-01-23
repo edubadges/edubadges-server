@@ -64,7 +64,7 @@ services:
         condition: service_started
     ports:
       - "8000:8000"
-      
+        
   db:
     image: mysql:8.4
     container_name: badgr_mysql_db
@@ -77,13 +77,14 @@ services:
       - "3306:3306"
     # Health check for MySQL
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${BADGR_DB_PASSWORD}"]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
     volumes:
       - db-data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
     networks:
       - edubadges-server
 
