@@ -208,15 +208,47 @@ class BadgeInstances(APIView):
                         'Badge Instances List',
                         value=[
                             {
-                                'entity_id': '123e4567-e89b-12d3-a456-426614174000',
+                                'id': 2,
+                                'created_at': '2021-04-20T16:20:30.528668+02:00',
+                                'entity_id': 'I41eovHQReGI_SG5KM6dSQ',
+                                'issued_on': '2021-04-20T16:20:30.521307+02:00',
+                                'award_type': 'requested',
+                                'revoked': 'false',
+                                'expires_at': '2030-04-20T16:20:30.521307+02:00',
+                                'acceptance': 'Accepted',
+                                'public': 'true',
                                 'badgeclass': {
-                                    'entity_id': 'badgeclass-123',
-                                    'name': 'Python Programming',
-                                    'description': 'Completed Python programming course',
-                                    'image': 'https://example.com/badge-image.png',
+                                    'id': 3,
+                                    'name': 'Edubadge account complete',
+                                    'entity_id': 'nwsL-dHyQpmvOOKBscsN_A',
+                                    'image_url': 'https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png',
+                                    'issuer': {
+                                        'name_dutch': 'SURF Edubadges',
+                                        'name_english': 'SURF Edubadges',
+                                        'image_dutch': 'null',
+                                        'image_english': '/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png',
+                                        'faculty': {
+                                            'name_dutch': 'SURF',
+                                            'name_english': 'SURF',
+                                            'image_dutch': 'null',
+                                            'image_english': 'null',
+                                            'on_behalf_of': 'false',
+                                            'on_behalf_of_display_name': 'null',
+                                            'on_behalf_of_url': 'null',
+                                            'institution': {
+                                                'name_dutch': 'University Voorbeeld',
+                                                'name_english': 'University Example',
+                                                'image_dutch': '/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png',
+                                                'image_english': '/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png',
+                                                'identifier': 'university-example.org',
+                                                'alternative_identifier': 'university-example.org.tempguestidp.edubadges.nl',
+                                                'grondslag_formeel': 'gerechtvaardigd_belang',
+                                                'grondslag_informeel': 'gerechtvaardigd_belang',
+                                            },
+                                        },
+                                    },
                                 },
-                                'issued_on': '2023-01-15T10:30:00Z',
-                                'recipient_identifier': 'user@example.com',
+                                'grade_achieved': '33',
                             },
                         ],
                         description='Array of badge instances belonging to the user',
@@ -265,18 +297,62 @@ class BadgeInstanceDetail(APIView):
                     OpenApiExample(
                         'Badge Instance Details',
                         value={
-                            'entity_id': '123e4567-e89b-12d3-a456-426614174000',
+                            'id': 2,
+                            'created_at': '2021-04-20T16:20:30.528668+02:00',
+                            'entity_id': 'I41eovHQReGI_SG5KM6dSQ',
+                            'issued_on': '2021-04-20T16:20:30.521307+02:00',
+                            'award_type': 'requested',
+                            'revoked': 'false',
+                            'expires_at': 'null',
+                            'acceptance': 'Accepted',
+                            'public': 'true',
                             'badgeclass': {
-                                'entity_id': 'badgeclass-123',
-                                'name': 'Python Programming',
-                                'description': 'Completed Python programming course',
-                                'image': 'https://example.com/badge-image.png',
-                                'criteria': 'https://example.com/criteria',
+                                'id': 3,
+                                'name': 'Edubadge account complete',
+                                'entity_id': 'nwsL-dHyQpmvOOKBscsN_A',
+                                'image': '/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png',
+                                'description': '### Welcome to edubadges. Let your life long learning begin! ###\r\n\r\nYou are now ready to collect all your edubadges in your backpack. In your backpack you can store and manage them safely.\r\n\r\nShare them anytime you like and with whom you like.\r\n\r\nEdubadges are visual representations of your knowledge, skills and competences.',
+                                'formal': 'false',
+                                'participation': 'blended',
+                                'assessment_type': 'written_exam',
+                                'assessment_id_verified': 'false',
+                                'assessment_supervised': 'false',
+                                'quality_assurance_name': 'null',
+                                'stackable': 'false',
+                                'badgeclassextension_set': [
+                                    {'name': 'extensions:LanguageExtension', 'value': 'en_EN'},
+                                    {
+                                        'name': 'extensions:LearningOutcomeExtension',
+                                        'value': 'This is an edubadge for demonstration purposes. The learning outcome for this edubadge is:\n\n* you have a basic understanding of edubadges,\n* you have a basic understanding how to use eduID.\n',
+                                    },
+                                ],
+                                'issuer': {
+                                    'name_dutch': 'SURF Edubadges',
+                                    'name_english': 'SURF Edubadges',
+                                    'image_dutch': 'null',
+                                    'image_english': '/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png',
+                                    'faculty': {
+                                        'name_dutch': 'SURF',
+                                        'name_english': 'SURF',
+                                        'image_dutch': 'null',
+                                        'image_english': 'null',
+                                        'on_behalf_of': 'false',
+                                        'on_behalf_of_display_name': 'null',
+                                        'on_behalf_of_url': 'null',
+                                        'institution': {
+                                            'name_dutch': 'University Voorbeeld',
+                                            'name_english': 'University Example',
+                                            'image_dutch': '/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png',
+                                            'image_english': '/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png',
+                                            'identifier': 'university-example.org',
+                                            'alternative_identifier': 'university-example.org.tempguestidp.edubadges.nl',
+                                            'grondslag_formeel': 'gerechtvaardigd_belang',
+                                            'grondslag_informeel': 'gerechtvaardigd_belang',
+                                        },
+                                    },
+                                },
                             },
-                            'issued_on': '2023-01-15T10:30:00Z',
-                            'recipient_identifier': 'user@example.com',
-                            'evidence': 'https://example.com/evidence',
-                            'narrative': 'User completed all assignments and final project',
+                            'linkedin_url': 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=Edubadge%20account%20complete&organizationId=206815&issueYear=2021&issueMonth=3&certUrl=https%3A%2F%2Fdemo.edubadges.nl%2Fpublic%2Fassertions%2FI41eovHQReGI_SG5KM6dSQ&certId=I41eovHQReGI_SG5KM6dSQ&original_referer=https%3A%2F%2Fdemo.edubadges.nl',
                         },
                         description='Detailed information about a specific badge instance',
                         response_only=True,
@@ -327,17 +403,41 @@ class UnclaimedDirectAwards(APIView):
                         'Unclaimed Direct Awards',
                         value=[
                             {
-                                'entity_id': 'direct-award-123',
+                                'id': 9606,
+                                'created_at': '2026-01-23T16:19:08.699037+01:00',
+                                'entity_id': 'Lgnh9njyStmGiI_w8396Xg',
                                 'badgeclass': {
-                                    'entity_id': 'badgeclass-456',
-                                    'name': 'Data Science Certificate',
-                                    'description': 'Awarded for completing data science program',
-                                    'image': 'https://example.com/data-science-badge.png',
+                                    'id': 113,
+                                    'name': 'unclaimed test',
+                                    'entity_id': 'X4MQyOYPS9yoMyZwZik1Jg',
+                                    'image_url': 'https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_32c9f91d-e731-40d4-99d4-c06ec6922f31.png',
+                                    'issuer': {
+                                        'name_dutch': 'SURF Edubadges',
+                                        'name_english': 'SURF Edubadges',
+                                        'image_dutch': 'null',
+                                        'image_english': '/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png',
+                                        'faculty': {
+                                            'name_dutch': 'SURF',
+                                            'name_english': 'SURF',
+                                            'image_dutch': 'null',
+                                            'image_english': 'null',
+                                            'on_behalf_of': 'false',
+                                            'on_behalf_of_display_name': 'null',
+                                            'on_behalf_of_url': 'null',
+                                            'institution': {
+                                                'name_dutch': 'University Voorbeeld',
+                                                'name_english': 'University Example',
+                                                'image_dutch': '/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png',
+                                                'image_english': '/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png',
+                                                'identifier': 'university-example.org',
+                                                'alternative_identifier': 'university-example.org.tempguestidp.edubadges.nl',
+                                                'grondslag_formeel': 'gerechtvaardigd_belang',
+                                                'grondslag_informeel': 'gerechtvaardigd_belang',
+                                            },
+                                        },
+                                    },
                                 },
-                                'status': 'Unaccepted',
-                                'created_at': '2023-02-20T09:15:00Z',
-                                'recipient_email': 'user@example.com',
-                            },
+                            }
                         ],
                         description='Array of unclaimed direct awards available to the user',
                         response_only=True,
@@ -479,16 +579,42 @@ class Enrollments(APIView):
                         'Enrollments List',
                         value=[
                             {
-                                'entity_id': 'enrollment-123',
+                                'id': 40,
+                                'entity_id': 'UMcx7xCPS4yBuztOj2IDEw',
+                                'date_created': '2023-09-04T14:42:03.046498+02:00',
+                                'denied': 'false',
+                                'date_awarded': '2023-09-04T15:02:15.088536+02:00',
                                 'badge_class': {
-                                    'entity_id': 'badgeclass-789',
-                                    'name': 'Advanced Machine Learning',
-                                    'description': 'Enrolled in advanced ML course',
+                                    'id': 119,
+                                    'name': 'Test enrollment',
+                                    'entity_id': '_KI6moSxQ3mAzPEfYUHnLg',
+                                    'image_url': 'https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_3b1a3c87-d7c6-488f-a1f9-1d3019a137ee.png',
+                                    'issuer': {
+                                        'name_dutch': 'SURF Edubadges',
+                                        'name_english': 'SURF Edubadges',
+                                        'image_dutch': 'null',
+                                        'image_english': '/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png',
+                                        'faculty': {
+                                            'name_dutch': 'SURF',
+                                            'name_english': 'SURF',
+                                            'image_dutch': 'null',
+                                            'image_english': 'null',
+                                            'on_behalf_of': 'false',
+                                            'on_behalf_of_display_name': 'null',
+                                            'on_behalf_of_url': 'null',
+                                            'institution': {
+                                                'name_dutch': 'University Voorbeeld',
+                                                'name_english': 'University Example',
+                                                'image_dutch': '/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png',
+                                                'image_english': '/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png',
+                                                'identifier': 'university-example.org',
+                                                'alternative_identifier': 'university-example.org.tempguestidp.edubadges.nl',
+                                                'grondslag_formeel': 'gerechtvaardigd_belang',
+                                                'grondslag_informeel': 'gerechtvaardigd_belang',
+                                            },
+                                        },
+                                    },
                                 },
-                                'user': 'user@example.com',
-                                'date_enrolled': '2023-03-10T14:25:00Z',
-                                'date_awarded': None,
-                                'status': 'Active',
                             },
                         ],
                         description='Array of course enrollments for the user',
@@ -577,11 +703,11 @@ class EnrollmentDetail(APIView):
     # ManyToManyField / reverse FK → prefetch_related
     def get(self, request, entity_id, **kwargs):
         enrollment = (
-            StudentsEnrolled.objects.select_related('badgeclass')
-            .prefetch_related('badgeclass__badgeclassextension_set')
-            .select_related('badgeclass__issuer')
-            .select_related('badgeclass__issuer__faculty')
-            .select_related('badgeclass__issuer__faculty__institution')
+            StudentsEnrolled.objects.select_related('badge_class')
+            .prefetch_related('badge_class__badgeclassextension_set')
+            .select_related('badge_class__issuer')
+            .select_related('badge_class__issuer__faculty')
+            .select_related('badge_class__issuer__faculty__institution')
             .filter(user=request.user)
             .filter(entity_id=entity_id)
             .get()
@@ -661,10 +787,27 @@ class BadgeCollectionsListView(APIView):
                         'Badge Collections List',
                         value=[
                             {
-                                'entity_id': 'YpQpVLu6QsmXiWZ7YhrSPQ',
-                                'name': 'My Achievements',
-                                'desacription': 'Collection of my programming achievements',
-                                'badge_instances': [311, 312],
+                                'id': 9,
+                                'created_at': '2025-10-07T12:41:36.332147+02:00',
+                                'entity_id': 'lt3O3SUpS9Culz0IrA3rOg',
+                                'badge_instances': [
+                                    'badge-96-entity-id',
+                                    'badge-175-entity-id',
+                                    'badge-176-entity-id',
+                                    'badge-287-entity-id',
+                                ],
+                                'name': 'Test collection 1',
+                                'public': 'false',
+                                'description': 'test',
+                            },
+                            {
+                                'id': 11,
+                                'created_at': '2025-10-27T16:14:42.650246+01:00',
+                                'entity_id': 'dhuf6Qx2RMCtRKBw0iHGcg',
+                                'badge_instances': ['badge-96-entity-id', 'badge-175-entity-id'],
+                                'name': 'Test collection 2',
+                                'public': 'true',
+                                'description': 'Test2',
                             },
                         ],
                         description='Array of badge collections created by the user',
@@ -727,7 +870,7 @@ class BadgeCollectionsDetailView(APIView):
 
     @extend_schema(
         request=BadgeInstanceCollectionSerializer,
-        description='Update an existing BadgeInstanceCollection by ID',
+        description='Update an existing BadgeInstanceCollection by entity_id',
         parameters=[
             OpenApiParameter(
                 name='entity_id',
