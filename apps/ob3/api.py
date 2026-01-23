@@ -64,7 +64,7 @@ class CredentialsView(APIView):
         elif variant == 'preauthorized':
             credential = ImpierceOfferRequest(offer_id, 'openbadge_credential', badge_instance)
             credential.set_url(OB3_AGENT_URL_UNIME)
-        elif variant == 'veramo':
+        elif variant == 'veramo' or variant is None:
             # Get our Application URL, then find the callback url from apps.ob3.api_urls.py
             callback_url: str = DEFAULT_DOMAIN + reverse('ob3:callback')
             credential = VeramoOfferRequest('OpenBadgeCredential', badge_instance, callback_url)
