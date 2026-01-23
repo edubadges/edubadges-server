@@ -387,6 +387,92 @@ class BadgeInstanceDetail(APIView):
         serializer = BadgeInstanceDetailSerializer(instance)
         return Response(serializer.data)
 
+    @extend_schema(
+        methods=['PUT'],
+        description='Update a badge instance',
+        parameters=[
+            OpenApiParameter(
+                name='entity_id',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                required=True,
+                description='entity_id of the badge instance',
+            )
+        ],
+        request=BadgeInstanceDetailSerializer,
+        responses={
+            200: OpenApiResponse(
+                description='Badge instance updated successfully',
+                response=BadgeInstanceDetailSerializer,
+                examples=[
+                    OpenApiExample(
+                        'Updated Badge Instance',
+                        value={
+                            'id': 2,
+                            'created_at': '2021-04-20T16:20:30.528668+02:00',
+                            'entity_id': 'I41eovHQReGI_SG5KM6dSQ',
+                            'issued_on': '2021-04-20T16:20:30.521307+02:00',
+                            'award_type': 'requested',
+                            'revoked': 'false',
+                            'expires_at': 'null',
+                            'acceptance': 'Accepted',
+                            'public': 'true',
+                            'badgeclass': {
+                                'id': 3,
+                                'name': 'Edubadge account complete',
+                                'entity_id': 'nwsL-dHyQpmvOOKBscsN_A',
+                                'image': '/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png',
+                                'description': '### Welcome to edubadges. Let your life long learning begin! ###\r\n\r\nYou are now ready to collect all your edubadges in your backpack. In your backpack you can store and manage them safely.\r\n\r\nShare them anytime you like and with whom you like.\r\n\r\nEdubadges are visual representations of your knowledge, skills and competences.',
+                                'formal': 'false',
+                            },
+                        },
+                        description='Updated badge instance details',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            404: OpenApiResponse(
+                description='Badge instance not found',
+                examples=[
+                    OpenApiExample(
+                        'Not Found',
+                        value={'detail': 'Badge instance not found'},
+                        description='The requested badge instance does not exist or user does not have access',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            400: OpenApiResponse(
+                description='Invalid request data',
+                examples=[
+                    OpenApiExample(
+                        'Invalid Data',
+                        value={'public': ['This field is required.']},
+                        description='Validation errors in the request data',
+                        response_only=True,
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
+    )
+    def put(self, request, entity_id, **kwargs):
+        instance = (
+            BadgeInstance.objects.select_related('badgeclass')
+            .select_related('badgeclass__issuer')
+            .select_related('badgeclass__issuer__faculty')
+            .select_related('badgeclass__issuer__faculty__institution')
+            .filter(user=request.user)
+            .filter(entity_id=entity_id)
+            .get()
+        )
+
+        serializer = BadgeInstanceDetailSerializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
 
 class UnclaimedDirectAwards(APIView):
     permission_classes = (MobileAPIPermission,)
