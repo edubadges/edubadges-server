@@ -44,6 +44,8 @@ for row in read_seed_csv('issuers_issuergroups'):
         description_dutch=f'Beschrijving voor {fac}',
         faculty_type=ins.institution_type,
         institution=ins,
+        image_english=ins.image_english,
+        image_dutch=ins.image_dutch,
     )[0]
     faculty.save()
 
