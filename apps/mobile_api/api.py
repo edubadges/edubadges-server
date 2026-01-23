@@ -1,41 +1,40 @@
 import logging
 
-from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import (
-    extend_schema,
-    inline_serializer,
-    OpenApiExample,
-    OpenApiResponse,
-    OpenApiParameter,
-    OpenApiTypes,
-)
-from rest_framework import serializers
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.db.models import Q, Subquery
-from rest_framework import status
+import requests
 from badgeuser.models import StudentAffiliation
 from badgrsocialauth.providers.eduid.provider import EduIDProvider
 from directaward.models import DirectAward, DirectAwardBundle
+from django.conf import settings
+from django.db.models import Q, Subquery
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiResponse,
+    OpenApiTypes,
+    extend_schema,
+    inline_serializer,
+)
 from issuer.models import BadgeInstance, BadgeInstanceCollection
 from issuer.serializers import BadgeInstanceCollectionSerializer
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
 from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
-from mobile_api.helper import process_eduid_response, RevalidatedNameException, NoValidatedNameException
+from mobile_api.helper import NoValidatedNameException, RevalidatedNameException, process_eduid_response
 from mobile_api.serializers import (
-    BadgeInstanceDetailSerializer,
-    DirectAwardSerializer,
-    StudentsEnrolledSerializer,
-    StudentsEnrolledDetailSerializer,
     BadgeCollectionSerializer,
-    UserSerializer,
+    BadgeInstanceDetailSerializer,
+    BadgeInstanceSerializer,
     DirectAwardDetailSerializer,
+    DirectAwardSerializer,
+    StudentsEnrolledDetailSerializer,
+    StudentsEnrolledSerializer,
+    UserSerializer,
 )
-from mobile_api.serializers import BadgeInstanceSerializer
-import requests
-from django.conf import settings
+from rest_framework import serializers, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 permission_denied_response = OpenApiResponse(
     response=inline_serializer(name='PermissionDeniedResponse', fields={'detail': serializers.CharField()}),
@@ -52,14 +51,7 @@ class Login(APIView):
         methods=['GET'],
         description='Login and validate the user',
         responses={
-            403: OpenApiResponse(
-                description='User does not have permission',
-                examples=[
-                    OpenApiExample(
-                        'No permission', value={'detail': 'You do not have permission to perform this action.'}
-                    )
-                ],
-            ),
+            403: permission_denied_response,
             200: OpenApiResponse(
                 description='Successful responses with examples',
                 response=dict,  # or inline custom serializer class
