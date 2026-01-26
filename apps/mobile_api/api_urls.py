@@ -15,6 +15,7 @@ from mobile_api.api import (
     Login,
     AcceptGeneralTerms,
     DirectAwardDetail,
+    CatalogBadgeClassListView,
 )
 
 urlpatterns = [
@@ -36,4 +37,5 @@ urlpatterns = [
     path('terms/accept', AcceptTermsView.as_view(), name='mobile_api_user_terms_accept'),
     path('enroll', StudentsEnrolledList.as_view(), name='mobile_api_lti_edu_enroll_student'),
     path('profile', BadgeUserDetail.as_view(), name='mobile_api_user_profile'),
+    path('catalog', CatalogBadgeClassListView.as_view(), name='mobile_api_catalog_badge_class'),
 ]

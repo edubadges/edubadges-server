@@ -265,3 +265,85 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_terms_agreed(self, obj):
         return obj.general_terms_accepted()
+
+
+class CatalogBadgeClassSerializer(serializers.ModelSerializer):
+    # BadgeClass fields
+    created_at = serializers.DateTimeField(read_only=True)
+    name = serializers.CharField()
+    image = serializers.ImageField()
+    archived = serializers.BooleanField()
+    entity_id = serializers.CharField(read_only=True)
+    is_private = serializers.BooleanField()
+    is_micro_credentials = serializers.BooleanField()
+    badge_class_type = serializers.CharField()
+
+    # Issuer fields
+    issuer_name_english = serializers.CharField(source='issuer.name_english', read_only=True)
+    issuer_name_dutch = serializers.CharField(source='issuer.name_dutch', read_only=True)
+    issuer_entity_id = serializers.CharField(source='issuer.entity_id', read_only=True)
+    issuer_image_dutch = serializers.CharField(source='issuer.image_dutch', read_only=True)
+    issuer_image_english = serializers.CharField(source='issuer.image_english', read_only=True)
+
+    # Faculty fields
+    faculty_name_english = serializers.CharField(source='issuer.faculty.name_english', read_only=True)
+    faculty_name_dutch = serializers.CharField(source='issuer.faculty.name_dutch', read_only=True)
+    faculty_entity_id = serializers.CharField(source='issuer.faculty.entity_id', read_only=True)
+    faculty_image_dutch = serializers.CharField(source='issuer.faculty.image_dutch', read_only=True)
+    faculty_image_english = serializers.CharField(source='issuer.faculty.image_english', read_only=True)
+    faculty_on_behalf_of = serializers.BooleanField(source='issuer.faculty.on_behalf_of', read_only=True)
+    faculty_type = serializers.CharField(source='issuer.faculty.faculty_type', read_only=True)
+
+    # Institution fields
+    institution_name_english = serializers.CharField(source='issuer.faculty.institution.name_english', read_only=True)
+    institution_name_dutch = serializers.CharField(source='issuer.faculty.institution.name_dutch', read_only=True)
+    institution_entity_id = serializers.CharField(source='issuer.faculty.institution.entity_id', read_only=True)
+    institution_image_dutch = serializers.CharField(source='issuer.faculty.institution.image_dutch', read_only=True)
+    institution_image_english = serializers.CharField(source='issuer.faculty.institution.image_english', read_only=True)
+    institution_type = serializers.CharField(source='issuer.faculty.institution.institution_type', read_only=True)
+
+    # Annotated counts
+    self_requested_assertions_count = serializers.IntegerField(read_only=True)
+    direct_awarded_assertions_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = BadgeClass
+        fields = [
+            # BadgeClass
+            'created_at',
+            'name',
+            'image',
+            'archived',
+            'entity_id',
+            'is_private',
+            'is_micro_credentials',
+            'badge_class_type',
+
+            # Issuer
+            'issuer_name_english',
+            'issuer_name_dutch',
+            'issuer_entity_id',
+            'issuer_image_dutch',
+            'issuer_image_english',
+
+            # Faculty
+            'faculty_name_english',
+            'faculty_name_dutch',
+            'faculty_entity_id',
+            'faculty_image_dutch',
+            'faculty_image_english',
+            'faculty_on_behalf_of',
+            'faculty_type',
+
+            # Institution
+            'institution_name_english',
+            'institution_name_dutch',
+            'institution_entity_id',
+            'institution_image_dutch',
+            'institution_image_english',
+            'institution_type',
+
+            # Counts
+            'self_requested_assertions_count',
+            'direct_awarded_assertions_count'
+        ]

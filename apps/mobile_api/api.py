@@ -1,11 +1,13 @@
 import logging
 
 import requests
+from rest_framework.permissions import AllowAny
+
 from badgeuser.models import StudentAffiliation
 from badgrsocialauth.providers.eduid.provider import EduIDProvider
 from directaward.models import DirectAward, DirectAwardBundle
 from django.conf import settings
-from django.db.models import Q, Subquery
+from django.db.models import Q, Subquery, Count
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
     OpenApiExample,
@@ -15,13 +17,14 @@ from drf_spectacular.utils import (
     extend_schema,
     inline_serializer,
 )
-from issuer.models import BadgeInstance, BadgeInstanceCollection
+from issuer.models import BadgeInstance, BadgeInstanceCollection, BadgeClass
 from issuer.serializers import BadgeInstanceCollectionSerializer
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
 from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
 from mobile_api.helper import NoValidatedNameException, RevalidatedNameException, process_eduid_response
+from mobile_api.pagination import CatalogPagination
 from mobile_api.serializers import (
     BadgeCollectionSerializer,
     BadgeInstanceDetailSerializer,
@@ -31,8 +34,9 @@ from mobile_api.serializers import (
     StudentsEnrolledDetailSerializer,
     StudentsEnrolledSerializer,
     UserSerializer,
+    CatalogBadgeClassSerializer,
 )
-from rest_framework import serializers, status
+from rest_framework import serializers, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -1101,3 +1105,37 @@ class BadgeCollectionsDetailView(APIView):
         badge_collection = get_object_or_404(BadgeInstanceCollection, entity_id=entity_id, user=request.user)
         badge_collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CatalogBadgeClassListView(generics.ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = CatalogBadgeClassSerializer
+    pagination_class = CatalogPagination
+
+    def get_queryset(self):
+        return (
+            BadgeClass.objects
+            .select_related(
+                'issuer',
+                'issuer__faculty',
+                'issuer__faculty__institution',
+            )
+            .filter(
+                is_private=False,
+                issuer__archived=False,
+                issuer__faculty__archived=False,
+            )
+            .exclude(
+                issuer__faculty__visibility_type='TEST'
+            )
+            .annotate(
+                selfRequestedAssertionsCount=Count(
+                    'badgeinstance',
+                    filter=Q(badgeinstance__award_type='requested'),
+                ),
+                directAwardedAssertionsCount=Count(
+                    'badgeinstance',
+                    filter=Q(badgeinstance__award_type='direct_award'),
+                ),
+            )
+        )
