@@ -23,6 +23,7 @@ from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
 from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
+from mobile_api.filters import CatalogBadgeClassFilter
 from mobile_api.helper import NoValidatedNameException, RevalidatedNameException, process_eduid_response
 from mobile_api.pagination import CatalogPagination
 from mobile_api.serializers import (
@@ -1110,6 +1111,7 @@ class BadgeCollectionsDetailView(APIView):
 class CatalogBadgeClassListView(generics.ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = CatalogBadgeClassSerializer
+    filterset_class = CatalogBadgeClassFilter
     pagination_class = CatalogPagination
 
     def get_queryset(self):
