@@ -1114,6 +1114,136 @@ class CatalogBadgeClassListView(generics.ListAPIView):
     filterset_class = CatalogBadgeClassFilter
     pagination_class = CatalogPagination
 
+    @extend_schema(
+        methods=['GET'],
+        description='Get a paginated list of badge classes. Supports filtering, searching (q), and page_size.',
+        parameters=[
+            OpenApiParameter(
+                name='page',
+                type=OpenApiTypes.INT,
+                location='query',
+                required=False,
+                description='Page number for pagination'
+            ),
+            OpenApiParameter(
+                name='page_size',
+                type=OpenApiTypes.INT,
+                location='query',
+                required=False,
+                description='Number of items per page'
+            ),
+            OpenApiParameter(
+                name='name',
+                type=OpenApiTypes.STR,
+                location='query',
+                required=False,
+                description='Filter badge classes by name'
+            ),
+            OpenApiParameter(
+                name='institution',
+                type=OpenApiTypes.STR,
+                location='query',
+                required=False,
+                description='Filter badge classes by institution entity_id'
+            ),
+            OpenApiParameter(
+                name='is_micro',
+                type=OpenApiTypes.BOOL,
+                location='query',
+                required=False,
+                description='Filter for micro-credentials (true/false)'
+            ),
+            OpenApiParameter(
+                name='q',
+                type=OpenApiTypes.STR,
+                location='query',
+                required=False,
+                description='General search across badge class, issuer, faculty, and institution names'
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(
+                description='Paginated list of badge classes',
+                response=CatalogBadgeClassSerializer(many=True),
+                examples=[
+                    OpenApiExample(
+                        'Filtered and Paginated Badge Classes Example',
+                        value={
+                            "count": 124,
+                            "next": "https://api.example.com/catalog/badge-classes/?page=2&page_size=2&q=edubadge",
+                            "previous": None,
+                            "results": [
+                                {
+                                    "created_at": "2025-05-02T12:20:51.573423",
+                                    "name": "Edubadge account complete",
+                                    "image": "uploads/badges/edubadge_student.png",
+                                    "archived": 0,
+                                    "entity_id": "qNGehQ2dRTKyjNtiDvhWsQ",
+                                    "is_private": 0,
+                                    "is_micro_credentials": 0,
+                                    "badge_class_type": "regular",
+                                    "issuer_name_english": "Team edubadges",
+                                    "issuer_name_dutch": "Team edubadges",
+                                    "issuer_entity_id": "WOLxSjpWQouas1123Z809Q",
+                                    "issuer_image_dutch": "",
+                                    "issuer_image_english": "uploads/issuers/surf.png",
+                                    "faculty_name_english": "eduBadges",
+                                    "faculty_name_dutch": "null",
+                                    "faculty_entity_id": "lVu1kbaqSDyJV_1Bu8_bcw",
+                                    "faculty_image_dutch": "",
+                                    "faculty_image_english": "",
+                                    "faculty_on_behalf_of": 0,
+                                    "faculty_type": "null",
+                                    "institution_name_english": "SURF",
+                                    "institution_name_dutch": "SURF",
+                                    "institution_entity_id": "NiqkZiz2TaGT8B4RRwG8Fg",
+                                    "institution_image_dutch": "uploads/issuers/surf.png",
+                                    "institution_image_english": "uploads/issuers/surf.png",
+                                    "institution_type": "null",
+                                    "self_requested_assertions_count": 1,
+                                    "direct_awarded_assertions_count": 0
+                                },
+                                {
+                                    "created_at": "2025-05-02T12:20:57.914064",
+                                    "name": "Growth and Development",
+                                    "image": "uploads/badges/eduid.png",
+                                    "archived": 0,
+                                    "entity_id": "Ge4D7gf1RLGYNZlSiCv-qA",
+                                    "is_private": 0,
+                                    "is_micro_credentials": 0,
+                                    "badge_class_type": "regular",
+                                    "issuer_name_english": "Medicine",
+                                    "issuer_name_dutch": "null",
+                                    "issuer_entity_id": "yuflXDK8ROukQkxSPmh5ag",
+                                    "issuer_image_dutch": "",
+                                    "issuer_image_english": "uploads/issuers/surf.png",
+                                    "faculty_name_english": "Medicine",
+                                    "faculty_name_dutch": "null",
+                                    "faculty_entity_id": "yYPphJ3bS5qszI7P69degA",
+                                    "faculty_image_dutch": "",
+                                    "faculty_image_english": "",
+                                    "faculty_on_behalf_of": 0,
+                                    "faculty_type": "null",
+                                    "institution_name_english": "university-example.org",
+                                    "institution_name_dutch": "null",
+                                    "institution_entity_id": "5rZhvRonT3OyyLQhhmuPmw",
+                                    "institution_image_dutch": "uploads/institution/surf.png",
+                                    "institution_image_english": "uploads/institution/surf.png",
+                                    "institution_type": "WO",
+                                    "self_requested_assertions_count": 0,
+                                    "direct_awarded_assertions_count": 0
+                                }
+                            ]
+                        },
+                        response_only=True,
+                    )
+                ],
+            ),
+            500: OpenApiResponse(
+                description='Internal server error occurred while retrieving badge classes.'
+            ),
+        }
+    )
     def get_queryset(self):
         return (
             BadgeClass.objects
