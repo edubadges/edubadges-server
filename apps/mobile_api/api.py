@@ -1,7 +1,7 @@
 import logging
 
 import requests
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from badgeuser.models import StudentAffiliation
 from badgrsocialauth.providers.eduid.provider import EduIDProvider
@@ -35,7 +35,7 @@ from mobile_api.serializers import (
     StudentsEnrolledDetailSerializer,
     StudentsEnrolledSerializer,
     UserSerializer,
-    CatalogBadgeClassSerializer,
+    CatalogBadgeClassSerializer, UserProfileSerializer,
 )
 from rest_framework import serializers, status, generics
 from rest_framework.response import Response
@@ -1271,3 +1271,34 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                 ),
             )
         )
+
+
+class UserProfileView(APIView):
+    permission_classes = (IsAuthenticated, MobileAPIPermission)
+    http_method_names = ('get', 'delete')
+
+    @extend_schema(
+        description="Get the authenticated user's profile",
+        responses={200: UserProfileSerializer},
+    )
+    def get(self, request):
+        serializer = UserProfileSerializer(
+            request.user,
+            context={'request': request},
+        )
+        return Response(serializer.data)
+
+    @extend_schema(
+        description="Delete the authenticated user",
+        responses={
+            204: OpenApiResponse(
+                description="User account deleted successfully"
+            ),
+            403: OpenApiResponse(
+                description="Permission denied"
+            )
+        }
+    )
+    def delete(self, request):
+        request.user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

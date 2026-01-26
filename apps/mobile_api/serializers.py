@@ -267,6 +267,22 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.general_terms_accepted()
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    institution = serializers.SlugRelatedField(slug_field='name', read_only=True)
+
+    class Meta:
+        model = BadgeUser
+        fields = [
+            'entity_id',
+            'first_name',
+            'last_name',
+            'email',
+            'institution',
+            'marketing_opt_in',
+            'is_superuser',
+        ]
+
+
 class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     # BadgeClass fields
     created_at = serializers.DateTimeField(read_only=True)
