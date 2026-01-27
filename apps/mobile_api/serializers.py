@@ -212,15 +212,15 @@ class StudentsEnrolledDetailSerializer(serializers.ModelSerializer):
 
 
 class BadgeCollectionSerializer(serializers.ModelSerializer):
-    badge_instances = serializers.SerializerMethodField()
+    badge_instances = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='entity_id'
+    )
 
     class Meta:
         model = BadgeInstanceCollection
         fields = ['id', 'created_at', 'entity_id', 'badge_instances', 'name', 'public', 'description']
-
-    def get_badge_instances(self, obj):
-        """Return entity_id instead of database id for badge instances"""
-        return [badge_instance.entity_id for badge_instance in obj.badge_instances.all()]
 
 
 class TermsUrlSerializer(serializers.ModelSerializer):
