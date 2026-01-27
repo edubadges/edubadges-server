@@ -941,7 +941,7 @@ class BadgeCollectionsListView(APIView):
         },
     )
     def get(self, request, **kwargs):
-        collections = BadgeInstanceCollection.objects.filter(user=request.user)
+        collections = BadgeInstanceCollection.objects.filter(user=request.user).prefetch_related('badge_instances')
         serializer = BadgeCollectionSerializer(collections, many=True)
         return Response(serializer.data)
 
