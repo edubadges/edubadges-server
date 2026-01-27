@@ -1262,11 +1262,11 @@ class CatalogBadgeClassListView(generics.ListAPIView):
             )
             .annotate(
                 selfRequestedAssertionsCount=Count(
-                    'badgeinstance',
+                    'badgeinstances',
                     filter=Q(badgeinstance__award_type='requested'),
                 ),
                 directAwardedAssertionsCount=Count(
-                    'badgeinstance',
+                    'badgeinstances',
                     filter=Q(badgeinstance__award_type='direct_award'),
                 ),
             )
