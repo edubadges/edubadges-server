@@ -248,7 +248,7 @@ class TermsAgreementSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     termsagreement_set = TermsAgreementSerializer(many=True, read_only=True)
-    terms_agreed = serializers.BooleanField(source='terms_agreed', read_only=True)
+    terms_agreed = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = BadgeUser
@@ -267,7 +267,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     institution = serializers.SlugRelatedField(slug_field='name', read_only=True)
     termsagreement_set = TermsAgreementSerializer(many=True, read_only=True)
-    terms_agreed = serializers.BooleanField(source='terms_agreed', read_only=True)
+    terms_agreed = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = BadgeUser
