@@ -248,7 +248,7 @@ class TermsAgreementSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     termsagreement_set = TermsAgreementSerializer(many=True, read_only=True)
-    terms_agreed = serializers.SerializerMethodField()
+    terms_agreed = serializers.BooleanField(source='terms_agreed', read_only=True)
 
     class Meta:
         model = BadgeUser
@@ -263,8 +263,27 @@ class UserSerializer(serializers.ModelSerializer):
             'termsagreement_set',
         ]
 
-    def get_terms_agreed(self, obj):
-        return obj.general_terms_accepted()
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    institution = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    termsagreement_set = TermsAgreementSerializer(many=True, read_only=True)
+    terms_agreed = serializers.BooleanField(source='terms_agreed', read_only=True)
+
+    class Meta:
+        model = BadgeUser
+        fields = [
+            'entity_id',
+            'first_name',
+            'last_name',
+            'email',
+            'institution',
+            'marketing_opt_in',
+            'is_superuser',
+            'validated_name',
+            'schac_homes',
+            'terms_agreed',
+            'termsagreement_set',
+        ]
 
 
 class CatalogBadgeClassSerializer(serializers.ModelSerializer):
