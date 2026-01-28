@@ -31,7 +31,7 @@ def direct_award_audit_trail(sender, user, request, direct_award_id, badgeclass_
         direct_award = None
         badgeclass = None
         if direct_award_id:
-            direct_award = DirectAward.objects.filter(id=direct_award_id).first()
+            direct_award = DirectAward.objects.filter(entity_id=direct_award_id).first()
         if badgeclass_id:
             badgeclass = BadgeClass.objects.filter(id=badgeclass_id).first()
 
