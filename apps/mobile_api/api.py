@@ -1120,7 +1120,7 @@ class CatalogBadgeClassListView(generics.ListAPIView):
     @extend_schema(
         methods=['GET'],
         filters=True,
-        description='Get a paginated list of badge classes. Supports filtering, searching (q), and page_size.',
+        description='Get a paginated list of badge classes. Supports filtering and page_size.',
         parameters=[
             OpenApiParameter(
                 name='page',
@@ -1151,18 +1151,10 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                 description='Filter badge classes by institution entity_id',
             ),
             OpenApiParameter(
-                name='is_micro',
-                type=OpenApiTypes.BOOL,
+                name='institution_type',
                 location='query',
                 required=False,
-                description='Filter for micro-credentials (true/false)',
-            ),
-            OpenApiParameter(
-                name='q',
-                type=OpenApiTypes.STR,
-                location='query',
-                required=False,
-                description='General search across badge class, issuer, faculty, and institution names',
+                description='Filter badge classes by institution_type (MBO/HBO/WO)',
             ),
         ],
         responses={
