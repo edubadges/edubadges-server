@@ -114,6 +114,7 @@ class BadgeInstanceSerializer(serializers.ModelSerializer):
             'public',
             'badgeclass',
             'grade_achieved',
+            "include_grade_achieved"
         ]
 
 
@@ -135,6 +136,9 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
             'public',
             'badgeclass',
             'linkedin_url',
+            'grade_achieved',
+            'include_grade_achieved',
+            'include_evidence'
         ]
 
     def _get_linkedin_org_id(self, badgeclass):
@@ -172,6 +176,7 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
         }
 
         return f"https://www.linkedin.com/profile/add?{urlencode(params)}"
+
 
 class DirectAwardSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassSerializer()
