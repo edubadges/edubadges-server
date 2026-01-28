@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from badgeuser.models import StudentAffiliation
@@ -1113,10 +1114,12 @@ class CatalogBadgeClassListView(generics.ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = CatalogBadgeClassSerializer
     filterset_class = CatalogBadgeClassFilter
+    filter_backends = [DjangoFilterBackend]
     pagination_class = CatalogPagination
 
     @extend_schema(
         methods=['GET'],
+        filters=True,
         description='Get a paginated list of badge classes. Supports filtering, searching (q), and page_size.',
         parameters=[
             OpenApiParameter(
