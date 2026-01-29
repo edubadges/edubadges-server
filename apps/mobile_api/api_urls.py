@@ -35,6 +35,7 @@ urlpatterns = [
     path('enrollments', Enrollments.as_view(), name='mobile_api_enrollments'),
     path('enrollments/<str:entity_id>', EnrollmentDetail.as_view(), name='mobile_api_enrollment_detail'),
     path('login', Login.as_view(), name='mobile_api_login'),
+    path('badge/public', BackpackAssertionDetail.as_view(), name='mobile_api_badge_public'),
     path('terms/accept', AcceptTermsView.as_view(), name='mobile_api_user_terms_accept'),
     path('enroll', StudentsEnrolledList.as_view(), name='mobile_api_lti_edu_enroll_student'),
     path('profile', UserProfileView.as_view(), name='mobile_api_user_profile'),
