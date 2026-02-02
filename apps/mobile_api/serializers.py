@@ -301,6 +301,7 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     is_private = serializers.BooleanField()
     is_micro_credentials = serializers.BooleanField()
     badge_class_type = serializers.CharField()
+    required_terms = serializers.SerializerMethodField()
 
     # Issuer fields
     issuer_name_english = serializers.CharField(source='issuer.name_english', read_only=True)
@@ -342,6 +343,7 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             'is_private',
             'is_micro_credentials',
             'badge_class_type',
+            'required_terms',
 
             # Issuer
             'issuer_name_english',
@@ -371,3 +373,11 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             'self_requested_assertions_count',
             'direct_awarded_assertions_count'
         ]
+
+    def get_required_terms(self, obj):
+        try:
+            terms = obj.get_required_terms()
+        except ValueError:
+            return None  # Should not break the serializer
+
+        return TermsSerializer(terms, context=self.context).data

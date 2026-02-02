@@ -666,6 +666,13 @@ class BadgeClass(
         super(BadgeClass, self).publish()
         self.issuer.publish()
 
+    def get_required_terms(self):
+        """
+        Return the Terms object that applies to this badge class.
+        Raises ValueError if required terms are missing.
+        """
+        return self._get_terms()
+
     def _get_terms(self):
         terms = self.institution.cached_terms()
         if not terms:
