@@ -302,6 +302,7 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     is_micro_credentials = serializers.BooleanField()
     badge_class_type = serializers.CharField()
     required_terms = serializers.SerializerMethodField()
+    user_has_accepted_terms = serializers.SerializerMethodField()
 
     # Issuer fields
     issuer_name_english = serializers.CharField(source='issuer.name_english', read_only=True)
@@ -344,6 +345,7 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             'is_micro_credentials',
             'badge_class_type',
             'required_terms',
+            'user_has_accepted_terms',
 
             # Issuer
             'issuer_name_english',
@@ -381,3 +383,11 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             return None  # Should not break the serializer
 
         return TermsSerializer(terms, context=self.context).data
+
+    def get_user_has_accepted_terms(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+
+        user = request.user
+        return obj.terms_accepted(user)
