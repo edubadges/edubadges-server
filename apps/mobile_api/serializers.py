@@ -24,6 +24,16 @@ class InstitutionSerializer(serializers.ModelSerializer):
         ]
 
 
+class InstitutionListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Institution
+        fields = [
+            'entity_id',
+            'name_dutch',
+            'name_english',
+        ]
+
+
 class FacultySerializer(serializers.ModelSerializer):
     institution = InstitutionSerializer(read_only=True)
 

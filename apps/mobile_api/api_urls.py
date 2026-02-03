@@ -18,6 +18,7 @@ from mobile_api.api import (
     DirectAwardDetail,
     CatalogBadgeClassListView,
     UserProfileView,
+    InstitutionListView,
 )
 
 urlpatterns = [
@@ -42,4 +43,5 @@ urlpatterns = [
     path('enroll', StudentsEnrolledList.as_view(), name='mobile_api_lti_edu_enroll_student'),
     path('profile', UserProfileView.as_view(), name='mobile_api_user_profile'),
     path('catalog', CatalogBadgeClassListView.as_view(), name='mobile_api_catalog_badge_class'),
+    path('institutions', InstitutionListView.as_view(), name='mobile_api_institution_list'),
 ]
