@@ -3,6 +3,7 @@ import logging
 import requests
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.generics import ListAPIView
 
 from badgeuser.models import StudentAffiliation
 from badgrsocialauth.providers.eduid.provider import EduIDProvider
@@ -18,6 +19,8 @@ from drf_spectacular.utils import (
     extend_schema,
     inline_serializer,
 )
+
+from institution.models import Institution
 from issuer.models import BadgeInstance, BadgeInstanceCollection, BadgeClass
 from issuer.serializers import BadgeInstanceCollectionSerializer
 from lti_edu.models import StudentsEnrolled
@@ -39,6 +42,7 @@ from mobile_api.serializers import (
     CatalogBadgeClassSerializer,
     UserProfileSerializer,
     BadgeClassDetailSerializer,
+    InstitutionListSerializer,
 )
 from rest_framework import serializers, status, generics
 from rest_framework.response import Response
@@ -1361,3 +1365,18 @@ class BadgeClassDetailView(generics.RetrieveAPIView):
     ).prefetch_related(
         'badgeclassextension_set'
     )
+
+
+class InstitutionListView(ListAPIView):
+    permission_classes = (IsAuthenticated, MobileAPIPermission)
+    serializer_class = InstitutionListSerializer
+
+    def get_queryset(self):
+        return (
+            Institution.objects.filter(
+                faculty__issuer__badgeclass__is_private=False,
+                faculty__issuer__archived=False,
+                faculty__archived=False,
+                faculty__visibility_type='PUBLIC',
+            ).distinct()
+        )
