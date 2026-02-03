@@ -38,6 +38,7 @@ from mobile_api.serializers import (
     UserSerializer,
     CatalogBadgeClassSerializer,
     UserProfileSerializer,
+    BadgeClassDetailSerializer,
 )
 from rest_framework import serializers, status, generics
 from rest_framework.response import Response
@@ -1347,3 +1348,16 @@ class UserProfileView(APIView):
     def delete(self, request):
         request.user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class BadgeClassDetailView(generics.RetrieveAPIView):
+    permission_classes = (IsAuthenticated, MobileAPIPermission)
+    lookup_field = 'entity_id'
+    serializer_class = BadgeClassDetailSerializer
+    queryset = BadgeClass.objects.select_related(
+        'issuer',
+        'issuer__faculty',
+        'issuer__faculty__institution',
+    ).prefetch_related(
+        'badgeclassextension_set'
+    )

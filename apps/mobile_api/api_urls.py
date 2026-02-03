@@ -7,6 +7,7 @@ from lti_edu.api import StudentsEnrolledList
 from mobile_api.api import (
     BadgeInstances,
     BadgeInstanceDetail,
+    BadgeClassDetailView,
     UnclaimedDirectAwards,
     Enrollments,
     EnrollmentDetail,
@@ -27,6 +28,7 @@ urlpatterns = [
         BadgeCollectionsDetailView.as_view(),
         name='mobile_api_badge_collection_update',
     ),
+    path('badge-classes/<str:entity_id>', BadgeClassDetailView.as_view(), name='mobile_api_badge_class_detail'),
     path('badge-instances', BadgeInstances.as_view(), name='mobile_api_badge_instances'),
     path('badge-instances/<str:entity_id>', BadgeInstanceDetail.as_view(), name='mobile_api_badge_instance_detail'),
     path('direct-awards', UnclaimedDirectAwards.as_view(), name='mobile_api_direct_awards'),
