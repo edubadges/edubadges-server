@@ -1178,6 +1178,33 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                                     'is_private': 0,
                                     'is_micro_credentials': 0,
                                     'badge_class_type': 'regular',
+                                    'required_terms': {
+                                        'entity_id': 'terms-123',
+                                        'terms_type': 'FORMAL_BADGE',
+                                        'institution': {
+                                            'name_dutch': 'SURF',
+                                            'name_english': 'SURF',
+                                            'image_dutch': '',
+                                            'image_english': '',
+                                            'identifier': 'surf.nl',
+                                            'alternative_identifier': None,
+                                            'grondslag_formeel': 'gerechtvaardigd_belang',
+                                            'grondslag_informeel': 'gerechtvaardigd_belang'
+                                        },
+                                        'terms_urls': [
+                                            {
+                                                'url': 'https://example.org/terms/nl',
+                                                'language': 'nl',
+                                                'excerpt': 'Door deel te nemen accepteer je...'
+                                            },
+                                            {
+                                                'url': 'https://example.org/terms/en',
+                                                'language': 'en',
+                                                'excerpt': 'By participating you accept...'
+                                            }
+                                        ]
+                                    },
+                                    'user_has_accepted_terms': True,
                                     'issuer_name_english': 'Team edubadges',
                                     'issuer_name_dutch': 'Team edubadges',
                                     'issuer_entity_id': 'WOLxSjpWQouas1123Z809Q',
@@ -1208,6 +1235,33 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                                     'is_private': 0,
                                     'is_micro_credentials': 0,
                                     'badge_class_type': 'regular',
+                                    'required_terms': {
+                                        'entity_id': 'terms-123',
+                                        'terms_type': 'FORMAL_BADGE',
+                                        'institution': {
+                                            'name_dutch': 'SURF',
+                                            'name_english': 'SURF',
+                                            'image_dutch': '',
+                                            'image_english': '',
+                                            'identifier': 'surf.nl',
+                                            'alternative_identifier': None,
+                                            'grondslag_formeel': 'gerechtvaardigd_belang',
+                                            'grondslag_informeel': 'gerechtvaardigd_belang'
+                                        },
+                                        'terms_urls': [
+                                            {
+                                                'url': 'https://example.org/terms/nl',
+                                                'language': 'nl',
+                                                'excerpt': 'Door deel te nemen accepteer je...'
+                                            },
+                                            {
+                                                'url': 'https://example.org/terms/en',
+                                                'language': 'en',
+                                                'excerpt': 'By participating you accept...'
+                                            }
+                                        ]
+                                    },
+                                    'user_has_accepted_terms': True,
                                     'issuer_name_english': 'Medicine',
                                     'issuer_name_dutch': 'null',
                                     'issuer_entity_id': 'yuflXDK8ROukQkxSPmh5ag',
@@ -1244,6 +1298,10 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                 'issuer',
                 'issuer__faculty',
                 'issuer__faculty__institution',
+            )
+            .prefetch_related(
+                'issuer__faculty__institution__terms',
+                'issuer__faculty__institution__terms__terms_urls',
             )
             .filter(
                 is_private=False,
