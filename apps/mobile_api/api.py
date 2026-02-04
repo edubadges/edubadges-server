@@ -1372,11 +1372,18 @@ class InstitutionListView(ListAPIView):
     serializer_class = InstitutionListSerializer
 
     def get_queryset(self):
-        return (
-            Institution.objects.filter(
-                faculty__issuer__badgeclasses__is_private=False,
-                faculty__issuer__archived=False,
-                faculty__archived=False,
-                faculty__visibility_type='PUBLIC',
-            ).distinct()
-        )
+        institution_entity_ids = BadgeClass.objects.select_related(
+            'issuer',
+            'issuer__faculty',
+            'issuer__faculty__institution',
+        ).filter(
+            is_private=False,
+            issuer__archived=False,
+            issuer__faculty__archived=False,
+        ).exclude(
+            issuer__faculty__visibility_type='TEST'
+        ).values_list(
+            'issuer__faculty__institution__entity_id',
+            flat=True,
+        ).distinct()
+        return Institution.objects.filter(entity_id__in=institution_entity_ids)
