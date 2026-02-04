@@ -1374,7 +1374,7 @@ class InstitutionListView(ListAPIView):
     def get_queryset(self):
         return (
             Institution.objects.filter(
-                faculty__issuer__badgeclass__is_private=False,
+                faculty__issuer__badgeclasses__is_private=False,
                 faculty__issuer__archived=False,
                 faculty__archived=False,
                 faculty__visibility_type='PUBLIC',
