@@ -12,6 +12,7 @@ from issuer.models import BadgeInstance
 from mainsite.settings import (
     DEFAULT_DOMAIN,
     OB3_AGENT_AUTHZ_TOKEN_SPHEREON,
+    OB3_AGENT_AUTHZ_TOKEN_VERAMO,
     OB3_AGENT_URL_SPHEREON,
     OB3_AGENT_URL_UNIME,
     OB3_AGENT_URL_VERAMO,
@@ -69,6 +70,7 @@ class CredentialsView(APIView):
             callback_url: str = DEFAULT_DOMAIN + reverse('ob3:callback')
             credential = VeramoOfferRequest('OpenBadgeCredential', badge_instance, callback_url)
             credential.set_url(OB3_AGENT_URL_VERAMO)
+            credential.set_authz_token(OB3_AGENT_AUTHZ_TOKEN_VERAMO)
         else:
             raise ValidationError('Invalid variant')
 

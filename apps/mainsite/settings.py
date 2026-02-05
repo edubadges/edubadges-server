@@ -243,7 +243,8 @@ DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETI
 OB3_AGENT_URL_SPHEREON = os.environ.get('OB3_AGENT_URL_SPHEREON', '')
 OB3_AGENT_AUTHZ_TOKEN_SPHEREON = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_SPHEREON', '')
 OB3_AGENT_URL_UNIME = os.environ.get('OB3_AGENT_URL_UNIME', '')
-OB3_AGENT_URL_VERAMO = os.environ.get('OB3_AGENT_URL_VERAMO', 'https://issuer.example.com/edubadges/api/create-offer')
+OB3_AGENT_URL_VERAMO = os.environ.get('OB3_AGENT_URL_VERAMO', '')
+OB3_AGENT_AUTHZ_TOKEN_VERAMO = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_VERAMO', '')
 
 # Note: Changing this value will not have any effect on already issued badges.
 EWI_PILOT_EXPIRATION_DATE = datetime.strptime('2026-12-31', '%Y-%m-%d').astimezone(pytz.timezone(TIME_ZONE))

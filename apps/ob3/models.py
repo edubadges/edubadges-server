@@ -228,9 +228,10 @@ class VeramoOfferRequest(OfferRequest):
         Returns:
             The response text from the HTTP call containing the offer URI
         """
-        headers = {'Accept': 'application/json'}
-        if self._get_authz_token():
-            headers['Authorization'] = f'Bearer {self._get_authz_token()}'
+        headers = {
+            'Accept': 'application/json',
+            'Authorization': f'Bearer {self._get_authz_token()}'
+        }
 
         payload = VeramoOfferRequestSerializer(self).data
 
