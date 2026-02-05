@@ -50,6 +50,8 @@ services:
       - OB3_AGENT_URL_UNIME=https://issuer-edubadges.dev.sdp.surf.nl/v0/
       - OB3_AGENT_URL_SPHEREON=https://agent.poc15.eduwallet.nl/oid4vci/admin/credentials/
       - OB3_AGENT_AUTHZ_TOKEN_SPHEREON=${OB3_AGENT_AUTHZ_TOKEN_SPHEREON}
+      - OB3_AGENT_URL_VERAMO=https://issuer.dev.edubadges.nl/edubadges/api/create-offer/
+      - OB3_AGENT_AUTHZ_TOKEN_VERAMO=${OB3_AGENT_AUTHZ_TOKEN_VERAMO}
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
       - AWS_ACCESS_KEY_ID=edubadges
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
