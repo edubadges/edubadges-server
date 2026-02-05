@@ -602,100 +602,91 @@ class UnclaimedDirectAwards(APIView):
         return Response(serializer.data)
 
 
-class DirectAwardDetail(APIView):
-    permission_classes = (MobileAPIPermission,)
-
-    @extend_schema(
-        methods=['GET'],
-        description='Get direct award details for the user',
-        parameters=[
-            OpenApiParameter(
-                name='entity_id',
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                required=True,
-                description='entity_id of the direct award',
-            )
-        ],
-        responses={
-            200: OpenApiResponse(
-                description='Direct award details',
-                response=DirectAwardDetailSerializer,
-                examples=[
-                    OpenApiExample(
-                        'Direct Award Details',
-                        value=[
-                            {
-                                'id': 9596,
-                                'created_at': '2026-01-16T10:56:44.293475+01:00',
-                                'entity_id': 'y8uStIzMQ--JY59DIKnvWw',
-                                'badgeclass': {
-                                    'id': 6,
-                                    'name': 'test direct award',
-                                    'entity_id': 'B3uWEIZSTh6wniHBbzVtbA',
-                                    'image_url': 'https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_6c3b5f04-292b-41fa-8df6-d5029386bd3f.png',
-                                    'issuer': {
-                                        'name_dutch': 'SURF Edubadges',
-                                        'name_english': 'SURF Edubadges',
-                                        'image_dutch': 'null',
-                                        'image_english': '/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png',
-                                        'faculty': {
-                                            'name_dutch': 'SURF',
-                                            'name_english': 'SURF',
-                                            'image_dutch': 'null',
-                                            'image_english': 'null',
-                                            'on_behalf_of': 'false',
-                                            'on_behalf_of_display_name': 'null',
-                                            'on_behalf_of_url': 'null',
-                                            'institution': {
-                                                'name_dutch': 'University Voorbeeld',
-                                                'name_english': 'University Example',
-                                                'image_dutch': '/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png',
-                                                'image_english': '/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png',
-                                                'identifier': 'university-example.org',
-                                                'alternative_identifier': 'university-example.org.tempguestidp.edubadges.nl',
-                                                'grondslag_formeel': 'gerechtvaardigd_belang',
-                                                'grondslag_informeel': 'gerechtvaardigd_belang',
-                                            },
-                                        },
+@extend_schema(
+    description="Get direct award details for the authenticated user",
+    responses={
+        200: OpenApiResponse(
+            response=DirectAwardDetailSerializer,
+            examples=[
+                OpenApiExample(
+                    "Example Direct Award",
+                    value={
+                        "id": 9596,
+                        "created_at": "2026-01-16T10:56:44.293475+01:00",
+                        "status": "Unaccepted",
+                        "entity_id": "y8uStIzMQ--JY59DIKnvWw",
+                        "badgeclass": {
+                            "id": 6,
+                            "name": "test direct award",
+                            "entity_id": "B3uWEIZSTh6wniHBbzVtbA",
+                            "image_url": "https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_6c3b5f04-292b-41fa-8df6-d5029386bd3f.png",
+                            "issuer": {
+                                "name_dutch": "SURF Edubadges",
+                                "name_english": "SURF Edubadges",
+                                "image_dutch": "null",
+                                "image_english": "/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png",
+                                "faculty": {
+                                    "name_dutch": "SURF",
+                                    "name_english": "SURF",
+                                    "image_dutch": "null",
+                                    "image_english": "null",
+                                    "on_behalf_of": "false",
+                                    "on_behalf_of_display_name": "null",
+                                    "on_behalf_of_url": "null",
+                                    "institution": {
+                                        "name_dutch": "University Voorbeeld",
+                                        "name_english": "University Example",
+                                        "image_dutch": "/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png",
+                                        "image_english": "/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png",
+                                        "identifier": "university-example.org",
+                                        "alternative_identifier": "university-example.org.tempguestidp.edubadges.nl",
+                                        "grondslag_formeel": "gerechtvaardigd_belang",
+                                        "grondslag_informeel": "gerechtvaardigd_belang",
                                     },
                                 },
-                            }
-                        ],
-                        description='Detailed information about a specific direct award',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            404: OpenApiResponse(
-                description='Direct award not found',
-                examples=[
-                    OpenApiExample(
-                        'Not Found',
-                        value={'detail': 'Direct award not found'},
-                        description='The requested direct award does not exist or user does not have access',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
+                            },
+                        },
+                        "required_terms": {
+                            "entity_id": "terms-123",
+                            "terms_type": "FORMAL_BADGE",
+                            "terms_urls": [
+                                {"url": "https://example.org/terms/nl", "language": "nl", "excerpt": "..."},
+                                {"url": "https://example.org/terms/en", "language": "en", "excerpt": "..."},
+                            ],
+                            "institution": {
+                                "name_dutch": "University Voorbeeld",
+                                "name_english": "University Example",
+                                "image_dutch": "/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png",
+                                "image_english": "/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png",
+                                "identifier": "university-example.org",
+                                "alternative_identifier": "university-example.org.tempguestidp.edubadges.nl",
+                                "grondslag_formeel": "gerechtvaardigd_belang",
+                                "grondslag_informeel": "gerechtvaardigd_belang",
+                            },
+                        },
+                        "user_has_accepted_terms": False,
+                    },
+                ),
+            ],
+        ),
+        403: permission_denied_response,
+        404: OpenApiResponse(description="Direct award not found"),
+    },
+)
+class DirectAwardDetailView(generics.RetrieveAPIView):
+    permission_classes = (MobileAPIPermission,)
+    serializer_class = DirectAwardDetailSerializer
+    lookup_field = "entity_id"
+
+    queryset = DirectAward.objects.select_related(
+        'badgeclass',
+        'badgeclass__issuer',
+        'badgeclass__issuer__faculty',
+        'badgeclass__issuer__faculty__institution',
+    ).prefetch_related(
+        'badgeclass__badgeclassextension_set',
+        'badgeclass__issuer__faculty__institution__terms',
     )
-    # ForeignKey / OneToOneField → select_related
-    # ManyToManyField / reverse FK → prefetch_related
-    def get(self, request, entity_id, **kwargs):
-        instance = (
-            DirectAward.objects.select_related('badgeclass')
-            .prefetch_related('badgeclass__badgeclassextension_set')
-            .select_related('badgeclass__issuer')
-            .select_related('badgeclass__issuer__faculty')
-            .select_related('badgeclass__issuer__faculty__institution')
-            .prefetch_related('badgeclass__issuer__faculty__institution__terms')
-            .filter(entity_id=entity_id)
-            .get()
-        )
-        serializer = DirectAwardDetailSerializer(instance)
-        return Response(serializer.data)
 
 
 class Enrollments(APIView):

@@ -198,16 +198,28 @@ class DirectAwardSerializer(serializers.ModelSerializer):
 
 class DirectAwardDetailSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassDetailSerializer()
-    terms = serializers.SerializerMethodField()
+    required_terms = serializers.SerializerMethodField()
+    user_has_accepted_terms = serializers.SerializerMethodField()
 
     class Meta:
         model = DirectAward
-        fields = ['id', 'created_at', 'status', 'entity_id', 'badgeclass', 'terms']
+        fields = ['id', 'created_at', 'status', 'entity_id', 'badgeclass', 'required_terms', 'user_has_accepted_terms']
 
-    def get_terms(self, obj):
-        institution_terms = obj.badgeclass.issuer.faculty.institution.terms.all()
-        serializer = TermsSerializer(institution_terms, many=True)
-        return serializer.data
+    def get_required_terms(self, obj):
+        try:
+            terms = obj.badgeclass.get_required_terms()
+        except ValueError:
+            return None  # Should not break the serializer
+
+        return TermsSerializer(terms, context=self.context).data
+
+    def get_user_has_accepted_terms(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+
+        user = request.user
+        return obj.badgeclass.terms_accepted(user)
 
 
 class StudentsEnrolledSerializer(serializers.ModelSerializer):
