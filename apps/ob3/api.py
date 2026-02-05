@@ -75,8 +75,9 @@ class CredentialsView(APIView):
         try:
             offer = credential.call()
             logger.debug(f'Offer: {offer}')
-        except Exception as error:
-            raise ValidationError(str(error))
+        except Exception:
+            msg = f'Error issuing credential for badge {badge_id} with offer_id {offer_id}'
+            raise ValidationError(msg)
 
         logger.info(f'Issued credential for badge {badge_id} with offer_id {offer_id}')
 
