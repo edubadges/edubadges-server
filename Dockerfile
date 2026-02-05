@@ -20,6 +20,7 @@ COPY . /app
 # Set execute permissions on entrypoint script
 RUN chmod +x /app/docker/entrypoint.sh
 
+RUN pip install --upgrade pip setuptools wheel
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django_celery_results',
     'drf_spectacular',
     'drf_spectacular_sidecar',
+    'fcm_django',
     # OAuth 2 provider
     'oauth2_provider',
     # eduBadges apps
@@ -652,3 +653,26 @@ SPECTACULAR_SETTINGS = {
 AUDITLOG_DISABLE_REMOTE_ADDR = True
 
 API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
+
+# FCM Django (Firebase Cloud Messaging for push notifications on mobile)
+def get_fcm_settings():
+    if any(os.environ.get(var) is None for var in [
+        "FIREBASE_TYPE",
+        "FIREBASE_PROJECT_ID",
+        "FIREBASE_PRIVATE_KEY_ID",
+        "FIREBASE_PRIVATE_KEY",
+        "FIREBASE_CLIENT_EMAIL",
+    ]):
+        return {}
+    return {
+        "type": os.environ["FIREBASE_TYPE"],
+        "project_id": os.environ["FIREBASE_PROJECT_ID"],
+        "private_key_id": os.environ["FIREBASE_PRIVATE_KEY_ID"],
+        "private_key": os.environ["FIREBASE_PRIVATE_KEY"].replace("\\n", "\n"),
+        "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
+        "token_uri": os.environ.get(
+            "FIREBASE_TOKEN_URI", "https://oauth2.googleapis.com/token"
+        ),
+    }
+
+FCM_DJANGO_SETTINGS = get_fcm_settings()
