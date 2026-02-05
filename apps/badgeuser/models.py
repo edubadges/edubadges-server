@@ -581,6 +581,10 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         return general_terms.__len__() == nr_accepted
 
     @property
+    def terms_agreed(self):
+        return self.general_terms_accepted()
+
+    @property
     def full_name(self):
         return self.get_full_name()
 
