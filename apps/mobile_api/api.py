@@ -4,6 +4,7 @@ import requests
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.generics import ListAPIView
+from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet, FCMDeviceSerializer
 
 from badgeuser.models import StudentAffiliation
 from badgrsocialauth.providers.eduid.provider import EduIDProvider
@@ -1378,3 +1379,33 @@ class InstitutionListView(ListAPIView):
             flat=True,
         ).distinct()
         return Institution.objects.filter(entity_id__in=institution_entity_ids)
+
+
+@extend_schema(
+    description="""
+    Register a device for push notifications
+    
+    - If the device is already registered, sending the same `registration_id` will update the existing record.
+    - Use this endpoint for both new registrations and updates.
+    - Use field 'active' to toggle push notifications for this user.
+    - Omitting 'active' in an update will keep the previous value, and for create the default value of active is True.
+    - 'registration_id' and 'type' are required, 'name' and 'device_id' are optional.
+    """,
+    request=FCMDeviceSerializer,
+    examples=[
+            OpenApiExample(
+                'Example Device Registration',
+                summary='Example payload to register or update a device',
+                value={
+                    'registration_id': 'fcm-token-123456',
+                    'type': 'ios',
+                    'name': "John's iPhone",
+                    'device_id': 'abc123...',
+                    'active': True,
+                },
+                request_only=True
+            )
+        ],
+)
+class RegisterDeviceViewSet(FCMDeviceAuthorizedViewSet):
+    pass
