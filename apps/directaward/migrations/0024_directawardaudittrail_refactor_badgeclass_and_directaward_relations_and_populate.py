@@ -12,7 +12,7 @@ def forwards_populate_audit_trail_fks(apps, schema_editor):
         if audit.direct_award_entity_id and not audit.direct_award:
             audit.direct_award = (
                 DirectAward.objects
-                .filter(id=audit.direct_award_entity_id)
+                .filter(entity_id=audit.direct_award_entity_id)
                 .first()
             )
 
@@ -31,7 +31,7 @@ def backwards_restore_entity_ids(apps, schema_editor):
 
     for audit in DirectAwardAuditTrail.objects.all().iterator():
         if audit.direct_award and not audit.direct_award_entity_id:
-            audit.direct_award_entity_id = audit.direct_award.id
+            audit.direct_award_entity_id = audit.direct_award.entity_id
 
         if audit.badgeclass and not audit.badgeclass_entity_id:
             audit.badgeclass_entity_id = audit.badgeclass.id
