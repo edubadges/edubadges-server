@@ -5,7 +5,7 @@ from django.db import migrations
 
 def populate_institution_email(apps, schema_editor):
     Institution = apps.get_model("institution", "Institution")
-    InstitutionStaff = apps.get_model("institution", "InstitutionStaff")
+    InstitutionStaff = apps.get_model("staff", "InstitutionStaff")
 
     for institution in Institution.objects.filter(email__isnull=True):
         # Find oldest active admin
@@ -28,8 +28,10 @@ def populate_institution_email(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('institution', '0066_institution_email'),
+        ('institution', '0067_merge_0066_institution_email_0066_merge_20241113_1458'),
+        ('staff', '0008_auto_20200526_1536'),
     ]
 
     operations = [
+        migrations.RunPython(populate_institution_email),
     ]
