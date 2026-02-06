@@ -83,7 +83,7 @@ cryptography==44.0.1
 enum34==1.1.6
 idna==3.10
 ipaddress==1.0.16
-pyasn1==0.1.9
+pyasn1>=0.6.1,<0.7.0
 pycparser==2.14
 six==1.13.0
 
@@ -136,3 +136,11 @@ django-prometheus==2.3.1
 loki-logger-handler==1.1.1
 
 django-auditlog==3.0.0
+
+fcm-django==2.3.1
+firebase-admin==7.1.0
+google-api-core==2.29.0
+protobuf>=6.31.1,<7.0.0
+grpcio<2
+grpcio-status==1.76.0
+pyasn1-modules==0.4.2
