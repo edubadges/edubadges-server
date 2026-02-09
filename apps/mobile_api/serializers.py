@@ -222,20 +222,28 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
         return obj.badgeclass.terms_accepted(user)
 
 
+STATUS_MAP = {
+    True: "Rejected",
+    False: "Unaccepted"
+}
+
+
 class StudentsEnrolledSerializer(serializers.ModelSerializer):
-    badge_class = BadgeClassSerializer()
+    badgeclass = BadgeClassSerializer()
+    created_at = serializers.DateTimeField(source='date_created', read_only=True)
+    issued_on = serializers.DateTimeField(source='date_awarded', read_only=True)
+    acceptance = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentsEnrolled
-        fields = ['id', 'entity_id', 'date_created', 'denied', 'date_awarded', 'badge_class']
+        fields = ['id', 'entity_id', 'created_at', 'denied', 'acceptance', 'issued_on', 'badgeclass']
+
+    def get_acceptance(self, obj):
+        return STATUS_MAP[obj.denied]
 
 
-class StudentsEnrolledDetailSerializer(serializers.ModelSerializer):
-    badge_class = BadgeClassDetailSerializer()
-
-    class Meta:
-        model = StudentsEnrolled
-        fields = ['id', 'entity_id', 'date_created', 'denied', 'date_awarded', 'badge_class']
+class StudentsEnrolledDetailSerializer(StudentsEnrolledSerializer):
+    badgeclass = BadgeClassDetailSerializer()
 
 
 class BadgeCollectionSerializer(serializers.ModelSerializer):
