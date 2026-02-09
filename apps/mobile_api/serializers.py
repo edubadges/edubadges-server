@@ -78,7 +78,7 @@ class BadgeClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeClass
-        fields = ['id', 'name', 'entity_id', 'image_url', 'issuer']
+        fields = ['id', 'name', 'entity_id', 'image', 'issuer']
 
 
 class BadgeClassDetailSerializer(serializers.ModelSerializer):
