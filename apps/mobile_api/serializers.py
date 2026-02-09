@@ -270,7 +270,7 @@ class TermsAgreementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TermsAgreement
-        fields = ['entity_id', 'agreed', 'agreed_version', 'terms']
+        fields = ['entity_id', 'agreed', 'agreed_version', 'agreed_at', 'terms']
 
 
 class UserSerializer(serializers.ModelSerializer):
