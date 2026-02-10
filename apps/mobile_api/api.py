@@ -18,12 +18,11 @@ from drf_spectacular.utils import (
     OpenApiResponse,
     OpenApiTypes,
     extend_schema,
-    inline_serializer,
+    inline_serializer, extend_schema_view,
 )
 
 from institution.models import Institution
 from issuer.models import BadgeInstance, BadgeInstanceCollection, BadgeClass
-from issuer.serializers import BadgeInstanceCollectionSerializer
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
 from mainsite.mobile_api_authentication import TemporaryUser
@@ -45,7 +44,7 @@ from mobile_api.serializers import (
     BadgeClassDetailSerializer,
     InstitutionListSerializer,
 )
-from rest_framework import serializers, status, generics
+from rest_framework import serializers, status, generics, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -936,213 +935,25 @@ class EnrollmentDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class BadgeCollectionsListView(APIView):
+@extend_schema_view(
+    list=extend_schema(description="List badge collections"),
+    retrieve=extend_schema(description="Retrieve badge collection"),
+    create=extend_schema(description="Create badge collection"),
+    update=extend_schema(description="Update badge collection"),
+    partial_update=extend_schema(description="Partially update badge collection"),
+    destroy=extend_schema(description="Delete badge collection"),
+)
+class BadgeCollectionViewSet(viewsets.ModelViewSet):
     permission_classes = (MobileAPIPermission,)
+    serializer_class = BadgeCollectionSerializer
+    lookup_field = "entity_id"
 
-    @extend_schema(
-        methods=['GET'],
-        description='Get all badge collections for the user',
-        responses={
-            200: OpenApiResponse(
-                description='List of badge collections',
-                response=BadgeCollectionSerializer(many=True),
-                examples=[
-                    OpenApiExample(
-                        'Badge Collections List',
-                        value=[
-                            {
-                                'id': 9,
-                                'created_at': '2025-10-07T12:41:36.332147+02:00',
-                                'entity_id': 'lt3O3SUpS9Culz0IrA3rOg',
-                                'badge_instances': [
-                                    'badge-96-entity-id',
-                                    'badge-175-entity-id',
-                                    'badge-176-entity-id',
-                                    'badge-287-entity-id',
-                                ],
-                                'name': 'Test collection 1',
-                                'public': 'false',
-                                'description': 'test',
-                            },
-                            {
-                                'id': 11,
-                                'created_at': '2025-10-27T16:14:42.650246+01:00',
-                                'entity_id': 'dhuf6Qx2RMCtRKBw0iHGcg',
-                                'badge_instances': ['badge-96-entity-id', 'badge-175-entity-id'],
-                                'name': 'Test collection 2',
-                                'public': 'true',
-                                'description': 'Test2',
-                            },
-                        ],
-                        description='Array of badge collections created by the user',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
-    )
-    def get(self, request, **kwargs):
-        collections = BadgeInstanceCollection.objects.filter(user=request.user).prefetch_related('badge_instances')
-        serializer = BadgeCollectionSerializer(collections, many=True)
-        return Response(serializer.data)
-
-    @extend_schema(
-        request=BadgeInstanceCollectionSerializer,
-        description='Create a new BadgeInstanceCollection',
-        responses={
-            201: OpenApiResponse(
-                description='Badge collection created successfully',
-                response=BadgeInstanceCollectionSerializer,
-                examples=[
-                    OpenApiExample(
-                        'Created Collection',
-                        value={
-                            'entity_id': 'collection-123',
-                            'name': 'My Achievements',
-                            'description': 'Collection of my programming achievements',
-                            'badge_instances': [311],
-                        },
-                        description='Newly created badge collection',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            400: OpenApiResponse(
-                description='Invalid request data',
-                examples=[
-                    OpenApiExample(
-                        'Invalid Data',
-                        value={'name': ['This field is required.']},
-                        description='Validation errors in the request data',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
-    )
-    def post(self, request):
-        serializer = BadgeInstanceCollectionSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        badge_collection = serializer.save()
-        return Response(BadgeInstanceCollectionSerializer(badge_collection).data, status=status.HTTP_201_CREATED)
-
-
-class BadgeCollectionsDetailView(APIView):
-    permission_classes = (MobileAPIPermission,)
-
-    @extend_schema(
-        request=BadgeInstanceCollectionSerializer,
-        description='Update an existing BadgeInstanceCollection by entity_id',
-        parameters=[
-            OpenApiParameter(
-                name='entity_id',
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                required=True,
-                description='entity_id of the collection',
-            )
-        ],
-        responses={
-            200: OpenApiResponse(
-                description='Badge collection updated successfully',
-                response=BadgeInstanceCollectionSerializer,
-                examples=[
-                    OpenApiExample(
-                        'Updated Collection',
-                        value={
-                            'entity_id': 'collection-123',
-                            'name': 'My Updated Achievements',
-                            'description': 'Updated collection of my programming achievements',
-                            'badge_instances': [
-                                {
-                                    'entity_id': 'badge-456',
-                                    'name': 'Python Programming',
-                                },
-                            ],
-                        },
-                        description='Updated badge collection',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            404: OpenApiResponse(
-                description='Badge collection not found',
-                examples=[
-                    OpenApiExample(
-                        'Not Found',
-                        value={'detail': 'Badge collection not found'},
-                        description='The requested badge collection does not exist',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            400: OpenApiResponse(
-                description='Invalid request data',
-                examples=[
-                    OpenApiExample(
-                        'Invalid Data',
-                        value={'name': ['This field is required.']},
-                        description='Validation errors in the request data',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
-    )
-    def put(self, request, entity_id):
-        badge_collection = get_object_or_404(BadgeInstanceCollection, user=request.user, entity_id=entity_id)
-        serializer = BadgeInstanceCollectionSerializer(
-            badge_collection, data=request.data, context={'request': request}, partial=False
+    def get_queryset(self):
+        return (
+            BadgeInstanceCollection.objects
+            .filter(user=self.request.user)
+            .prefetch_related("badge_instances")
         )
-        serializer.is_valid(raise_exception=True)
-        badge_collection = serializer.save()
-        return Response(BadgeInstanceCollectionSerializer(badge_collection).data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        request=None,
-        description='Delete a BadgeInstanceCollection by ID',
-        parameters=[
-            OpenApiParameter(
-                name='entity_id',
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                required=True,
-                description='entity_id of the enrollment',
-            )
-        ],
-        responses={
-            204: OpenApiResponse(
-                description='Badge collection deleted successfully',
-                examples=[
-                    OpenApiExample(
-                        'Deleted',
-                        value=None,
-                        description='Badge collection was successfully deleted',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            404: OpenApiResponse(
-                description='Badge collection not found',
-                examples=[
-                    OpenApiExample(
-                        'Not Found',
-                        value={'detail': 'Badge collection not found'},
-                        description='The requested badge collection does not exist',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
-    )
-    def delete(self, request, entity_id):
-        badge_collection = get_object_or_404(BadgeInstanceCollection, entity_id=entity_id, user=request.user)
-        badge_collection.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CatalogBadgeClassListView(generics.ListAPIView):
