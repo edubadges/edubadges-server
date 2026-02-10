@@ -877,6 +877,11 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         returns: TermsAgreement"""
         # must work for updating increment and for accepting the first time
         terms_agreement, created = TermsAgreement.objects.get_or_create(user=user, terms=self)
+
+        # Only set the agreed_at date if the terms_agreement wasn't agreed yet (for newly created ones and older ones that have agreed false)
+        if not terms_agreement.agreed:
+            terms_agreement.agreed_at = timezone.now()
+
         terms_agreement.agreed_version = self.version
         terms_agreement.agreed = True
         terms_agreement.save()
@@ -894,6 +899,7 @@ class TermsAgreement(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     terms = models.ForeignKey('badgeuser.Terms', on_delete=models.CASCADE)
     agreed = models.BooleanField(default=True)
     agreed_version = models.PositiveIntegerField(null=True)
+    agreed_at = models.DateTimeField(null=True, blank=True)
 
 
 class StudentAffiliation(models.Model):
