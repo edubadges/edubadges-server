@@ -281,6 +281,7 @@ class BadgeInstances(APIView):
             .select_related('badgeclass__issuer__faculty')
             .select_related('badgeclass__issuer__faculty__institution')
             .filter(user=request.user)
+            .order_by('-issued_on')
         )
         serializer = BadgeInstanceSerializer(instances, many=True)
         return Response(serializer.data)
@@ -1164,7 +1165,7 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                     'badgeinstances',
                     filter=Q(badgeinstances__award_type='direct_award'),
                 ),
-            )
+            ).order_by('name')
         )
 
 
