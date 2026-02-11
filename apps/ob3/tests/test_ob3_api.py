@@ -1,4 +1,5 @@
 from typing import Any
+from unittest.mock import patch
 
 from allauth.socialaccount.models import SocialAccount
 from badgeuser.models import BadgeUser
@@ -173,3 +174,131 @@ class OB3CallbackAPITest(BadgrTestCase):
 
     def _get_social_account(self, user: BadgeUser) -> SocialAccount:
         return SocialAccount.objects.get(user=user)
+
+
+class OB3CredentialsViewAPITest(BadgrTestCase):
+    """
+    Tests for the OB3 CredentialsView endpoint that issues credentials.
+    """
+
+    def _with_mock_endpoints(self):
+        """
+        Context manager that mocks all HTTP requests.post calls to return successful responses.
+        This avoids making actual network requests during tests.
+        """
+        # Create a mock response object
+        mock_response = type('MockResponse', (), {'status_code': 200, 'text': '{"fake": "json"}'})()
+
+        # Return the patch object as a context manager
+        return patch('ob3.models.requests.post', return_value=mock_response)
+
+    def test_credentials_endpoint_returns_offer_for_authorization_variant(self):
+        """
+        Test that the credentials endpoint returns an offer for the authorization variant.
+        """
+        assertion = self._setup_assertion_with_relations()
+
+        # Mock the HTTP calls to avoid actual network requests
+        with self._with_mock_endpoints():
+            response = self._post_credentials(assertion.id, 'authorization')
+
+            self.assertEqual(response.status_code, 201)
+            response_data = response.json()
+            self.assertIn('offer', response_data)
+
+    def test_credentials_endpoint_returns_offer_for_preauthorized_variant(self):
+        """
+        Test that the credentials endpoint returns an offer for the preauthorized variant.
+        """
+        assertion = self._setup_assertion_with_relations()
+
+        # Mock the HTTP calls to avoid actual network requests
+        with self._with_mock_endpoints():
+            response = self._post_credentials(assertion.id, 'preauthorized')
+            self.assertResponseCode(response, 201)
+            response_data = response.json()
+            self.assertIn('offer', response_data)
+
+    def test_credentials_endpoint_requires_badge_id(self):
+        """
+        Test that the credentials endpoint requires a badge_id parameter.
+        """
+        with self._with_mock_endpoints():
+            self.setup_student(authenticate=True)
+            response = self._post_credentials(None, 'authorization')
+            self.assertResponseCode(response, 400)
+
+    def test_credentials_endpoint_requires_variant(self):
+        """
+        Test that the credentials endpoint requires a variant parameter.
+        """
+        with self._with_mock_endpoints():
+            assertion = self._setup_assertion_with_relations()
+            response = self._post_credentials(assertion.id, None)
+            self.assertResponseCode(response, 400)
+
+    def test_credentials_endpoint_requires_valid_variant(self):
+        """
+        Test that the credentials endpoint requires a valid variant.
+        """
+        with self._with_mock_endpoints():
+            assertion = self._setup_assertion_with_relations()
+            response = self._post_credentials(assertion.id, 'invalid-variant')
+            self.assertResponseCode(response, 400)
+
+    def test_credentials_endpoint_requires_existing_badge(self):
+        """
+        Test that the credentials endpoint requires an existing badge instance.
+        """
+        with self._with_mock_endpoints():
+            self.setup_student(authenticate=True)
+            response = self._post_credentials(999999, 'authorization')
+            self.assertResponseCode(response, 404)
+
+    def test_credentials_endpoint_requires_user_owns_badge(self):
+        """
+        Test that the credentials endpoint requires the user to own the badge.
+        """
+        with self._with_mock_endpoints():
+            assertion = self._setup_assertion_with_relations()
+            self.setup_student(authenticate=True)
+
+            response = self._post_credentials(assertion.id, 'authorization')
+            self.assertResponseCode(response, 404)
+
+    def test_credentials_endpoint_returns_offer_for_veramo_variant(self):
+        """
+        Test that the credentials endpoint returns an offer for the veramo variant.
+        """
+        assertion = self._setup_assertion_with_relations()
+
+        # Mock the HTTP calls to avoid actual network requests
+        with self._with_mock_endpoints():
+            response = self._post_credentials(assertion.id, 'veramo')
+
+            self.assertEqual(response.status_code, 201)
+            response_data = response.json()
+            self.assertIn('offer', response_data)
+
+    def assertResponseCode(self, response, expected_code):
+        self.assertEqual(
+            response.status_code,
+            expected_code,
+            f'Expected status code {expected_code}, got {response.status_code}. {response.content.decode("utf-8")}',
+        )
+
+    def _post_credentials(self, badge_id: int, variant: str):
+        """Helper method to make POST requests to the credentials endpoint."""
+        data: dict[str, Any] = {'badge_id': badge_id, 'variant': variant}
+        # Filter out None values
+        data = {k: v for k, v in data.items() if v is not None}
+        return self.client.post('/ob3/v1/ob3', data)
+
+    def _setup_assertion_with_relations(self) -> BadgeInstance:
+        teacher = self.setup_teacher(authenticate=False)
+        student = self.setup_student(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher)
+        return assertion

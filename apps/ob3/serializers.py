@@ -1,9 +1,8 @@
 from typing import Any, Dict
 
 from django.utils import timezone
+from mainsite.settings import UI_URL
 from rest_framework import serializers
-
-from apps.mainsite.settings import UI_URL
 
 
 class OmitNoneFieldsMixin:
@@ -197,3 +196,9 @@ class ImpierceOfferRequestSerializer(serializers.Serializer):
     credentialConfigurationId = serializers.CharField(source='credential_configuration_id')
     expiresAt = serializers.CharField(source='expires_at', required=True)
     credential = CredentialSerializer()
+
+
+class VeramoOfferRequestSerializer(serializers.Serializer):
+    credentials = serializers.ListField()
+    grants = serializers.DictField()
+    credential_callback = serializers.URLField(source='callback_url')

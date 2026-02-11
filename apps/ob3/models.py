@@ -1,9 +1,16 @@
 # Description: This file contains the models for the badge-issuing service.
 
+import logging
 from hashlib import sha256
 from typing import Optional
+from urllib.parse import urljoin
 
+import requests
 from issuer.models import BadgeInstance
+from ob3.serializers import ImpierceOfferRequestSerializer, SphereonOfferRequestSerializer, VeramoOfferRequestSerializer
+from typing_extensions import override
+
+logger = logging.getLogger('django')
 
 
 def generate_sha256_hashstring(identifier: str, salt: Optional[str] = None):
@@ -55,8 +62,37 @@ class StructFieldsMixin:
             setattr(self, key, value)
 
 
+# Base class for all offer requests
+class OfferRequest:
+    _url: Optional[str] = None
+    _authz_token: Optional[str] = None
+
+    def call(self) -> str:
+        """
+        Generic method to make HTTP calls to issue credentials.
+        This base implementation does nothing - subclasses should override.
+        Returns:
+            The response text from the HTTP call
+        """
+        return 'invalid offer request called'
+
+    def _get_url(self) -> str:
+        if not self._url:
+            raise ValueError('URL is not set')
+        return self._url
+
+    def set_url(self, url: str):
+        self._url = url
+
+    def _get_authz_token(self) -> Optional[str]:
+        return self._authz_token
+
+    def set_authz_token(self, authz_token: str):
+        self._authz_token = authz_token
+
+
 # A plain old Python object (POPO) that represents an educational credential
-class ImpierceOfferRequest:
+class ImpierceOfferRequest(OfferRequest):
     def __init__(self, offer_id, credential_configuration_id, badge_instance):
         self.offer_id = offer_id
         self.credential_configuration_id = credential_configuration_id
@@ -75,8 +111,51 @@ class ImpierceOfferRequest:
         else:
             self.expires_at = 'never'
 
+    @override
+    def call(self) -> str:
+        """
+        Issue the credential and get the offer for Impierce (Unime).
+        Returns:
+            The offer ID as a string
+        """
+        # First, issue the credential
+        self.__issue_unime_badge()
 
-class SphereonOfferRequest:
+        # Then get the offer
+        return self.__get_unime_offer()
+
+    def __issue_unime_badge(self) -> None:
+        """Issue the credential to Unime API."""
+        url = urljoin(self._get_url(), 'credentials')
+        headers = {'Accept': 'application/json'}
+        payload = ImpierceOfferRequestSerializer(self).data
+
+        logger.debug(f'Requesting credential issuance: {url} {headers} {payload}')
+        response = requests.post(timeout=5, json=payload, url=url, headers=headers)
+        logger.debug(f'Response: {response.status_code} {response.text}')
+
+        if response.status_code >= 400:
+            msg = f'Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
+            raise Exception(msg)
+
+    def __get_unime_offer(self) -> str:
+        """Get the offer from Unime API."""
+        url = urljoin(self._get_url(), 'offers')
+        headers = {'Accept': 'application/json'}
+        payload = {'offerId': self.offer_id}
+
+        logger.debug(f'Requesting offer: {url} {headers} {payload}')
+        response = requests.post(timeout=5, url=url, json=payload, headers=headers)
+        logger.debug(f'Response: {response.status_code} {response.text}')
+
+        if response.status_code >= 400:
+            msg = f'Failed to get offer:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
+            raise Exception(msg)
+
+        return response.text
+
+
+class SphereonOfferRequest(OfferRequest):
     def __init__(
         self, offer_id, credential_configuration_id, badge_instance, edu_id, email, eppn, family_name, given_name
     ):
@@ -100,6 +179,75 @@ class SphereonOfferRequest:
         self.eppn = eppn
         self.family_name = family_name
         self.given_name = given_name
+
+    @override
+    def call(self):
+        """
+        Issue the credential for Sphereon.
+        Returns:
+            The response text from the HTTP call
+        """
+        headers = {'Accept': 'application/json'}
+        if self._get_authz_token():
+            headers['Authorization'] = f'Bearer {self._get_authz_token()}'
+
+        payload = SphereonOfferRequestSerializer(self).data
+
+        url = self._get_url()
+        logger.debug(f'Requesting credential issuance: {url} {payload}')
+        response = requests.post(
+            timeout=5,
+            url=url,
+            json=payload,
+            headers=headers,
+        )
+        logger.debug(f'Response: {response.status_code} {response.text}')
+
+        if response.status_code >= 400:
+            msg = f'Failed to issue badge:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
+            raise Exception(msg)
+
+        return response.text
+
+
+class VeramoOfferRequest(OfferRequest):
+    """
+    A Veramo offer request that doesn't send the initial credential payload.
+    This is used for the /api/create-offer endpoint.
+    """
+
+    def __init__(self, credential_configuration_id: str, badge_instance: BadgeInstance, callback_url: str):
+        self.credentials: list[str] = [credential_configuration_id]
+        self.grants: dict[str, dict[str, str]] = {'authorization_code': {'issuer_state': badge_instance.entity_id}}
+        self.callback_url: str = callback_url
+
+    @override
+    def call(self) -> str:
+        """
+        Create an offer for the credential.
+        Returns:
+            The response text from the HTTP call containing the offer URI
+        """
+        headers = {
+            'Accept': 'application/json',
+            'Authorization': f'Bearer {self._get_authz_token()}'
+        }
+
+        payload = VeramoOfferRequestSerializer(self).data
+
+        url = self._get_url()
+        logger.debug(f'Requesting offer creation: {url} {headers} {payload}')
+        response = requests.post(timeout=5, json=payload, url=url, headers=headers)
+        logger.debug(f'Response: {response.status_code} {response.text}')
+
+        if response.status_code >= 400:
+            msg = f'Failed to create offer:\n\tcode: {response.status_code}\n\tcontent:\n {response.text}'
+            raise Exception(msg)
+
+        offer_uri = str(response.json()['uri'])
+        logger.debug(f'Offer URI: {offer_uri}')
+
+        return offer_uri
 
 
 class Credential:
