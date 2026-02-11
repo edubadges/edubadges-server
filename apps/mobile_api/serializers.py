@@ -1,6 +1,8 @@
 import json
 from urllib.parse import urlencode
 
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
+
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
@@ -78,7 +80,7 @@ class BadgeClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeClass
-        fields = ['id', 'name', 'entity_id', 'image_url', 'issuer']
+        fields = ['id', 'name', 'entity_id', 'image', 'issuer']
 
 
 class BadgeClassDetailSerializer(serializers.ModelSerializer):
@@ -222,32 +224,112 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
         return obj.badgeclass.terms_accepted(user)
 
 
+STATUS_MAP = {
+    True: "Rejected",
+    False: "Unaccepted"
+}
+
+
 class StudentsEnrolledSerializer(serializers.ModelSerializer):
-    badge_class = BadgeClassSerializer()
+    badgeclass = BadgeClassSerializer()
+    created_at = serializers.DateTimeField(source='date_created', read_only=True)
+    issued_on = serializers.DateTimeField(source='date_awarded', read_only=True)
+    acceptance = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentsEnrolled
-        fields = ['id', 'entity_id', 'date_created', 'denied', 'date_awarded', 'badge_class']
+        fields = ['id', 'entity_id', 'created_at', 'denied', 'acceptance', 'issued_on', 'badgeclass']
+
+    def get_acceptance(self, obj):
+        return STATUS_MAP[obj.denied]
 
 
-class StudentsEnrolledDetailSerializer(serializers.ModelSerializer):
-    badge_class = BadgeClassDetailSerializer()
-
-    class Meta:
-        model = StudentsEnrolled
-        fields = ['id', 'entity_id', 'date_created', 'denied', 'date_awarded', 'badge_class']
+class StudentsEnrolledDetailSerializer(StudentsEnrolledSerializer):
+    badgeclass = BadgeClassDetailSerializer()
 
 
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "BadgeCollection",
+            value={
+                "entity_id": "EallxIUARlebkDxox3jYTw",
+                "name": "My certificates",
+                "description": "Stuff I’m proud of",
+                "public": False,
+                "badge_instances": [
+                    "JtNF5yC1QriHtbN5Ufro5A",
+                    "kstvuQ0rTDuoXp7PdgSo4A",
+                ],
+            },
+            response_only=False,
+        ),
+    ]
+)
 class BadgeCollectionSerializer(serializers.ModelSerializer):
     badge_instances = serializers.SlugRelatedField(
         many=True,
-        read_only=True,
-        slug_field='entity_id'
+        slug_field="entity_id",
+        queryset=BadgeInstance.objects.all(),
+        required=False,
+        help_text="List of BadgeInstance entity_ids belonging to the current user",
     )
 
     class Meta:
         model = BadgeInstanceCollection
-        fields = ['id', 'created_at', 'entity_id', 'badge_instances', 'name', 'public', 'description']
+        fields = [
+            "id",
+            "created_at",
+            "entity_id",
+            "name",
+            "description",
+            "public",
+            "badge_instances",
+        ]
+        read_only_fields = ["id", "created_at", "entity_id"]
+
+    def validate_badge_instances(self, badge_instances):
+        user = self.context["request"].user
+
+        for badge in badge_instances:
+            if badge.user_id != user.id:
+                raise serializers.ValidationError(
+                    "All badge_instances must belong to the current user."
+                )
+
+        return badge_instances
+
+    def create(self, validated_data):
+        badges = validated_data.pop("badge_instances", [])
+
+        collection = BadgeInstanceCollection.objects.create(
+            user=self.context["request"].user,
+            **validated_data,
+        )
+
+        if badges:
+            collection.badge_instances.set(badges)
+
+        return collection
+
+    def update(self, instance, validated_data):
+        badges = validated_data.pop("badge_instances", None)
+
+        if badges == []:
+            raise serializers.ValidationError(
+                "badge_instances cannot be empty when explicitly provided."
+            )
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        # Only update M2M if explicitly provided
+        if badges is not None:
+            instance.badge_instances.set(badges)
+
+        return instance
 
 
 class TermsUrlSerializer(serializers.ModelSerializer):

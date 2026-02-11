@@ -1,4 +1,5 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
 
 from backpack.api import BackpackAssertionDetail
 from badgeuser.api import AcceptTermsView
@@ -11,8 +12,6 @@ from mobile_api.api import (
     UnclaimedDirectAwards,
     Enrollments,
     EnrollmentDetail,
-    BadgeCollectionsListView,
-    BadgeCollectionsDetailView,
     Login,
     AcceptGeneralTerms,
     DirectAwardDetailView,
@@ -20,16 +19,20 @@ from mobile_api.api import (
     UserProfileView,
     InstitutionListView,
     RegisterDeviceViewSet,
+    BadgeCollectionViewSet,
+)
+
+
+router = routers.DefaultRouter()
+
+router.register(
+    "badge-collections",
+    BadgeCollectionViewSet,
+    basename="badge-collections",
 )
 
 urlpatterns = [
     path('accept-general-terms', AcceptGeneralTerms.as_view(), name='mobile_api_accept_general_terms'),
-    path('badge-collections', BadgeCollectionsListView.as_view(), name='mobile_api_badge_collections'),
-    path(
-        'badge-collections/<str:entity_id>',
-        BadgeCollectionsDetailView.as_view(),
-        name='mobile_api_badge_collection_update',
-    ),
     path('badge-classes/<str:entity_id>', BadgeClassDetailView.as_view(), name='mobile_api_badge_class_detail'),
     path('badge-instances', BadgeInstances.as_view(), name='mobile_api_badge_instances'),
     path('badge-instances/<str:entity_id>', BadgeInstanceDetail.as_view(), name='mobile_api_badge_instance_detail'),
@@ -46,4 +49,5 @@ urlpatterns = [
     path('catalog', CatalogBadgeClassListView.as_view(), name='mobile_api_catalog_badge_class'),
     path('institutions', InstitutionListView.as_view(), name='mobile_api_institution_list'),
     path('register-device', RegisterDeviceViewSet.as_view({'post': 'create'}), name='mobile_api_register_device'),
+    path('', include(router.urls)),
 ]

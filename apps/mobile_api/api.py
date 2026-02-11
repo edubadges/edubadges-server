@@ -18,12 +18,11 @@ from drf_spectacular.utils import (
     OpenApiResponse,
     OpenApiTypes,
     extend_schema,
-    inline_serializer,
+    inline_serializer, extend_schema_view,
 )
 
 from institution.models import Institution
 from issuer.models import BadgeInstance, BadgeInstanceCollection, BadgeClass
-from issuer.serializers import BadgeInstanceCollectionSerializer
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
 from mainsite.mobile_api_authentication import TemporaryUser
@@ -37,15 +36,15 @@ from mobile_api.serializers import (
     BadgeInstanceSerializer,
     DirectAwardDetailSerializer,
     DirectAwardSerializer,
-    StudentsEnrolledDetailSerializer,
     StudentsEnrolledSerializer,
+    StudentsEnrolledDetailSerializer,
     UserSerializer,
     CatalogBadgeClassSerializer,
     UserProfileSerializer,
     BadgeClassDetailSerializer,
     InstitutionListSerializer,
 )
-from rest_framework import serializers, status, generics
+from rest_framework import serializers, status, generics, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -707,27 +706,28 @@ class Enrollments(APIView):
                             {
                                 'id': 40,
                                 'entity_id': 'UMcx7xCPS4yBuztOj2IDEw',
-                                'date_created': '2023-09-04T14:42:03.046498+02:00',
-                                'denied': 'false',
-                                'date_awarded': '2023-09-04T15:02:15.088536+02:00',
-                                'badge_class': {
+                                'created_at': '2023-09-04T14:42:03.046498+02:00',
+                                'denied': False,
+                                'issued_on': '2023-09-04T15:02:15.088536+02:00',
+                                'acceptance': 'Unaccepted',
+                                'badgeclass': {
                                     'id': 119,
                                     'name': 'Test enrollment',
                                     'entity_id': '_KI6moSxQ3mAzPEfYUHnLg',
-                                    'image_url': 'https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_3b1a3c87-d7c6-488f-a1f9-1d3019a137ee.png',
+                                    'image': 'https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_3b1a3c87-d7c6-488f-a1f9-1d3019a137ee.png',
                                     'issuer': {
                                         'name_dutch': 'SURF Edubadges',
                                         'name_english': 'SURF Edubadges',
-                                        'image_dutch': 'null',
+                                        'image_dutch': None,
                                         'image_english': '/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png',
                                         'faculty': {
                                             'name_dutch': 'SURF',
                                             'name_english': 'SURF',
-                                            'image_dutch': 'null',
-                                            'image_english': 'null',
-                                            'on_behalf_of': 'false',
-                                            'on_behalf_of_display_name': 'null',
-                                            'on_behalf_of_url': 'null',
+                                            'image_dutch': None,
+                                            'image_english': None,
+                                            'on_behalf_of': False,
+                                            'on_behalf_of_display_name': None,
+                                            'on_behalf_of_url': None,
                                             'institution': {
                                                 'name_dutch': 'University Voorbeeld',
                                                 'name_english': 'University Example',
@@ -789,24 +789,61 @@ class EnrollmentDetail(APIView):
                     OpenApiExample(
                         'Enrollment Details',
                         value={
-                            'entity_id': 'enrollment-123',
-                            'badge_class': {
-                                'entity_id': 'badgeclass-789',
-                                'name': 'Advanced Machine Learning',
-                                'description': 'Enrolled in advanced ML course',
-                                'image': 'https://example.com/ml-badge.png',
-                                'criteria': 'https://example.com/criteria',
-                            },
-                            'user': 'user@example.com',
-                            'date_enrolled': '2023-03-10T14:25:00Z',
-                            'date_awarded': None,
-                            'status': 'Active',
-                            'issuer': {
-                                'name': 'University of Example',
-                                'url': 'https://example.edu',
+                            'id': 40,
+                            'entity_id': 'UMcx7xCPS4yBuztOj2IDEw',
+                            'created_at': '2023-09-04T14:42:03.046498+02:00',
+                            'denied': False,
+                            'issued_on': '2023-09-04T15:02:15.088536+02:00',
+                            'acceptance': 'Unaccepted',
+                            'badgeclass': {
+                                'id': 119,
+                                'name': 'Test enrollment',
+                                'entity_id': '_KI6moSxQ3mAzPEfYUHnLg',
+                                'image': 'https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_3b1a3c87-d7c6-488f-a1f9-1d3019a137ee.png',
+                                'description': 'This is a detailed badge class description',
+                                'formal': True,
+                                'participation': 'optional',
+                                'assessment_type': 'exam',
+                                'assessment_id_verified': True,
+                                'assessment_supervised': False,
+                                'quality_assurance_name': 'QA Name',
+                                'stackable': False,
+                                'badgeclassextension_set': [
+                                    {
+                                        'name': 'ECTS',
+                                        'value': 2.5
+                                    }
+                                ],
+                                'badge_class_type': 'standard',
+                                'expiration_period': None,
+                                'issuer': {
+                                    'name_dutch': 'SURF Edubadges',
+                                    'name_english': 'SURF Edubadges',
+                                    'image_dutch': None,
+                                    'image_english': '/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png',
+                                    'faculty': {
+                                        'name_dutch': 'SURF',
+                                        'name_english': 'SURF',
+                                        'image_dutch': None,
+                                        'image_english': None,
+                                        'on_behalf_of': False,
+                                        'on_behalf_of_display_name': None,
+                                        'on_behalf_of_url': None,
+                                        'institution': {
+                                            'name_dutch': 'University Voorbeeld',
+                                            'name_english': 'University Example',
+                                            'image_dutch': '/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png',
+                                            'image_english': '/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png',
+                                            'identifier': 'university-example.org',
+                                            'alternative_identifier': 'university-example.org.tempguestidp.edubadges.nl',
+                                            'grondslag_formeel': 'gerechtvaardigd_belang',
+                                            'grondslag_informeel': 'gerechtvaardigd_belang',
+                                        },
+                                    },
+                                },
                             },
                         },
-                        description='Detailed information about a specific enrollment',
+                        description='Detailed information about a specific enrollment with full badgeclass details',
                         response_only=True,
                     ),
                 ],
@@ -898,213 +935,25 @@ class EnrollmentDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class BadgeCollectionsListView(APIView):
+@extend_schema_view(
+    list=extend_schema(description="List badge collections"),
+    retrieve=extend_schema(description="Retrieve badge collection"),
+    create=extend_schema(description="Create badge collection"),
+    update=extend_schema(description="Update badge collection"),
+    partial_update=extend_schema(description="Partially update badge collection"),
+    destroy=extend_schema(description="Delete badge collection"),
+)
+class BadgeCollectionViewSet(viewsets.ModelViewSet):
     permission_classes = (MobileAPIPermission,)
+    serializer_class = BadgeCollectionSerializer
+    lookup_field = "entity_id"
 
-    @extend_schema(
-        methods=['GET'],
-        description='Get all badge collections for the user',
-        responses={
-            200: OpenApiResponse(
-                description='List of badge collections',
-                response=BadgeCollectionSerializer(many=True),
-                examples=[
-                    OpenApiExample(
-                        'Badge Collections List',
-                        value=[
-                            {
-                                'id': 9,
-                                'created_at': '2025-10-07T12:41:36.332147+02:00',
-                                'entity_id': 'lt3O3SUpS9Culz0IrA3rOg',
-                                'badge_instances': [
-                                    'badge-96-entity-id',
-                                    'badge-175-entity-id',
-                                    'badge-176-entity-id',
-                                    'badge-287-entity-id',
-                                ],
-                                'name': 'Test collection 1',
-                                'public': 'false',
-                                'description': 'test',
-                            },
-                            {
-                                'id': 11,
-                                'created_at': '2025-10-27T16:14:42.650246+01:00',
-                                'entity_id': 'dhuf6Qx2RMCtRKBw0iHGcg',
-                                'badge_instances': ['badge-96-entity-id', 'badge-175-entity-id'],
-                                'name': 'Test collection 2',
-                                'public': 'true',
-                                'description': 'Test2',
-                            },
-                        ],
-                        description='Array of badge collections created by the user',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
-    )
-    def get(self, request, **kwargs):
-        collections = BadgeInstanceCollection.objects.filter(user=request.user).prefetch_related('badge_instances')
-        serializer = BadgeCollectionSerializer(collections, many=True)
-        return Response(serializer.data)
-
-    @extend_schema(
-        request=BadgeInstanceCollectionSerializer,
-        description='Create a new BadgeInstanceCollection',
-        responses={
-            201: OpenApiResponse(
-                description='Badge collection created successfully',
-                response=BadgeInstanceCollectionSerializer,
-                examples=[
-                    OpenApiExample(
-                        'Created Collection',
-                        value={
-                            'entity_id': 'collection-123',
-                            'name': 'My Achievements',
-                            'description': 'Collection of my programming achievements',
-                            'badge_instances': [311],
-                        },
-                        description='Newly created badge collection',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            400: OpenApiResponse(
-                description='Invalid request data',
-                examples=[
-                    OpenApiExample(
-                        'Invalid Data',
-                        value={'name': ['This field is required.']},
-                        description='Validation errors in the request data',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
-    )
-    def post(self, request):
-        serializer = BadgeInstanceCollectionSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        badge_collection = serializer.save()
-        return Response(BadgeInstanceCollectionSerializer(badge_collection).data, status=status.HTTP_201_CREATED)
-
-
-class BadgeCollectionsDetailView(APIView):
-    permission_classes = (MobileAPIPermission,)
-
-    @extend_schema(
-        request=BadgeInstanceCollectionSerializer,
-        description='Update an existing BadgeInstanceCollection by entity_id',
-        parameters=[
-            OpenApiParameter(
-                name='entity_id',
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                required=True,
-                description='entity_id of the collection',
-            )
-        ],
-        responses={
-            200: OpenApiResponse(
-                description='Badge collection updated successfully',
-                response=BadgeInstanceCollectionSerializer,
-                examples=[
-                    OpenApiExample(
-                        'Updated Collection',
-                        value={
-                            'entity_id': 'collection-123',
-                            'name': 'My Updated Achievements',
-                            'description': 'Updated collection of my programming achievements',
-                            'badge_instances': [
-                                {
-                                    'entity_id': 'badge-456',
-                                    'name': 'Python Programming',
-                                },
-                            ],
-                        },
-                        description='Updated badge collection',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            404: OpenApiResponse(
-                description='Badge collection not found',
-                examples=[
-                    OpenApiExample(
-                        'Not Found',
-                        value={'detail': 'Badge collection not found'},
-                        description='The requested badge collection does not exist',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            400: OpenApiResponse(
-                description='Invalid request data',
-                examples=[
-                    OpenApiExample(
-                        'Invalid Data',
-                        value={'name': ['This field is required.']},
-                        description='Validation errors in the request data',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
-    )
-    def put(self, request, entity_id):
-        badge_collection = get_object_or_404(BadgeInstanceCollection, user=request.user, entity_id=entity_id)
-        serializer = BadgeInstanceCollectionSerializer(
-            badge_collection, data=request.data, context={'request': request}, partial=False
+    def get_queryset(self):
+        return (
+            BadgeInstanceCollection.objects
+            .filter(user=self.request.user)
+            .prefetch_related("badge_instances")
         )
-        serializer.is_valid(raise_exception=True)
-        badge_collection = serializer.save()
-        return Response(BadgeInstanceCollectionSerializer(badge_collection).data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        request=None,
-        description='Delete a BadgeInstanceCollection by ID',
-        parameters=[
-            OpenApiParameter(
-                name='entity_id',
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
-                required=True,
-                description='entity_id of the enrollment',
-            )
-        ],
-        responses={
-            204: OpenApiResponse(
-                description='Badge collection deleted successfully',
-                examples=[
-                    OpenApiExample(
-                        'Deleted',
-                        value=None,
-                        description='Badge collection was successfully deleted',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            404: OpenApiResponse(
-                description='Badge collection not found',
-                examples=[
-                    OpenApiExample(
-                        'Not Found',
-                        value={'detail': 'Badge collection not found'},
-                        description='The requested badge collection does not exist',
-                        response_only=True,
-                    ),
-                ],
-            ),
-            403: permission_denied_response,
-        },
-    )
-    def delete(self, request, entity_id):
-        badge_collection = get_object_or_404(BadgeInstanceCollection, entity_id=entity_id, user=request.user)
-        badge_collection.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CatalogBadgeClassListView(generics.ListAPIView):
