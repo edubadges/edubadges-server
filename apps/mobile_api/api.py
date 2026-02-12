@@ -366,6 +366,7 @@ class BadgeInstanceDetail(APIView):
                                 },
                             },
                             'linkedin_url': 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=Edubadge%20account%20complete&organizationId=206815&issueYear=2021&issueMonth=3&certUrl=https%3A%2F%2Fdemo.edubadges.nl%2Fpublic%2Fassertions%2FI41eovHQReGI_SG5KM6dSQ&certId=I41eovHQReGI_SG5KM6dSQ&original_referer=https%3A%2F%2Fdemo.edubadges.nl',
+                            'narrative': "Personal message from the awarder to the receiver",
                         },
                         description='Detailed information about a specific badge instance',
                         response_only=True,
@@ -390,6 +391,7 @@ class BadgeInstanceDetail(APIView):
         instance = (
             BadgeInstance.objects.select_related('badgeclass')
             .prefetch_related('badgeclass__badgeclassextension_set')
+            .prefetch_related('badgeinstanceevidence_set')
             .select_related('badgeclass__issuer')
             .select_related('badgeclass__issuer__faculty')
             .select_related('badgeclass__issuer__faculty__institution')
