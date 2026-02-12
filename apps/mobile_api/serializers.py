@@ -104,7 +104,7 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'stackable',
             'badgeclassextension_set',
             'issuer',
-            'badge_class_type', 
+            'badge_class_type',
             'expiration_period',
         ]
 
@@ -231,7 +231,7 @@ STATUS_MAP = {
 
 
 class StudentsEnrolledSerializer(serializers.ModelSerializer):
-    badgeclass = BadgeClassSerializer()
+    badgeclass = BadgeClassSerializer(source="badge_class")
     created_at = serializers.DateTimeField(source='date_created', read_only=True)
     issued_on = serializers.DateTimeField(source='date_awarded', read_only=True)
     acceptance = serializers.SerializerMethodField()
@@ -245,7 +245,7 @@ class StudentsEnrolledSerializer(serializers.ModelSerializer):
 
 
 class StudentsEnrolledDetailSerializer(StudentsEnrolledSerializer):
-    badgeclass = BadgeClassDetailSerializer()
+    badgeclass = BadgeClassDetailSerializer(source="badge_class")
 
 
 @extend_schema_serializer(
