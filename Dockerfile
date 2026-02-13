@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     libcairo2-dev \
     locales \
     git \
+    default-libmysqlclient-dev \
     && locale-gen en_US.UTF-8 && dpkg-reconfigure locales \
     && rm -rf /var/lib/apt/lists/*
 
