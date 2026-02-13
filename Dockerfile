@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     git \
     default-libmysqlclient-dev \
     gcc \
-    python3.9-dev \
+    python3-dev \
     && locale-gen en_US.UTF-8 && dpkg-reconfigure locales \
     && rm -rf /var/lib/apt/lists/*
 
