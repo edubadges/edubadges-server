@@ -99,6 +99,10 @@ docker compose up
 docker build -t edubadges-server .
 ```
 
+### Important Note: --system Flag
+
+The Dockerfile uses `uv pip sync uv.lock --system` to install packages directly into the system Python environment rather than creating a virtual environment. This is the recommended approach for Docker containers.
+
 ### Docker Image Benefits
 
 - **Official support**: Maintained by the uv team
