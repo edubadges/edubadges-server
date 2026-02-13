@@ -1,29 +1,26 @@
 import os
-
 from django.core.checks import register, Warning
 
-
 @register()
-def check_firebase_env_vars(app_configs, **kwargs):
+def check_firebase_json_file(app_configs, **kwargs):
     """
-    Check that all required Firebase env variables are set.
+    Check that the Firebase service account JSON file exists.
     """
-    required_vars = [
-        "FIREBASE_TYPE",
-        "FIREBASE_PROJECT_ID",
-        "FIREBASE_PRIVATE_KEY_ID",
-        "FIREBASE_PRIVATE_KEY",
-        "FIREBASE_CLIENT_EMAIL",
-    ]
-
-    missing = [var for var in required_vars if not os.environ.get(var)]
-
-    if missing:
+    json_file = os.environ.get("FIREBASE_JSON_FILE")
+    if not json_file:
         return [
             Warning(
-                "Missing Firebase environment variables: {}".format(", ".join(missing)),
-                hint="Set these env vars for push notifications to work.",
+                "FIREBASE_JSON_FILE environment variable not set.",
+                hint="Set FIREBASE_JSON_FILE to the path of your Firebase service account JSON file.",
                 id="fcm_django.W001",
+            )
+        ]
+    if not os.path.exists(json_file):
+        return [
+            Warning(
+                f"Firebase service account JSON file not found at {json_file}",
+                hint="Make sure the file exists and the Django process can read it.",
+                id="fcm_django.W002",
             )
         ]
     return []
