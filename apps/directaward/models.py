@@ -11,6 +11,7 @@ from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BaseAuditedModel
 from mainsite.utils import send_mail, EmailMessageMaker
+from mobile_api.push_notifications import send_push_notification
 
 
 class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
@@ -142,6 +143,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return self.badgeclass.get_permissions(user)
 
     def notify_recipient(self):
+        from badgeuser.models import BadgeUser
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(
@@ -150,6 +152,19 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             html_message=html_message,
             recipient_list=[self.recipient_email],
         )
+
+        user = BadgeUser.objects.filter(email=self.recipient_email).first()
+        send_push_notification(
+            user=user,
+            title="Edubadge received",
+            body="You earned an edubadge, claim it now!",
+            data={
+                "title_key": "push.badge_received_title",
+                "body_key": "push.badge_received_body",
+                "badge": self.name,
+            }
+        )
+
 
 
 class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
@@ -225,6 +240,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return [da.recipient_email for da in self.cached_direct_awards()]
 
     def notify_recipients(self):
+        from badgeuser.models import BadgeUser
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(
@@ -233,6 +249,18 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             html_message=html_message,
             bcc=self.recipient_emails,
         )
+
+        for user in BadgeUser.objects.filter(email__in=self.recipient_emails):
+            send_push_notification(
+                user=user,
+                title="Edubadge received",
+                body="You earned an edubadge, claim it now!",
+                data={
+                    "title_key": "push.badge_received_title",
+                    "body_key": "push.badge_received_body",
+                    "badge": self.badgeclass.name,
+                }
+            )
 
     def notify_awarder(self):
         html_message = EmailMessageMaker.create_direct_award_bundle_mail(self)

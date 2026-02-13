@@ -33,6 +33,7 @@ from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError,
 from mainsite.mixins import ImageUrlGetterMixin, DefaultLanguageMixin
 from mainsite.models import BadgrApp, BaseAuditedModel, ArchiveMixin
 from mainsite.utils import OriginSetting, generate_entity_uri, EmailMessageMaker, send_mail
+from mobile_api.push_notifications import send_push_notification
 from signing import tsob
 from signing.models import AssertionTimeStamp, PublicKeyIssuer
 from signing.models import PublicKey
@@ -858,6 +859,8 @@ class BadgeClass(
         include_evidence=True,
         **kwargs,
     ):
+        from badgeuser.models import BadgeUser
+
         if not recipient.validated_name and enforce_validated_name and not self.award_non_validated_name_allowed:
             raise serializers.ValidationError('You need a validated_name from an Institution to issue badges.')
         assertion = BadgeInstance.objects.create(
@@ -875,6 +878,19 @@ class BadgeClass(
             recipient.email_user(
                 subject='Je hebt een edubadge ontvangen! You received an edubadge!', html_message=message
             )
+
+            user = BadgeUser.objects.filter(email=recipient.email).first()
+            send_push_notification(
+                user=user,
+                title="Edubadge received",
+                body="You earned an edubadge, claim it now!",
+                data={
+                    "title_key": "push.badge_received_title",
+                    "body_key": "push.badge_received_body",
+                    "badge": self.name,
+                }
+            )
+
         return assertion
 
     def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
