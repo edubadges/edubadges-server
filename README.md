@@ -150,7 +150,16 @@ mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql
 
 _from within edubadges-server directory_
 
+You have two options for dependency management:
+
+**Option 1: Using uv (recommended)**
+- Install uv: `pip install uv`
+- Sync dependencies: `uv pip sync uv.lock`
+
+**Option 2: Using pip (traditional)**
 - `pip install -r requirements.txt`
+
+**Note:** The Docker setup uses official uv Docker base images (`ghcr.io/astral-sh/uv:0.8`) for optimal performance and consistency.
 
 if on a mac mysqlclient does not build, try:
 

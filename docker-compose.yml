@@ -10,6 +10,7 @@ services:
       - .:/app:Z
     working_dir: /app
     environment:
+      - UV_PYTHON=python3.9
       # Be sure to set BADGR_DB_PASSWORD when running docker-compose
       - ACCOUNT_SALT=secret
       - ALLOW_SEEDS=1

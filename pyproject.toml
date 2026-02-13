@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "badgr-server"
+version = "1.12.0"
+description = "Digital badge management for issuers, earners, and consumers"
+authors = [{name = "Concentric Sky", email = "badgr@concentricsky.com"}]
+license = {text = "GNU Affero General Public License v3"}
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Education",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.4.0",
+    "black>=24.0.0",
+    "mypy>=1.0.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "apps"}
+packages = ["find:"]
+
+[tool.setuptools.package-data]
+"*" = ["*.*"]
+
+[tool.ruff]
+line-length = 120
+select = ["E", "F", "W", "I", "N", "D"]
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
+
+[tool.black]
+line-length = 120
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true

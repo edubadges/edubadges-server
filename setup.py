@@ -9,9 +9,18 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     README = readme.read()
 
-# execute version.py in the local namespace, but dont import the module.
-exec(compile(open(os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'), "rb").read(), os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'), 'exec'))
-version = ".".join(map(str, VERSION))
+# Try to get version from version.py, fall back to default
+try:
+    exec(
+        compile(
+            open(os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'), 'rb').read(),
+            os.path.join(os.path.dirname(__file__), 'apps/mainsite/version.py'),
+            'exec',
+        )
+    )
+    version = '.'.join(map(str, VERSION))
+except (FileNotFoundError, NameError):
+    version = '1.12.0'
 
 
 def _clean_version_tag(tag):
@@ -25,20 +34,23 @@ def dependencies_from_requirements(requirements_filename):
     install_requires = []
     dependency_links = []
     with open(requirements_filename) as fh:
-        for line in fh.read().split("\n"):
+        for line in fh.read().split('\n'):
             line = line.strip()
             if len(line) < 1 or line.startswith('#') or line.startswith('--'):
+                continue
+            # Skip git dependencies for setuptools, they're handled by uv/pip directly
+            if line.startswith('git+'):
                 continue
             matches = re.match(r'git\+(?P<path>.+/)(?P<package_name>.+)\.git@(?P<version>.+)$', line)
             if matches:
                 d = matches.groupdict()
                 d['cleanversion'] = _clean_version_tag(d.get('version'))
-                dependency_links.append("{line}#egg={package_name}-{version}".format(
-                    line=line,
-                    package_name=d.get('package_name'),
-                    version=d.get('cleanversion')
-                ))
-                install_requires.append("{package_name}=={cleanversion}".format(**d))
+                dependency_links.append(
+                    '{line}#egg={package_name}-{version}'.format(
+                        line=line, package_name=d.get('package_name'), version=d.get('cleanversion')
+                    )
+                )
+                install_requires.append('{package_name}=={cleanversion}'.format(**d))
             else:
                 install_requires.append(line)
     return install_requires, dependency_links
@@ -50,11 +62,9 @@ install_requires, dependency_links = dependencies_from_requirements('requirement
 setup(
     name='badgr-server',
     version=version,
-
-    package_dir={'': "apps"},
+    package_dir={'': 'apps'},
     packages=find_packages('apps'),
     include_package_data=True,
-
     license='GNU Affero General Public License v3',
     description='Digital badge management for issuers, earners, and consumers',
     long_description=README,
@@ -63,7 +73,6 @@ setup(
     author_email='badgr@concentricsky.com',
     install_requires=install_requires,
     dependency_links=dependency_links,
-
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
@@ -78,5 +87,4 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-
 )
