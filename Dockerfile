@@ -5,6 +5,7 @@ FROM ghcr.io/astral-sh/uv:python3.9-trixie-slim as builder
 RUN apt-get update && apt-get install -y \
     libcairo2-dev \
     locales \
+    git \
     && locale-gen en_US.UTF-8 && dpkg-reconfigure locales \
     && rm -rf /var/lib/apt/lists/*
 
@@ -24,6 +25,7 @@ FROM ghcr.io/astral-sh/uv:python3.9-trixie-slim
 RUN apt-get update && apt-get install -y \
     libcairo2 \
     locales \
+    git \
     && locale-gen en_US.UTF-8 && dpkg-reconfigure locales \
     && rm -rf /var/lib/apt/lists/*
 
