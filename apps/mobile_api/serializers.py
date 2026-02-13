@@ -133,6 +133,7 @@ class BadgeInstanceSerializer(serializers.ModelSerializer):
 class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassDetailSerializer()
     linkedin_url = serializers.SerializerMethodField()
+    narrative = serializers.SerializerMethodField()
 
     class Meta:
         model = BadgeInstance
@@ -150,7 +151,8 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
             'linkedin_url',
             'grade_achieved',
             'include_grade_achieved',
-            'include_evidence'
+            'include_evidence',
+            'narrative',
         ]
 
     def _get_linkedin_org_id(self, badgeclass):
@@ -188,6 +190,10 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
         }
 
         return f"https://www.linkedin.com/profile/add?{urlencode(params)}"
+
+    def get_narrative(self, obj):
+        evidence = obj.badgeinstanceevidence_set.first()
+        return evidence.narrative if evidence else None
 
 
 class DirectAwardSerializer(serializers.ModelSerializer):
