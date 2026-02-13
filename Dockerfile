@@ -14,8 +14,8 @@ WORKDIR /app
 # Copy only requirements files first for better caching
 COPY uv.lock pyproject.toml ./
 
-# Install dependencies using uv sync
-RUN uv pip sync uv.lock
+# Install dependencies using uv sync (--system for Docker system installation)
+RUN uv pip sync uv.lock --system
 
 # Final stage - use the same Python+uv image for consistency
 FROM ghcr.io/astral-sh/uv:python3.9-trixie-slim
