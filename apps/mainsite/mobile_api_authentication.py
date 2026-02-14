@@ -91,6 +91,7 @@ class MobileAPIAuthentication(BaseAuthentication):
                 # further logic is dealt with in /mobile/api/login
                 request.mobile_api_call = True
                 logger.info(f'MobileAPIAuthentication created TemporaryUser {introspect_json["email"]} for login')
+                request.mobile_api_call = True
                 return TemporaryUser(introspect_json, bearer_token), bearer_token
             else:
                 # If not heading to login-endpoint, we raise AuthenticationFailed resulting in 401

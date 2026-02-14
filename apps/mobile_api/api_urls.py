@@ -21,14 +21,19 @@ from mobile_api.api import (
     RegisterDeviceViewSet,
     BadgeCollectionViewSet,
 )
+from mobile_api.test_api import (
+    TestAnalyticsAPI,
+    TestRateLimitAPI,
+    AnalyticsSummaryAPI,
+)
 
 
 router = routers.DefaultRouter()
 
 router.register(
-    "badge-collections",
+    'badge-collections',
     BadgeCollectionViewSet,
-    basename="badge-collections",
+    basename='badge-collections',
 )
 
 urlpatterns = [
@@ -50,4 +55,8 @@ urlpatterns = [
     path('institutions', InstitutionListView.as_view(), name='mobile_api_institution_list'),
     path('register-device', RegisterDeviceViewSet.as_view({'post': 'create'}), name='mobile_api_register_device'),
     path('', include(router.urls)),
+    # Test endpoints for analytics and rate limiting
+    path('test-analytics', TestAnalyticsAPI.as_view(), name='mobile_api_test_analytics'),
+    path('test-rate-limit', TestRateLimitAPI.as_view(), name='mobile_api_test_rate_limit'),
+    path('analytics-summary', AnalyticsSummaryAPI.as_view(), name='mobile_api_analytics_summary'),
 ]
