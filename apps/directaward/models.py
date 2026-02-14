@@ -32,12 +32,18 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     STATUS_REJECTED = 'Rejected'
     STATUS_SCHEDULED = 'Scheduled'
     STATUS_DELETED = 'Deleted'
+    STATUS_PENDING_APPROVAL = 'Pending Approval'
+    STATUS_APPROVED = 'Approved'
+    STATUS_BLOCKED = 'Blocked'
     STATUS_CHOICES = (
         (STATUS_UNACCEPTED, 'Unaccepted'),
         (STATUS_REVOKED, 'Revoked'),
         (STATUS_REJECTED, 'Rejected'),
         (STATUS_SCHEDULED, 'Scheduled'),
         (STATUS_DELETED, 'Deleted'),
+        (STATUS_PENDING_APPROVAL, 'Pending Approval'),
+        (STATUS_APPROVED, 'Approved'),
+        (STATUS_BLOCKED, 'Blocked'),
     )
     status = models.CharField(max_length=254, choices=STATUS_CHOICES, default=STATUS_UNACCEPTED)
     revocation_reason = models.CharField(max_length=255, blank=True, null=True, default=None)
@@ -46,27 +52,25 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     expiration_date = models.DateTimeField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
-        if ((
-                self.__class__.objects.filter(
-                    eppn=self.eppn,
-                    badgeclass=self.badgeclass,
-                    status='Unaccepted',
-                    bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN,
-                )
-                        .exclude(pk=self.pk)
-                        .exclude(eppn__isnull=True)
-                        .exists()
+        if (
+            self.__class__.objects.filter(
+                eppn=self.eppn,
+                badgeclass=self.badgeclass,
+                status='Unaccepted',
+                bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN,
+            )
+            .exclude(pk=self.pk)
+            .exclude(eppn__isnull=True)
+            .exists()
         ) or self.__class__.objects.filter(
             recipient_email=self.recipient_email,
             badgeclass=self.badgeclass,
             status='Unaccepted',
             bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EMAIL,
-        )
-                .exclude(pk=self.pk)
-                .exclude(recipient_email__isnull=True).exists()):
+        ).exclude(pk=self.pk).exclude(recipient_email__isnull=True).exists():
             raise IntegrityError(
-                f"DirectAward with eppn: {self.eppn} / email: {self.recipient_email} and status Unaccepted "
-                f"already exists for badgeclass {self.badgeclass.name} ({self.badgeclass.id})."
+                f'DirectAward with eppn: {self.eppn} / email: {self.recipient_email} and status Unaccepted '
+                f'already exists for badgeclass {self.badgeclass.name} ({self.badgeclass.id}).'
             )
         return super(DirectAward, self).validate_unique(exclude=exclude)
 
@@ -88,9 +92,9 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         from issuer.models import BadgeInstance
 
         if (
-                self.eppn not in recipient.eppns
-                and self.recipient_email != recipient.email
-                and self.bundle.identifier_type != DirectAwardBundle.IDENTIFIER_EMAIL
+            self.eppn not in recipient.eppns
+            and self.recipient_email != recipient.email
+            and self.bundle.identifier_type != DirectAwardBundle.IDENTIFIER_EMAIL
         ):
             raise BadgrValidationError('Cannot award, eppn / email does not match', 999)
 
@@ -112,8 +116,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         expires_at = None
         if self.badgeclass.expiration_period:
             expires_at = (
-                    datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
-                    + self.badgeclass.expiration_period
+                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+                + self.badgeclass.expiration_period
             )
         assertion = self.badgeclass.issue(
             recipient=recipient,
@@ -150,6 +154,52 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             html_message=html_message,
             recipient_list=[self.recipient_email],
         )
+
+    def check_thresholds(self):
+        """Check if this direct award passes threshold monitoring"""
+        from .threshold_monitor import DirectAwardThresholdMonitor
+
+        monitor = DirectAwardThresholdMonitor()
+        threshold_result = monitor.check_award(self)
+
+        if threshold_result.passed:
+            self.status = DirectAward.STATUS_APPROVED
+            self.save()
+            return True
+        else:
+            self.status = DirectAward.STATUS_BLOCKED
+            self.save()
+            # Create monitoring record
+            DirectAwardMonitoring.objects.create(
+                direct_award=self,
+                monitoring_status='Blocked',
+                threshold_violations=threshold_result.violations,
+                auto_approved=False,
+            )
+            return False
+
+    def admin_override(self, reviewer, override_action, comments=None):
+        """Admin override for blocked direct award"""
+        if self.status != DirectAward.STATUS_BLOCKED:
+            raise BadgrValidationError('Direct award is not blocked', 999)
+
+        monitoring = self.monitoring
+
+        if override_action == 'approve':
+            self.status = DirectAward.STATUS_APPROVED
+            monitoring.monitoring_status = 'Admin Approved'
+        elif override_action == 'reject':
+            self.status = DirectAward.STATUS_REJECTED
+            monitoring.monitoring_status = 'Admin Rejected'
+        else:
+            raise BadgrValidationError('Invalid override action', 999)
+
+        monitoring.reviewed_by = reviewer
+        monitoring.review_date = datetime.datetime.now()
+        monitoring.admin_comments = comments
+        monitoring.save()
+
+        self.save()
 
 
 class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
@@ -252,6 +302,37 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             html_message=html_message,
             recipient_list=[self.created_by.email],
         )
+
+
+class DirectAwardMonitoring(models.Model):
+    STATUS_PENDING = 'Pending'
+    STATUS_AUTO_APPROVED = 'Auto Approved'
+    STATUS_BLOCKED = 'Blocked'
+    STATUS_ADMIN_APPROVED = 'Admin Approved'
+    STATUS_ADMIN_REJECTED = 'Admin Rejected'
+    STATUS_CHOICES = (
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_AUTO_APPROVED, 'Auto Approved'),
+        (STATUS_BLOCKED, 'Blocked'),
+        (STATUS_ADMIN_APPROVED, 'Admin Approved'),
+        (STATUS_ADMIN_REJECTED, 'Admin Rejected'),
+    )
+
+    direct_award = models.OneToOneField('directaward.DirectAward', on_delete=models.CASCADE, related_name='monitoring')
+    monitoring_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    threshold_violations = models.JSONField(null=True, blank=True)
+    auto_approved = models.BooleanField(default=False)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    review_date = models.DateTimeField(null=True, blank=True)
+    admin_comments = models.TextField(blank=True, null=True)
+    block_reason = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Direct Award Monitoring'
+        verbose_name_plural = 'Direct Award Monitoring Records'
 
 
 class DirectAwardAuditTrail(models.Model):

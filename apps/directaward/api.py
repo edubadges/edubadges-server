@@ -11,7 +11,11 @@ from rest_framework.views import APIView
 from badgrsocialauth.permissions import IsSuperUser
 from directaward.models import DirectAward, DirectAwardBundle, DirectAwardAuditTrail
 from directaward.permissions import IsDirectAwardOwner
-from directaward.serializer import DirectAwardBundleSerializer, DirectAwardAuditTrailSerializer
+from directaward.serializer import (
+    DirectAwardBundleSerializer,
+    DirectAwardAuditTrailSerializer,
+    DirectAwardApprovalSerializer,
+)
 from directaward.signals import audit_trail_signal
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
 from mainsite import settings
@@ -99,7 +103,10 @@ not_found_response = OpenApiResponse(
 @extend_schema(
     description='Create a direct award bundle',
     methods=['POST'],
-    request=inline_serializer(name='DirectAwardCreateBundleRequest', fields=direct_awards_request),
+    request=inline_serializer(
+        name='DirectAwardCreateBundleRequest',
+        fields={**direct_awards_request},
+    ),
     responses={
         201: OpenApiResponse(
             response=inline_serializer(
@@ -147,9 +154,10 @@ not_found_response = OpenApiResponse(
                 'identifier_type': 'eppn',
                 'scheduled_at': '2025-01-01T12:00:00Z',
                 'notify_recipients': True,
+                'requires_approval': False,
             },
             request_only=True,
-        )
+        ),
     ],
 )
 class DirectAwardBundleList(VersionedObjectMixin, BaseEntityListView):
@@ -189,6 +197,9 @@ class DirectAwardBundleView(APIView):
                                     'eppn': serializers.CharField(),
                                     'status': serializers.CharField(),
                                     'entity_id': serializers.CharField(),
+                                    'monitoring_status': serializers.CharField(required=False, allow_null=True),
+                                    'block_reason': serializers.CharField(required=False, allow_null=True),
+                                    'admin_comments': serializers.CharField(required=False, allow_null=True),
                                 },
                             )
                         ),
@@ -220,12 +231,17 @@ class DirectAwardBundleView(APIView):
                             'direct_award_scheduled_count': 1,
                             'direct_award_deleted_count': 0,
                             'direct_award_revoked_count': 0,
+                            'direct_award_pending_approval_count': 2,
+                            'direct_award_approved_count': 5,
                             'direct_awards': [
                                 {
                                     'recipient_email': 'user@example.edu',
                                     'eppn': 'user123',
-                                    'status': 'Accepted',
+                                    'status': 'Approved',
                                     'entity_id': 'da-001',
+                                    'monitoring_status': 'Auto Approved',
+                                    'block_reason': None,
+                                    'admin_comments': None,
                                 }
                             ],
                             'badge_assertions': [
@@ -256,12 +272,18 @@ class DirectAwardBundleView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         def convert_direct_award(direct_award):
-            return {
+            award_data = {
                 'recipient_email': direct_award.recipient_email,
                 'eppn': direct_award.eppn,
                 'status': direct_award.status,
                 'entity_id': direct_award.entity_id,
             }
+            # Add monitoring information
+            if hasattr(direct_award, 'monitoring') and direct_award.monitoring:
+                award_data['monitoring_status'] = direct_award.monitoring.monitoring_status
+                award_data['block_reason'] = direct_award.monitoring.block_reason
+                award_data['admin_comments'] = direct_award.monitoring.admin_comments
+            return award_data
 
         def convert_badge_assertion(badge_instance):
             user = badge_instance.user
@@ -284,6 +306,15 @@ class DirectAwardBundleView(APIView):
             'direct_award_scheduled_count': award_bundle.direct_award_scheduled_count,
             'direct_award_deleted_count': award_bundle.direct_award_deleted_count,
             'direct_award_revoked_count': award_bundle.direct_award_revoked_count,
+            'direct_award_pending_monitoring_count': award_bundle.directaward_set.filter(
+                status=DirectAward.STATUS_PENDING_APPROVAL
+            ).count(),
+            'direct_award_auto_approved_count': award_bundle.directaward_set.filter(
+                status=DirectAward.STATUS_APPROVED
+            ).count(),
+            'direct_award_blocked_count': award_bundle.directaward_set.filter(
+                status=DirectAward.STATUS_BLOCKED
+            ).count(),
             'direct_awards': [convert_direct_award(da) for da in award_bundle.directaward_set.all()],
             'badge_assertions': [convert_badge_assertion(ba) for ba in award_bundle.badgeinstance_set.all()],
         }
@@ -710,11 +741,9 @@ class DirectAwardAuditTrailListView(ListAPIView):
             403: permission_denied_response,
         },
     )
-
     def get_queryset(self):
         return (
-            DirectAwardAuditTrail.objects
-            .filter(
+            DirectAwardAuditTrail.objects.filter(
                 action='CREATE',
                 direct_award__isnull=False,
             )
@@ -724,4 +753,269 @@ class DirectAwardAuditTrailListView(ListAPIView):
                 'badgeclass__issuer__faculty__institution',
             )
             .order_by('-action_datetime')
+        )
+
+
+class DirectAwardBlockedList(APIView):
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_map = {'GET': 'may_award'}
+
+    @extend_schema(
+        description='List direct awards blocked by threshold monitoring',
+        methods=['GET'],
+        responses={
+            200: OpenApiResponse(
+                response=inline_serializer(
+                    name='DirectAwardBlockedListResponse',
+                    fields={
+                        'blocked_awards': serializers.ListField(
+                            child=inline_serializer(
+                                name='BlockedAward',
+                                fields={
+                                    'entity_id': serializers.CharField(),
+                                    'recipient_email': serializers.CharField(),
+                                    'eppn': serializers.CharField(),
+                                    'badgeclass_name': serializers.CharField(),
+                                    'created_at': serializers.DateTimeField(),
+                                    'created_by': serializers.CharField(),
+                                    'block_reason': serializers.CharField(),
+                                    'threshold_violations': serializers.DictField(),
+                                },
+                            )
+                        ),
+                    },
+                ),
+                examples=[
+                    OpenApiExample(
+                        'Successful Response',
+                        value={
+                            'blocked_awards': [
+                                {
+                                    'entity_id': 'da-001',
+                                    'recipient_email': 'student@example.edu',
+                                    'eppn': 'student123',
+                                    'badgeclass_name': 'Introduction to Python',
+                                    'created_at': '2025-01-15T10:30:00Z',
+                                    'created_by': 'teacher@example.edu',
+                                    'block_reason': 'Suspicious activity detected',
+                                    'threshold_violations': {'hourly_limit': {'threshold': 10, 'actual': 15}},
+                                }
+                            ],
+                        },
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+        },
+    )
+    def get(self, request):
+        """List all direct awards blocked by threshold monitoring for the user's institution"""
+        # Get all blocked awards for badgeclasses the user can manage
+        blocked_awards = DirectAward.objects.filter(
+            status=DirectAward.STATUS_BLOCKED,
+            badgeclass__issuer__faculty__institution__in=request.user.institutions.all(),
+        ).select_related('badgeclass', 'created_by', 'monitoring')
+
+        result = []
+        for award in blocked_awards:
+            violations = {}
+            block_reason = 'Threshold violation'
+            if hasattr(award, 'monitoring') and award.monitoring:
+                if award.monitoring.threshold_violations:
+                    violations = award.monitoring.threshold_violations
+                if award.monitoring.block_reason:
+                    block_reason = award.monitoring.block_reason
+
+            result.append(
+                {
+                    'entity_id': award.entity_id,
+                    'recipient_email': award.recipient_email,
+                    'eppn': award.eppn,
+                    'badgeclass_name': award.badgeclass.name,
+                    'created_at': award.created_at,
+                    'created_by': award.created_by.email if award.created_by else None,
+                    'block_reason': block_reason,
+                    'threshold_violations': violations,
+                }
+            )
+
+        return Response({'blocked_awards': result}, status=status.HTTP_200_OK)
+
+
+class DirectAwardAdminOverride(BaseEntityDetailView):
+    model = DirectAward
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ['post']
+    permission_map = {'POST': 'may_award'}
+
+    @extend_schema(
+        description='Admin override for blocked direct awards',
+        methods=['POST'],
+        request=inline_serializer(
+            name='DirectAwardAdminOverrideRequest',
+            fields={
+                'action': serializers.ChoiceField(choices=['approve', 'reject']),
+                'comments': serializers.CharField(required=False, allow_blank=True),
+                'block_reason': serializers.CharField(required=False, allow_blank=True),
+            },
+        ),
+        responses={
+            200: OpenApiResponse(
+                response=inline_serializer(
+                    name='DirectAwardAdminOverrideResponse',
+                    fields={
+                        'result': serializers.CharField(),
+                        'status': serializers.CharField(),
+                        'monitoring_record': inline_serializer(
+                            name='DirectAwardMonitoringRecord',
+                            fields={
+                                'monitoring_status': serializers.CharField(),
+                                'reviewed_by': serializers.CharField(),
+                                'review_date': serializers.DateTimeField(),
+                                'admin_comments': serializers.CharField(),
+                                'block_reason': serializers.CharField(),
+                            },
+                        ),
+                    },
+                ),
+                examples=[
+                    OpenApiExample(
+                        'Override Approval Successful Response',
+                        value={
+                            'result': 'ok',
+                            'status': 'Admin Approved',
+                            'monitoring_record': {
+                                'monitoring_status': 'Admin Approved',
+                                'reviewed_by': 'admin@example.edu',
+                                'review_date': '2025-01-15T11:00:00Z',
+                                'admin_comments': 'Legitimate high volume award',
+                                'block_reason': 'Threshold violation overridden',
+                            },
+                        },
+                    ),
+                    OpenApiExample(
+                        'Override Rejection Successful Response',
+                        value={
+                            'result': 'ok',
+                            'status': 'Admin Rejected',
+                            'monitoring_record': {
+                                'monitoring_status': 'Admin Rejected',
+                                'reviewed_by': 'admin@example.edu',
+                                'review_date': '2025-01-15T11:00:00Z',
+                                'admin_comments': 'Confirmed suspicious activity',
+                                'block_reason': 'Inappropriate award pattern',
+                            },
+                        },
+                    ),
+                ],
+            ),
+            400: OpenApiResponse(
+                response=inline_serializer(
+                    name='DirectAwardAdminOverrideBadRequestResponse',
+                    fields={'error': serializers.CharField()},
+                ),
+                examples=[
+                    OpenApiExample(
+                        'Invalid Action',
+                        value={'error': 'Invalid action. Must be either approve or reject'},
+                    ),
+                    OpenApiExample(
+                        'Not Blocked',
+                        value={'error': 'Direct award is not blocked'},
+                    ),
+                ],
+            ),
+            403: permission_denied_response,
+            404: not_found_response,
+        },
+        examples=[
+            OpenApiExample(
+                'Override Approve Request Example',
+                value={
+                    'action': 'approve',
+                    'comments': 'This is a legitimate bulk award for a workshop',
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Override Reject Request Example',
+                value={
+                    'action': 'reject',
+                    'comments': 'Confirmed this is abusive behavior',
+                    'block_reason': 'Violation of institutional policy',
+                },
+                request_only=True,
+            ),
+        ],
+    )
+    def post(self, request, **kwargs):
+        """Admin override for blocked direct awards"""
+        direct_award = self.get_object(request, **kwargs)
+
+        if not self.has_object_permissions(request, direct_award):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        action = request.data.get('action')
+        comments = request.data.get('comments', '')
+        block_reason = request.data.get('block_reason', '')
+
+        if action not in ['approve', 'reject']:
+            return Response(
+                {'error': 'Invalid action. Must be either approve or reject'}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if direct_award.status != DirectAward.STATUS_BLOCKED:
+            return Response({'error': 'Direct award is not blocked'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            direct_award.admin_override(request.user, action, comments)
+
+            if action == 'approve':
+                result_status = 'Admin Approved'
+            else:  # reject
+                result_status = 'Admin Rejected'
+
+            # Get the monitoring record
+            monitoring_record = direct_award.monitoring
+
+            return Response(
+                {
+                    'result': 'ok',
+                    'status': result_status,
+                    'monitoring_record': {
+                        'monitoring_status': monitoring_record.monitoring_status,
+                        'reviewed_by': monitoring_record.reviewed_by.email if monitoring_record.reviewed_by else None,
+                        'review_date': monitoring_record.review_date,
+                        'admin_comments': monitoring_record.admin_comments,
+                        'block_reason': monitoring_record.block_reason,
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def _notify_creator(self, direct_award, status, comments, rejection_reason):
+        """Send email notification to the direct award creator"""
+        creator_email = direct_award.created_by.email if direct_award.created_by else None
+        if not creator_email:
+            return
+
+        if status == 'Approved':
+            subject = f'Your direct award request has been approved'
+            message = f'The direct award for {direct_award.recipient_email} has been approved by an administrator.'
+            if comments:
+                message += f'\n\nComments: {comments}'
+        else:  # Rejected
+            subject = f'Your direct award request has been rejected'
+            message = f'The direct award for {direct_award.recipient_email} has been rejected by an administrator.'
+            if rejection_reason:
+                message += f'\n\nReason: {rejection_reason}'
+            if comments:
+                message += f'\n\nComments: {comments}'
+
+        send_mail(
+            subject=subject,
+            message=message,
+            recipient_list=[creator_email],
         )

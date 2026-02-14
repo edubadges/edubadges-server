@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError, BadRequest
 from django.db import transaction
 from rest_framework import serializers
 
-from directaward.models import DirectAward, DirectAwardBundle, DirectAwardAuditTrail
+from directaward.models import DirectAward, DirectAwardBundle, DirectAwardAuditTrail, DirectAwardMonitoring
 from directaward.signals import audit_trail_signal
 from issuer.models import BadgeClass
 from issuer.serializers import BadgeClassSlugRelatedField
@@ -81,6 +81,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         batch_mode = validated_data.pop('batch_mode')
         notify_recipients = validated_data.pop('notify_recipients')
         direct_awards = validated_data.pop('direct_awards')
+        requires_approval = validated_data.pop('requires_approval', False)
         user_permissions = badgeclass.get_permissions(validated_data['created_by'])
         if user_permissions['may_award']:
             successful_direct_awards = []
@@ -103,8 +104,9 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                     # Not required and already validated
                     direct_award['recipient_email'] = direct_award['recipient_email'].lower()
                     direct_award['eppn'] = direct_award['eppn'].lower() if eppn_required else None
-                    status = DirectAward.STATUS_SCHEDULED if scheduled_at else DirectAward.STATUS_UNACCEPTED
-                    direct_award['status'] = status
+
+                    # All awards start as pending approval by default now
+                    direct_award['status'] = DirectAward.STATUS_PENDING_APPROVAL
                     direct_award['created_by'] = validated_data['created_by']
                     direct_award['expiration_date'] = expiration_date
                     try:
@@ -113,6 +115,24 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                             badgeclass=badgeclass,
                             **direct_award,
                         )
+
+                        # Check thresholds and create monitoring record
+                        threshold_passed = da_created.check_thresholds()
+
+                        if threshold_passed:
+                            # Auto-approved, create monitoring record
+                            DirectAwardMonitoring.objects.create(
+                                direct_award=da_created, monitoring_status='Auto Approved', auto_approved=True
+                            )
+                        else:
+                            # Blocked by thresholds, create monitoring record
+                            DirectAwardMonitoring.objects.create(
+                                direct_award=da_created,
+                                monitoring_status='Blocked',
+                                auto_approved=False,
+                                block_reason='Threshold violation detected',
+                            )
+
                         successful_direct_awards.append(da_created)
                         audit_trail_signal.send(
                             sender=self.__class__,
@@ -167,6 +187,22 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         return data
 
 
+class DirectAwardMonitoringSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DirectAwardMonitoring
+        fields = [
+            'monitoring_status',
+            'reviewed_by',
+            'review_date',
+            'admin_comments',
+            'block_reason',
+            'threshold_violations',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['monitoring_status', 'reviewed_by', 'review_date', 'created_at', 'updated_at']
+
+
 class DirectAwardAuditTrailSerializer(serializers.ModelSerializer):
     badgeclass_name = serializers.CharField(
         source='badgeclass.name',
@@ -176,14 +212,8 @@ class DirectAwardAuditTrailSerializer(serializers.ModelSerializer):
         source='badgeclass.issuer.faculty.institution.name',
         read_only=True,
     )
-    recipient_email = serializers.EmailField(
-        source='direct_award.recipient_email',
-        read_only=True
-    )
-    recipient_eppn = serializers.CharField(
-        source='direct_award.eppn',
-        read_only=True
-    )
+    recipient_email = serializers.EmailField(source='direct_award.recipient_email', read_only=True)
+    recipient_eppn = serializers.CharField(source='direct_award.eppn', read_only=True)
 
     class Meta:
         model = DirectAwardAuditTrail
