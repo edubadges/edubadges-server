@@ -2,19 +2,20 @@
 
 ## Problem Statement
 
-The current direct award system lacks oversight and abuse prevention mechanisms. Institution administrators need the ability to review and approve direct award requests before they are sent to recipients to ensure appropriate use of the direct awarding system and prevent potential abuse.
+The current direct award system lacks oversight and abuse prevention mechanisms. Institution administrators need the ability to review and approve direct award requests, in case threshold limits are reached, before they are sent to recipients. This approval step ensures appropriate use of the direct awarding system and prevents potential abuse.
 
 ## Key Terms
 
-- **Direct Award**: A badge awarded directly to a recipient without requiring them to complete specific criteria
+- **Direct Award**: A badge awarded directly to a recipient without requiring them to request the award
 - **EPPN**: EduPersonPrincipalName - a unique identifier for users in the education system
 - **BadgeClass**: The template or definition of a badge that can be awarded
 - **Institution Admin**: User with administrative privileges for an educational institution
+- **Awarder**: User with awarding privileges to create direct awards
 - **Threshold Monitoring**: System that detects suspicious activity patterns based on configurable limits
 
 ## Use Cases
 
-The system needs to prevent abuse of direct awards, ensure quality control for high-value badges, comply with institutional policies, and detect suspicious activity. A teacher attempting to award 50 badges to the same student in one day should be flagged for admin review before awards are sent. The system should detect when a single teacher is creating 100 direct awards per hour and alert administrators.
+The system needs to prevent abuse of direct awards, ensure quality control for high-value badges, comply with institutional policies, and detect suspicious activity. For instance, an awarder attempting to award more than 1000 badges in one day should be flagged for admin review before awards are sent.
 
 ## Breaking Changes
 
@@ -22,7 +23,7 @@ The API changes include a new required field `requires_approval` in direct award
 
 ## Success Criteria
 
-Quantitative metrics include an adoption rate of 75% of institutions enabling approval workflow within 6 months of release, a 90% reduction in reported inappropriate direct awards within 12 months, 95% of approval requests processed within 48 hours, and the approval workflow adding less than 500ms to direct award creation time. Qualitative metrics involve positive feedback from institution administrators about oversight capabilities, institutions being able to demonstrate compliance with internal badge awarding policies, and reduced incidents of badge system misuse reported by institutions.
+Qualitative metrics involve positive feedback from institution administrators about oversight capabilities, institutions being able to demonstrate compliance with internal credential awarding policies, and reduced incidents of badge system misuse reported by institutions. Quantitative metrics do not apply.
 
 ## Proposed Design
 
@@ -32,7 +33,7 @@ The direct award approval workflow introduces a security-focused process for awa
 
 ### Architecture Overview
 
-The architecture involves a teacher creating a direct award request that goes through the Direct Award API to the DirectAward Model. The DirectAwardApproval Model then processes the request, which can be reviewed by an admin through the Admin Review Interface. The Approval API handles the approval or rejection of the request, and the Notification Service sends email alerts. The Threshold Monitor detects suspicious activity and sends alerts.
+The architecture involves an awarder creating a direct award request that goes through the Direct Award API to the DirectAward Model. The DirectAwardApproval Model then processes the request, which can be reviewed by an admin through the Admin Review Interface. The Approval API handles the approval or rejection of the request, and the Notification Service sends email alerts. The Threshold Monitor detects suspicious activity and sends alerts.
 
 ### Key Components
 
@@ -46,11 +47,11 @@ Approval API Endpoints include `GET /directaward/pending-approvals` to list awar
 
 ### Data Flow
 
-The data flow starts with a teacher creating a direct award bundle request. The system creates a DirectAward record with `STATUS_PENDING_APPROVAL`. The real-time threshold monitor checks the request against configurable rules. If thresholds are passed, the system automatically approves the award with `STATUS_APPROVED`. If thresholds are violated, the award is flagged as `STATUS_BLOCKED` and requires admin review. The admin reviews blocked awards and makes a final decision. The system sends appropriate notifications throughout the process.
+The data flow starts with an awarder creating a direct award bundle request. The system creates a DirectAward record with `STATUS_PENDING_APPROVAL`. The real-time threshold monitor then checks the request against configurable rules. If thresholds are passed, the system automatically approves the award with `STATUS_APPROVED`. If thresholds are violated, the award is flagged as `STATUS_BLOCKED` and requires admin review. The admin reviews blocked awards and makes a final decision. The system sends appropriate notifications throughout the process via email to either the awarder or institution admin.
 
 ## Components
 
-The components include the Direct Award API that handles creation and management of direct awards with built-in threshold checking, the Real-time Monitoring Service that actively checks each request against configurable thresholds, the Approval System that manages the admin review process for flagged awards, the Notification Service that sends email alerts for approvals, rejections, and review requests, the Database that stores award and approval records with detailed audit trail, and the Admin Interface that provides a web interface for reviewing blocked awards.
+The components that needs to be created or updated include the Direct Award API that handles creation and management of direct awards with built-in threshold checking, the Real-time Monitoring Service that actively checks each request against configurable thresholds, the Approval System that manages the admin review process for flagged awards, the Notification Service that sends email alerts for approvals, rejections, and review requests, the Database that stores award and approval records with detailed audit trail, and the Institution Admin Interface that provides a web interface for reviewing blocked awards.
 
 ## Dependencies
 
@@ -63,12 +64,6 @@ The components include the Direct Award API that handles creation and management
 ## Monitoring
 
 Technical metrics to monitor include API response time for direct award creation with threshold checking, threshold check performance, database performance for approval and blocking operations, notification delivery success/failure rates, and false positive rate of legitimate awards incorrectly blocked. Business metrics include auto-approval rate, admin review volume, block rate, and processing time from creation to final status.
-
-## New APIs or Behaviors
-
-Public-facing API changes include bundle creation with automatic monitoring where all direct awards go through threshold monitoring by default, the `requires_approval` field is removed (system determines need for review), and `threshold_check_results` is added to response showing monitoring decision. A blocked awards endpoint is introduced as a new GET endpoint for listing awards blocked by threshold monitoring, filterable by institution, user, and block reason, returning detailed award information and threshold violation details. An admin override endpoint is also introduced as a new POST endpoint for admin to override threshold decisions, supporting both approve (override block) and reject (confirm block) actions, and requiring admin comments explaining override decision.
-
-Internal behavior changes include all direct awards going through real-time threshold monitoring, awards being blocked immediately if thresholds are violated, the system generating different notifications based on monitoring outcome (auto-approval notifications for clean awards and admin review notifications for blocked awards), and threshold monitoring being integrated directly into award creation workflow.
 
 ## Pros & Cons
 
@@ -90,7 +85,7 @@ Threshold configuration complexity can be mitigated by providing sensible defaul
 
 Data protection measures include ensuring that monitoring decisions and admin actions contain sensitive information, proper access controls for all monitoring and approval data, encryption of sensitive threshold violation details, and audit logging for all monitoring decisions and admin actions.
 
-Permission control involves only users with `may_award` permission being able to override threshold blocks, institution-level permission checking for all admin review operations, prevention of privilege escalation through monitoring system bypass, and implementation of separation of duties for threshold configuration.
+Permission control involves only instituion admins being able to override threshold blocks, institution-level permission checking for all admin review operations, and implementation of separation of duties for threshold configuration.
 
 Audit trail measures include recording all monitoring decisions with timestamps and criteria, storing all admin override actions with detailed reasoning, maintaining a complete history of threshold changes and configurations, and keeping immutable logs for compliance and forensic analysis.
 
@@ -102,9 +97,9 @@ The minimum viable product includes real-time threshold checking on award creati
 
 ## Out of Scope
 
-Future enhancements include machine learning for improved threshold detection, advanced threshold rules (behavioral patterns, anomaly detection), integration with institutional SIEM systems, a comprehensive security analytics dashboard, and automated threshold tuning based on historical data.
+Future enhancements include machine learning for improved threshold detection, advanced threshold rules (behavioral patterns, anomaly detection), integration with institutional SIEM systems, and automated threshold tuning based on historical data.
 
-Not included in the initial release are a mobile interface for admin overrides, advanced reporting and visualization, multi-factor threshold systems, and automated remediation workflows.
+Not included in the initial release are advanced reporting and visualization, multi-factor threshold systems, and automated remediation workflows.
 
 ## Alternatives Considered
 
