@@ -5,6 +5,79 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [8.4.1] - 2026-02-05
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.4...v8.4.1</br>
+
+- Merge branch 'develop'
+- Merge pull request #261 from edubadges/feature/add-terms-to-direct-award-endpoint
+- Add required terms to direct award detail view
+- Merge pull request #258 from edubadges/feature/populate-institution-email
+- Merge pull request #260 from edubadges/bugfix/fix-institution-mobile-endpoint-filtering
+- Flip filtering logic around to make query faster
+- Merge pull request #259 from edubadges/bugfix/institution-mobile-endpoint-use-correct-related-name
+- Use correct related name for badgeclass issuer FK
+- Add datamigration to populate institution email
+- Merge pull request #257 from edubadges/dependabot/pip/django-4.2.28
+- Bump django from 4.2.27 to 4.2.28
+- Merge pull request #255 from edubadges/feature/add-mobile-institution-api-endpoint
+- Add mobile institution api endpoint
+- Merge pull request #256 from edubadges/feature/add-mobile-api-endpoint-for-badge-class-detail
+- Add mobile api endpoint for badge class detail
+- Merge pull request #254 from edubadges/feature/add-terms-to-mobile-catalog
+- Add boolean for whether user has accepted the terms
+- Add terms to catalog badge class serializer
+- Added endpoint to make a badge instance public
+- Merge pull request #253 from edubadges/bugfix/fix-entity-id-for-direct-award
+- Use entity id for direct awards
+- Merge pull request #252 from edubadges/bugfix/fix-creation-of-audit-trail-objects-in-signal
+- Merge pull request #251 from edubadges/feature/update-filters-for-mobile-api-catalog-endpoint
+- Find direct award and badgeclass on id and not entity_id
+- Added grade_achieved in the BadgeInstanceDetailSerializer
+- Remove q filter and replace is_micro with institution_type filter
+- Updated CHANGELOG for release 8.4
+- Updated CHANGELOG for 8.3.3 release
+- Merge pull request #250 from edubadges/bugfix/fix-swagger-ui-for-filterable-fields
+- Add filter backend globally and locally
+- Annotate correct related objects (badgeinstances) #2
+- Annotate correct related objects
+- Remove source from terms_agreed
+- Merge pull request #249 from edubadges/feature/mobile-profile-add-extra-metadata
+- Add registration and consent data to user profile
+- Replace profile api view with custom one for mobile api
+- Merge pull request #248 from edubadges/feature/mobile-catalog-endpoint-with-filtering-and-pagination
+- Add schema example
+- Add filter class so endpoint can be filtered with query params
+- Add catalog list view with pagination
+- Merge pull request #247 from edubadges/improve_mobile_api_swagger
+- Prefetch related badge instances to minimize queries
+- Use slug related field instead of serializer method field
+- fix: have badge instance PUT method only allow acceptance and public field
+- fix: use for badge-instances/entity_id path one view (BadgeInstanceDetail) and add logic to support PUT method in BadgeInstanceDetail
+- chore: improved the swagger doc by adding full models of badge instances, direct award, and collections
+- fix: return entity_id's instead of id's of badgeinstances within collections
+- fix: mobile API auth to return 401 instead of 403
+- Adding .zed to gitignore
+- Feat: improve mobile api swagger, initial commit
+- Added badge_class_type in mobile API
+- Merge pull request #244 from edubadges/bugfix/fix-audittrail-errors
+- Add a one-off management command to backfill badgeclass ids
+- Select related institution through issuer and faculty
+- Fix migration to filter on actual ids
+- Merge pull request #243 from edubadges/feature/improve-performance-of-direct-award-audit-trail-endpoint
+- Update audit trail signal receiver to set fk relations properly
+- Improve performance with select_related and extra filter
+- Refactor audit trail api view into a ListAPIView
+- Refactor charfields to foreign key relationships
+- Added stackable to the badgeclass serializer
+- Added grade_achieved to mobile seerializer
+- Updated CHANGELOG for release 8.4
+- Merge pull request #242 from edubadges/feature/add-linkedin-url-to-mobile-badgeinstance-api-endpoint
+- Retrieve faculty directly fro badgeclass issuer
+- Add linkedin_url field to badge instance detail serializer
+
 ## [8.4] - 2026-01-14
 
 #### Full GitHub changelogs:
