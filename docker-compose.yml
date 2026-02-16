@@ -32,7 +32,6 @@ services:
       - EMAIL_USE_TLS=0
       - EMAIL_HOST=mailhog
       - EMAIL_PORT=1025
-      - FIREBASE_JSON_FILE=/secrets/serviceaccount.json
       - LTI_FRONTEND_URL=localhost
       - MEMCACHED=memcached:11211
       - OIDC_RS_ENTITY_ID=test.edubadges.rs.nl
@@ -65,7 +64,7 @@ services:
         condition: service_started
     ports:
       - "8000:8000"
-
+      
   db:
     image: mysql:8.4
     container_name: badgr_mysql_db
