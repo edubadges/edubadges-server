@@ -23,7 +23,7 @@ from mobile_api.api import (
 )
 
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(
     "badge-collections",
