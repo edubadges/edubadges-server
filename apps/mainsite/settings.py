@@ -655,4 +655,7 @@ AUDITLOG_DISABLE_REMOTE_ADDR = True
 API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
 
 # FCM Django (Tell Firebase Admin SDK where the service account JSON is)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.environ.get("FIREBASE_JSON_FILE")
+firebase_json = os.environ.get("FIREBASE_JSON_FILE")
+
+if firebase_json:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = firebase_json
