@@ -118,6 +118,14 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                     datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
                     + self.badgeclass.expiration_period
             )
+
+        # The validated name should take precedence over the user filled in recipient name
+        recipient_name = None
+        if recipient.validated_name:
+            recipient_name = recipient.validated_name
+        elif self.recipient_first_name and self.recipient_surname:
+            recipient_name = f'{self.recipient_first_name} {self.recipient_surname}'
+
         assertion = self.badgeclass.issue(
             recipient=recipient,
             created_by=self.created_by,
@@ -131,6 +139,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             evidence=evidence,
             include_evidence=evidence is not None,
             grade_achieved=self.grade_achieved,
+            recipient_name=recipient_name,
         )
         # delete any pending enrollments for this badgeclass and user
         recipient.cached_pending_enrollments().filter(badge_class=self.badgeclass).delete()
