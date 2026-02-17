@@ -8,6 +8,9 @@ from google.auth.exceptions import DefaultCredentialsError
 logger = logging.getLogger(__name__)
 
 def send_push_notification(user, title, body, data):
+    if not user:
+        logger.info(f"No user found, skipping push notification.")
+        return None
     devices = FCMDevice.objects.filter(user=user, active=True)
     if not devices:
         logger.info(f"No FCM devices found for user {user.id} ({user.entity_id})")
