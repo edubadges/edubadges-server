@@ -1047,6 +1047,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     )
 
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
+    recipient_name = models.CharField(max_length=255, blank=True, null=True)
 
     image = models.FileField(upload_to='uploads/badges', blank=True, null=True, db_index=True)
 

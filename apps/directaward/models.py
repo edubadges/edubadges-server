@@ -16,6 +16,8 @@ from mobile_api.push_notifications import send_push_notification
 
 class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     recipient_email = models.EmailField()
+    recipient_first_name = models.CharField(max_length=255, blank=True, null=True)
+    recipient_surname = models.CharField(max_length=255, blank=True, null=True)
     eppn = models.CharField(max_length=254, blank=True, null=True, default=None)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     bundle = models.ForeignKey('directaward.DirectAwardBundle', null=True, on_delete=models.CASCADE)
