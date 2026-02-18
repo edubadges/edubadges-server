@@ -1162,12 +1162,10 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
         timestamp.submit_assertion()
 
     def get_recipient_name(self):
-        if self.recipient_name:
-            return self.recipient_name
-        elif self.user and self.user.validated_name:
-            return self.user.validated_name
-        else:
-            return None
+        return self.recipient_name or None
+
+    def get_validated_name(self):
+        return getattr(self.user, "validated_name", None)
 
     def get_email_address(self):
         if self.user:

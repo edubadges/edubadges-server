@@ -345,7 +345,7 @@ class IssuerPublicAPITest(BadgrTestCase):
         assertion.save()
         response = self.client.get('/public/assertions/identity/{}/{}'.format(eduid_hash, salt))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['name'], assertion.get_recipient_name())
+        self.assertEqual(response.data['validated_name'], assertion.get_validated_name())
 
 
 # class IssuerExtensionsTest(BadgrTestCase):
