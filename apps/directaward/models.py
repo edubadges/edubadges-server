@@ -97,11 +97,6 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         ):
             raise BadgrValidationError('Cannot award, eppn / email does not match', 999)
 
-        if not recipient.validated_name:
-            raise BadgrValidationError(
-                'Cannot award, you do not have a validated name',
-                999,
-            )
         evidence = None
         if self.evidence_url or self.narrative:
             evidence = [
@@ -140,6 +135,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             include_evidence=evidence is not None,
             grade_achieved=self.grade_achieved,
             recipient_name=recipient_name,
+            enforce_validated_name=False,
         )
         # delete any pending enrollments for this badgeclass and user
         recipient.cached_pending_enrollments().filter(badge_class=self.badgeclass).delete()
