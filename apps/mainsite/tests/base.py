@@ -117,10 +117,10 @@ class SetupHelper(object):
         user.save()
         return user
 
-    def setup_student(self, first_name='', last_name='', authenticate=False, affiliated_institutions=[]):
+    def setup_student(self, first_name='', last_name='', authenticate=False, affiliated_institutions=[], email=None):
         first_name = string_randomiser('student_first_name') if not first_name else first_name
         last_name = string_randomiser('student_last_name') if not last_name else last_name
-        user = self.setup_user(first_name, last_name, authenticate, institution=None)
+        user = self.setup_user(first_name, last_name, authenticate, institution=None, email=email)
         self.add_eduid_socialaccount(user)
         affiliations = [
             {'schac_home': inst.identifier, 'eppn': string_randomiser('eppn')} for inst in affiliated_institutions

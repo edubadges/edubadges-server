@@ -10,7 +10,7 @@ from institution.models import Institution
 from issuer.models import Issuer, BadgeClass
 from issuer.testfiles.helper import badgeclass_json, issuer_json
 from lti_edu.models import StudentsEnrolled
-from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
+from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError, BadgrValidationError
 from mainsite.tests import BadgrTestCase
 
 
@@ -476,6 +476,60 @@ class IssuerModelsTest(BadgrTestCase):
         assertion_data = assertion.get_json()
         self.assertEqual(assertion_data['evidence'][0]['id'], 'http://valid.com')
         self.assertEqual(assertion_data['narrative'], 'assertion narrative')
+
+    def test_direct_award_sets_recipient_name_on_badgeinstance(self):
+        teacher = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(
+            teacher, teacher.institution, may_award=True, may_read=True, may_create=True, may_update=True
+        )
+        faculty = self.setup_faculty(institution=teacher.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+
+        # Create a direct award with first and surname filled
+        bundle = self.setup_direct_award_bundle(badgeclass=badgeclass, created_by=teacher, identifier_type='email')
+        direct_award = self.setup_direct_award(
+            badgeclass=badgeclass,
+            bundle=bundle,
+            recipient_email='student@example.com',
+            recipient_first_name='John',
+            recipient_surname='Doe',
+        )
+
+        # Create a student without validated_name so fallback name is used
+        student = self.setup_student(email='student@example.com')
+        student.validated_name = None
+        student.save()
+
+        # Award the direct award
+        assertion = direct_award.award(student)
+
+        self.assertEqual(assertion.recipient_name, 'John Doe')
+
+    def test_direct_award_with_incorrect_eppn_fails(self):
+        teacher = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(
+            teacher, teacher.institution, may_award=True, may_read=True, may_create=True, may_update=True
+        )
+        faculty = self.setup_faculty(institution=teacher.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        eppn_bundle = self.setup_direct_award_bundle(badgeclass=badgeclass, created_by=teacher, identifier_type='eppn')
+        eppn_direct_award = self.setup_direct_award(
+            badgeclass=badgeclass,
+            bundle=eppn_bundle,
+            recipient_email='student@example.com',
+            recipient_first_name='John',
+            recipient_surname='Doe',
+            eppn='some-other-eppn',
+        )
+
+        student = self.setup_student(email='student@example.com')
+        student.validated_name = None
+        student.save()
+
+        with self.assertRaises(BadgrValidationError):
+            eppn_direct_award.award(student)
 
 
 class IssuerSchemaTest(BadgrTestCase):

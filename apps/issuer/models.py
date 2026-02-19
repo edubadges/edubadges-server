@@ -1047,6 +1047,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     )
 
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
+    recipient_name = models.CharField(max_length=255, blank=True, null=True)
 
     image = models.FileField(upload_to='uploads/badges', blank=True, null=True, db_index=True)
 
@@ -1161,7 +1162,9 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
         timestamp.submit_assertion()
 
     def get_recipient_name(self):
-        if self.user:
+        if self.recipient_name:
+            return self.recipient_name
+        elif self.user and self.user.validated_name:
             return self.user.validated_name
         else:
             return None

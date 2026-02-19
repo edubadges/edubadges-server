@@ -16,6 +16,8 @@ from mobile_api.push_notifications import send_push_notification
 
 class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     recipient_email = models.EmailField()
+    recipient_first_name = models.CharField(max_length=255, blank=True, null=True)
+    recipient_surname = models.CharField(max_length=255, blank=True, null=True)
     eppn = models.CharField(max_length=254, blank=True, null=True, default=None)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     bundle = models.ForeignKey('directaward.DirectAwardBundle', null=True, on_delete=models.CASCADE)
@@ -88,18 +90,20 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         """Accept the direct award and make an assertion out of it"""
         from issuer.models import BadgeInstance
 
-        if (
-                self.eppn not in recipient.eppns
-                and self.recipient_email != recipient.email
-                and self.bundle.identifier_type != DirectAwardBundle.IDENTIFIER_EMAIL
-        ):
-            raise BadgrValidationError('Cannot award, eppn / email does not match', 999)
+        if self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EPPN:
+            if self.eppn not in recipient.eppns:
+                raise BadgrValidationError(
+                    'Cannot award, eppn does not match',
+                    999,
+                )
 
-        if not recipient.validated_name:
-            raise BadgrValidationError(
-                'Cannot award, you do not have a validated name',
-                999,
-            )
+        elif self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL:
+            if self.recipient_email != recipient.email:
+                raise BadgrValidationError(
+                    'Cannot award, email does not match',
+                    999,
+                )
+
         evidence = None
         if self.evidence_url or self.narrative:
             evidence = [
@@ -116,6 +120,14 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                     datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
                     + self.badgeclass.expiration_period
             )
+
+        # The validated name should take precedence over the user filled in recipient name
+        recipient_name = None
+        if recipient.validated_name:
+            recipient_name = recipient.validated_name
+        elif self.recipient_first_name and self.recipient_surname:
+            recipient_name = f'{self.recipient_first_name} {self.recipient_surname}'
+
         assertion = self.badgeclass.issue(
             recipient=recipient,
             created_by=self.created_by,
@@ -129,6 +141,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             evidence=evidence,
             include_evidence=evidence is not None,
             grade_achieved=self.grade_achieved,
+            recipient_name=recipient_name,
+            enforce_validated_name=False,
         )
         # delete any pending enrollments for this badgeclass and user
         recipient.cached_pending_enrollments().filter(badge_class=self.badgeclass).delete()

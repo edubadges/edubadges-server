@@ -21,6 +21,8 @@ class DirectAwardSerializer(serializers.Serializer):
     badgeclass = BadgeClassSlugRelatedField(slug_field='entity_id', required=False)
     eppn = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     recipient_email = serializers.EmailField(required=False)
+    first_name = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    surname = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     status = serializers.CharField(required=False)
     evidence_url = serializers.URLField(required=False, allow_blank=True, allow_null=True)
     narrative = serializers.CharField(required=False, allow_blank=True, allow_null=True)
@@ -107,6 +109,8 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                     direct_award['status'] = status
                     direct_award['created_by'] = validated_data['created_by']
                     direct_award['expiration_date'] = expiration_date
+                    direct_award['recipient_first_name'] = direct_award.pop('first_name', None) or None
+                    direct_award['recipient_surname'] = direct_award.pop('surname', None) or None
                     try:
                         da_created = DirectAward.objects.create(
                             bundle=direct_award_bundle,
