@@ -90,12 +90,19 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         """Accept the direct award and make an assertion out of it"""
         from issuer.models import BadgeInstance
 
-        if (
-                self.eppn not in recipient.eppns
-                and self.recipient_email != recipient.email
-                and self.bundle.identifier_type != DirectAwardBundle.IDENTIFIER_EMAIL
-        ):
-            raise BadgrValidationError('Cannot award, eppn / email does not match', 999)
+        if self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EPPN:
+            if self.eppn not in recipient.eppns:
+                raise BadgrValidationError(
+                    'Cannot award, eppn does not match',
+                    999,
+                )
+
+        elif self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL:
+            if self.recipient_email != recipient.email:
+                raise BadgrValidationError(
+                    'Cannot award, email does not match',
+                    999,
+                )
 
         evidence = None
         if self.evidence_url or self.narrative:
