@@ -108,6 +108,40 @@ class DirectAwardTest(BadgrTestCase):
                                       content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
+    def test_create_direct_award_bundle_with_recipient_names(self):
+        teacher1 = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+
+        post_data = {
+            'badgeclass': badgeclass.entity_id,
+            'batch_mode': True,
+            'notify_recipients': True,
+            'direct_awards': [
+                {
+                    'recipient_email': 'john@example.com',
+                    'eppn': 'john_eppn',
+                    'first_name': 'John',
+                    'surname': 'Doe',
+                }
+            ]
+        }
+
+        response = self.client.post(
+            '/directaward/create',
+            json.dumps(post_data),
+            content_type='application/json'
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        bundle = DirectAwardBundle.objects.get(entity_id=response.data['entity_id'])
+        direct_award = bundle.directaward_set.first()
+
+        self.assertEqual(direct_award.recipient_first_name, 'John')
+        self.assertEqual(direct_award.recipient_surname, 'Doe')
 
 class DirectAwardSchemaTest(BadgrTestCase):
 
