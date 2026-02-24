@@ -20,6 +20,7 @@ from mobile_api.api import (
     InstitutionListView,
     RegisterDeviceViewSet,
     BadgeCollectionViewSet,
+    TermsAgreementViewSet,
 )
 
 
@@ -29,6 +30,11 @@ router.register(
     "badge-collections",
     BadgeCollectionViewSet,
     basename="badge-collections",
+)
+router.register(
+    "terms-agreements",
+    TermsAgreementViewSet,
+    basename="terms-agreements",
 )
 
 urlpatterns = [
@@ -43,7 +49,6 @@ urlpatterns = [
     path('enrollments/<str:entity_id>', EnrollmentDetail.as_view(), name='mobile_api_enrollment_detail'),
     path('login', Login.as_view(), name='mobile_api_login'),
     path('badge/public', BackpackAssertionDetail.as_view(), name='mobile_api_badge_public'),
-    path('terms/accept', AcceptTermsView.as_view(), name='mobile_api_user_terms_accept'),
     path('enroll', StudentsEnrolledList.as_view(), name='mobile_api_lti_edu_enroll_student'),
     path('profile', UserProfileView.as_view(), name='mobile_api_user_profile'),
     path('catalog', CatalogBadgeClassListView.as_view(), name='mobile_api_catalog_badge_class'),
