@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.generics import ListAPIView
 from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet, FCMDeviceSerializer
 
-from badgeuser.models import StudentAffiliation
+from badgeuser.models import StudentAffiliation, TermsAgreement
 from badgrsocialauth.providers.eduid.provider import EduIDProvider
 from directaward.models import DirectAward, DirectAwardBundle
 from django.conf import settings
@@ -43,6 +43,9 @@ from mobile_api.serializers import (
     UserProfileSerializer,
     BadgeClassDetailSerializer,
     InstitutionListSerializer,
+    TermsAgreementSerializer,
+    TermsAgreementCreateSerializer,
+    TermsAgreementUpdateSerializer,
 )
 from rest_framework import serializers, status, generics, viewsets
 from rest_framework.response import Response
@@ -1261,3 +1264,21 @@ class InstitutionListView(ListAPIView):
 )
 class RegisterDeviceViewSet(FCMDeviceAuthorizedViewSet):
     pass
+
+
+class TermsAgreementViewSet(viewsets.ModelViewSet):
+    queryset = TermsAgreement.objects.all()
+    permission_classes = (IsAuthenticated, MobileAPIPermission)
+    http_method_names = ('get', 'post', 'patch')
+    lookup_field = 'entity_id'
+
+    def get_queryset(self):
+        return TermsAgreement.objects.filter(user=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return TermsAgreementCreateSerializer
+        elif self.action == 'partial_update':
+            return TermsAgreementUpdateSerializer
+        else:
+            return TermsAgreementSerializer

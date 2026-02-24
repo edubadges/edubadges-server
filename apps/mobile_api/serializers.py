@@ -1,7 +1,8 @@
 import json
 from urllib.parse import urlencode
 
-from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
+from django.utils import timezone
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, extend_schema
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
@@ -359,6 +360,61 @@ class TermsAgreementSerializer(serializers.ModelSerializer):
     class Meta:
         model = TermsAgreement
         fields = ['entity_id', 'agreed', 'agreed_version', 'agreed_at', 'terms']
+
+
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "Accept Terms Example",
+            summary="Accept a term",
+            description="User accepts a specific term by entity_id",
+            value={
+                "terms": "t1t2t3t4"
+            },
+        ),
+    ]
+)
+class TermsAgreementCreateSerializer(serializers.ModelSerializer):
+    terms = serializers.SlugRelatedField(
+        queryset=Terms.objects.all(),
+        slug_field="entity_id"
+    )
+
+    class Meta:
+        model = TermsAgreement
+        fields = ['terms']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        terms = validated_data['terms']
+        return terms.accept(user)
+
+
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "Update a Terms Agreement",
+            summary="Update a terms agreement",
+            description="Toggle agreed state of a Terms Agreement",
+            value={
+                "agreed": False,
+            },
+        ),
+    ]
+)
+class TermsAgreementUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TermsAgreement
+        fields = ['agreed']
+        read_only_fields = ['agreed_version', 'agreed_at', 'terms']
+
+    def update(self, instance, validated_data):
+        instance.agreed = validated_data['agreed']
+        if instance.agreed and not instance.agreed_at:
+            instance.agreed_at = timezone.now()
+        instance.save()
+        instance.user.remove_cached_data(['cached_terms_agreements'])
+        return instance
 
 
 class UserSerializer(serializers.ModelSerializer):
