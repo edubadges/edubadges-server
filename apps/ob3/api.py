@@ -125,7 +125,7 @@ class OB3CallbackView(APIView):
         # Verify that the badge instance was issued to the user associated with the provided social account UUID
         social_account = get_social_account(social_uuid)
         if not social_account:
-            raise AuthenticationFailed('Invalid user')
+            raise PermissionDenied('Unknown user')
 
         if social_account.user_id != badge_instance.user_id:  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue] We need django-stubs first
             raise PermissionDenied('Invalid user')
