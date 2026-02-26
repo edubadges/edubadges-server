@@ -2,7 +2,7 @@ import json
 from urllib.parse import urlencode
 
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, extend_schema
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, extend_schema, extend_schema_field
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
@@ -113,9 +113,11 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'user_may_enroll',
         ]
 
+    @extend_schema_field(serializers.BooleanField)
     def get_self_enrollment_enabled(self, obj):
         return not obj.self_enrollment_disabled
 
+    @extend_schema_field(serializers.BooleanField)
     def get_user_may_enroll(self, obj):
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
@@ -576,9 +578,11 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
         user = request.user
         return obj.terms_accepted(user)
 
+    @extend_schema_field(serializers.BooleanField)
     def get_self_enrollment_enabled(self, obj):
         return not obj.self_enrollment_disabled
 
+    @extend_schema_field(serializers.BooleanField)
     def get_user_may_enroll(self, obj):
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
