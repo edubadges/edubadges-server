@@ -286,7 +286,7 @@ class SetupHelper(object):
         if not kwargs.get('image', False):
             kwargs['image'] = resize_image(open(self.get_test_image_path(), 'r'))
         return BadgeClass.objects.create(
-            issuer=issuer, formal=False, description='Description', criteria_text='Criteria text', **kwargs
+            issuer=issuer, formal=kwargs.pop('formal', False), description='Description', criteria_text='Criteria text', **kwargs
         )
 
     def setup_assertion(self, recipient, badgeclass, created_by, **kwargs):
