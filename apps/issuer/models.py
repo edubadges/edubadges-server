@@ -1000,6 +1000,19 @@ class BadgeClass(
     def cached_badgrapp(self):
         return self.cached_issuer.cached_badgrapp
 
+    def user_may_enroll(self, user):
+        if self.self_enrollment_disabled:
+            return False
+
+        if self.institution.identifier in user.schac_homes:
+            return True
+
+        if not self.formal:
+            allowed_institutions = [institution.identifier for institution in  self.award_allowed_institutions.all()]
+            return set(user.schac_homes) & set(allowed_institutions)
+
+        return False
+
 
 class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, BaseOpenBadgeObjectModel):
     entity_class_name = 'Assertion'
