@@ -88,6 +88,7 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
     issuer = IssuerSerializer(read_only=True)
     badgeclassextension_set = BadgeClassExtensionSerializer(many=True, read_only=True)
     self_enrollment_enabled = serializers.SerializerMethodField()
+    user_may_enroll = serializers.SerializerMethodField()
 
     class Meta:
         model = BadgeClass
@@ -109,10 +110,18 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'badge_class_type',
             'expiration_period',
             'self_enrollment_enabled',
+            'user_may_enroll',
         ]
 
     def get_self_enrollment_enabled(self, obj):
         return not obj.self_enrollment_disabled
+
+    def get_user_may_enroll(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+        user = request.user
+        return obj.may_enroll(user)
 
 
 class BadgeInstanceSerializer(serializers.ModelSerializer):
@@ -475,6 +484,7 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     required_terms = serializers.SerializerMethodField()
     user_has_accepted_terms = serializers.SerializerMethodField()
     self_enrollment_enabled = serializers.SerializerMethodField()
+    user_may_enroll = serializers.SerializerMethodField()
 
     # Issuer fields
     issuer_name_english = serializers.CharField(source='issuer.name_english', read_only=True)
@@ -519,6 +529,7 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             'required_terms',
             'user_has_accepted_terms',
             'self_enrollment_enabled',
+            'user_may_enroll',
 
             # Issuer
             'issuer_name_english',
@@ -568,3 +579,9 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     def get_self_enrollment_enabled(self, obj):
         return not obj.self_enrollment_disabled
 
+    def get_user_may_enroll(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+        user = request.user
+        return obj.may_enroll(user)
