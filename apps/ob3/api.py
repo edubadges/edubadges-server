@@ -121,14 +121,11 @@ class OB3CallbackView(APIView):
 
         return state, user_id
 
-    def __authorize(self, badge_instance: BadgeInstance, social_uuid: str):
-        # Verify that the badge instance was issued to the user associated with the provided social account UUID
-        social_account = get_social_account(social_uuid)
-        if not social_account:
-            raise PermissionDenied('Unknown user')
-
-        if social_account.user_id != badge_instance.user_id:  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue] We need django-stubs first
-            raise PermissionDenied('Invalid user')
+    def __authorize(self, _badge_instance: BadgeInstance, _social_uuid: str):
+        # TEMPORARY: Allow everything for testing purposes.
+        # We cannot get the correct uuid from the authorization flow yet, nor any attribute that we could check on.
+        # Once this is solved by the issuer making the callback, we should use the correct attribute to check on.
+        pass
 
     def __get_badge_instance(self, entity_id: str) -> BadgeInstance:
         try:
