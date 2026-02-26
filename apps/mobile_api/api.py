@@ -1057,6 +1057,7 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                                         ]
                                     },
                                     'user_has_accepted_terms': True,
+                                    'self_enrollment_enabled': True,
                                     'issuer_name_english': 'Team edubadges',
                                     'issuer_name_dutch': 'Team edubadges',
                                     'issuer_entity_id': 'WOLxSjpWQouas1123Z809Q',
@@ -1114,6 +1115,7 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                                         ]
                                     },
                                     'user_has_accepted_terms': True,
+                                    'self_enrollment_enabled': True,
                                     'issuer_name_english': 'Medicine',
                                     'issuer_name_dutch': 'null',
                                     'issuer_entity_id': 'yuflXDK8ROukQkxSPmh5ag',
