@@ -1,32 +1,31 @@
-{% extends 'email/base.html' %}
-{% block style %}
+{% extends 'email/base.html' %} {% block style %}
 <style>
-    .main{
-        text-align:center;
+    .main {
+        text-align: center;
         font-family: "Proxima Nova", sans-serif;
         line-height: 18px;
         font-size: 14px;
         color: #353535;
     }
-    .head{
+    .head {
         width: 600px;
         height: 100px;
         margin: auto;
     }
-    .title{
+    .title {
         color: grey;
-        font-size:20px;
+        font-size: 20px;
         line-height: 50px;
         margin-bottom: 10px;
         font-weight: bold;
     }
-    .message_container{
+    .message_container {
         width: 280px;
         margin: auto;
         margin-top: 40px;
         overflow: auto;
     }
-    .text_header{
+    .text_header {
         font-size: 14px;
         line-height: 30px;
         font-weight: bold;
@@ -39,7 +38,7 @@
         background-color: #772583;
         text-decoration: none;
         display: inline-block;
-        cursor:pointer;
+        cursor: pointer;
         font-size: 12px;
         font-weight: bold;
         width: 100%;
@@ -48,7 +47,7 @@
         padding: 14px 0px;
     }
 
-    .example_container{
+    .example_container {
         box-shadow: 1px 3px #b9b9b9;
         border-style: solid;
         border-width: 1px;
@@ -56,21 +55,21 @@
         border-color: #b9b9b9;
         overflow: auto;
     }
-    .issuer_image{
+    .issuer_image {
         display: inline-block;
         height: 50px;
         width: 50px;
         float: left;
         margin: 15px 0px 0px 10px;
     }
-    .badgeclass_image{
+    .badgeclass_image {
         width: available;
     }
     .issuer_container {
         margin-top: 10px;
         margin-left: 10px;
     }
-    .issuer_description{
+    .issuer_description {
         text-align: left;
         padding: 10px 0px 10px 10px;
         float: left;
@@ -78,11 +77,11 @@
     .issuer_description p {
         margin: 0px;
     }
-    .issuer_description p:nth-of-type(1){
+    .issuer_description p:nth-of-type(1) {
         color: #772583;
         font-weight: bold;
     }
-    .issuer_description p:nth-of-type(3){
+    .issuer_description p:nth-of-type(3) {
         color: grey;
     }
     .badge_name {
@@ -93,30 +92,34 @@
     .footer {
         margin-bottom: 25px;
     }
-    .footer a:link, .footer a:visited  {
+    .footer a:link,
+    .footer a:visited {
         color: grey;
     }
-    .footer a:hover, .footer a:active {
+    .footer a:hover,
+    .footer a:active {
         color: #772583;
     }
 </style>
-{% endblock %}
-
-{% block title %}
-<title>Je hebt een edubadge ontvangen. You received an edubadge.</title>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block title %}
+<title>Eduwallet pilot: Je hebt een edubadge ontvangen. You received an edubadge.</title>
+{% endblock %} {% block content %}
 
 <div><p>For the English version, see below.</p></div>
+
+<div>
+    <p>
+        <b>Dit is een edubadge i.v.m. de eduwallet pilot. Je krijgt ook een echte edubadge.</b>
+    </p>
+</div>
 
 <p class="title">{{issuer_name}} heeft je de volgende edubadge gestuurd.</p>
 <div class="message_container">
     <div class="example_container">
-        <img class="badgeclass_image" src={{badgeclass_image}}>
+        <img class="badgeclass_image" src="{{badgeclass_image}}" />
         <p class="text badge_name">{{badgeclass_name}}</p>
         <div class="issuer_container">
-            <img class="issuer_image" src={{issuer_image}}>
+            <img class="issuer_image" src="{{issuer_image}}" />
             <div class="issuer_description">
                 <p>Uitgegeven door</p>
                 <p>{{issuer_name}}</p>
@@ -128,18 +131,26 @@
     <p class="text">{{badgeclass_description}}</p> -->
 
     <p class="text text_header">Bekijk jouw edubadge.</p>
-    <p class="text">Het plaatje hierboven is een voorbeeld, de echte gepersonaliseerde edubadge is beschikbaar in jouw backpack.
-        <br><br>Denk eraan om je edubadge publiek te zetten als je deze wilt delen met anderen.</p>
-    <a class="button" target="_blank" rel="noopener noreferrer" href="{{assertion_url}}">
-        Bekijk jouw edubadge</a>
+    <p class="text">
+        Het plaatje hierboven is een voorbeeld, de echte gepersonaliseerde edubadge is beschikbaar in jouw backpack.
+        <br /><br />Denk eraan om je edubadge publiek te zetten als je deze wilt delen met anderen.
+    </p>
+    <a class="button" target="_blank" rel="noopener noreferrer" href="{{assertion_url}}"> Bekijk jouw edubadge</a>
 </div>
+
+<div>
+    <p>
+        <b>These are badges related to the eduwallet pilot. You will also receive a real badge.</b>
+    </p>
+</div>
+
 <p class="title">{{issuer_name}} has sent you the following edubadge.</p>
 <div class="message_container">
     <div class="example_container">
-        <img class="badgeclass_image" src={{badgeclass_image}}>
+        <img class="badgeclass_image" src="{{badgeclass_image}}" />
         <p class="text badge_name">{{badgeclass_name}}</p>
         <div class="issuer_container">
-            <img class="issuer_image" src={{issuer_image}}>
+            <img class="issuer_image" src="{{issuer_image}}" />
             <div class="issuer_description">
                 <p>Issued by</p>
                 <p>{{issuer_name}}</p>
@@ -152,10 +163,9 @@
 
     <p class="text text_header">View your edubadge.</p>
     <p class="text">
-        The above image is an example, the real personalised edubadge is available for you in your
-        edubadges backpack. Go there to view this edubadge.
+        The above image is an example, the real personalised edubadge is available for you in your edubadges backpack.
+        Go there to view this edubadge.
     </p>
-    <a class="button" target="_blank" rel="noopener noreferrer" href="{{assertion_url}}">
-        View your edubadge</a>
+    <a class="button" target="_blank" rel="noopener noreferrer" href="{{assertion_url}}"> View your edubadge</a>
 </div>
 {% endblock %}

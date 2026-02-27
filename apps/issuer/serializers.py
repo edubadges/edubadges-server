@@ -310,12 +310,10 @@ class BadgeClassSerializer(
             img_name, img_ext = os.path.splitext(image.name)
             image.name = 'issuer_badgeclass_' + str(uuid.uuid4()) + img_ext
             image = resize_image(image)
-            app = BadgrApp.objects.get_current(self.context.get('request', None))
             is_svg = verify_svg(image)
             if is_svg:
                 image = scrub_svg_image(image)
-            if app.is_demo_environment:
-                image = add_watermark(image, is_svg)
+            image = add_watermark(image, is_svg)
         return image
 
     def validate_criteria_text(self, criteria_text):
@@ -459,10 +457,10 @@ class BadgeClassSerializer(
             new_badgeclass = BadgeClass.objects.create(**validated_data)
             new_badgeclass.tags.set(tags)
             new_badgeclass.save()
-            
+
             logger = badgrlog.BadgrLogger()
             logger.event(badgrlog.BadgeClassCreatedEvent(new_badgeclass))
-            
+
             return new_badgeclass
         else:
             raise BadgrValidationError("You don't have the necessary permissions", 100)
@@ -613,11 +611,11 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         enrollment.user.remove_cached_data(['cached_pending_enrollments'])
         # delete the pending direct awards for this badgeclass and this user
         badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns).delete()
-        
+
         # Log the badge instance creation event
         logger = badgrlog.BadgrLogger()
         logger.event(badgrlog.BadgeInstanceCreatedEvent(assertion))
-        
+
         return assertion
 
 
