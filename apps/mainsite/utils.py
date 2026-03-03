@@ -137,15 +137,6 @@ def list_of(value):
     return [value]
 
 
-def open_mail_in_browser(html):
-    tmp = tempfile.NamedTemporaryFile(delete=False)
-    path = tmp.name + '.html'
-    f = open(path, 'w')
-    f.write(html)
-    f.close()
-    webbrowser.open('file://' + path)
-
-
 class EmailMessageMaker:
     @staticmethod
     def _create_example_image(badgeclass):

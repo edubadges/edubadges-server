@@ -234,20 +234,6 @@ class TestFetchRemoteFileToStorage(TestCase):
         self.assertIsNone(storage_name)
 
 
-@patch('apps.mainsite.utils.settings')
-class TestSendMail(TestCase):
-    """new"""
-    
-    @patch('apps.mainsite.utils.open_mail_in_browser')
-    @patch('apps.mainsite.utils.mail.EmailMessage')
-    def test_local_development_opens_in_browser(self, mock_email_message, mock_open_browser, mock_settings):
-        mock_settings.LOCAL_DEVELOPMENT_MODE = True
-        
-        send_mail('Subject', 'Message', ['test@example.com'], html_message='<html>Test</html>')
-        
-        mock_open_browser.assert_called_once_with('<html>Test</html>')
-
-
 class TestAdminListLinkify(TestCase):
     """new"""
     
