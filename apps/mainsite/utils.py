@@ -6,7 +6,6 @@ import base64
 import datetime
 import hashlib
 import io
-import locale
 import math
 import os
 import pathlib
@@ -136,15 +135,6 @@ def list_of(value):
     elif isinstance(value, list):
         return value
     return [value]
-
-
-def open_mail_in_browser(html):
-    tmp = tempfile.NamedTemporaryFile(delete=False)
-    path = tmp.name + '.html'
-    f = open(path, 'w')
-    f.write(html)
-    f.close()
-    webbrowser.open('file://' + path)
 
 
 class EmailMessageMaker:
@@ -294,12 +284,8 @@ class EmailMessageMaker:
     @staticmethod
     def create_direct_award_student_mail(direct_award):
         badgeclass = direct_award.badgeclass
-        template = 'email/earned_direct_award_new.html'
+        template = 'email/earned_direct_award.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
-        en_end_date = direct_award.expiration_date.strftime('%d %B %Y')
-        locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
-        nl_end_date = direct_award.expiration_date.strftime('%d %B %Y')
-        locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
         faculty = badgeclass.issuer.faculty
         institution_name = faculty.name if faculty.on_behalf_of else faculty.institution.name
         email_vars = {
@@ -310,7 +296,7 @@ class EmailMessageMaker:
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
-            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'institution_name': institution_name,
             'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
@@ -334,12 +320,6 @@ class EmailMessageMaker:
         template = 'email/reminder_direct_award_new.html'
         badgeclass_image = EmailMessageMaker._create_example_image(badgeclass)
 
-        en_create_date = direct_award.created_at.strftime('%d %B %Y')
-        en_end_date = direct_award.expiration_date.strftime('%d %B %Y')
-        locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
-        nl_create_date = direct_award.created_at.strftime('%d %B %Y')
-        nl_end_date = direct_award.expiration_date.strftime('%d %B %Y')
-        locale.setlocale(locale.LC_ALL, os.environ.get('LC_ALL', 'en_US.UTF-8'))
         faculty = badgeclass.issuer.faculty
         institution_name = faculty.name if faculty.on_behalf_of else faculty.institution.name
         email_vars = {
@@ -350,7 +330,7 @@ class EmailMessageMaker:
             'ui_url': urllib.parse.urljoin(settings.UI_URL, 'direct-awards'),
             'badgeclass_description': badgeclass.description,
             'badgeclass_name': badgeclass.name,
-            'institution_name': badgeclass.issuer.faculty.institution.name,
+            'institution_name': institution_name,
             'da_enddate': direct_award.expiration_date.strftime('%d %B %Y'),
         }
         return render_to_string(template, email_vars)
@@ -433,15 +413,20 @@ class EmailMessageMaker:
 
 
 def send_mail(subject, message, recipient_list=None, html_message=None, bcc=None):
-    if settings.LOCAL_DEVELOPMENT_MODE:
-        open_mail_in_browser(html_message)
+    subject = 'Eduwallet ' + settings.WATERMARK_TEXT + ': ' + subject
     if html_message:
         html_with_inline_css = transform(html_message)
         msg = mail.EmailMessage(subject=subject, body=html_with_inline_css, from_email=None, to=recipient_list, bcc=bcc)
         msg.content_subtype = 'html'
         msg.send()
     else:
-        mail.send_mail(subject, message, from_email=None, recipient_list=recipient_list, html_message=html_message)
+        mail.send_mail(
+            subject,
+            message,
+            from_email=None,
+            recipient_list=recipient_list,
+            html_message=html_message,
+        )
 
 
 def admin_list_linkify(field_name, label_param=None):
