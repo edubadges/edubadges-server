@@ -7,6 +7,7 @@ from django.conf import settings
 from institution.models import Faculty, Institution
 from issuer.models import BadgeClass, BadgeClassExtension, Issuer
 from mainsite.seeds.util import institution_id_by_pba_id, read_seed_csv, seed_image_for
+from mainsite.utils import add_watermark
 
 super_user = BadgeUser.objects.get(username=settings.SUPERUSER_NAME)
 
@@ -117,7 +118,7 @@ for course in read_seed_csv('courses'):
         defaults={
             'entity_id': entity_id,
             'description': course['Description'],
-            'image': image,
+            'image': add_watermark(image, False),
             'criteria_text': course['Criteria'],
             'created_by': super_user,
             'updated_by': super_user,
