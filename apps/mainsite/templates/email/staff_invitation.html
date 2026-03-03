@@ -1,11 +1,12 @@
-{% extends 'email/base.html' %}
-
-{% block title %}
+{% extends 'email/base.html' %} {% block title %}
 <title>{{invited_by_name}} invited you for a staff membership</title>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="mail_container">
+    <div>
+        <p>
+            <b>This invication is for the edubadges environment related to the eduwallet pilot.</b>
+        </p>
+    </div>
     <div class="mail_subcontainer">
         <p class="mail_title">{{invited_by_name}} invited you for a staff membership on edubadges</p>
         <p class="mail_subtitle">Please log in or sign up to the issuer portal to accept your new role</p>
@@ -13,17 +14,23 @@
     </div>
     <div class="mail_subcontainer middle">
         <p>For the English version, see below.</p>
-        <hr>
+        <hr />
         <p>{{invitee_name_dutch}},</p>
-        <p>Door het accepteren van deze uitnodiging krijgt u de rechten voor de {{entity_type_dutch}} <strong>{{entity_name}}</strong>.</p>
+        <p>
+            Door het accepteren van deze uitnodiging krijgt u de rechten voor de {{entity_type_dutch}}
+            <strong>{{entity_name}}</strong>.
+        </p>
         <p>Dit geeft u toegang tot het edubadges platform en maakt het voor u mogelijk om edubadges te gebruiken.</p>
         <p>Klik op de knop om uw nieuwe rol te bekijken.</p>
         <p>Indien u vragen heeft kunt u contact opnemen met {{support_email_address}}.</p>
         <p>Met vriendelijke groet,</p>
         <p>Team Edubadges</p>
-        <hr>
+        <hr />
         <p>{{invitee_name}},</p>
-        <p>Accepting this invitation gives you the appropriate permissions for the {{entity_type}} <strong>{{entity_name}}</strong>.</p>
+        <p>
+            Accepting this invitation gives you the appropriate permissions for the {{entity_type}}
+            <strong>{{entity_name}}</strong>.
+        </p>
         <p>This grants you access to the edubadges-platform and enables you to work with edubadges.</p>
         <p>Click the button to view your new role.</p>
         <p>If you have any questions, don't hesitate to contact us at {{support_email_address}}.</p>
