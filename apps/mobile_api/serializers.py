@@ -588,4 +588,4 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
         if not request or not request.user.is_authenticated:
             return False
         user = request.user
-        return obj.may_enroll(user)
+        return obj.user_may_enroll(user)
