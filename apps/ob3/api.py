@@ -110,8 +110,8 @@ class OB3CallbackView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def __parse_body(self, request: Request) -> tuple[str, str]:
-        state = request.data.get('state')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
-        user_id = request.data.get('user_id')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        state = request.data.get('issuer_state')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        user_id = request.data.get('sub')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
 
         if not isinstance(state, str) or not state:
             raise ValidationError('state parameter is required')

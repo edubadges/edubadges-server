@@ -23,7 +23,6 @@ class OB3CallbackAPITest(BadgrTestCase):
         assertion = self._setup_assertion_with_relations()
         recipient_uid: str = self._get_social_account(assertion.user).uid
 
-        # Make request to callback endpoint with state parameter
         response = self._post_callback(assertion.entity_id, recipient_uid)
 
         # Verify response
@@ -104,34 +103,34 @@ class OB3CallbackAPITest(BadgrTestCase):
         response = self._post_callback(assertion.entity_id, recipient_uid)
         self.assertEqual(response.status_code, 200)
 
-    def test_callback_endpoint_requires_state_parameter(self):
+    def test_callback_endpoint_requires_issuer_state_parameter(self):
         """
-        Test that the callback endpoint requires a state parameter.
-        If state parameter is missing, should return 400 Bad Request.
+        Test that the callback endpoint requires an issuer_state parameter.
+        If parameter is missing, should return 400 Bad Request.
         """
-        response = self.client.post('/ob3/v1/ob3/callback', {'user_id': '42'})
+        response = self.client.post('/ob3/v1/ob3/callback', {'sub': '42'})
         self.assertEqual(response.status_code, 400)
 
-    def test_callback_endpoint_requires_user_id_parameter(self):
+    def test_callback_endpoint_requires_sub_parameter(self):
         """
-        Test that the callback endpoint requires a user_id parameter.
-        If user_id parameter is missing, should return 400 Bad Request.
+        Test that the callback endpoint requires a sub parameter.
+        If parameter is missing, should return 400 Bad Request.
         """
-        response = self.client.post('/ob3/v1/ob3/callback', {'state': '123'})
+        response = self.client.post('/ob3/v1/ob3/callback', {'issuer_state': '123'})
         self.assertEqual(response.status_code, 400)
 
     @skip("Authorization checks are temporarily disabled")
     def test_callback_endpoint_must_be_for_recipient_user(self):
         """
         Test that the callback endpoint must be for the user who initiated the request.
-        If the user_id parameter does not match the uuid of the socialaccount
+        If the sub parameter does not match the uuid of the socialaccount
         for the user who initiated the request, should return 403 Forbidden.
         """
         assertion = self._setup_assertion_with_relations()
         another_user = self.setup_student(authenticate=False)
         response = self.client.post(
             '/ob3/v1/ob3/callback',
-            {'state': assertion.entity_id, 'user_id': self._get_social_account(another_user).uid},
+            {'issuer_state': assertion.entity_id, 'sub': self._get_social_account(another_user).uid},
         )
         self.assertEqual(response.status_code, 403)
 
@@ -139,31 +138,31 @@ class OB3CallbackAPITest(BadgrTestCase):
     def test_callback_endpoint_must_be_for_existing_user(self):
         """
         Test that the callback endpoint must be for an existing user.
-        If the user_id parameter does not match the uuid of any socialaccount for the user who initiated the request,
+        If the sub parameter does not match the uuid of any socialaccount for the user who initiated the request,
         should return 403 Forbidden.
         """
         assertion = self._setup_assertion_with_relations()
         response = self.client.post(
-            '/ob3/v1/ob3/callback', {'state': assertion.entity_id, 'user_id': 'userdoesnotexist'}
+            '/ob3/v1/ob3/callback', {'issuer_state': assertion.entity_id, 'sub': 'userdoesnotexist'}
         )
         self.assertEqual(response.status_code, 403)
 
     def test_callback_endpoint_can_be_for_any_socialaccount_uuid(self):
         """
         Test that the callback endpoint accepts any socialaccount UUID belonging to the user who initiated the request.
-        If the user_id parameter matches the UUID of any of the user's socialaccounts, the request should succeed (200 OK).
+        If the sub parameter matches the UUID of any of the user's socialaccounts, the request should succeed (200 OK).
         """
         assertion = self._setup_assertion_with_relations()
         second_social_account = self.add_eduid_socialaccount(assertion.user)
         self.assertEqual(SocialAccount.objects.filter(user=assertion.user).count(), 2)
         response = self.client.post(
-            '/ob3/v1/ob3/callback', {'state': assertion.entity_id, 'user_id': second_social_account.uid}
+            '/ob3/v1/ob3/callback', {'issuer_state': assertion.entity_id, 'sub': second_social_account.uid}
         )
         self.assertEqual(response.status_code, 200, response.content)
 
     def _post_callback(self, state: str, user_id: str):
         """Helper method to make POST requests to the callback endpoint."""
-        data: dict[str, str] = {'state': state, 'user_id': user_id}
+        data: dict[str, str] = {'issuer_state': state, 'sub': user_id}
         return self.client.post('/ob3/v1/ob3/callback', data)
 
     def _setup_assertion_with_relations(self) -> BadgeInstance:
