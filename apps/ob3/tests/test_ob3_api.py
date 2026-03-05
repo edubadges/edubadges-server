@@ -163,6 +163,37 @@ class OB3CallbackAPITest(BadgrTestCase):
     def _post_callback(self, state: str, user_id: str):
         """Helper method to make POST requests to the callback endpoint."""
         data: dict[str, str] = {'issuer_state': state, 'sub': user_id}
+        # An example of the actual body that the veramo issuer sends to the callback:
+        # {
+        #   "acr": "urn:oasis:names:tc:SAML:2.0:ac:classes:Password",
+        #   "authenticating_authority": "https://login.test.eduid.nl",
+        #   "eduperson_affiliation": ["member", "student", "affiliate"],
+        #   "eduperson_assurance": [
+        #     "https://refeds.org/assurance/IAP/medium",
+        #     "https://eduid.nl/validated/institution",
+        #     "https://refeds.org/assurance",
+        #     "https://refeds.org/assurance/ID/unique",
+        #     "https://refeds.org/assurance/ID/eppn-unique-no-reassign",
+        #     "https://refeds.org/assurance/IAP/low",
+        #     "https://refeds.org/assurance/version/2",
+        #     "https://eduid.nl/validated/email-validated"
+        #   ],
+        #   "eduperson_scoped_affiliation": [
+        #     "member@mbob.nl",
+        #     "student@mbob.nl",
+        #     "affiliate@eduid.nl"
+        #   ],
+        #   "email": "ber@xxxxxx",
+        #   "email_verified": true,
+        #   "family_name": "Kuester",
+        #   "given_name": "Markus",
+        #   "name": "B\u00e8r Kuester",
+        #   "schac_home_organization": "eduid.nl",
+        #   "sub": "1axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        #   "updated_at": 1772708164,
+        #   "issuer_state": "nxxxxxxxxxxxxxxxxxxxxx",
+        #   "iss": "https://oauth2-server.playground.sdp.surf.nl"
+        # }
         return self.client.post('/ob3/v1/ob3/callback', data)
 
     def _setup_assertion_with_relations(self) -> BadgeInstance:
