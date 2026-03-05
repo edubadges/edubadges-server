@@ -10,8 +10,8 @@ from issuer.models import Issuer, BadgeClass, BadgeClassExtension
 from mainsite.models import BadgrApp
 
 # BadgrApp
-from .constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, EDU_BADGES_ISSUER_NAME
-from .util import add_terms_institution, seed_image_for
+from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, EDU_BADGES_ISSUER_NAME
+from mainsite.seeds.util import add_terms_institution, seed_image_for
 
 setattr(settings, 'SUPPRESS_EMAILS', 1)
 badgr_app_id = getattr(settings, 'BADGR_APP_ID')

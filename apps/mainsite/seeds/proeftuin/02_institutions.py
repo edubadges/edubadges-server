@@ -1,6 +1,6 @@
 from institution.models import Institution, Faculty
 from issuer.models import Issuer
-from .util import add_terms_institution, institution_id_by_pba_id, seed_image_for, read_seed_csv
+from mainsite.seeds.util import add_terms_institution, institution_id_by_pba_id, seed_image_for, read_seed_csv
 
 
 def get_institution_type(identifier: str) -> str:
