@@ -5,7 +5,7 @@ from pprint import pformat
 from typing import Optional
 
 import badgrlog
-from badgrsocialauth.utils import get_social_account
+from badgeuser.models import BadgeUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from issuer.models import BadgeInstance
@@ -24,7 +24,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import AchievementSubject, Credential, ImpierceOfferRequest, SphereonOfferRequest, VeramoOfferRequest
-from .serializers import CredentialSerializer, VeramoOfferRequestSerializer
+from .serializers import CredentialSerializer
 
 logger = logging.getLogger('django')
 
@@ -100,10 +100,11 @@ class OB3CallbackView(APIView):
     http_method_names: Sequence[str] = ['post']
 
     def post(self, request: Request):
-        entity_id, social_uuid = self.__parse_body(request)
+        entity_id, email = self.__parse_body(request)
         badge_instance = self.__get_badge_instance(entity_id)
+        user = self.__get_user(email)
 
-        self.__authorize(badge_instance, social_uuid)
+        self.__authorize(badge_instance, user)
 
         credential = self.__create_credential(badge_instance)
         serializer = CredentialSerializer(credential)
@@ -111,21 +112,30 @@ class OB3CallbackView(APIView):
 
     def __parse_body(self, request: Request) -> tuple[str, str]:
         state = request.data.get('issuer_state')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
-        user_id = request.data.get('sub')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
+        email = request.data.get('email')  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue, reportUnknownVariableType]
 
         if not isinstance(state, str) or not state:
-            raise ValidationError('state parameter is required')
+            raise ValidationError('issuer_state parameter is required')
 
-        if not isinstance(user_id, str) or not user_id:
-            raise ValidationError('user_id parameter is required')
+        if not isinstance(email, str) or not email:
+            raise ValidationError('email parameter is required')
 
-        return state, user_id
+        return state, email
 
-    def __authorize(self, _badge_instance: BadgeInstance, _social_uuid: str):
-        # TEMPORARY: Allow everything for testing purposes.
-        # We cannot get the correct uuid from the authorization flow yet, nor any attribute that we could check on.
-        # Once this is solved by the issuer making the callback, we should use the correct attribute to check on.
-        pass
+    def __get_user(self, email: str) -> BadgeUser:
+        from badgeuser.models import BadgeUser
+
+        try:
+            return BadgeUser.objects.get(email=email)
+        except BadgeUser.DoesNotExist:
+            raise AuthenticationFailed('unknown email')
+
+    def __authorize(self, badge_instance: BadgeInstance, user: BadgeUser):
+        badge_email: str = badge_instance.get_email_address() or ''
+        user_email: str = str(user.primary_email) or ''
+
+        if badge_email.lower() != user_email.lower():
+            raise AuthenticationFailed('invalid email')
 
     def __get_badge_instance(self, entity_id: str) -> BadgeInstance:
         try:
