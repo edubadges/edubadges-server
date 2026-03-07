@@ -1,9 +1,7 @@
-from typing import Any
-from unittest import skip
+from typing import Any, Optional
 from unittest.mock import patch
 
-from allauth.socialaccount.models import SocialAccount
-from badgeuser.models import BadgeUser
+from django.core.handlers.wsgi import WSGIRequest
 from issuer.models import BadgeInstance
 from mainsite.tests import BadgrTestCase
 
@@ -21,9 +19,7 @@ class OB3CallbackAPITest(BadgrTestCase):
         - Verify response contains required OB3 credential fields
         """
         assertion = self._setup_assertion_with_relations()
-        recipient_uid: str = self._get_social_account(assertion.user).uid
-
-        response = self._post_callback(assertion.entity_id, recipient_uid)
+        response = self._post_callback(assertion.entity_id, str(assertion.get_email_address()))
 
         # Verify response
         self.assertEqual(response.status_code, 200)
@@ -70,8 +66,7 @@ class OB3CallbackAPITest(BadgrTestCase):
         Test that the callback endpoint includes hashed recipient identifier when present.
         """
         assertion = self._setup_assertion_with_relations()
-        recipient_uid: str = self._get_social_account(assertion.user).uid
-        response = self._post_callback(assertion.entity_id, recipient_uid)
+        response = self._post_callback(assertion.entity_id, str(assertion.get_email_address()))
 
         # Verify response
         self.assertEqual(response.status_code, 200)
@@ -90,17 +85,16 @@ class OB3CallbackAPITest(BadgrTestCase):
         """
         Test that requesting a non-existent badge instance returns 404.
         """
-        response = self._post_callback('nonexistent-badge-entity-id', '42')
+        response = self._post_callback('nonexistent-badge-entity-id', 'test@example.com')
         self.assertEqual(response.status_code, 404)
 
     def test_callback_endpoint_anonymous_access(self):
         """
-        Test that requesting a badge instance needs no authentication.
+        Test that requesting a badge instance needs no bearer token authentication.
         """
         assertion = self._setup_assertion_with_relations()
         self.client.logout()
-        recipient_uid: str = self._get_social_account(assertion.user).uid
-        response = self._post_callback(assertion.entity_id, recipient_uid)
+        response = self._post_callback(assertion.entity_id, assertion.get_email_address())
         self.assertEqual(response.status_code, 200)
 
     def test_callback_endpoint_requires_issuer_state_parameter(self):
@@ -108,18 +102,19 @@ class OB3CallbackAPITest(BadgrTestCase):
         Test that the callback endpoint requires an issuer_state parameter.
         If parameter is missing, should return 400 Bad Request.
         """
-        response = self.client.post('/ob3/v1/ob3/callback', {'sub': '42'})
+        response = self._post_callback(None, 'test@example.com')
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), ['issuer_state parameter is required'])
 
-    def test_callback_endpoint_requires_sub_parameter(self):
+    def test_callback_endpoint_requires_email_parameter(self):
         """
-        Test that the callback endpoint requires a sub parameter.
-        If parameter is missing, should return 400 Bad Request.
+        Test that the callback endpoint requires an email parameter.
+        If parameter is missing, should return 403 Bad Request.
         """
-        response = self.client.post('/ob3/v1/ob3/callback', {'issuer_state': '123'})
+        response = self._post_callback('issuer_state', None,)
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), ['email parameter is required'])
 
-    @skip("Authorization checks are temporarily disabled")
     def test_callback_endpoint_must_be_for_recipient_user(self):
         """
         Test that the callback endpoint must be for the user who initiated the request.
@@ -128,13 +123,10 @@ class OB3CallbackAPITest(BadgrTestCase):
         """
         assertion = self._setup_assertion_with_relations()
         another_user = self.setup_student(authenticate=False)
-        response = self.client.post(
-            '/ob3/v1/ob3/callback',
-            {'issuer_state': assertion.entity_id, 'sub': self._get_social_account(another_user).uid},
-        )
+        response = self._post_callback(assertion.entity_id, another_user.email)
         self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json(), {'detail': 'invalid email'})
 
-    @skip("Authorization checks are temporarily disabled")
     def test_callback_endpoint_must_be_for_existing_user(self):
         """
         Test that the callback endpoint must be for an existing user.
@@ -142,27 +134,19 @@ class OB3CallbackAPITest(BadgrTestCase):
         should return 403 Forbidden.
         """
         assertion = self._setup_assertion_with_relations()
-        response = self.client.post(
-            '/ob3/v1/ob3/callback', {'issuer_state': assertion.entity_id, 'sub': 'userdoesnotexist'}
-        )
+        response = self._post_callback(assertion.entity_id, 'nonexistent@example.com')
         self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json(), {'detail': 'unknown email'})
 
-    def test_callback_endpoint_can_be_for_any_socialaccount_uuid(self):
-        """
-        Test that the callback endpoint accepts any socialaccount UUID belonging to the user who initiated the request.
-        If the sub parameter matches the UUID of any of the user's socialaccounts, the request should succeed (200 OK).
-        """
-        assertion = self._setup_assertion_with_relations()
-        second_social_account = self.add_eduid_socialaccount(assertion.user)
-        self.assertEqual(SocialAccount.objects.filter(user=assertion.user).count(), 2)
-        response = self.client.post(
-            '/ob3/v1/ob3/callback', {'issuer_state': assertion.entity_id, 'sub': second_social_account.uid}
-        )
-        self.assertEqual(response.status_code, 200, response.content)
-
-    def _post_callback(self, state: str, user_id: str):
+    def _post_callback(self, issuer_state: Optional[str], email: Optional[str]) -> WSGIRequest:
         """Helper method to make POST requests to the callback endpoint."""
-        data: dict[str, str] = {'issuer_state': state, 'sub': user_id}
+
+        data: dict[str, str] = {}
+        if issuer_state is not None:
+            data['issuer_state'] = issuer_state
+        if email is not None:
+            data['email'] = email
+
         # An example of the actual body that the veramo issuer sends to the callback:
         # {
         #   "acr": "urn:oasis:names:tc:SAML:2.0:ac:classes:Password",
@@ -205,9 +189,6 @@ class OB3CallbackAPITest(BadgrTestCase):
         assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher)
         return assertion
 
-    def _get_social_account(self, user: BadgeUser) -> SocialAccount:
-        return SocialAccount.objects.get(user=user)
-
 
 class OB3CredentialsViewAPITest(BadgrTestCase):
     """
@@ -220,11 +201,11 @@ class OB3CredentialsViewAPITest(BadgrTestCase):
         This avoids making actual network requests during tests.
         """
         # Create a mock response object
-        mock_response = type('MockResponse', (), {
-            'status_code': 200,
-            'text': '{"fake": "json"}',
-            'json': lambda self: {"uri": "oidc://fake-offer-uri"}
-        })()
+        mock_response = type(
+            'MockResponse',
+            (),
+            {'status_code': 200, 'text': '{"fake": "json"}', 'json': lambda self: {'uri': 'oidc://fake-offer-uri'}},
+        )()
 
         # Return the patch object as a context manager
         return patch('ob3.models.requests.post', return_value=mock_response)
