@@ -10,7 +10,8 @@ from typing_extensions import Optional
 
 
 def seed_image_for(type: str, name: str) -> File:
-    base_path = 'apps/mainsite/seeds/images/'
+    ## NOTE: proeftuin seedbank is hardcoded here, for simplicity
+    base_path = 'apps/mainsite/seeds/proeftuin/images/'
     if type == 'institutions':
         raise ValueError('NOTE: path for institutions is inconsistent and must be singular: institution')
 
@@ -72,14 +73,16 @@ def add_terms_institution(institution: Institution) -> None:
 
 
 def read_seed_csv(csv_name: str) -> list[dict[str, str]]:
-    file_path = os.path.join('apps/mainsite/seeds/data', f'{csv_name}.csv')
+    ## NOTE: proeftuin seedbank is hardcoded here, for simplicity
+    file_path = os.path.join('apps/mainsite/seeds/proeftuin/data', f'{csv_name}.csv')
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file, delimiter=';', strict=True)
         return list(reader)
 
 
 def read_seed_jsons(pattern: str) -> list[dict[str, str]]:
-    files = glob.glob(f'apps/mainsite/seeds/data/{pattern}')
+    ## NOTE: proeftuin seedbank is hardcoded here, for simplicity
+    files = glob.glob(f'apps/mainsite/seeds/proeftuin/data/{pattern}')
 
     # All files contain arrays at the .iam attribute, merge and return these
     merged = []

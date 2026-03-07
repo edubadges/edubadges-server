@@ -183,8 +183,12 @@ If you login to http://localhost:8000/staff/superuser then you'll have to provid
 
 ### Seed database
 
-- `./manage.py seed -c` - truncate tables and refill with seed data
-- `./manage.py seed` - fill tables with seed data if objects don't exist yet
+The seed command now requires a `--seedbank` parameter to specify which seedbank to use. Available seedbanks include `proeftuin`.
+
+- `./manage.py seed --seedbank proeftuin -c` - truncate tables and refill with seed data from the proeftuin seedbank
+- `./manage.py seed --seedbank proeftuin` - fill tables with seed data from the proeftuin seedbank if objects don't exist yet
+
+The `--seedbank` parameter is required and has no default value.
 
 ### Run a server locally for development
 

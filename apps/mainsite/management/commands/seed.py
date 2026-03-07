@@ -1,41 +1,46 @@
-import traceback
 import sys
-from os import listdir, environ
-from os.path import dirname, basename, isfile, join
-from django.test.utils import override_settings
-from django.utils import timezone
+import traceback
+from os import listdir
+from os.path import dirname, isfile, join
+from random import randrange
+
+import badgrlog
+from badgeuser.models import BadgeUser
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
-from random import randrange
-from badgeuser.models import BadgeUser
+from django.test.utils import override_settings
+from django.utils import timezone
+from institution.models import Faculty, Institution
+from issuer.models import BadgeClass, BadgeInstance, Issuer
 from mainsite.models import BadgrApp
 from mainsite.tests.base import SetupHelper
-from institution.models import Institution, Faculty
-from issuer.models import Issuer, BadgeClass, BadgeInstance
-import badgrlog
 
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-c', '--clean', action='store_true')
         parser.add_argument('-as', '--add_assertions', type=int)
-        parser.add_argument('-cf', '--check_first', action="store_true")
+        parser.add_argument('-cf', '--check_first', action='store_true')
+        parser.add_argument('--seedbank', required=True, help='Specify the seedbank to use (e.g., proeftuin)')
 
     def handle(self, *args, **options):
         if not settings.ALLOW_SEEDS:
             print('Not seeding: ALLOW_SEEDS is set to false')
             return
-            
-        with override_settings(CACHES={
-            'default': {
-                'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+
+        with override_settings(
+            CACHES={
+                'default': {
+                    'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+                }
             }
-        }):
+        ):
             if options['clean']:
                 clear_data()
 
-            run_seeds()
+            seeds = get_seeds(options['seedbank'])
+            run_seeds(seeds)
             if options['add_assertions']:
                 nr_of_assertions = options['add_assertions']
                 run_scaled_seed(scale=nr_of_assertions)
@@ -47,7 +52,7 @@ def clear_data():
 
         schema = 'public'
         migration_filled_tables = ('auth_permission', 'django_content_type', 'django_migrations')
-        
+
         sql = (
             f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}' "
             f"AND table_name NOT IN {migration_filled_tables} AND table_type = 'BASE TABLE'"
@@ -59,21 +64,31 @@ def clear_data():
         print('\033[92mdone!\033[0m')
 
 
-def run_seeds():
-    seedsdir = join(dirname(__file__), '../../seeds')
-    seeds = [
-        basename(x)[:-3]
-        for x in listdir(seedsdir)
-        if x.endswith('.py')
-        if x not in ['__init__.py', 'constants.py', 'util.py']
-        if isfile(join(seedsdir, x))
-    ]
+def get_seeds(seedbank):
+    """Get list of seed modules for a given seedbank"""
 
-    for seed in sorted(seeds):
-        print('Seeding %s... ' % seed, end='')
+    ## There is quite probably a much more pythonic way to get a list of python files that are modules.
 
+    seedsdir = join(dirname(__file__), f'../../seeds/{seedbank}')
+    seeds = listdir(seedsdir)
+    # Filter out anything that is not a file
+    seeds = filter(lambda seed: isfile(join(seedsdir, seed)), seeds)
+    # Filter out __ini__.py, constants.py, and util.py
+    seeds = filter(lambda seed: seed not in ['__init__.py', 'constants.py', 'util.py'], seeds)
+
+    # Filter out anything not ending in .py then remove the extension
+    seeds = filter(lambda seed: seed.endswith('.py'), seeds)
+    seeds = map(lambda seed: seed.replace('.py', ''), seeds)
+    # turn the list of seed names into a list of seed module names return sorted
+    seeds = map(lambda seed: f'mainsite.seeds.{seedbank}.{seed}', seeds)
+    return sorted(seeds)
+
+
+def run_seeds(seeds):
+    """Run the specified seed modules"""
+    for seed in seeds:
         try:
-            __import__('mainsite.seeds.' + seed)
+            __import__(seed)
             print('\033[92mdone!\033[0m')
         except Exception as e:
             sys.stderr.write('\033[91mFAILED!\033[0m')
