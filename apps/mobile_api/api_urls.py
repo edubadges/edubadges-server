@@ -53,6 +53,7 @@ urlpatterns = [
     path('profile', UserProfileView.as_view(), name='mobile_api_user_profile'),
     path('catalog', CatalogBadgeClassListView.as_view(), name='mobile_api_catalog_badge_class'),
     path('institutions', InstitutionListView.as_view(), name='mobile_api_institution_list'),
-    path('register-device', RegisterDeviceViewSet.as_view({'post': 'create'}), name='mobile_api_register_device'),
+    path('register-devices', RegisterDeviceViewSet.as_view({'post': 'create'}), name='mobile_api_register_devices_list'),
+    path('register-devices/<str:registration_id>', RegisterDeviceViewSet.as_view({'get': 'retrieve'}), name='mobile_api_register_devices_detail'),
     path('', include(router.urls)),
 ]
