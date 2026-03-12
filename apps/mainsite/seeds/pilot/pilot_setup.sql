@@ -15,7 +15,7 @@ INSERT INTO "institution_institution" VALUES
 (2,'SURFnet','aDYXgNnsT-WXxro8vfykSg','2020-09-23 14:16:44.380748','2024-11-13 14:00:06.172579',NULL,NULL,'0000','https://www.surf.nl/','uploads/institution/35d54c37-8b78-491a-8948-33ee9b36e2ce.png','surfnet.nl','uitvoering_overeenkomst','uitvoering_overeenkomst','In SURF, education and research institutions work together on ICT facilities and innovation in order to make full use of the opportunities offered by digitisation. In this way, together we can make better and more flexible education and research possible.','In SURF, education and research institutions work together on ICT facilities and innovation in order to make full use of the opportunities offered by digitisation. In this way, together we can make better and more flexible education and research possible.',NULL,'en_EN','','SURFnet',false,false,true,false,'surfnet.nl.tempguestidp.edubadges.nl','(.*@*.nl|.*@*.edu|.*@*.com)',NULL,NULL,NULL,false,false,false,'NL',true,'support@edubadges.nl'),
 
 -- SURF (ID: 3)
-(3,'SURF','y2C_ap_gTPm_dQaAE2Q-ww','2020-10-01 18:53:17.362562','2026-02-23 10:23:05.757393',NULL,NULL,'0000','https://www.surf.nl/','uploads/institution/surf-logo.png','surf.nl','uitvoering_overeenkomst','uitvoering_overeenkomst','In SURF, education and research institutions work together on ICT facilities and innovation in order to make full use of the opportunities offered by digitisation. In this way, together we can make better and more flexible education and research possible..','In SURF werken onderwijs- en onderzoeksinstellingen samen aan ICT-voorzieningen en innovatie om de mogelijkheden van digitalisering optimaal te benutten. Zo maken we samen beter en flexibeler onderwijs en onderzoek mogelijk.','SURF','en_EN','uploads/institution/e0ae6a48-5607-4c3e-9551-49270d8cf0a5.png','SURF',true,true,true,false,'surf.nl.tempguestidp.edubadges.nl','(.*@*.nl|.*@*.edu|.*@*.com)','206815','sis-surf.prod.edubadges.nl',69902,true,false,true,'NL',true,'support@edubadges.nl'),
+(3,'SURF','y2C_ap_gTPm_dQaAE2Q-ww','2020-10-01 18:53:17.362562','2026-02-23 10:23:05.757393',NULL,NULL,'0000','https://www.surf.nl/','uploads/institution/surf-logo.png','surf.nl','uitvoering_overeenkomst','uitvoering_overeenkomst','In SURF, education and research institutions work together on ICT facilities and innovation in order to make full use of the opportunities offered by digitisation. In this way, together we can make better and more flexible education and research possible..','In SURF werken onderwijs- en onderzoeksinstellingen samen aan ICT-voorzieningen en innovatie om de mogelijkheden van digitalisering optimaal te benutten. Zo maken we samen beter en flexibeler onderwijs en onderzoek mogelijk.','SURF','en_EN','uploads/institution/e0ae6a48-5607-4c3e-9551-49270d8cf0a5.png','SURF',true,true,true,false,'surf.nl.tempguestidp.edubadges.nl','(.*@*.nl|.*@*.edu|.*@*.com)','206815',NULL,NULL,false,false,true,'NL',true,'support@edubadges.nl'),
 
 -- University of Groningen (RUG) (ID: 22)
 (22,'University of Groningen','_yF-0DaoTFKejs5ovFl5SQ','2021-09-27 09:33:37.244741','2024-11-13 14:00:06.191097',NULL,NULL,'21PC',NULL,'','rug.nl','gerechtvaardigd_belang','gerechtvaardigd_belang','','','WO','en_EN','','Rijksuniversiteit Groningen',true,true,true,false,'rug.nl.tempguestidp.edubadges.nl','(.*@*.nl|.*@*.edu|.*@*.com)','165742',NULL,NULL,false,false,true,'NL',true,'support@edubadges.nl'),
@@ -51,54 +51,55 @@ INSERT INTO "badgeuser_terms" VALUES
 -- Dumping data for table "badgeuser_termsurl"
 --
 
-(7,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/formal-edubadges-agreement-en.md','en',1,false)
-(8,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/formal-edubadges-agreement-nl.md','nl',1,false)
-(9,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/formal-edubadges-agreement-en.md','en',1,true)
-(10,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/formal-edubadges-agreement-nl.md','en',1,true)
-(11,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/informal-edubadges-agreement-en.md','en',2,false)
-(12,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/informal-edubadges-agreement-nl.md','nl',2,false)
-(13,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/informal-edubadges-agreement-en.md','en',2,true)
-(14,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/informal-edubadges-agreement-nl.md','nl',2,true)
-(15,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/formal-edubadges-agreement-en.md','en',6,false)
-(16,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/formal-edubadges-agreement-nl.md','nl',6,false)
-(17,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/informal-edubadges-agreement-en.md','en',7,false)
-(18,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/informal-edubadges-agreement-nl.md','nl',7,false)
-(19,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/formal-edubadges-excerpt-en.md','en',6,true)
-(20,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/formal-edubadges-excerpt-nl.md','nl',6,true)
-(21,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/informal-edubadges-excerpt-en.md','en',7,true)
-(22,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/informal-edubadges-excerpt-nl.md','nl',7,true)
-(67,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-formal-text-en.md','en',25,false)
-(68,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-formal-text-nl.md','nl',25,false)
-(69,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-formal-excerpt-en.md','en',25,true)
-(70,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-formal-excerpt-nl.md','nl',25,true)
-(71,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-nonformal-text-en.md','en',26,false)
-(72,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-nonformal-text-nl.md','nl',26,false)
-(73,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-nonformal-excerpt-en.md','en',26,true)
-(74,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-nonformal-excerpt-nl.md','nl',26,true)
-(119,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-nonformal-text-en.md','en',38,false)
-(120,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-nonformal-text-nl.md','nl',38,false)
-(121,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-nonformal-excerpt-en.md','en',38,true)
-(122,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-nonformal-excerpt-nl.md','nl',38,true)
-(151,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-formal-text-en.md','en',46,false)
-(152,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-formal-text-nl.md','nl',46,false)
-(153,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-formal-excerpt-en.md','en',46,true)
-(154,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-formal-excerpt-nl.md','nl',46,true)
-(227,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-formal-excerpt-en.md','en',65,true)
-(228,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-formal-excerpt-nl.md','nl',65,true)
-(229,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-formal-text-en.md','en',65,false)
-(230,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-formal-text-nl.md','nl',65,false)
-(231,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-nonformal-excerpt-en.md','en',66,true)
-(232,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-nonformal-excerpt-nl.md','nl',66,true)
-(233,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-nonformal-text-en.md','en',66,false)
-(234,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-nonformal-text-nl.md','nl',66,false)
-(251,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-formal-excerpt-en.md','en',71,true)
-(252,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-formal-excerpt-nl.md','nl',71,true)
-(253,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-formal-text-en.md','en',71,false)
-(254,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-formal-text-nl.md','nl',71,false)
-(267,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-nonformal-excerpt-en.md','en',75,true)
-(268,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-nonformal-excerpt-nl.md','nl',75,true)
-(269,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-nonformal-text-en.md','en',75,false)
-(270,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-nonformal-text-nl.md','nl',75,false)
+INSERT INTO "badgeuser_termsurl" VALUES
+(7,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/formal-edubadges-agreement-en.md','en',1,false),
+(8,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/formal-edubadges-agreement-nl.md','nl',1,false),
+(9,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/formal-edubadges-agreement-en.md','en',1,true),
+(10,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/formal-edubadges-agreement-nl.md','en',1,true),
+(11,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/informal-edubadges-agreement-en.md','en',2,false),
+(12,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/informal-edubadges-agreement-nl.md','nl',2,false),
+(13,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/informal-edubadges-agreement-en.md','en',2,true),
+(14,'https://raw.githubusercontent.com/edubadges/privacy/master/surfnet.nl/informal-edubadges-agreement-nl.md','nl',2,true),
+(15,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/formal-edubadges-agreement-en.md','en',6,false),
+(16,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/formal-edubadges-agreement-nl.md','nl',6,false),
+(17,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/informal-edubadges-agreement-en.md','en',7,false),
+(18,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/informal-edubadges-agreement-nl.md','nl',7,false),
+(19,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/formal-edubadges-excerpt-en.md','en',6,true),
+(20,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/formal-edubadges-excerpt-nl.md','nl',6,true),
+(21,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/informal-edubadges-excerpt-en.md','en',7,true),
+(22,'https://raw.githubusercontent.com/edubadges/privacy/master/surf/informal-edubadges-excerpt-nl.md','nl',7,true),
+(67,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-formal-text-en.md','en',25,false),
+(68,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-formal-text-nl.md','nl',25,false),
+(69,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-formal-excerpt-en.md','en',25,true),
+(70,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-formal-excerpt-nl.md','nl',25,true),
+(71,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-nonformal-text-en.md','en',26,false),
+(72,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-nonformal-text-nl.md','nl',26,false),
+(73,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-nonformal-excerpt-en.md','en',26,true),
+(74,'https://raw.githubusercontent.com/edubadges/privacy/master/fontys-hogescholen/edubadges-nonformal-excerpt-nl.md','nl',26,true),
+(119,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-nonformal-text-en.md','en',38,false),
+(120,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-nonformal-text-nl.md','nl',38,false),
+(121,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-nonformal-excerpt-en.md','en',38,true),
+(122,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-nonformal-excerpt-nl.md','nl',38,true),
+(151,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-formal-text-en.md','en',46,false),
+(152,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-formal-text-nl.md','nl',46,false),
+(153,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-formal-excerpt-en.md','en',46,true),
+(154,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-formal-excerpt-nl.md','nl',46,true),
+(227,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-formal-excerpt-en.md','en',65,true),
+(228,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-formal-excerpt-nl.md','nl',65,true),
+(229,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-formal-text-en.md','en',65,false),
+(230,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-formal-text-nl.md','nl',65,false),
+(231,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-nonformal-excerpt-en.md','en',66,true),
+(232,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-nonformal-excerpt-nl.md','nl',66,true),
+(233,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-nonformal-text-en.md','en',66,false),
+(234,'https://raw.githubusercontent.com/edubadges/privacy/master/tu-delft/edubadges-nonformal-text-nl.md','nl',66,false),
+(251,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-formal-excerpt-en.md','en',71,true),
+(252,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-formal-excerpt-nl.md','nl',71,true),
+(253,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-formal-text-en.md','en',71,false),
+(254,'https://raw.githubusercontent.com/edubadges/privacy/master/han-university-of-applied-sciences/edubadges-formal-text-nl.md','nl',71,false),
+(267,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-nonformal-excerpt-en.md','en',75,true),
+(268,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-nonformal-excerpt-nl.md','nl',75,true),
+(269,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-nonformal-text-en.md','en',75,false),
+(270,'https://raw.githubusercontent.com/edubadges/privacy/master/rijksuniversiteit-groningen/edubadges-nonformal-text-nl.md','nl',75,false);
 
 -- This file now contains the 6 requested institutions with their related badgeuser_terms and badgeuser_termsurl data:
 -- 1. SURFnet (ID: 2) - 12 terms records
