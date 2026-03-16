@@ -402,7 +402,7 @@ class BadgeInstanceDetail(APIView):
             .filter(entity_id=entity_id)
             .get()
         )
-        serializer = BadgeInstanceDetailSerializer(instance)
+        serializer = BadgeInstanceDetailSerializer(instance, context={"request": request})
         return Response(serializer.data)
 
     @extend_schema(
