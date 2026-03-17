@@ -656,38 +656,69 @@ class IssuerMembers(APIView):
     permission_classes = (TeachPermission,)
 
     def get(self, request, **kwargs):
-        is_super_user = hasattr(request.user, 'is_superuser') and request.user.is_superuser
-        institution_part = '' if is_super_user else f'ins.id = {request.user.institution.id} and '
+        user = request.user
+        is_super_user = user.is_superuser
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"""
-select i.id, u.email, u.first_name, u.last_name, i.name_english as issuer_name_en, i.name_dutch  as issuer_name_nl, 
-si.may_update as issuer_staff
-from users u
-inner join staff_issuerstaff si on u.id = si.user_id
-inner join issuer_issuer i on i.id = si.issuer_id
-inner join institution_faculty f on f.id = i.faculty_id
-inner join institution_institution ins on ins.id = f.institution_id
-where {institution_part} si.may_update is not null and i.id is not null order by i.id;
-                        """,
-                [],
-            )
-            issuer_overview = dict_fetch_all(cursor)
+        issuers = Issuer.objects.select_related(
+            "faculty__institution"
+        ).prefetch_related(
+            "badgeclasses",
+            "issuerstaff_set__user",
+        )
 
-            def determine_role(row):
-                return 'Issuer Admin' if row['issuer_staff'] else 'Issuer Awarder'
+        if not is_super_user:
+            issuers = issuers.filter(faculty__institution=user.institution)
 
-            results = []
+        results = []
 
-            for row in issuer_overview:
+        for issuer in issuers:
+            badgeclasses = issuer.badgeclasses.all()
+
+            for staff in issuer.issuerstaff_set.all():
+                role = self.get_role(staff)
+
+                for badgeclass in badgeclasses:
+                    results.append(
+                        {
+                            "issuer_name": issuer.name,
+                            "email": staff.user.email,
+                            "name": staff.user.get_full_name(),
+                            "role": role,
+                            "permissie/edubadge": badgeclass.name,
+                        }
+                    )
+
+        # Institution admins
+        institution_staff = InstitutionStaff.objects.select_related(
+            "user", "institution"
+        ).filter(may_administrate_users=True)
+
+        if not is_super_user:
+            institution_staff = institution_staff.filter(institution=user.institution)
+
+        for inst_staff in institution_staff:
+            badgeclasses = BadgeClass.objects.filter(
+                issuer__faculty__institution=inst_staff.institution
+            ).select_related("issuer")
+
+            for badgeclass in badgeclasses:
                 results.append(
                     {
-                        'issuer_name': row['issuer_name_en'] if row['issuer_name_en'] else row['issuer_name_nl'],
-                        'email': row['email'],
-                        'name': f'{row["first_name"]} {row["last_name"]}',
-                        'role': determine_role(row),
+                        "issuer_name": badgeclass.issuer.name,
+                        "email": inst_staff.user.email,
+                        "name": inst_staff.user.get_full_name(),
+                        "role": "instellingsadmin",
+                        "permissie/edubadge": badgeclass.name,
                     }
                 )
-            sorted_results = sorted(results, key=lambda a: (a['issuer_name'] or '',))
-            return Response(sorted_results, status=status.HTTP_200_OK)
+
+        return Response(results, status=status.HTTP_200_OK)
+
+    def get_role(self, staff):
+        if staff.may_update:
+            return "Issuer admin"
+        if staff.may_award:
+            return "awarder"
+        if staff.may_read:
+            return "badge raadpleger"
+        return "unknown"
