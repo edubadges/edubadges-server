@@ -63,41 +63,14 @@ class Login(APIView):
 
     @extend_schema(
         methods=['GET'],
-        description='Login and validate the user',
+        description='Retrieve current user and sync eduID data',
         responses={
-            403: permission_denied_response,
             200: OpenApiResponse(
-                description='Successful responses with examples',
-                response=dict,  # or inline custom serializer class
+                response=UserSerializer,
+                description='urrent user data, synchronized with eduID. The presence of `validated_name` indicates whether the user has connected his eduID account to an other service like a bank or institution.',
                 examples=[
                     OpenApiExample(
-                        'User needs to link account in eduID',
-                        value={'status': 'link-account'},
-                        description="Redirect the user back to eduID with 'acr_values' = 'https://eduid.nl/trust/validate-names'",
-                        response_only=True,
-                    ),
-                    OpenApiExample(
-                        'User needs to revalidate name in eduID',
-                        value={'status': 'revalidate-name'},
-                        description="Redirect the user back to eduID with 'acr_values' = 'https://eduid.nl/trust/validate-names'",
-                        response_only=True,
-                    ),
-                    OpenApiExample(
-                        'User needs to agree to terms',
-                        value={
-                            'email': 'jdoe@example.com',
-                            'last_name': 'Doe',
-                            'first_name': 'John',
-                            'validated_name': 'John Doe',
-                            'schac_homes': ['university-example.org'],
-                            'terms_agreed': False,
-                            'termsagreement_set': [],
-                        },
-                        description="Show the terms and use the 'accept-general-terms' endpoint",
-                        response_only=True,
-                    ),
-                    OpenApiExample(
-                        'User valid',
+                        name='User with validated name',
                         value={
                             'email': 'jdoe@example.com',
                             'last_name': 'Doe',
@@ -109,17 +82,92 @@ class Login(APIView):
                                 {
                                     'agreed': True,
                                     'agreed_version': 1,
-                                    'terms': {'terms_type': 'service_agreement_student'},
+                                    'terms': {
+                                        'terms_type': 'service_agreement_student'
+                                    },
                                 },
                                 {
                                     'agreed': True,
                                     'agreed_version': 1,
-                                    'terms': {'terms_type': 'terms_of_service', 'institution': None},
+                                    'terms': {
+                                        'terms_type': 'terms_of_service',
+                                        'institution': None
+                                    },
                                 },
                             ],
                         },
-                        description='The user is valid, proceed with fetching all badge-instances and OPEN direct-awards',
+                        description='User has a validated name in eduID.',
                         response_only=True,
+                    ),
+                    OpenApiExample(
+                        name='User without validated name',
+                        value={
+                            'email': 'jdoe@example.com',
+                            'last_name': 'Doe',
+                            'first_name': 'John',
+                            'validated_name': None,
+                            'schac_homes': [],
+                            'terms_agreed': False,
+                            'termsagreement_set': [],
+                        },
+                        description='User does not have a validated name (yet).',
+                        response_only=True,
+                    ),
+                    OpenApiExample(
+                        name='User without agreed terms',
+                        value={
+                            'email': 'jdoe@example.com',
+                            'last_name': 'Doe',
+                            'first_name': 'John',
+                            'validated_name': 'John Doe',
+                            'schac_homes': ['university-example.org'],
+                            'terms_agreed': False,
+                            'termsagreement_set': [],
+                        },
+                        description='User did not accept terms (yet).',
+                        response_only=True,
+                    ),
+                ],
+            ),
+
+            # 🔐 Auth / permission errors
+            401: OpenApiResponse(
+                description='Authentication failed (missing or invalid bearer token)',
+                examples=[
+                    OpenApiExample(
+                        name='Missing token',
+                        value={'detail': 'Authentication credentials were not provided.'},
+                    ),
+                    OpenApiExample(
+                        name='Invalid token',
+                        value={'detail': 'Invalid or expired token.'},
+                    ),
+                ],
+            ),
+
+            403: permission_denied_response,
+
+            # 🌐 External dependency errors
+            502: OpenApiResponse(
+                description='eduID service error or unavailable',
+                examples=[
+                    OpenApiExample(
+                        name='eduID unavailable',
+                        value={'error': 'eduID unavailable'},
+                    ),
+                    OpenApiExample(
+                        name='eduID error',
+                        value={'error': 'eduID error'},
+                    ),
+                ],
+            ),
+
+            504: OpenApiResponse(
+                description='eduID request timeout',
+                examples=[
+                    OpenApiExample(
+                        name='Timeout',
+                        value={'error': 'eduID timeout'},
                     ),
                 ],
             ),
