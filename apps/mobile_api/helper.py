@@ -1,34 +1,48 @@
-import logging
-from rest_framework.exceptions import APIException
-from badgeuser.models import BadgeUser
+from rest_framework.exceptions import AuthenticationFailed
+from badgrsocialauth.providers.eduid.provider import EduIDProvider
 
-class RevalidatedNameException(APIException):
-    pass
 
-class NoValidatedNameException(APIException):
-    pass
-
-def process_eduid_response(eduid_response: dict, user: BadgeUser):
-    logger = logging.getLogger('Badgr.Debug')
-
-    validated_names = [info['validated_name'] for info in eduid_response if 'validated_name' in info]
+def sync_user_with_eduid(user, eduid_data, logger):
+    validated_names = []
+    preferred_name = None
 
     user.clear_affiliations()
-    for info in eduid_response:
-        if 'eppn' in info and 'schac_home_organization' in info:
-            user.add_affiliations([{'eppn': info['eppn'].lower(),
-                                    'schac_home': info['schac_home_organization'], }])
-            logger.info(f'Stored affiliations {info["eppn"]} {info["schac_home_organization"]}')
 
-    if user.validated_name and len(validated_names) == 0:
-        raise RevalidatedNameException
-    if len(validated_names) > 0:
-        # Use the preferred linked account for the validated_name.
-        preferred_validated_name = [info['validated_name'] for info in eduid_response if info['preferred']]
-        if not preferred_validated_name:
-            # This should never happen as it would be a bug in eduID, but let's be defensive
-            preferred_validated_name = [validated_names[0]]
-        user.validated_name = preferred_validated_name[0]
-    else:
+    for info in eduid_data:
+        # validated names
+        if "validated_name" in info:
+            validated_names.append(info["validated_name"])
+            if info.get("preferred"):
+                preferred_name = info["validated_name"]
+
+        # affiliations
+        if "eppn" in info and "schac_home_organization" in info:
+            user.add_affiliations([{
+                "eppn": info["eppn"].lower(),
+                "schac_home": info["schac_home_organization"],
+            }])
+
+    if not validated_names:
         user.validated_name = None
-        raise NoValidatedNameException
+        return
+
+    user.validated_name = preferred_name or validated_names[0]
+
+
+def extract_bearer_token(request) -> str:
+    auth = request.headers.get("Authorization", "")
+
+    if not auth.lower().startswith("bearer "):
+        raise AuthenticationFailed("Invalid or missing Authorization header")
+
+    return auth.split(" ", 1)[1]
+
+
+def provision_user_from_temporary(request, temp_user):
+    provider = EduIDProvider(request)
+    social_login = provider.sociallogin_from_response(
+        request,
+        temp_user.user_payload
+    )
+    social_login.save(request)
+    return social_login.user

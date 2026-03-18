@@ -7,9 +7,7 @@ from rest_framework.generics import ListAPIView
 from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet, FCMDeviceSerializer
 
 from badgeuser.models import StudentAffiliation, TermsAgreement
-from badgrsocialauth.providers.eduid.provider import EduIDProvider
 from directaward.models import DirectAward, DirectAwardBundle
-from django.conf import settings
 from django.db.models import Q, Subquery, Count
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
@@ -27,8 +25,9 @@ from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
 from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
+from mobile_api.eduid import EduIDClient
 from mobile_api.filters import CatalogBadgeClassFilter
-from mobile_api.helper import NoValidatedNameException, RevalidatedNameException, process_eduid_response
+from mobile_api.helper import provision_user_from_temporary, extract_bearer_token, sync_user_with_eduid
 from mobile_api.pagination import CatalogPagination
 from mobile_api.serializers import (
     BadgeCollectionSerializer,
@@ -64,41 +63,14 @@ class Login(APIView):
 
     @extend_schema(
         methods=['GET'],
-        description='Login and validate the user',
+        description='Retrieve current user and sync eduID data',
         responses={
-            403: permission_denied_response,
             200: OpenApiResponse(
-                description='Successful responses with examples',
-                response=dict,  # or inline custom serializer class
+                response=UserSerializer,
+                description='urrent user data, synchronized with eduID. The presence of `validated_name` indicates whether the user has connected his eduID account to an other service like a bank or institution.',
                 examples=[
                     OpenApiExample(
-                        'User needs to link account in eduID',
-                        value={'status': 'link-account'},
-                        description="Redirect the user back to eduID with 'acr_values' = 'https://eduid.nl/trust/validate-names'",
-                        response_only=True,
-                    ),
-                    OpenApiExample(
-                        'User needs to revalidate name in eduID',
-                        value={'status': 'revalidate-name'},
-                        description="Redirect the user back to eduID with 'acr_values' = 'https://eduid.nl/trust/validate-names'",
-                        response_only=True,
-                    ),
-                    OpenApiExample(
-                        'User needs to agree to terms',
-                        value={
-                            'email': 'jdoe@example.com',
-                            'last_name': 'Doe',
-                            'first_name': 'John',
-                            'validated_name': 'John Doe',
-                            'schac_homes': ['university-example.org'],
-                            'terms_agreed': False,
-                            'termsagreement_set': [],
-                        },
-                        description="Show the terms and use the 'accept-general-terms' endpoint",
-                        response_only=True,
-                    ),
-                    OpenApiExample(
-                        'User valid',
+                        name='User with validated name',
                         value={
                             'email': 'jdoe@example.com',
                             'last_name': 'Doe',
@@ -110,17 +82,92 @@ class Login(APIView):
                                 {
                                     'agreed': True,
                                     'agreed_version': 1,
-                                    'terms': {'terms_type': 'service_agreement_student'},
+                                    'terms': {
+                                        'terms_type': 'service_agreement_student'
+                                    },
                                 },
                                 {
                                     'agreed': True,
                                     'agreed_version': 1,
-                                    'terms': {'terms_type': 'terms_of_service', 'institution': None},
+                                    'terms': {
+                                        'terms_type': 'terms_of_service',
+                                        'institution': None
+                                    },
                                 },
                             ],
                         },
-                        description='The user is valid, proceed with fetching all badge-instances and OPEN direct-awards',
+                        description='User has a validated name in eduID.',
                         response_only=True,
+                    ),
+                    OpenApiExample(
+                        name='User without validated name',
+                        value={
+                            'email': 'jdoe@example.com',
+                            'last_name': 'Doe',
+                            'first_name': 'John',
+                            'validated_name': None,
+                            'schac_homes': [],
+                            'terms_agreed': False,
+                            'termsagreement_set': [],
+                        },
+                        description='User does not have a validated name (yet).',
+                        response_only=True,
+                    ),
+                    OpenApiExample(
+                        name='User without agreed terms',
+                        value={
+                            'email': 'jdoe@example.com',
+                            'last_name': 'Doe',
+                            'first_name': 'John',
+                            'validated_name': 'John Doe',
+                            'schac_homes': ['university-example.org'],
+                            'terms_agreed': False,
+                            'termsagreement_set': [],
+                        },
+                        description='User did not accept terms (yet).',
+                        response_only=True,
+                    ),
+                ],
+            ),
+
+            # 🔐 Auth / permission errors
+            401: OpenApiResponse(
+                description='Authentication failed (missing or invalid bearer token)',
+                examples=[
+                    OpenApiExample(
+                        name='Missing token',
+                        value={'detail': 'Authentication credentials were not provided.'},
+                    ),
+                    OpenApiExample(
+                        name='Invalid token',
+                        value={'detail': 'Invalid or expired token.'},
+                    ),
+                ],
+            ),
+
+            403: permission_denied_response,
+
+            # 🌐 External dependency errors
+            502: OpenApiResponse(
+                description='eduID service error or unavailable',
+                examples=[
+                    OpenApiExample(
+                        name='eduID unavailable',
+                        value={'error': 'eduID unavailable'},
+                    ),
+                    OpenApiExample(
+                        name='eduID error',
+                        value={'error': 'eduID error'},
+                    ),
+                ],
+            ),
+
+            504: OpenApiResponse(
+                description='eduID request timeout',
+                examples=[
+                    OpenApiExample(
+                        name='Timeout',
+                        value={'error': 'eduID timeout'},
                     ),
                 ],
             ),
@@ -130,49 +177,37 @@ class Login(APIView):
         logger = logging.getLogger('Badgr.Debug')
 
         user = request.user
-        """
-        Check if the user is known, has agreed to the terms and has a validated_name. If the user is not known
-        then check if there is a validate name and provision the user. If all is well, then return the user information
-        """
-        temporary_user = isinstance(user, TemporaryUser)
-        if temporary_user:
+
+        # Resolve user + token
+        if isinstance(user, TemporaryUser):
             bearer_token = user.bearer_token
+            user = provision_user_from_temporary(request, user)
         else:
-            authorization = request.environ.get('HTTP_AUTHORIZATION')
-            bearer_token = authorization[len('bearer ') :]
+            bearer_token = extract_bearer_token(request)
 
-        headers = {
-            'Accept': 'application/json, application/json;charset=UTF-8',
-            'Authorization': f'Bearer {bearer_token}',
-        }
-        url = f'{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links'
-        response = requests.get(url, headers=headers, timeout=60)
-        if response.status_code != 200:
-            error = f'Server error: eduID eppn endpoint error ({response.status_code})'
-            logger.error(error)
-            return Response(data={'error': str(error)}, status=response.status_code)
-
-        eduid_response = response.json()
-        validated_names = [info['validated_name'] for info in eduid_response if 'validated_name' in info]
-        if not validated_names:
-            # The user must go back to eduID and link an account
-            return Response(data={'status': 'link-account'})
-        if temporary_user:
-            # User must be created / provisioned together with social account
-            provider = EduIDProvider(request)
-            social_login = provider.sociallogin_from_response(request, user.user_payload)
-            social_login.save(request)
-            user = social_login.user
+        # Fetch eduID data
         try:
-            process_eduid_response(eduid_response, user)
-        except RevalidatedNameException:
-            return Response(data={'status': 'revalidate-name'})
-        except NoValidatedNameException:
-            return Response(data={'status': 'link-account'})
+            client = EduIDClient(bearer_token)
+            eduid_data = client.get_links()
+
+        except requests.Timeout:
+            logger.warning('eduID timeout')
+            return Response({'error': 'eduID timeout'}, status=504)
+
+        except requests.HTTPError as e:
+            logger.exception('eduID returned error')
+            return Response({'error': 'eduID error'}, status=502)
+
+        except requests.RequestException:
+            logger.exception('eduID unavailable')
+            return Response({'error': 'eduID unavailable'}, status=502)
+
+        # Sync user state
+        sync_user_with_eduid(user, eduid_data, logger)
 
         user.save()
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+
+        return Response(UserSerializer(user).data)
 
 
 class AcceptGeneralTerms(APIView):
