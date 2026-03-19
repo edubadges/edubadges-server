@@ -394,6 +394,7 @@ class BadgeInstanceDetail(APIView):
                                 'stackable': 'false',
                                 'self_enrollment_enabled': 'true',
                                 'user_may_enroll': 'false',
+                                'criteria_text': 'In order to earn this badge, you must complete the course and show proficiency in things.',
                                 'alignments': [
                                     {
                                         'target_name': 'EQF',

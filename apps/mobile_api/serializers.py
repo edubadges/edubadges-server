@@ -127,6 +127,7 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'quality_assurance_url',
             'quality_assurance_description',
             'stackable',
+            'criteria_text',
             'self_enrollment_enabled',
             'user_may_enroll',
             'alignments',
