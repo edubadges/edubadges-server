@@ -99,18 +99,18 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'image',
             'description',
             'formal',
+            'badge_class_type',
+            'expiration_period',
             'participation',
             'assessment_type',
             'assessment_id_verified',
             'assessment_supervised',
             'quality_assurance_name',
             'stackable',
-            'badgeclassextension_set',
-            'issuer',
-            'badge_class_type',
-            'expiration_period',
             'self_enrollment_enabled',
             'user_may_enroll',
+            'badgeclassextension_set',
+            'issuer',
         ]
 
     @extend_schema_field(serializers.BooleanField)
@@ -164,12 +164,12 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
             'expires_at',
             'acceptance',
             'public',
-            'badgeclass',
             'linkedin_url',
-            'grade_achieved',
             'include_grade_achieved',
+            'grade_achieved',
             'include_evidence',
             'narrative',
+            'badgeclass',
         ]
 
     def _get_linkedin_org_id(self, badgeclass):
@@ -228,7 +228,15 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectAward
-        fields = ['id', 'created_at', 'status', 'entity_id', 'badgeclass', 'required_terms', 'user_has_accepted_terms']
+        fields = [
+            'id',
+            'created_at',
+            'status',
+            'entity_id',
+            'badgeclass',
+            'required_terms',
+            'user_has_accepted_terms',
+        ]
 
     def get_required_terms(self, obj):
         try:

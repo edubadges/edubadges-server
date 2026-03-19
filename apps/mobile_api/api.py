@@ -67,7 +67,7 @@ class Login(APIView):
         responses={
             200: OpenApiResponse(
                 response=UserSerializer,
-                description='urrent user data, synchronized with eduID. The presence of `validated_name` indicates whether the user has connected his eduID account to an other service like a bank or institution.',
+                description='Current user data, synchronized with eduID. The presence of `validated_name` indicates whether the user has connected his eduID account to an other service like a bank or institution.',
                 examples=[
                     OpenApiExample(
                         name='User with validated name',
@@ -357,6 +357,10 @@ class BadgeInstanceDetail(APIView):
                             'expires_at': 'null',
                             'acceptance': 'Accepted',
                             'public': 'true',
+                            'linkedin_url': 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=Edubadge%20account%20complete&organizationId=206815&issueYear=2021&issueMonth=3&certUrl=https%3A%2F%2Fdemo.edubadges.nl%2Fpublic%2Fassertions%2FI41eovHQReGI_SG5KM6dSQ&certId=I41eovHQReGI_SG5KM6dSQ&original_referer=https%3A%2F%2Fdemo.edubadges.nl',
+                            'include_grade_achieved': 'true',
+                            'grade_achieved': '8',
+                            'include_evidence': 'true',
                             'badgeclass': {
                                 'id': 3,
                                 'name': 'Edubadge account complete',
@@ -364,12 +368,16 @@ class BadgeInstanceDetail(APIView):
                                 'image': '/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png',
                                 'description': '### Welcome to edubadges. Let your life long learning begin! ###\r\n\r\nYou are now ready to collect all your edubadges in your backpack. In your backpack you can store and manage them safely.\r\n\r\nShare them anytime you like and with whom you like.\r\n\r\nEdubadges are visual representations of your knowledge, skills and competences.',
                                 'formal': 'false',
+                                'badge_class_type': 'regular',
+                                'expiration_period': 'null',
                                 'participation': 'blended',
                                 'assessment_type': 'written_exam',
                                 'assessment_id_verified': 'false',
                                 'assessment_supervised': 'false',
                                 'quality_assurance_name': 'null',
                                 'stackable': 'false',
+                                'self_enrollment_enabled': 'true',
+                                'user_may_enroll': 'false',
                                 'badgeclassextension_set': [
                                     {'name': 'extensions:LanguageExtension', 'value': 'en_EN'},
                                     {
@@ -403,7 +411,6 @@ class BadgeInstanceDetail(APIView):
                                     },
                                 },
                             },
-                            'linkedin_url': 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=Edubadge%20account%20complete&organizationId=206815&issueYear=2021&issueMonth=3&certUrl=https%3A%2F%2Fdemo.edubadges.nl%2Fpublic%2Fassertions%2FI41eovHQReGI_SG5KM6dSQ&certId=I41eovHQReGI_SG5KM6dSQ&original_referer=https%3A%2F%2Fdemo.edubadges.nl',
                             'narrative': "Personal message from the awarder to the receiver",
                         },
                         description='Detailed information about a specific badge instance',
