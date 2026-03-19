@@ -318,7 +318,10 @@ class BadgeInstances(APIView):
             .select_related('badgeclass__issuer')
             .select_related('badgeclass__issuer__faculty')
             .select_related('badgeclass__issuer__faculty__institution')
-            .filter(user=request.user)
+            .filter(
+                user=request.user,
+                revoked=False,
+            )
             .order_by('-issued_on')
         )
         serializer = BadgeInstanceSerializer(instances, many=True)
