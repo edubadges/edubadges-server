@@ -7,7 +7,8 @@ from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, exte
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
-from issuer.models import BadgeClass, BadgeClassExtension, BadgeInstance, BadgeInstanceCollection, Issuer
+from issuer.models import BadgeClass, BadgeClassExtension, BadgeInstance, BadgeInstanceCollection, Issuer, \
+    BadgeInstanceEvidence, BadgeClassAlignment
 from lti_edu.models import StudentsEnrolled
 from rest_framework import serializers
 
@@ -84,11 +85,28 @@ class BadgeClassSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'entity_id', 'image', 'issuer']
 
 
+class BadgeClassAlignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BadgeClassAlignment
+        fields = [
+            'target_name',
+            'target_url',
+            'target_description',
+            'target_framework',
+            'target_code',
+        ]
+
+
 class BadgeClassDetailSerializer(serializers.ModelSerializer):
     issuer = IssuerSerializer(read_only=True)
     badgeclassextension_set = BadgeClassExtensionSerializer(many=True, read_only=True)
     self_enrollment_enabled = serializers.SerializerMethodField()
     user_may_enroll = serializers.SerializerMethodField()
+    alignments = BadgeClassAlignmentSerializer(
+        source='badgeclassalignment_set',
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = BadgeClass
@@ -99,18 +117,23 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'image',
             'description',
             'formal',
+            'badge_class_type',
+            'expiration_period',
             'participation',
             'assessment_type',
             'assessment_id_verified',
             'assessment_supervised',
             'quality_assurance_name',
+            'quality_assurance_url',
+            'quality_assurance_description',
             'stackable',
-            'badgeclassextension_set',
-            'issuer',
-            'badge_class_type',
-            'expiration_period',
+            'criteria_text',
             'self_enrollment_enabled',
             'user_may_enroll',
+            'eqf_nlqf_level_verified',
+            'alignments',
+            'badgeclassextension_set',
+            'issuer',
         ]
 
     @extend_schema_field(serializers.BooleanField)
@@ -146,11 +169,25 @@ class BadgeInstanceSerializer(serializers.ModelSerializer):
             "include_grade_achieved"
         ]
 
+class BadgeInstanceEvidenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BadgeInstanceEvidence
+        fields = [
+            'evidence_url',
+            'narrative',
+            'name',
+            'description',
+        ]
+
 
 class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassDetailSerializer()
     linkedin_url = serializers.SerializerMethodField()
-    narrative = serializers.SerializerMethodField()
+    evidences = BadgeInstanceEvidenceSerializer(
+        source='badgeinstanceevidence_set',
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = BadgeInstance
@@ -164,12 +201,12 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
             'expires_at',
             'acceptance',
             'public',
-            'badgeclass',
             'linkedin_url',
-            'grade_achieved',
             'include_grade_achieved',
+            'grade_achieved',
             'include_evidence',
-            'narrative',
+            'evidences',
+            'badgeclass',
         ]
 
     def _get_linkedin_org_id(self, badgeclass):
@@ -228,7 +265,16 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectAward
-        fields = ['id', 'created_at', 'status', 'entity_id', 'badgeclass', 'required_terms', 'user_has_accepted_terms']
+        fields = [
+            'id',
+            'created_at',
+            'status',
+            'entity_id',
+            'badgeclass',
+            'required_terms',
+            'user_has_accepted_terms',
+            'grade_achieved',
+        ]
 
     def get_required_terms(self, obj):
         try:
