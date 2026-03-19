@@ -361,6 +361,20 @@ class BadgeInstanceDetail(APIView):
                             'include_grade_achieved': 'true',
                             'grade_achieved': '8',
                             'include_evidence': 'true',
+                            'evidences': [
+                                {
+                                    'evidence_url': 'https://example.com',
+                                    'narrative': 'Personal message from the awarder to the receiver',
+                                    'name': 'evidence name',
+                                    'description': 'evidence description',
+                                },
+                                {
+                                    'evidence_url': 'https://example.com',
+                                    'narrative': 'Personal message from the awarder to the receiver',
+                                    'name': 'evidence name',
+                                    'description': 'evidence description',
+                                },
+                            ],
                             'badgeclass': {
                                 'id': 3,
                                 'name': 'Edubadge account complete',
@@ -427,7 +441,6 @@ class BadgeInstanceDetail(APIView):
                                     },
                                 },
                             },
-                            'narrative': "Personal message from the awarder to the receiver",
                         },
                         description='Detailed information about a specific badge instance',
                         response_only=True,

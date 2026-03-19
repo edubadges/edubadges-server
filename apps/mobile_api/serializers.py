@@ -165,11 +165,25 @@ class BadgeInstanceSerializer(serializers.ModelSerializer):
             "include_grade_achieved"
         ]
 
+class BadgeInstanceEvidenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BadgeInstanceEvidence
+        fields = [
+            'evidence_url',
+            'narrative',
+            'name',
+            'description',
+        ]
+
 
 class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassDetailSerializer()
     linkedin_url = serializers.SerializerMethodField()
-    narrative = serializers.SerializerMethodField()
+    evidences = BadgeInstanceEvidenceSerializer(
+        source='badgeinstanceevidence_set',
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = BadgeInstance
@@ -187,7 +201,7 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
             'include_grade_achieved',
             'grade_achieved',
             'include_evidence',
-            'narrative',
+            'evidences',
             'badgeclass',
         ]
 
