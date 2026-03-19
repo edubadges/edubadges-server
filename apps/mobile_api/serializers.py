@@ -7,7 +7,8 @@ from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, exte
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
 from institution.models import Faculty, Institution
-from issuer.models import BadgeClass, BadgeClassExtension, BadgeInstance, BadgeInstanceCollection, Issuer
+from issuer.models import BadgeClass, BadgeClassExtension, BadgeInstance, BadgeInstanceCollection, Issuer, \
+    BadgeInstanceEvidence, BadgeClassAlignment
 from lti_edu.models import StudentsEnrolled
 from rest_framework import serializers
 
@@ -84,11 +85,28 @@ class BadgeClassSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'entity_id', 'image', 'issuer']
 
 
+class BadgeClassAlignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BadgeClassAlignment
+        fields = [
+            'target_name',
+            'target_url',
+            'target_description',
+            'target_framework',
+            'target_code',
+        ]
+
+
 class BadgeClassDetailSerializer(serializers.ModelSerializer):
     issuer = IssuerSerializer(read_only=True)
     badgeclassextension_set = BadgeClassExtensionSerializer(many=True, read_only=True)
     self_enrollment_enabled = serializers.SerializerMethodField()
     user_may_enroll = serializers.SerializerMethodField()
+    alignments = BadgeClassAlignmentSerializer(
+        source='badgeclassalignment_set',
+        many=True,
+        read_only=True
+    )
 
     class Meta:
         model = BadgeClass
@@ -109,6 +127,7 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'stackable',
             'self_enrollment_enabled',
             'user_may_enroll',
+            'alignments',
             'badgeclassextension_set',
             'issuer',
         ]

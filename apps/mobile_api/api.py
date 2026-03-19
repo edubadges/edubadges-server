@@ -378,6 +378,22 @@ class BadgeInstanceDetail(APIView):
                                 'stackable': 'false',
                                 'self_enrollment_enabled': 'true',
                                 'user_may_enroll': 'false',
+                                'alignments': [
+                                    {
+                                        'target_name': 'EQF',
+                                        'target_url': 'https://ec.europa.eu/ploteus/content/descriptors-page',
+                                        'target_description': 'European Qualifications Framework',
+                                        'target_framework': 'EQF',
+                                        'target_code': '7',
+                                    },
+                                    {
+                                        'target_name': 'ECTS',
+                                        'target_url': 'https://ec.europa.eu/education/resources-and-tools/european-credit-transfer-and-accumulation-system-ects_en',
+                                        'target_description': 'European Credit Transfer and Accumulation System',
+                                        'target_framework': 'ECTS',
+                                        'target_code': '2.5',
+                                    },
+                                ],
                                 'badgeclassextension_set': [
                                     {'name': 'extensions:LanguageExtension', 'value': 'en_EN'},
                                     {
@@ -437,6 +453,7 @@ class BadgeInstanceDetail(APIView):
             BadgeInstance.objects.select_related('badgeclass')
             .prefetch_related('badgeclass__badgeclassextension_set')
             .prefetch_related('badgeinstanceevidence_set')
+            .prefetch_related('badgeclass__badgeclassalignment_set')
             .select_related('badgeclass__issuer')
             .select_related('badgeclass__issuer__faculty')
             .select_related('badgeclass__issuer__faculty__institution')
@@ -1256,7 +1273,8 @@ class BadgeClassDetailView(generics.RetrieveAPIView):
         'issuer__faculty',
         'issuer__faculty__institution',
     ).prefetch_related(
-        'badgeclassextension_set'
+        'badgeclassextension_set',
+        'badgeclassalignment_set',
     )
 
 
