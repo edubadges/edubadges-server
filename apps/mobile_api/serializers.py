@@ -273,6 +273,7 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
             'badgeclass',
             'required_terms',
             'user_has_accepted_terms',
+            'grade_achieved',
         ]
 
     def get_required_terms(self, obj):

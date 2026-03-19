@@ -747,6 +747,7 @@ class UnclaimedDirectAwards(APIView):
                             },
                         },
                         "user_has_accepted_terms": False,
+                        "grade_achieved": "8,0",
                     },
                 ),
             ],
