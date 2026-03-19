@@ -134,3 +134,4 @@ django-upgrade==1.23.1
 django-prometheus==2.3.1
 
 django-auditlog==3.0.0
+whitenoise==6.11

@@ -40,6 +40,7 @@ LANGUAGE_CODE = 'en-us'
 ##
 
 INSTALLED_APPS = [
+    'whitenoise.runserver_nostatic',
     'mainsite',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -100,6 +101,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'lti13.middleware.SameSiteMiddleware',
@@ -351,7 +353,7 @@ STORAGES = {
         },
     },
     'staticfiles': {
-        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
     },
 }
 
