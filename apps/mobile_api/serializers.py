@@ -130,6 +130,7 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'criteria_text',
             'self_enrollment_enabled',
             'user_may_enroll',
+            'eqf_nlqf_level_verified',
             'alignments',
             'badgeclassextension_set',
             'issuer',
