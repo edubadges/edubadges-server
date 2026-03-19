@@ -1,8 +1,9 @@
 import json
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urljoin
 
+from django.conf import settings
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, extend_schema, extend_schema_field
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, extend_schema_field
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
@@ -228,7 +229,8 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
 
         organization_id = self._get_linkedin_org_id(obj.badgeclass)
 
-        cert_url = request.build_absolute_uri(
+        cert_url = urljoin(
+            settings.UI_URL,
             f"/public/assertions/{obj.entity_id}"
         )
 
@@ -240,7 +242,7 @@ class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
             "issueMonth": obj.issued_on.month,
             "certUrl": cert_url,
             "certId": obj.entity_id,
-            "original_referer": request.build_absolute_uri("/"),
+            "original_referer": settings.UI_URL,
         }
 
         return f"https://www.linkedin.com/profile/add?{urlencode(params)}"
