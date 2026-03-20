@@ -12,6 +12,7 @@ services:
       # Be sure to set BADGR_DB_PASSWORD when running docker-compose
       - ACCOUNT_SALT=secret
       - ALLOW_SEEDS=1
+      - SEEDBANK=proeftuin
       - BADGR_APP_ID=1
       - BADGR_DB_HOST=postgres
       - BADGR_DB_NAME=badgr
@@ -53,10 +54,11 @@ services:
       - OB3_AGENT_URL_VERAMO=https://issuer.dev.edubadges.nl/edubadges/api/create-offer/
       - OB3_AGENT_AUTHZ_TOKEN_VERAMO=${OB3_AGENT_AUTHZ_TOKEN_VERAMO}
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
-      - AWS_ACCESS_KEY_ID=edubadges
+      - AWS_ACCESS_KEY_ID=minioadmin
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_S3_CUSTOM_DOMAIN=http://minio:9000
       - AWS_STORAGE_BUCKET_NAME=edubadges
+      - WATERMARK_TEXT=PROEFTUIN
     networks:
       - shared-network
       - edubadges-server
@@ -69,6 +71,8 @@ services:
         condition: service_started
       minio:
         condition: service_started
+      minio-init:
+        condition: service_completed_successfully
     ports:
       - "8000:8000"
 
@@ -115,7 +119,7 @@ services:
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY}
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -136,7 +140,7 @@ services:
       minio:
         condition: service_healthy
     volumes:
-      - ./docker/minio-init.sh:/minio-init.sh
+      - ./docker/minio-init.sh:/minio-init.sh:Z
     entrypoint: /bin/sh
     command: [ "/minio-init.sh" ]
     environment:
