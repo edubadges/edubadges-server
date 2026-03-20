@@ -55,3 +55,8 @@ pyrightconfig.json
 start.fish
 sourceandcharm.sh
 .serena
+.zed
+
+# secrets
+/secrets
+!/secrets/.keep

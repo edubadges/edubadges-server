@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand
-from django.db import connections
+from django.db import connections, IntegrityError
 from django.utils import timezone
 
 from mainsite import settings
@@ -53,11 +53,18 @@ class Command(BaseCommand):
                 html_message = EmailMessageMaker.direct_award_reminder_student_mail(direct_award)
                 direct_award.reminders = index + 1
                 _remove_cached_direct_awards(direct_award)
-                direct_award.save()
-                send_mail(subject='Reminder: your edubadge will expire',
-                          message=None,
-                          html_message=html_message,
-                          recipient_list=[direct_award.recipient_email])
+                try:
+                    direct_award.save()
+                    send_mail(
+                        subject='Reminder: your edubadge will expire',
+                        message=None,
+                        html_message=html_message,
+                        recipient_list=[direct_award.recipient_email]
+                    )
+                except IntegrityError:
+                    # Already exists, just skip it
+                    print(f"Skipped duplicate direct award: {direct_award}")
+
             index += 1
 
         direct_awards = DirectAward.objects.filter(expiration_date__lt=now,

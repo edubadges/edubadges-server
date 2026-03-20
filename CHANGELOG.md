@@ -5,10 +5,204 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [8.4.1] - 2026-02-05
 
-- Removed logging to loki, syslog and files. In k8s all logging goes to the default "console" - k8s then forwards to a.o. loki for us
-- Removed "public" and "private" flag for BadgeInstances. All badges are now private.
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.4...v8.4.1</br>
+
+- Merge branch 'develop'
+- Merge pull request #261 from edubadges/feature/add-terms-to-direct-award-endpoint
+- Add required terms to direct award detail view
+- Merge pull request #258 from edubadges/feature/populate-institution-email
+- Merge pull request #260 from edubadges/bugfix/fix-institution-mobile-endpoint-filtering
+- Flip filtering logic around to make query faster
+- Merge pull request #259 from edubadges/bugfix/institution-mobile-endpoint-use-correct-related-name
+- Use correct related name for badgeclass issuer FK
+- Add datamigration to populate institution email
+- Merge pull request #257 from edubadges/dependabot/pip/django-4.2.28
+- Bump django from 4.2.27 to 4.2.28
+- Merge pull request #255 from edubadges/feature/add-mobile-institution-api-endpoint
+- Add mobile institution api endpoint
+- Merge pull request #256 from edubadges/feature/add-mobile-api-endpoint-for-badge-class-detail
+- Add mobile api endpoint for badge class detail
+- Merge pull request #254 from edubadges/feature/add-terms-to-mobile-catalog
+- Add boolean for whether user has accepted the terms
+- Add terms to catalog badge class serializer
+- Added endpoint to make a badge instance public
+- Merge pull request #253 from edubadges/bugfix/fix-entity-id-for-direct-award
+- Use entity id for direct awards
+- Merge pull request #252 from edubadges/bugfix/fix-creation-of-audit-trail-objects-in-signal
+- Merge pull request #251 from edubadges/feature/update-filters-for-mobile-api-catalog-endpoint
+- Find direct award and badgeclass on id and not entity_id
+- Added grade_achieved in the BadgeInstanceDetailSerializer
+- Remove q filter and replace is_micro with institution_type filter
+- Updated CHANGELOG for release 8.4
+- Updated CHANGELOG for 8.3.3 release
+- Merge pull request #250 from edubadges/bugfix/fix-swagger-ui-for-filterable-fields
+- Add filter backend globally and locally
+- Annotate correct related objects (badgeinstances) #2
+- Annotate correct related objects
+- Remove source from terms_agreed
+- Merge pull request #249 from edubadges/feature/mobile-profile-add-extra-metadata
+- Add registration and consent data to user profile
+- Replace profile api view with custom one for mobile api
+- Merge pull request #248 from edubadges/feature/mobile-catalog-endpoint-with-filtering-and-pagination
+- Add schema example
+- Add filter class so endpoint can be filtered with query params
+- Add catalog list view with pagination
+- Merge pull request #247 from edubadges/improve_mobile_api_swagger
+- Prefetch related badge instances to minimize queries
+- Use slug related field instead of serializer method field
+- fix: have badge instance PUT method only allow acceptance and public field
+- fix: use for badge-instances/entity_id path one view (BadgeInstanceDetail) and add logic to support PUT method in BadgeInstanceDetail
+- chore: improved the swagger doc by adding full models of badge instances, direct award, and collections
+- fix: return entity_id's instead of id's of badgeinstances within collections
+- fix: mobile API auth to return 401 instead of 403
+- Adding .zed to gitignore
+- Feat: improve mobile api swagger, initial commit
+- Added badge_class_type in mobile API
+- Merge pull request #244 from edubadges/bugfix/fix-audittrail-errors
+- Add a one-off management command to backfill badgeclass ids
+- Select related institution through issuer and faculty
+- Fix migration to filter on actual ids
+- Merge pull request #243 from edubadges/feature/improve-performance-of-direct-award-audit-trail-endpoint
+- Update audit trail signal receiver to set fk relations properly
+- Improve performance with select_related and extra filter
+- Refactor audit trail api view into a ListAPIView
+- Refactor charfields to foreign key relationships
+- Added stackable to the badgeclass serializer
+- Added grade_achieved to mobile seerializer
+- Updated CHANGELOG for release 8.4
+- Merge pull request #242 from edubadges/feature/add-linkedin-url-to-mobile-badgeinstance-api-endpoint
+- Retrieve faculty directly fro badgeclass issuer
+- Add linkedin_url field to badge instance detail serializer
+
+## [8.4] - 2026-01-14
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.3.3...v8.4</br>
+
+- Merge pull request #239 from edubadges/dependabot/pip/urllib3-2.6.3
+- Merge pull request #241 from edubadges/chore/run-django-tests-in-ci-cd
+- Update import of urllib
+- Bump urllib3 from 1.26.19 to 2.6.3
+- Grant privileges to test db user
+- Add workflow to run django tests
+- Merge pull request #240 from edubadges/chore/fix-tests
+- Fix tests for removed constraint for badgeclass
+- Fix request data that was no valid json
+- Add required badgeclass type to request data
+- Disable extension validation in tests
+- Fix assertion for showing archived badges in issuer response
+- Fix urls and expected response code in institution test
+- Remove edit directaward functionality from tests
+- Assert correct type
+- Fix staff permission in test to show issuers
+- Fix broken test helpers for enrollment setup
+- Disable auth signals and logging in tests
+- Add dedicated settings for testing
+- Suppress cssutils CSS validation errors in test environment
+- Fix naive datetime defaults in legacy migrations
+- Remove setlocale usage and localize email dates in templates
+- Fix for MA7QDbnn Added expiration date based on the badgeclass when a user claims a DA See https://trello.com/c/MA7QDbnn/1143-vervallen-edubadge-werkt-niet
+- WIP for https://trello.com/c/tsJHRy6A/ After the user is created, the correct staffs can be added as super-user
+- Added delete account endpoint for mobile API https://trello.com/c/WYW0JiGA/1105-changes-needed-for-making-apis-mobile-app-ready
+- Merge pull request #226 from edubadges/feature/remove-imported-badge-functionality
+- Fixes remove-imported-badge-functionality See https://trello.com/c/W4o0VLeC/1132-remove-imported-badge-functionality
+- Not needed anymore to increase MAX_URL_LENGTH as Django 4.2.27 fixes this.
+- Merge pull request #220 from edubadges/dependabot/pip/django-4.2.27
+- Ignore .serena directory
+- DA audit traiL: action instead of method
+- Filter DA audit trail with method CREATE
+- Merge pull request #224 from edubadges/feature/da_audittrail_view
+- feat: adding direct award audit trail API used by super users
+- Bump django from 4.2.26 to 4.2.27
+- Updated CHANGELOG for 8.3.3 release
+
+## [8.3.3] - 2025-12-02
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.3.2...v8.3.3</br>
+
+- Update to Django 4.2.26
+- Updating swagger annotations
+- Remove referer header requirement from auth provider views
+- Merge pull request #215 from edubadges/feature/reduce_error_logs
+- Only allow for super-users to perform impersonation
+- Added extra logging to MobileAPIAuthentication
+- Slug fields were removed in 2020 from all models
+- Catch TypeError when trying to load JSON from imported badge
+- Adding DIRS var to TEMPLATES object
+- Return 404 in case badgr app is none
+- Added is_authenticated checks
+- Increase MAX_URL_LENGTH even more, to 16384
+- Increased MAX_URL_LENGTH times 4 to be able to exceed 2048 chars which is to low for our use-cases
+- Quick fix for Unsafe redirect exceeding 2048 characters
+- Do not use SIS authentication for mobile flow
+
+## [8.3.2] - 2025-11-14
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.3.1...v8.3.2</br>
+
+- Added enrollment endpoint for mobile API
+- Merge pull request #210 from edubadges/dependabot/pip/django-4.2.26
+- Bump django from 4.2.25 to 4.2.26
+- Also apply virtual organization name for reminders
+- Merge pull request #209 from edubadges/feature/mail-virtual-organization
+- Fix for virtual organization DA email https://trello.com/c/8xUKHT9C/1116-virtuele-organisatie-wordt-niet-getoond-in-de-e-mail
+- Fixed CMD in Dockerfile
+- Added SELinux flag to app volume, made entrypoint executable
+
+## [8.3.1] - 2025-10-28
+
+#### Full GitHub changelogs:
+
+Backend: https://github.com/edubadges/edubadges-server/compare/v8.3.0...v8.3.1</br>
+
+- WIP for 8zmfgqmL - edubadges per sector
+- Transferred openbadges-validator-core to edubadges repo
+- Wip for mobile API
+- Merge pull request #201 from edubadges/dependabot/pip/django-4.2.25
+- Updated reminder mail template to include creation date, improved ear… (#203)
+- Bump django from 4.2.24 to 4.2.25
+- Merge pull request #199 from edubadges/feature/mobile-api
+- Added more mobile endpoints
+- Added mobile DirectAward detail endpoint
+- Added mobile/api/login example responses
+- Merge branch 'develop' into feature/mobile-api
+- Merge pull request #200 from edubadges/dependabot/pip/django-4.2.24
+- WIP for provisioning users mobile API
+- Bump django from 4.2.22 to 4.2.24
+- WIP for provisioning users mobile API
+- Added default parameters in post processor
+- Merge branch 'feature/reminder_unit_test' into develop
+- Added discussion questions
+- Added endpoint for unclaimed direct awards
+- Added badge instance detail endpoint
+- First WIP commit for new mobile API https://trello.com/c/WYW0JiGA/1105-changes-needed-for-making-apis-mobile-app-ready
+- Fixed test cmd in README
+- Updated README to include how to run tests
+- Merge pull request #190 from edubadges/feature/impierce_update
+- refactor: Move logic for presenting expires_at to serializer
+- chore: move tests to the correct place in directory hierarchy
+- refactor: Ensure the ExpiresAt can be "never" which isn't a valid datetime
+- feat: Only allow unime for demo
+- fix: Bring serialized payload in line with reqs for new unime-core
+- feat: Add expires_at that is required with new impierce version
+- Added missing init file
+- Fixed unit tests, updated tests for reminders DA.
+- Need to encode string before hashing
+- Started adding tests for reminders_direct_awards
+- Merge pull request #194 from edubadges/bug/reminders-direct-awards
+- Fixed bug in reminders_direct_awards
+- Set the issued_on date for accepted assertions When a requested badge is accepted, set the issued_on date of the new assertion with the value of the creation date of the enrollment
+- Use preferred linked account for validated name
+- Added stdout messages for running reminders_direct_award directly
 
 ## [8.3.0] - 2025-07-14
 

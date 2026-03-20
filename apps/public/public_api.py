@@ -626,7 +626,11 @@ class AssertionRecipientName(APIView):
         instance = BadgeInstance.objects.get(salt=salt)
         if instance.public:
             if identity == instance.get_hashed_identity():
-                return Response({'name': instance.get_recipient_name()})
+                return Response({
+                    'name': instance.get_recipient_name(), #TODO: for backward compatibility, remove once frontend is updated.
+                    'validated_name': instance.get_validated_name(),
+                    'recipient_name': instance.get_recipient_name(),
+                })
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 

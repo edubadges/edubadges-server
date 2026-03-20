@@ -7,10 +7,11 @@ from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.urls import reverse
 from institution.models import Institution
-from issuer.models import Issuer
+from issuer.models import Issuer, BadgeClass
 from issuer.testfiles.helper import badgeclass_json, issuer_json
-from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError
-from mainsite.tests import BadgrTestCase
+from lti_edu.models import StudentsEnrolled
+from mainsite.exceptions import BadgrValidationFieldError, BadgrValidationMultipleFieldError, BadgrValidationError
+from mainsite.tests import BadgrTestCase, string_randomiser
 
 
 class IssuerAPITest(BadgrTestCase):
@@ -57,6 +58,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_create=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
@@ -69,6 +71,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_create=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         alignment_json = [
             {
                 'target_name': 'name',
@@ -94,6 +97,7 @@ class IssuerAPITest(BadgrTestCase):
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['formal'] = True
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
@@ -140,6 +144,7 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(teacher1, issuer, may_read=True)
         badgeclass_json_copy = copy.deepcopy(badgeclass_json)
         badgeclass_json_copy['issuer'] = issuer.entity_id
+        badgeclass_json_copy['badge_class_type'] = BadgeClass.BADGE_CLASS_TYPE_REGULAR
         response = self.client.post(
             '/issuer/badgeclasses/create', json.dumps(badgeclass_json_copy), content_type='application/json'
         )
@@ -170,10 +175,15 @@ class IssuerAPITest(BadgrTestCase):
             '/issuer/delete/{}'.format(issuer.entity_id), content_type='application/json'
         )
         self.assertEqual(issuer_response.status_code, 204)
-        # and its child badgeclass is not gettable, as it has been archived
+        # and its child badgeclass is still gettable, even though it has been archived
         query = 'query foo{badgeClass(id: "' + badgeclass.entity_id + '") { entityId name } }'
         response = self.graphene_post(teacher1, query)
-        self.assertEqual(response['data']['badgeClass'], None)
+        badgeclass_data = response['data']['badgeClass']
+
+        self.assertIsNotNone(badgeclass_data)
+        self.assertEqual(badgeclass_data['entityId'], badgeclass.entity_id)
+        self.assertEqual(badgeclass_data['name'], badgeclass.name)
+
         self.assertTrue(self.reload_from_db(issuer).archived)
         self.assertTrue(self.reload_from_db(badgeclass).archived)
 
@@ -282,8 +292,12 @@ class IssuerAPITest(BadgrTestCase):
         self.setup_staff_membership(
             teacher1, teacher1.institution, may_award=True, may_read=True, may_create=True, may_update=True
         )
-        enrollment = self.enroll_user(student, badgeclass)
-        response = self.client.put(reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}))
+        enrollment = StudentsEnrolled.objects.create(user=student, badge_class=badgeclass)
+        response = self.client.put(
+            reverse('api_lti_edu_update_enrollment', kwargs={'entity_id': enrollment.entity_id}),
+            data=json.dumps({'denyReason': 'Not eligible'}),
+            content_type='application/json',
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_award_badge_expiration_date(self):
@@ -331,7 +345,7 @@ class IssuerPublicAPITest(BadgrTestCase):
         assertion.save()
         response = self.client.get('/public/assertions/identity/{}/{}'.format(eduid_hash, salt))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['name'], assertion.get_recipient_name())
+        self.assertEqual(response.data['validated_name'], assertion.get_validated_name())
 
 
 # class IssuerExtensionsTest(BadgrTestCase):
@@ -403,7 +417,9 @@ class IssuerModelsTest(BadgrTestCase):
         issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
         setup_badgeclass_kwargs = {'created_by': teacher1, 'issuer': issuer, 'name': 'The same'}
         badgeclass = self.setup_badgeclass(**setup_badgeclass_kwargs)
-        self.assertRaises(IntegrityError, self.setup_badgeclass, **setup_badgeclass_kwargs)
+        # setting up another badgeclass with same name and other kwargs should be possible
+        self.setup_badgeclass(**setup_badgeclass_kwargs)
+        # setting up another badgeclass with same kwargs but archived should also be possible
         setup_badgeclass_kwargs['archived'] = True
         self.setup_badgeclass(**setup_badgeclass_kwargs)
         badgeclass.archive()
@@ -443,9 +459,9 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertTrue(self.reload_from_db(badgeclass).archived)
         self.assertTrue(self.instance_is_removed(staff))
         self.assertEqual(teacher1.cached_badgeclass_staffs().__len__(), 0)
-        self.assertEqual(faculty.cached_issuers().__len__(), 0)
-        self.assertEqual(issuer.cached_badgeclasses().__len__(), 0)
-        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 0)
+        self.assertEqual(faculty.cached_issuers().__len__(), 1)
+        self.assertEqual(issuer.cached_badgeclasses().__len__(), 1)
+        self.assertEqual(teacher1.institution.cached_faculties().__len__(), 1)
 
     def test_badgeinstance_get_json(self):
         teacher1 = self.setup_teacher()
@@ -461,11 +477,138 @@ class IssuerModelsTest(BadgrTestCase):
         self.assertEqual(assertion_data['evidence'][0]['id'], 'http://valid.com')
         self.assertEqual(assertion_data['narrative'], 'assertion narrative')
 
+    def test_direct_award_sets_recipient_name_on_badgeinstance(self):
+        teacher = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(
+            teacher, teacher.institution, may_award=True, may_read=True, may_create=True, may_update=True
+        )
+        faculty = self.setup_faculty(institution=teacher.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+
+        # Create a direct award with first and surname filled
+        bundle = self.setup_direct_award_bundle(badgeclass=badgeclass, created_by=teacher, identifier_type='email')
+        direct_award = self.setup_direct_award(
+            badgeclass=badgeclass,
+            bundle=bundle,
+            recipient_email='student@example.com',
+            recipient_first_name='John',
+            recipient_surname='Doe',
+        )
+
+        # Create a student without validated_name so fallback name is used
+        student = self.setup_student(email='student@example.com')
+        student.validated_name = None
+        student.save()
+
+        # Award the direct award
+        assertion = direct_award.award(student)
+
+        self.assertEqual(assertion.recipient_name, 'John Doe')
+
+    def test_direct_award_with_incorrect_eppn_fails(self):
+        teacher = self.setup_teacher(authenticate=True)
+        self.setup_staff_membership(
+            teacher, teacher.institution, may_award=True, may_read=True, may_create=True, may_update=True
+        )
+        faculty = self.setup_faculty(institution=teacher.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        eppn_bundle = self.setup_direct_award_bundle(badgeclass=badgeclass, created_by=teacher, identifier_type='eppn')
+        eppn_direct_award = self.setup_direct_award(
+            badgeclass=badgeclass,
+            bundle=eppn_bundle,
+            recipient_email='student@example.com',
+            recipient_first_name='John',
+            recipient_surname='Doe',
+            eppn='some-other-eppn',
+        )
+
+        student = self.setup_student(email='student@example.com')
+        student.validated_name = None
+        student.save()
+
+        with self.assertRaises(BadgrValidationError):
+            eppn_direct_award.award(student)
+
+    def _create_badge_and_student(
+            self, self_enrollment_disabled=False, formal=False, same_institution=False, schac_home_match_in_allowed_institutions=False,
+    ):
+        """Helper to create a badgeclass and test users"""
+        teacher = self.setup_teacher()
+        faculty = self.setup_faculty(institution=teacher.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher)
+
+        other_institution = self.setup_institution()
+        badgeclass = self.setup_badgeclass(
+            issuer=issuer,
+            self_enrollment_disabled=self_enrollment_disabled,
+            formal=formal,
+        )
+
+        if same_institution:
+            student = self.setup_student(affiliated_institutions=[teacher.institution])
+        else:
+            student = self.setup_student(affiliated_institutions=[other_institution])
+
+        if not same_institution and schac_home_match_in_allowed_institutions:
+            badgeclass.award_allowed_institutions.add(other_institution)
+            badgeclass.save()
+
+        return badgeclass, student
+
+    def test_enrollment_disabled_blocks_all_enrollments(self):
+        test_cases = [
+            (True, True, True),
+            (True, True, False),
+            (True, False, True),
+            (True, False, False),
+            (False, True, True),
+            (False, True, False),
+            (False, False, True),
+            (False, False, False),
+        ]
+
+        for formal, same_institution, schac_home_match_in_allowed_institutions in test_cases:
+            badgeclass, student = self._create_badge_and_student(
+                self_enrollment_disabled=True, formal=formal, same_institution=same_institution, schac_home_match_in_allowed_institutions=schac_home_match_in_allowed_institutions
+            )
+            self.assertFalse(badgeclass.user_may_enroll(student))
+
+    def test_enrollment_allowed_for_formal_on_same_institution(self):
+        # Not allowed when not same institution
+        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=True, same_institution=False)
+        self.assertFalse(badgeclass.user_may_enroll(student))
+
+        # Allowed when same institution
+        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=True, same_institution=True)
+        self.assertTrue(badgeclass.user_may_enroll(student))
+
+        # Having a match of schac home in allowed institutions should not make a difference for formal badges
+        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=True, same_institution=False, schac_home_match_in_allowed_institutions=True)
+        self.assertFalse(badgeclass.user_may_enroll(student))
+
+        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=True, same_institution=True, schac_home_match_in_allowed_institutions=True)
+        self.assertTrue(badgeclass.user_may_enroll(student))
+
+    def test_enrollment_allowed_for_informal_when_schac_home_matches(self):
+        # Not allowed when not same institution and no schac home match
+        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=False, same_institution=False, schac_home_match_in_allowed_institutions=False)
+        self.assertFalse(badgeclass.user_may_enroll(student))
+
+        # Allowed when same institution
+        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=False, same_institution=True, schac_home_match_in_allowed_institutions=False)
+        self.assertTrue(badgeclass.user_may_enroll(student))
+
+        # Allowed when not same institution but with schac home match
+        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=False, same_institution=False, schac_home_match_in_allowed_institutions=True)
+        self.assertTrue(badgeclass.user_may_enroll(student))
+
 
 class IssuerSchemaTest(BadgrTestCase):
     def test_issuer_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_update=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         self.setup_issuer(teacher1, faculty=faculty)
         query = 'query foo {issuers {entityId contentTypeId}}'

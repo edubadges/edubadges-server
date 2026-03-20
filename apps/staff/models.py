@@ -1,4 +1,4 @@
-import urllib
+import urllib.parse
 
 from auditlog.registry import auditlog
 from django.conf import settings

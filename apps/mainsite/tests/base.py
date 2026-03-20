@@ -119,10 +119,10 @@ class SetupHelper(object):
         user.save()
         return user
 
-    def setup_student(self, first_name='', last_name='', authenticate=False, affiliated_institutions=[]):
+    def setup_student(self, first_name='', last_name='', authenticate=False, affiliated_institutions=[], email=None):
         first_name = string_randomiser('student_first_name') if not first_name else first_name
         last_name = string_randomiser('student_last_name') if not last_name else last_name
-        user = self.setup_user(first_name, last_name, authenticate, institution=None)
+        user = self.setup_user(first_name, last_name, authenticate, institution=None, email=email)
         self.add_eduid_socialaccount(user)
         affiliations = [
             {'schac_home': inst.identifier, 'eppn': string_randomiser('eppn')} for inst in affiliated_institutions
@@ -288,7 +288,7 @@ class SetupHelper(object):
         if not kwargs.get('image', False):
             kwargs['image'] = resize_image(open(self.get_test_image_path(), 'r'))
         return BadgeClass.objects.create(
-            issuer=issuer, formal=False, description='Description', criteria_text='Criteria text', **kwargs
+            issuer=issuer, formal=kwargs.pop('formal', False), description='Description', criteria_text='Criteria text', **kwargs
         )
 
     def setup_assertion(self, recipient, badgeclass, created_by, **kwargs):

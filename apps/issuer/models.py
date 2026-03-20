@@ -31,6 +31,7 @@ from mainsite.exceptions import BadgrValidationError, BadgrValidationFieldError,
 from mainsite.mixins import DefaultLanguageMixin, ImageUrlGetterMixin
 from mainsite.models import ArchiveMixin, BadgrApp, BaseAuditedModel
 from mainsite.utils import EmailMessageMaker, OriginSetting, generate_entity_uri, send_mail
+from mobile_api.push_notifications import send_push_notification
 from openbadges_bakery import bake
 from rest_framework import serializers
 from signing import tsob
@@ -852,6 +853,8 @@ class BadgeClass(
         include_evidence=True,
         **kwargs,
     ):
+        from badgeuser.models import BadgeUser
+
         if not recipient.validated_name and enforce_validated_name and not self.award_non_validated_name_allowed:
             raise serializers.ValidationError('You need a validated_name from an Institution to issue badges.')
         assertion = BadgeInstance.objects.create(
@@ -869,6 +872,18 @@ class BadgeClass(
             message = EmailMessageMaker.create_earned_badge_mail(assertion)
             recipient.email_user(
                 subject='Je hebt een edubadge ontvangen! You received an edubadge!', html_message=message
+            )
+
+            user = BadgeUser.objects.filter(email=recipient.email).first()
+            send_push_notification(
+                user=user,
+                title="Edubadge received",
+                body="You earned an edubadge, claim it now!",
+                data={
+                    "title_key": "push.badge_received_title",
+                    "body_key": "push.badge_received_body",
+                    "badge": self.name,
+                }
             )
 
         # Log the badge instance creation event
@@ -1062,6 +1077,8 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
 
     signature = models.TextField(blank=True, null=True, default=None)
 
+    public = models.BooleanField(default=False)
+
     include_evidence = models.BooleanField(default=False)
     grade_achieved = models.CharField(max_length=254, blank=True, null=True, default=None)
     include_grade_achieved = models.BooleanField(default=False)
@@ -1152,10 +1169,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
         timestamp.submit_assertion()
 
     def get_recipient_name(self):
-        if self.user:
-            return self.user.validated_name
-        else:
-            return None
+        return self.recipient_name or None
 
     def get_email_address(self):
         if self.user:

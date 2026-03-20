@@ -3,6 +3,7 @@ export OIDC_RS_SECRET="ask-a-colleague"
 export EDU_ID_SECRET="ask-a-colleague"
 export SURF_CONEXT_SECRET="ask-a-colleague"
 export AWS_SECRET_ACCESS_KEY="ask-a-colleague"
+export FIREBASE_JSON_FILE="path/to/serviceaccount.json"
 
 # Only needed when wallet import is used
 export OB3_AGENT_AUTHZ_TOKEN_SPHEREON="s3cr3t"
