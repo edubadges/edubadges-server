@@ -5,7 +5,7 @@ from firebase_admin import messaging
 from google.auth.exceptions import DefaultCredentialsError
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('Badgr.Debug')
 
 def send_push_notification(user, title, body, data):
     if not user:
