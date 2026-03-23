@@ -2,6 +2,7 @@ import logging
 import os
 
 import firebase_admin
+from firebase_admin import credentials
 
 from django.conf import settings
 
@@ -19,7 +20,8 @@ def initialize_firebase():
 
     try:
         if not firebase_admin._apps:
-            firebase_admin.initialize_app()
+            cred = credentials.Certificate(firebase_json)
+            firebase_admin.initialize_app(cred)
             logger.info("Firebase initialized")
     except Exception as e:
         logger.error(f"Failed to initialize Firebase: {e}")
