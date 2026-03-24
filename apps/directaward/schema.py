@@ -8,7 +8,7 @@ class DirectAwardType(DjangoObjectType):
     class Meta:
         model = DirectAward
         fields = ('entity_id', 'eppn', 'status', 'recipient_email', 'badgeclass', 'created_at', 'updated_at',
-                  'resend_at', 'delete_at', 'expiration_date')
+                  'resend_at', 'delete_at', 'expiration_date', 'recipient_first_name', 'recipient_surname')
 
 
 class DirectAwardBundleType(DjangoObjectType):
