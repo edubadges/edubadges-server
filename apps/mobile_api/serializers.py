@@ -511,6 +511,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'email',
+            'date_joined',
             'institution',
             'marketing_opt_in',
             'is_superuser',
