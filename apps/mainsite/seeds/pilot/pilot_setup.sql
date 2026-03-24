@@ -6,6 +6,15 @@
 -- 5. HAN University of Applied Sciences (ID: 17)
 -- 6. Fontys University of Applied Sciences (ID: 9)
 
+INSERT INTO "oauth2_provider_application" VALUES
+(1, 'public', '', 'public', 'password', 'unused', '', NULL, false, '2020-09-23 15:25:19.423578', '2020-09-23 15:25:19.423578', '');
+
+INSERT INTO "mainsite_applicationinfo" VALUES
+(1, NULL, NULL, 1, '', NULL, false);
+
+INSERT INTO "mainsite_badgrapp" VALUES
+(1,true,'2020-07-22 13:22:37.804587','2020-10-01 15:05:45.369314','https://pilots.edubadges.nl', 'https://pilots.edubadges.nl/login/', 'https://pilots.edubadges.nl/change-password/', NULL, NULL, 'Edubadges', 'https://pilots.edubadges.nl/signup/', 'https://pilots.edubadges.nl/auth/login/', 'https://pilots.edubadges.nl/signup/success/', 'https://pilots.edubadges.nl/profile/', 'https://pilots.edubadges.nl/public/', 'https://pilots.edubadges.nl/oauth/', false, NULL, false);
+
 --
 -- Dumping data for table "institution_institution"
 --
