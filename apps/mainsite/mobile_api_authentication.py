@@ -106,7 +106,7 @@ class MobileAPIAuthentication(BaseAuthentication):
             logger.info(f'MobileAPIAuthentication User {user.email} allowed to access {request.path}')
             request.mobile_api_call = True
             return user, bearer_token
-        elif not user.general_terms_accepted() or not user.validated_name:
+        elif not user.general_terms_accepted():
             # If not heading to login-endpoint or agree-terms, we raise AuthenticationFailed resulting in 401
             logger.info(
                 f'MobileAPIAuthentication User {user.email} has not accepted the general terms. '
