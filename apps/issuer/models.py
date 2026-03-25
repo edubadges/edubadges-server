@@ -1008,8 +1008,9 @@ class BadgeClass(
             return True
 
         if not self.formal:
-            allowed_institutions = [institution.identifier for institution in  self.award_allowed_institutions.all()]
-            return set(user.schac_homes) & set(allowed_institutions)
+            return self.award_allowed_institutions.filter(
+                identifier__in=user.schac_homes
+            ).exists()
 
         return False
 
