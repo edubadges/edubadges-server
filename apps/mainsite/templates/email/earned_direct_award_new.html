@@ -122,15 +122,33 @@
   Claim deze voor {{ da_enddate|date:"d F Y" }}!
 </p>
 <div class="message_container">
-  <p class="text text_header">Hoe krijg ik de edubadge in mijn bezit?</p>
-  <p class="text"></p>
-  Om je edubadge in je bezit te krijgen, moet je je edubadge claimen. Dit doe je
-  in je backpack. <br /><br />Heb je nog geen backpack? Kijk dan in de
-  handleiding hoe je een backpack aanmaakt. <br /><br /><a
-    target="_blank"
-    href="https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/142573610/Ontvanger+student+lerende"
-    >Handleiding edubadges</a
-  >
+    {% if is_private_email_award %}
+        <p class="text">
+            Deze edubadges is uitgegeven aan {{ recipient_name }}. Als deze niet juist is, neem dan contact op met de
+            instelling van wie je deze edubadge hebt ontvangen via <a href="mailto:{{ issuer_support_email }}">{{ issuer_support_email }}</a>.
+        </p>
+    {% endif %}
+    <p class="text text_header">Hoe krijg ik de edubadge in mijn bezit?</p>
+    <p class="text">
+        Om je edubadge in je bezit te krijgen, moet je je edubadge claimen. Dit doe je in je backpack.
+    </p>
+    <br />
+    <p class="text">
+        {% if is_private_email_award %}
+            Zorg dat het e-mailadres van je eduID gelijk is aan het e-mailadres waarop je deze e-mail hebt ontvangen.
+        {% else %}
+            Zorg ervoor dat je eduID gekoppeld is aan de instelling van wie je de edubadge hebt ontvangen.
+        {% endif %}
+    </p>
+    <br />
+    <p class="text">
+        Heb je nog geen backpack? Kijk dan in de handleiding hoe je een backpack aanmaakt.
+    </p>
+     <br /><br />
+    <a
+        target="_blank"
+        href="https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/142573610/Ontvanger+student+lerende"
+    >Handleiding edubadges</a>
   <br /><br /><b>Let op! Je kunt tot {{ da_enddate|date:"d F Y" }} je edubadge claimen</b>
 
   <a class="button" target="_blank" rel="noopener noreferrer" href="{{ui_url}}">
@@ -158,12 +176,31 @@
   {{institution_name}} has sent you the following edubadge.<br />
   Claim it before {{ da_enddate|date:"d F Y" }}!
 </p>
+
 <div class="message_container">
-  <p class="text text_header">How do I obtain the edubadge?</p>
-  <p class="text"></p>
-  To obtain your edubadge, you need to claim it. You can do this in your
-  backpack <br /><br />Don’t have a backpack yet? Check the manual to learn how
-  to create one. <br /><br /><a
+    {% if is_private_email_award %}
+        <p class="text">
+            This edubadge has been awarded to {{ recipient_name }}. If this is not correct, please contact the institution
+            that awarded you this edubadge via <a href="mailto:{{ issuer_support_email }}">{{ issuer_support_email }}</a>
+        </p>
+    {% endif %}
+    <p class="text text_header">How do I obtain the edubadge?</p>
+    <p class="text">
+        To obtain your edubadge, you need to claim it. You can do this in your backpack.
+    </p>
+    <br />
+    <p class="text">
+        {% if is_private_email_award %}
+            Please ensure that the email address in your eduID is the same as the email address you’ve received this email on.
+        {% else %}
+            Please ensure that your eduID is connected to the institution that awarded you this edubadge.
+        {% endif %}
+    </p>
+      <br/>
+    <p class="text">
+        Don’t have a backpack yet? Check the manual to learn how to create one.
+    </p>
+    <br /><br /><a
     target="_blank"
     href="https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/142573713/Receiver+student"
     >Manual edubadges</a
