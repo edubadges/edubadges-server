@@ -46,5 +46,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(populate_recipient_name),
+        migrations.RunPython(populate_recipient_name, migrations.RunPython.noop),
     ]
