@@ -307,6 +307,9 @@ class EmailMessageMaker:
             'badgeclass_name': badgeclass.name,
             'institution_name': institution_name,
             'da_enddate': direct_award.expiration_date,
+            'is_private_email_award': not direct_award.eppn,
+            'recipient_name': direct_award.get_recipient_name(),
+            'issuer_support_email': badgeclass.issuer.email,
         }
         return render_to_string(template, email_vars)
 

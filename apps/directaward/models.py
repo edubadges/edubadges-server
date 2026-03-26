@@ -122,10 +122,9 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             )
 
         # The recipient name filled in for the direct award (available only with awarding via email) should take precedence over the validated name
-        recipient_name = None
-        if self.recipient_first_name and self.recipient_surname:
-            recipient_name = f'{self.recipient_first_name} {self.recipient_surname}'
-        elif recipient.validated_name:
+        recipient_name = self.get_recipient_name()
+
+        if not recipient_name and recipient.validated_name:
             recipient_name = recipient.validated_name
 
         assertion = self.badgeclass.issue(
@@ -179,6 +178,10 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             }
         )
 
+    def get_recipient_name(self):
+        if self.recipient_first_name and self.recipient_surname:
+            return f'{self.recipient_first_name} {self.recipient_surname}'
+        return None
 
 
 class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
