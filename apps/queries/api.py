@@ -102,12 +102,8 @@ class DirectAwards(APIView):
                     )
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
-            403: OpenApiResponse(
-                description='You do not have teaching permissions required to access direct awards.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
+            403: OpenApiResponse(description='You do not have teaching permissions required to access direct awards.'),
         },
     )
     def get(self, request, **kwargs):
@@ -226,12 +222,8 @@ class BadgeClasses(APIView):
                     )
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
-            403: OpenApiResponse(
-                description='You do not have teaching permissions required to access badge classes.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
+            403: OpenApiResponse(description='You do not have teaching permissions required to access badge classes.'),
         },
     )
     def get(self, request, **kwargs):
@@ -319,12 +311,8 @@ class CurrentInstitution(APIView):
                     ),
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
-            403: OpenApiResponse(
-                description='Your email address must be verified to access this resource.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
+            403: OpenApiResponse(description='Your email address must be verified to access this resource.'),
         },
     )
     def get(self, request, **kwargs):
@@ -349,7 +337,7 @@ class CurrentInstitution(APIView):
                 return Response({'current_institution': {}, 'permissions': {}}, status=status.HTTP_200_OK)
             current_institution = records[0]
             current_institution['admins'] = [
-                {'email': u['email'], 'name': f"{u['first_name']} {u['last_name']}"} for u in records
+                {'email': u['email'], 'name': f'{u["first_name"]} {u["last_name"]}'} for u in records
             ]
             for attr in ['email', 'first_name', 'last_name']:
                 del current_institution[attr]
@@ -453,9 +441,7 @@ class CatalogBadgeClasses(APIView):
                     )
                 ],
             ),
-            500: OpenApiResponse(
-                description='Internal server error occurred while retrieving badge classes.'
-            ),
+            500: OpenApiResponse(description='Internal server error occurred while retrieving badge classes.'),
         },
     )
     def get(self, request, **kwargs):
@@ -536,12 +522,8 @@ class IssuersOverview(APIView):
                     )
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
-            403: OpenApiResponse(
-                description='You do not have teaching permissions required to access issuers.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
+            403: OpenApiResponse(description='You do not have teaching permissions required to access issuers.'),
         },
     )
     def get(self, request, **kwargs):
@@ -620,12 +602,8 @@ class Issuers(APIView):
                     )
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
-            403: OpenApiResponse(
-                description='You do not have teaching permissions required to access issuers.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
+            403: OpenApiResponse(description='You do not have teaching permissions required to access issuers.'),
         },
     )
     def get(self, request, **kwargs):
@@ -709,12 +687,8 @@ class Faculties(APIView):
                     )
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
-            403: OpenApiResponse(
-                description='You do not have teaching permissions required to access faculties.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
+            403: OpenApiResponse(description='You do not have teaching permissions required to access faculties.'),
         },
     )
     def get(self, request, **kwargs):
@@ -739,7 +713,7 @@ where ins.id = %(ins_id)s and
 (
     (exists (select 1 from staff_institutionstaff insst where insst.institution_id = ins.id and insst.user_id = %(u_id)s and insst.may_award = true))
     or
-    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true1))
+    (exists (select 1 from staff_facultystaff facst where facst.faculty_id = f.id and facst.user_id = %(u_id)s and facst.may_award = true))
     or
     (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = true))
 )
@@ -906,9 +880,7 @@ class Users(APIView):
                     )
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
             403: OpenApiResponse(
                 description='You do not have teaching permissions required to access user information.'
             ),
@@ -1118,9 +1090,7 @@ class Notifications(APIView):
                     )
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
             403: OpenApiResponse(
                 description='You do not have teaching permissions required to access notification settings.'
             ),
@@ -1211,9 +1181,7 @@ class EndorsementBadgeClasses(APIView):
                     )
                 ],
             ),
-            401: OpenApiResponse(
-                description='Authentication credentials were not provided or are invalid.'
-            ),
+            401: OpenApiResponse(description='Authentication credentials were not provided or are invalid.'),
             403: OpenApiResponse(
                 description='You do not have teaching permissions required to access badge classes for endorsement.'
             ),
