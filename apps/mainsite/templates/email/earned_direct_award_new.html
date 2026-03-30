@@ -124,8 +124,10 @@
 <div class="message_container">
     {% if is_private_email_award %}
         <p class="text">
-            Deze edubadge is uitgegeven aan {{ recipient_name }}. Als deze niet juist is, neem dan contact op met de
-            instelling van wie je deze edubadge hebt ontvangen via <a href="mailto:{{ issuer_support_email }}">{{ issuer_support_email }}</a>.
+            Deze edubadge is uitgegeven aan {{ recipient_name }}.
+        </p>
+        <p class="text">
+            Als deze naam niet juist is, stuur dan een e-mail naar <a href="mailto:{{ issuer_support_email }}">{{ issuer_support_email }}</a>.
         </p>
     {% endif %}
     <p class="text text_header">Hoe krijg ik de edubadge in mijn bezit?</p>
@@ -180,8 +182,10 @@
 <div class="message_container">
     {% if is_private_email_award %}
         <p class="text">
-            This edubadge has been awarded to {{ recipient_name }}. If this is not correct, please contact the institution
-            that awarded you this edubadge via <a href="mailto:{{ issuer_support_email }}">{{ issuer_support_email }}</a>
+            This edubadge has been awarded to {{ recipient_name }}.
+        </p>
+        <p class="text">
+            If this is not correct, please send an email to <a href="mailto:{{ issuer_support_email }}">{{ issuer_support_email }}</a>
         </p>
     {% endif %}
     <p class="text text_header">How do I obtain the edubadge?</p>
