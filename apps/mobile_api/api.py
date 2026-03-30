@@ -1321,18 +1321,19 @@ class InstitutionListView(ListAPIView):
         return Institution.objects.filter(entity_id__in=institution_entity_ids)
 
 
-@extend_schema(
-    description="""
-    Register a device for push notifications
-    
-    - If the device is already registered, sending the same `registration_id` will update the existing record.
-    - Use this endpoint for both new registrations and updates.
-    - Use field 'active' to toggle push notifications for this user.
-    - Omitting 'active' in an update will keep the previous value, and for create the default value of active is True.
-    - 'registration_id' and 'type' are required, 'name' and 'device_id' are optional.
-    """,
-    request=FCMDeviceSerializer,
-    examples=[
+@extend_schema_view(
+    create=extend_schema(
+        description="""
+        Register a device for push notifications
+        
+        - If the device is already registered, sending the same `registration_id` will update the existing record.
+        - Use this endpoint for both new registrations and updates.
+        - Use field 'active' to toggle push notifications for this user.
+        - Omitting 'active' in an update will keep the previous value, and for create the default value of active is True.
+        - 'registration_id' and 'type' are required, 'name' and 'device_id' are optional.
+        """,
+        request=FCMDeviceSerializer,
+        examples=[
             OpenApiExample(
                 'Example Device Registration',
                 summary='Example payload to register or update a device',
@@ -1346,6 +1347,24 @@ class InstitutionListView(ListAPIView):
                 request_only=True
             )
         ],
+    ),
+    retrieve=extend_schema(
+        description="Retrieve the registered push notification device based on registration_id.",
+        request=FCMDeviceSerializer,
+        examples=[
+            OpenApiExample(
+                'Example Device Registration',
+                value={
+                    'id': 5,
+                    'registration_id': 'fcm-token-123456',
+                    'type': 'ios',
+                    'name': "John's iPhone",
+                    'device_id': 'abc123...',
+                    'active': True,
+                },
+            )
+        ],
+    ),
 )
 class RegisterDeviceViewSet(FCMDeviceAuthorizedViewSet):
     pass
