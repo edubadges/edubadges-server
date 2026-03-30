@@ -1176,7 +1176,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
         timestamp.submit_assertion()
 
     def get_recipient_name(self):
-        return self.recipient_name or None
+        return self.recipient_name or self.user.get_full_name()
 
     def get_validated_name(self):
         return getattr(self.user, "validated_name", None)
