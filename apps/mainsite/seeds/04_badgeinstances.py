@@ -23,7 +23,7 @@ badgr_app = BadgrApp.objects.get(id=getattr(settings, 'BADGR_APP_ID'))
 def create_badge_instance(user, badge_class, revoked, acceptance="Unaccepted"):
     badge_class.issue(recipient=user, created_by=super_user, allow_uppercase=True,
                       recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID, acceptance=acceptance, revoked=revoked,
-                      send_email=False)
+                      send_email=False, recipient_name=user.get_full_name())
 
 def create_enrollments_badge_instances(user, bc_names, revoked, acceptance="Unaccepted", include_badge_instances=True):
     for bc_name in bc_names:
