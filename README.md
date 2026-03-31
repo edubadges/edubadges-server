@@ -147,6 +147,9 @@ _from within edubadges-server directory_
 
 - `pip install -r requirements.txt`
 
+For development, also install development dependencies:
+- `pip install -r requirements-dev.txt`
+
 if on a mac psycopg does not build, try:
 ```
 LDFLAGS=-L/usr/local/opt/openssl/lib pip install psycopg
