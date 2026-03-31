@@ -152,8 +152,10 @@ _from within edubadges-server directory_
 
 - `pip install -r requirements.txt`
 
-if on a mac mysqlclient does not build, try:
+For development, also install development dependencies:
+- `pip install -r requirements-dev.txt`
 
+if on a mac mysqlclient does not build, try:
 ```
 LDFLAGS=-L/usr/local/opt/openssl/lib pip install mysqlclient
 ```
