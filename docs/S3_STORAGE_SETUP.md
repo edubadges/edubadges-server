@@ -78,6 +78,12 @@ Install them with:
 pip install -r requirements.txt
 ```
 
+For development, also install development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
 ## Testing the Configuration
 
 Use the management command to test your S3 configuration:

@@ -23,6 +23,9 @@ RUN chmod +x /entrypoint.sh
 # Install any needed packages specified in requirements.txt
 RUN uv pip install --system --no-cache -r requirements.txt
 
+# Install development dependencies
+RUN uv pip install --system --no-cache -r requirements-dev.txt
+
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 
