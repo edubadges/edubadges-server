@@ -659,66 +659,123 @@ class IssuerMembers(APIView):
         user = request.user
         is_super_user = user.is_superuser
 
-        issuers = Issuer.objects.select_related(
-            "faculty__institution"
+        badgeclasses = BadgeClass.objects.select_related(
+            "issuer__faculty__institution"
         ).prefetch_related(
-            "badgeclasses",
-            "issuerstaff_set__user",
+            "issuer__issuerstaff_set__user",
+            "issuer__faculty__facultystaff_set__user",
+            "badgeclassstaff_set__user",
         )
 
         if not is_super_user:
-            issuers = issuers.filter(faculty__institution=user.institution)
+            badgeclasses = badgeclasses.filter(
+                issuer__faculty__institution=user.institution
+            )
 
         results = []
 
-        for issuer in issuers:
-            badgeclasses = issuer.badgeclasses.all()
-
-            for staff in issuer.issuerstaff_set.all():
-                role = self.get_role(staff)
-
-                for badgeclass in badgeclasses:
-                    results.append(
-                        {
-                            "issuer_name": issuer.name,
-                            "email": staff.user.email,
-                            "name": staff.user.get_full_name(),
-                            "role": role,
-                            "permissie/edubadge": badgeclass.name,
-                        }
-                    )
-
-        # Institution admins
-        institution_staff = InstitutionStaff.objects.select_related(
-            "user", "institution"
-        ).filter(may_administrate_users=True)
+        institution_staff = InstitutionStaff.objects.select_related("user").filter(
+            may_administrate_users=True
+        )
 
         if not is_super_user:
-            institution_staff = institution_staff.filter(institution=user.institution)
+            institution_staff = institution_staff.filter(
+                institution=user.institution
+            )
 
-        for inst_staff in institution_staff:
-            badgeclasses = BadgeClass.objects.filter(
-                issuer__faculty__institution=inst_staff.institution
-            ).select_related("issuer")
+        for badgeclass in badgeclasses:
+            processed_users = set()
 
-            for badgeclass in badgeclasses:
+            issuer = badgeclass.issuer
+
+            # 1️⃣ Institution admins
+            for staff in institution_staff:
                 results.append(
-                    {
-                        "issuer_name": badgeclass.issuer.name,
-                        "email": inst_staff.user.email,
-                        "name": inst_staff.user.get_full_name(),
-                        "role": "instellingsadmin",
-                        "permissie/edubadge": badgeclass.name,
-                    }
+                    self.build_result(
+                        badgeclass,
+                        staff.user,
+                        "instellingsadmin",
+                    )
                 )
+                processed_users.add(staff.user_id)
+
+            # 2️⃣ Faculty staff
+            for staff in issuer.faculty.facultystaff_set.all():
+
+                if staff.user_id in processed_users:
+                    continue
+
+                role = self.get_faculty_role(staff)
+                if not role:
+                    continue
+
+                results.append(
+                    self.build_result(badgeclass, staff.user, role)
+                )
+
+                processed_users.add(staff.user_id)
+
+            # 3️⃣ Issuer staff
+            for staff in issuer.issuerstaff_set.all():
+
+                if staff.user_id in processed_users:
+                    continue
+
+                role = self.get_issuer_role(staff)
+                if not role:
+                    continue
+
+                results.append(
+                    self.build_result(badgeclass, staff.user, role)
+                )
+
+                processed_users.add(staff.user_id)
+
+            # 4️⃣ BadgeClass staff
+            for staff in badgeclass.badgeclassstaff_set.all():
+
+                if staff.user_id in processed_users:
+                    continue
+
+                role = self.get_badgeclass_role(staff)
+                if not role:
+                    continue
+
+                results.append(
+                    self.build_result(badgeclass, staff.user, role)
+                )
+
+                processed_users.add(staff.user_id)
 
         return Response(results, status=status.HTTP_200_OK)
 
-    def get_role(self, staff):
+
+    def build_result(self, badgeclass, user, role):
+        return {
+            "issuer_name": badgeclass.issuer.name,
+            "email": user.email,
+            "name": user.get_full_name(),
+            "role": role,
+            "permissie/edubadge": badgeclass.name,
+        }
+
+    def get_issuer_role(self, staff):
         if staff.may_update:
             return "Issuer admin"
         if staff.may_award:
-            return "awarder"
-        if staff.may_read:
-            return "badge raadpleger"
-        return "unknown"
+            return "Issuer awarder"
+        return None
+
+    def get_badgeclass_role(self, staff):
+        if staff.may_update:
+            return "Badge admin"
+        if staff.may_award:
+            return "Badge awarder"
+        return None
+
+    def get_faculty_role(self, staff):
+        if staff.may_update:
+            return "Issuer group admin"
+        if staff.may_award:
+            return "Issuer group awarder"
+        return None
