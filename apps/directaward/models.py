@@ -174,7 +174,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             data={
                 "title_key": "push.badge_received_title",
                 "body_key": "push.badge_received_body",
-                "badge": self.name,
+                "badge": self.badgeclass.name,
             }
         )
 

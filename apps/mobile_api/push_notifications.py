@@ -16,9 +16,7 @@ def send_push_notification(user, title, body, data):
         logger.info(f"No FCM devices found for user {user.id} ({user.entity_id})")
         return None
 
-    for k, v in data.items():
-        logger.debug(f"FCM data {k}={v} ({type(v)})")
-
+    # Make sure only str data is added to the Message
     data = {k: str(v) for k, v in data.items()}
 
     message = messaging.Message(
