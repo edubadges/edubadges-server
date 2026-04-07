@@ -63,7 +63,6 @@ class DirectAwardBundleSerializer(serializers.Serializer):
     entity_id = serializers.CharField(read_only=True)
     sis_user_id = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
     batch_mode = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
-    lti_import = serializers.BooleanField(write_only=True, default=False, required=False, allow_null=True)
     status = serializers.CharField(write_only=True, default='Active', required=False, allow_null=True)
     identifier_type = serializers.CharField(write_only=True, default='eppn', allow_null=False)
     scheduled_at = serializers.DateTimeField(write_only=True, required=False, allow_null=True)

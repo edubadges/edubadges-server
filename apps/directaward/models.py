@@ -187,7 +187,6 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     initial_total = models.IntegerField()
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
-    lti_import = models.BooleanField(default=False)
     sis_import = models.BooleanField(default=False)
     sis_user_id = models.CharField(max_length=254, blank=True, null=True)
     sis_client_id = models.CharField(max_length=254, blank=True, null=True)
