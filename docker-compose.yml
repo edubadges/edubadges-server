@@ -54,9 +54,9 @@ services:
       - OB3_AGENT_URL_VERAMO=https://issuer.dev.edubadges.nl/edubadges/api/create-offer/
       - OB3_AGENT_AUTHZ_TOKEN_VERAMO=${OB3_AGENT_AUTHZ_TOKEN_VERAMO}
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
-      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_ACCESS_KEY_ID=storage-admin
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_S3_CUSTOM_DOMAIN=http://minio:9000
+      - AWS_S3_CUSTOM_DOMAIN=http://object-storage:9000
       - AWS_STORAGE_BUCKET_NAME=edubadges
       - WATERMARK_TEXT=PROEFTUIN
     networks:
@@ -69,9 +69,7 @@ services:
         condition: service_started
       mailhog:
         condition: service_started
-      minio:
-        condition: service_started
-      minio-init:
+      object-storage-init:
         condition: service_completed_successfully
     ports:
       - "8000:8000"
@@ -113,41 +111,60 @@ services:
     networks:
       - edubadges-server
 
-  minio:
-    image: minio/minio:latest
-    container_name: minio
-    command: server /data --console-address ":9001"
+  rustfs-perms:
+    image: alpine
+    user: root
+    volumes:
+      - object-storage-data:/fix_path
+    command: chown -R 10001:10001 /fix_path
+
+  object-storage:
+    image: rustfs/rustfs:latest
+    container_name: rustfs
+    command: "--access-key storage-admin --secret-key ${RUSTFS_SECRET_KEY} /data"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY}
+      RUSTFS_ACCESS_KEY: storage-admin
+      RUSTFS_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY}
     ports:
       - "9000:9000"
-      - "9001:9001"
     volumes:
-      - minio-data:/data
+      - object-storage-data:/data
     networks:
       - edubadges-server
-    healthcheck:
-      test: [ "CMD", "mc", "ready", "local" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  minio-init:
-    image: minio/mc:latest
-    container_name: minio-init
     depends_on:
-      minio:
-        condition: service_healthy
-    volumes:
-      - ./docker/minio-init.sh:/minio-init.sh:Z
-    entrypoint: /bin/sh
-    command: [ "/minio-init.sh" ]
+        rustfs-perms:
+          condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh", "-c",
+          "curl -f http://127.0.0.1:9000/health && curl -f http://127.0.0.1:9001/rustfs/console/health"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  object-storage-init:
+    image: rustfs/rc:latest
+    container_name: rustfs-init
+    entrypoint: ""
+    command:
+      - sh
+      - -c
+      - |
+        rc alias set local http://object-storage:9000 storage-admin ${AWS_SECRET_ACCESS_KEY}
+        rc bucket create local/edubadges
     environment:
-      - MC_HOST_minio=http://minioadmin:minioadmin@minio:9000
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      RUSTFS_ACCESS_KEY: storage-admin
+      RUSTFS_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY}
     networks:
       - edubadges-server
+    depends_on:
+      object-storage:
+        condition: service_healthy
+
 
 networks:
   shared-network:
@@ -157,4 +174,4 @@ networks:
 
 volumes:
   db-data:
-  minio-data:
+  object-storage-data:
