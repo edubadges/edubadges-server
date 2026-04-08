@@ -24,6 +24,9 @@ RUN pip install --upgrade pip setuptools wheel
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install development dependencies
+RUN pip install --system --no-cache -r requirements-dev.txt
+
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
 
