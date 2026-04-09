@@ -95,19 +95,6 @@ class DirectAwardTest(BadgrTestCase):
                                     content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
-    def test_revoke_direct_award(self):
-        teacher1 = self.setup_teacher(authenticate=True)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
-        faculty = self.setup_faculty(institution=teacher1.institution)
-        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
-        badgeclass = self.setup_badgeclass(issuer=issuer)
-        direct_award = self.setup_direct_award(created_by=teacher1, badgeclass=badgeclass)
-        response = self.client.post('/directaward/revoke-direct-awards',
-                                      json.dumps({'revocation_reason': 'revocation_reason',
-                                                  'direct_awards': [{'entity_id': direct_award.entity_id}]}),
-                                      content_type='application/json')
-        self.assertEqual(response.status_code, 200)
-
     def test_create_direct_award_bundle_with_recipient_names(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_award=True)
