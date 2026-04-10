@@ -15,6 +15,7 @@ python-dateutil==2.8.2
 psycopg>=3.1.8
 
 django-storages[s3]==1.14.6
+boto3==1.34.162
 
 python-resize-image==1.1.19
 
@@ -114,7 +115,7 @@ git+https://github.com/edubadges/pylti1.3@master#egg=PyLTI1p3
 
 # after python3 upgrade
 social-auth-app-django==5.4.2
-urllib3==2.6.3
+urllib3==1.26.19
 
 # graphql
 graphene-django==3.2.2
