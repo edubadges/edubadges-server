@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('issuer', '0117_rename_badgeinstance_recipient_identifier_badgeclass_revoked_issuer_badg_recipie_6a2cd8_idx_and_more'),
+        ('issuer', '0119_populate_recipient_name'),
     ]
 
     operations = [
