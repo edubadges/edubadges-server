@@ -407,14 +407,11 @@ class Query(object):
             return []
         return list(filter(lambda bi: bi.revoked == True, user.cached_badgeinstances()))
 
-    def resolve_badge_instances_count(self, info):
-        surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
+    def resolve_badge_instances_count(self, _):
         today = datetime.utcnow()
-        query = BadgeInstance.objects.exclude(badgeclass__issuer__faculty__institution=surf_institution).exclude(
-            expires_at__lte=today)
+        query = BadgeInstance.objects.exclude(expires_at__lte=today)
         return query.count()
 
-    def resolve_badge_classes_count(self, info):
-        surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
-        query = BadgeClass.objects.exclude(issuer__faculty__institution=surf_institution)
+    def resolve_badge_classes_count(self, _):
+        query = BadgeClass.objects.exclude()
         return query.count()
