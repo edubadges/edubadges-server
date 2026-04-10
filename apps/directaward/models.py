@@ -1,4 +1,4 @@
-import urllib
+import urllib.parse
 import uuid
 
 from cachemodel.decorators import cached_method
@@ -11,11 +11,14 @@ from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BaseAuditedModel
 from mainsite.settings import EWI_PILOT_EXPIRATION_DATE
-from mainsite.utils import EmailMessageMaker, send_mail
+from mainsite.utils import send_mail, EmailMessageMaker
+from mobile_api.push_notifications import send_push_notification
 
 
 class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     recipient_email = models.EmailField()
+    recipient_first_name = models.CharField(max_length=255, blank=True, null=True)
+    recipient_surname = models.CharField(max_length=255, blank=True, null=True)
     eppn = models.CharField(max_length=254, blank=True, null=True, default=None)
     badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.CASCADE)
     bundle = models.ForeignKey('directaward.DirectAwardBundle', null=True, on_delete=models.CASCADE)
@@ -88,18 +91,20 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         """Accept the direct award and make an assertion out of it"""
         from issuer.models import BadgeInstance
 
-        if (
-                self.eppn not in recipient.eppns
-                and self.recipient_email != recipient.email
-                and self.bundle.identifier_type != DirectAwardBundle.IDENTIFIER_EMAIL
-        ):
-            raise BadgrValidationError('Cannot award, eppn / email does not match', 999)
+        if self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EPPN:
+            if self.eppn not in recipient.eppns:
+                raise BadgrValidationError(
+                    'Cannot award, eppn does not match',
+                    999,
+                )
 
-        if not recipient.validated_name:
-            raise BadgrValidationError(
-                'Cannot award, you do not have a validated name',
-                999,
-            )
+        elif self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL:
+            if self.recipient_email != recipient.email:
+                raise BadgrValidationError(
+                    'Cannot award, email does not match',
+                    999,
+                )
+
         evidence = None
         if self.evidence_url or self.narrative:
             evidence = [
@@ -120,6 +125,13 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         else:
             expires_at = max_expiration
 
+        # The recipient name filled in for the direct award (available only with awarding via email) should take precedence over the validated name
+        recipient_name = None
+        if self.recipient_first_name and self.recipient_surname:
+            recipient_name = f'{self.recipient_first_name} {self.recipient_surname}'
+        elif recipient.validated_name:
+            recipient_name = recipient.validated_name
+
         assertion = self.badgeclass.issue(
             recipient=recipient,
             created_by=self.created_by,
@@ -133,6 +145,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             evidence=evidence,
             include_evidence=evidence is not None,
             grade_achieved=self.grade_achieved,
+            recipient_name=recipient_name,
+            enforce_validated_name=False,
         )
         # delete any pending enrollments for this badgeclass and user
         recipient.cached_pending_enrollments().filter(badge_class=self.badgeclass).delete()
@@ -147,6 +161,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return self.badgeclass.get_permissions(user)
 
     def notify_recipient(self):
+        from badgeuser.models import BadgeUser
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(
@@ -155,6 +170,19 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             html_message=html_message,
             recipient_list=[self.recipient_email],
         )
+
+        user = BadgeUser.objects.filter(email=self.recipient_email).first()
+        send_push_notification(
+            user=user,
+            title="Edubadge received",
+            body="You earned an edubadge, claim it now!",
+            data={
+                "title_key": "push.badge_received_title",
+                "body_key": "push.badge_received_body",
+                "badge": self.name,
+            }
+        )
+
 
 
 class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
@@ -230,6 +258,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return [da.recipient_email for da in self.cached_direct_awards()]
 
     def notify_recipients(self):
+        from badgeuser.models import BadgeUser
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(
@@ -238,6 +267,18 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             html_message=html_message,
             bcc=self.recipient_emails,
         )
+
+        for user in BadgeUser.objects.filter(email__in=self.recipient_emails):
+            send_push_notification(
+                user=user,
+                title="Edubadge received",
+                body="You earned an edubadge, claim it now!",
+                data={
+                    "title_key": "push.badge_received_title",
+                    "body_key": "push.badge_received_body",
+                    "badge": self.badgeclass.name,
+                }
+            )
 
     def notify_awarder(self):
         html_message = EmailMessageMaker.create_direct_award_bundle_mail(self)
@@ -268,5 +309,5 @@ class DirectAwardAuditTrail(models.Model):
     user_agent_info = models.CharField(max_length=255, blank=True)
     action = models.CharField(max_length=40)
     change_summary = models.CharField(max_length=199, blank=True)
-    direct_award_id = models.CharField(max_length=255, blank=True)
-    badgeclass_id = models.CharField(max_length=255, blank=True)
+    direct_award = models.ForeignKey('directaward.DirectAward', on_delete=models.SET_NULL, null=True, blank=True)
+    badgeclass = models.ForeignKey('issuer.BadgeClass', on_delete=models.SET_NULL, null=True, blank=True)

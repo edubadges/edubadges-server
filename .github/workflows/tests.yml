@@ -1,0 +1,94 @@
+name: Django Tests
+
+on:
+  pull_request:
+    branches: [ develop ]
+  push:
+    branches: [ develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: badgr
+          MYSQL_USER: badgr
+          MYSQL_PASSWORD: badgr
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      memcached:
+        image: memcached:1.6
+        ports:
+          - 11211:11211
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h "127.0.0.1" --silent; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+          
+      - name: Grant MySQL test database privileges
+        run: |
+          mysql -h 127.0.0.1 -u root -proot <<'EOF'
+          GRANT ALL PRIVILEGES ON test_badgr.* TO 'badgr'@'%';
+          FLUSH PRIVILEGES;
+          EOF
+
+      - name: Run Django tests
+        env:
+          DJANGO_SETTINGS_MODULE: apps.mainsite.settings_tests
+          DOMAIN: 0.0.0.0:8000
+          DEFAULT_DOMAIN: http://0.0.0.0:8000
+          SITE_ID: "1"
+          ACCOUNT_SALT: test
+          ROOT_INFO_SECRET_KEY: test
+          UNSUBSCRIBE_SECRET_KEY: test
+          EXTENSIONS_ROOT_URL: http://localhost/static
+          TIME_STAMPED_OPEN_BADGES_BASE_URL: http://localhost/
+          UI_URL: http://localhost:8080
+          DEFAULT_FROM_EMAIL: test@example.com
+          EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+          EMAIL_HOST: localhost
+          EMAIL_PORT: "1025"
+          EMAIL_USE_TLS: "0"
+          BADGR_DB_HOST: 127.0.0.1
+          BADGR_DB_PORT: "3306"
+          BADGR_DB_NAME: badgr
+          BADGR_DB_USER: badgr
+          BADGR_DB_PASSWORD: badgr
+          DISABLE_EXTENSION_VALIDATION: "true"
+          EDUID_PROVIDER_URL: https://connect.test.surfconext.nl/oidc
+          EDUID_REGISTRATION_URL: https://login.test.eduid.nl/register
+          EDU_ID_CLIENT: edubadges
+          EDU_ID_SECRET: supersecret
+          SURF_CONEXT_CLIENT: test.edubadges.nl
+          SURF_CONEXT_SECRET: supersecret
+          OIDC_RS_ENTITY_ID: test.edubadges.rs.nl
+          OIDC_RS_SECRET: supersecret
+        run: |
+          python manage.py test --noinput

@@ -33,6 +33,7 @@ services:
       - EMAIL_USE_TLS=0
       - EMAIL_HOST=mailhog
       - EMAIL_PORT=1025
+      - FIREBASE_JSON_FILE=/secrets/serviceaccount.json
       - LTI_FRONTEND_URL=localhost
       - MEMCACHED=memcached:11211
       - OIDC_RS_ENTITY_ID=test.edubadges.rs.nl
