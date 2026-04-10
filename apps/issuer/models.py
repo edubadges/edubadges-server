@@ -1077,8 +1077,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
 
     signature = models.TextField(blank=True, null=True, default=None)
 
-    public = models.BooleanField(default=False)
-
     include_evidence = models.BooleanField(default=False)
     grade_achieved = models.CharField(max_length=254, blank=True, null=True, default=None)
     include_grade_achieved = models.BooleanField(default=False)
