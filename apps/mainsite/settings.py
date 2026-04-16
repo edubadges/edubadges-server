@@ -1,10 +1,10 @@
 import logging
 import os
 from datetime import datetime
-from graphql.pyutils.awaitable_or_value import T
-import pytz
 
+import pytz
 from django.http import response as http_response
+from graphql.pyutils.awaitable_or_value import T
 from mainsite import TOP_DIR
 from mainsite.environment import env_settings
 
@@ -19,7 +19,9 @@ env_settings()
 
 SESSION_COOKIE_AGE = 60 * 60  # 1 hour session validity
 SESSION_COOKIE_SAMESITE = None  # should be set as 'None' for Django >= 3.1
-SESSION_COOKIE_SECURE = True  # should be True in case of HTTPS usage (production)
+SESSION_COOKIE_SECURE = (
+    True  # should be True in case of HTTPS usage (production)
+)
 
 DEBUG = legacy_boolean_parsing('DEBUG', '0')
 
@@ -71,6 +73,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.oauth2',
     'corsheaders',
     'rest_framework',
+    'django_filters',
     'rest_framework.authtoken',
     'django_celery_results',
     'drf_spectacular',
@@ -169,7 +172,10 @@ TEMPLATE_LOADERS = [
 #
 ##
 
-HTTP_ORIGIN = os.environ.get('SERVER_PROTOCOL', '') + os.environ.get('SERVER_NAME', '') or 'http://localhost:8000'
+HTTP_ORIGIN = (
+    os.environ.get('SERVER_PROTOCOL', '') + os.environ.get('SERVER_NAME', '')
+    or 'http://localhost:8000'
+)
 HTTP_ORIGIN_MEDIA = HTTP_ORIGIN
 
 DOMAIN = os.environ['DOMAIN']
@@ -221,7 +227,9 @@ ACCOUNT_SALT = os.environ['ACCOUNT_SALT']
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 SOCIALACCOUNT_ADAPTER = 'badgrsocialauth.adapter.BadgrSocialAccountAdapter'
 
-SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://connect.test.surfconext.nl/oidc')
+SURFCONEXT_DOMAIN_URL = os.environ.get(
+    'SURFCONEXT_DOMAIN_URL', 'https://connect.test.surfconext.nl/oidc'
+)
 
 ##
 # EduId, in both provider and EDUID_xxx (or EDU_ID) is a confusing name, because it's really surfconext but the surfconext setup for the students.
@@ -234,23 +242,35 @@ SURFCONEXT_DOMAIN_URL = os.environ.get('SURFCONEXT_DOMAIN_URL', 'https://connect
 # For surfconext, the userinfo endpoint is determined from the SURFCONEXT_DOMAIN_URL.
 EDUID_OIDC_PROVIDER_NAME = 'surfconext'
 EDUID_PROVIDER_URL = os.environ['EDUID_PROVIDER_URL']
-EDUID_API_BASE_URL = os.environ.get('EDUID_API_BASE_URL', 'https://login.test.eduid.nl')
+EDUID_API_BASE_URL = os.environ.get(
+    'EDUID_API_BASE_URL', 'https://login.test.eduid.nl'
+)
 EDUID_IDENTIFIER = os.environ.get('EDUID_IDENTIFIER', 'eduid')
 
 EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS = str(
     os.environ.get('EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS', '42, 62')
 )
-EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 82))
-DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 30))
+EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(
+    os.environ.get('EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 82)
+)
+DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(
+    os.environ.get('DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 30)
+)
 
 OB3_AGENT_URL_SPHEREON = os.environ.get('OB3_AGENT_URL_SPHEREON', '')
-OB3_AGENT_AUTHZ_TOKEN_SPHEREON = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_SPHEREON', '')
+OB3_AGENT_AUTHZ_TOKEN_SPHEREON = os.environ.get(
+    'OB3_AGENT_AUTHZ_TOKEN_SPHEREON', ''
+)
 OB3_AGENT_URL_UNIME = os.environ.get('OB3_AGENT_URL_UNIME', '')
 OB3_AGENT_URL_VERAMO = os.environ.get('OB3_AGENT_URL_VERAMO', '')
-OB3_AGENT_AUTHZ_TOKEN_VERAMO = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_VERAMO', '')
+OB3_AGENT_AUTHZ_TOKEN_VERAMO = os.environ.get(
+    'OB3_AGENT_AUTHZ_TOKEN_VERAMO', ''
+)
 
 # Note: Changing this value will not have any effect on already issued badges.
-EWI_PILOT_EXPIRATION_DATE = datetime.strptime('2026-12-31', '%Y-%m-%d').astimezone(pytz.timezone(TIME_ZONE))
+EWI_PILOT_EXPIRATION_DATE = datetime.strptime(
+    '2026-12-31', '%Y-%m-%d'
+).astimezone(pytz.timezone(TIME_ZONE))
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'
@@ -332,7 +352,9 @@ elif AWS_S3_ENDPOINT_URL:  # MinIO config
     from urllib.parse import urlparse
 
     parsed = urlparse(AWS_S3_ENDPOINT_URL)
-    _endpoint_url = f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
+    _endpoint_url = (
+        f'{parsed.scheme}://{parsed.netloc}/{AWS_STORAGE_BUCKET_NAME}/'
+    )
 else:
     _endpoint_url = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/'
 
@@ -391,7 +413,11 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console': {'level': LOG_LEVEL, 'class': 'logging.StreamHandler', 'formatter': 'json'},
+        'console': {
+            'level': LOG_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'json',
+        },
     },
     'loggers': {
         'Badgr.Debug': {
@@ -405,7 +431,9 @@ LOGGING = {
             'propagate': False,
         },
         'django': {
-            'handlers': ['console'],  # Replace stream and email handler with console
+            'handlers': [
+                'console'
+            ],  # Replace stream and email handler with console
             'level': LOG_LEVEL,
             'propagate': False,  # Don't propagate to root logger as that will cause duplicate logs
         },
@@ -458,7 +486,9 @@ TEST_RUNNER = 'mainsite.testrunner.BadgrRunner'
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
     'DEFAULT_RENDERER_CLASSES': (
         'mainsite.renderers.JSONLDRenderer',
         'rest_framework.renderers.JSONRenderer',
@@ -496,7 +526,9 @@ LINKED_DATA_DOCUMENT_FETCHER = 'badgeanalysis.utils.custom_docloader'
 ##
 
 LTI_STORE_IN_SESSION = False
-TIME_STAMPED_OPEN_BADGES_BASE_URL = os.environ['TIME_STAMPED_OPEN_BADGES_BASE_URL']
+TIME_STAMPED_OPEN_BADGES_BASE_URL = os.environ[
+    'TIME_STAMPED_OPEN_BADGES_BASE_URL'
+]
 CAIROSVG_VERSION_SUFFIX = '2'
 
 SITE_ID = int(os.environ.get('SITE_ID', 1))
@@ -545,7 +577,9 @@ OAUTH2_PROVIDER = {
 OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
 
-OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS = OAUTH2_PROVIDER['ACCESS_TOKEN_EXPIRE_SECONDS']
+OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS = OAUTH2_PROVIDER[
+    'ACCESS_TOKEN_EXPIRE_SECONDS'
+]
 
 BADGR_PUBLIC_BOT_USERAGENTS = [
     'LinkedInBot',
@@ -606,7 +640,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Email
 EMAIL_USE_TLS = legacy_boolean_parsing('EMAIL_USE_TLS', '1')
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend'
+)
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
 DEFAULT_FROM_EMAIL = os.environ['DEFAULT_FROM_EMAIL']
@@ -635,11 +671,15 @@ DEBUG_ERRORS = DEBUG
 DEBUG_STATIC = DEBUG
 DEBUG_MEDIA = DEBUG
 LOCAL_DEVELOPMENT_MODE = legacy_boolean_parsing('LOCAL_DEVELOPMENT_MODE', '0')
-SUPERUSER_LOGIN_WITH_SURFCONEXT = legacy_boolean_parsing('SUPERUSER_LOGIN_WITH_SURFCONEXT', '0')
+SUPERUSER_LOGIN_WITH_SURFCONEXT = legacy_boolean_parsing(
+    'SUPERUSER_LOGIN_WITH_SURFCONEXT', '0'
+)
 
 VALIDATOR_URL = os.environ.get('VALIDATOR_URL', 'http://localhost:5000')
 VALIDATOR_ENABLED = os.environ.get('VALIDATOR_ENABLED', False)
-EXTENSIONS_ROOT_URL = os.environ.get('EXTENSIONS_ROOT_URL', 'http://127.0.0.1:8000/static')
+EXTENSIONS_ROOT_URL = os.environ.get(
+    'EXTENSIONS_ROOT_URL', 'http://127.0.0.1:8000/static'
+)
 
 MAX_IMAGE_UPLOAD_SIZE = 256000  # 256Kb
 MAX_IMAGE_UPLOAD_SIZE_LABEL = '256 kB'  # used in error messaging
@@ -661,7 +701,9 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
     'SERVERS': [{'url': os.environ['DEFAULT_DOMAIN']}],
-    'PREPROCESSING_HOOKS': ['mainsite.drf_spectacluar.custom_preprocessing_hook'],
+    'PREPROCESSING_HOOKS': [
+        'mainsite.drf_spectacluar.custom_preprocessing_hook'
+    ],
     'POSTPROCESSING_HOOKS': [
         'drf_spectacular.hooks.postprocess_schema_enums',
         'mainsite.drf_spectacluar.custom_postprocessing_hook',
@@ -671,30 +713,35 @@ SPECTACULAR_SETTINGS = {
 AUDITLOG_DISABLE_REMOTE_ADDR = True
 
 # FCM Django (Tell Firebase Admin SDK where the service account JSON is)
-firebase_json = os.environ.get("FIREBASE_JSON_FILE")
+firebase_json = os.environ.get('FIREBASE_JSON_FILE')
 
 if firebase_json:
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = firebase_json
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = firebase_json
+
 
 # FCM Django (Firebase Cloud Messaging for push notifications on mobile)
 def get_fcm_settings():
-    if any(os.environ.get(var) is None for var in [
-        "FIREBASE_TYPE",
-        "FIREBASE_PROJECT_ID",
-        "FIREBASE_PRIVATE_KEY_ID",
-        "FIREBASE_PRIVATE_KEY",
-        "FIREBASE_CLIENT_EMAIL",
-    ]):
+    if any(
+        os.environ.get(var) is None
+        for var in [
+            'FIREBASE_TYPE',
+            'FIREBASE_PROJECT_ID',
+            'FIREBASE_PRIVATE_KEY_ID',
+            'FIREBASE_PRIVATE_KEY',
+            'FIREBASE_CLIENT_EMAIL',
+        ]
+    ):
         return {}
     return {
-        "type": os.environ["FIREBASE_TYPE"],
-        "project_id": os.environ["FIREBASE_PROJECT_ID"],
-        "private_key_id": os.environ["FIREBASE_PRIVATE_KEY_ID"],
-        "private_key": os.environ["FIREBASE_PRIVATE_KEY"].replace("\\n", "\n"),
-        "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
-        "token_uri": os.environ.get(
-            "FIREBASE_TOKEN_URI", "https://oauth2.googleapis.com/token"
+        'type': os.environ['FIREBASE_TYPE'],
+        'project_id': os.environ['FIREBASE_PROJECT_ID'],
+        'private_key_id': os.environ['FIREBASE_PRIVATE_KEY_ID'],
+        'private_key': os.environ['FIREBASE_PRIVATE_KEY'].replace('\\n', '\n'),
+        'client_email': os.environ['FIREBASE_CLIENT_EMAIL'],
+        'token_uri': os.environ.get(
+            'FIREBASE_TOKEN_URI', 'https://oauth2.googleapis.com/token'
         ),
     }
+
 
 FCM_DJANGO_SETTINGS = get_fcm_settings()
