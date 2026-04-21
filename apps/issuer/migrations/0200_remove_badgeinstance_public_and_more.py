@@ -4,18 +4,31 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('issuer', '0119_populate_recipient_name'),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='badgeinstance',
-            name='public',
-        ),
-        migrations.RemoveField(
-            model_name='badgeinstancecollection',
-            name='public',
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RemoveField(
+                    model_name='badgeinstance',
+                    name='public',
+                ),
+                migrations.RemoveField(
+                    model_name='badgeinstancecollection',
+                    name='public',
+                ),
+            ],
+            state_operations=[
+                migrations.RemoveField(
+                    model_name='badgeinstance',
+                    name='public',
+                ),
+                migrations.RemoveField(
+                    model_name='badgeinstancecollection',
+                    name='public',
+                ),
+            ],
         ),
     ]
