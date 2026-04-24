@@ -1,5 +1,5 @@
 """
-Migration 0200: Remove public field from BadgeInstance and BadgeInstanceCollection
+Migration 0200: Remove public field from BadgeInstance and BadgeInstanceCollection.
 
 CONTEXT / LESSONS LEARNED:
 -------------------------
@@ -45,7 +45,7 @@ Rather than attempting to untangle the migration history (which would require ca
 coordination across all environments and risk breaking those with partial migration
 states), we chose to make this migration idempotent by:
 1. Using SeparateDatabaseAndState to handle state vs. schema separately
-2. Making database operations conditional: only attempt to remove fields if they exist
+2. Making database operations safe to run even if the field is already gone
 3. Keeping state operations unchanged (Django's state tracking needs to see the removal)
 
 This approach ensures the migration succeeds on ALL environments regardless of whether
@@ -58,45 +58,61 @@ FUTURE GUIDANCE:
   already run on production environments.
 """
 
+from collections.abc import Sequence
+from contextlib import suppress
+from typing import Any, Callable
+
+from django.apps.registry import Apps
 from django.db import migrations
+from django.db.backends.base.schema import BaseDatabaseSchemaEditor
+from django.db.migrations.operations.base import Operation
 
 
-def safe_remove_field(app_label, model_name, field_name):
-    """
-    Conditionally remove a field only if it exists in the model.
+def safe_remove_field(app_label: str, model_name: str, field_name: str) -> Callable[[Apps, BaseDatabaseSchemaEditor], None]:
+    """Conditionally remove a field from the database if it exists.
 
     This handles the case where the field may have already been removed
     by a previous migration (0118_remove_badgeinstance_public_and_more in some envs).
+
+    We use exception handling because:
+    - The field may be present in Django's model state but already removed from the DB
+    - schema_editor.remove_field() will raise an exception if the column doesn't exist
+    - We catch that exception and silently ignore it, making this a safe no-op
     """
-    def remove_if_exists(apps, schema_editor):
+
+    def remove_if_exists(apps: Apps, schema_editor: BaseDatabaseSchemaEditor) -> None:
         model = apps.get_model(app_label, model_name)
-        # Check if field exists in the model's meta (state check)
-        field_names = [f.name for f in model._meta.get_fields()]
-        if field_name in field_names:
-            # Field exists in Django's state, attempt to remove from database
-            field = model._meta.get_field(field_name)
-            schema_editor.remove_field(model, field)
+
+        # Get the field from the model
+        try:
+            field = model._meta.get_field(field_name)  # pyright: ignore[reportAny] BK: Djago returns Any
+        except AttributeError:
+            # Field doesn't exist in model state - nothing to do
+            return
+
+        # Try to remove the field, catch any database errors (column already gone, etc.)
+        with suppress(Exception):
+            schema_editor.remove_field(model, field)  # pyright: ignore[reportUnknownMemberType, reportAny] BK: Django returns Any for get_field
+
     return remove_if_exists
 
 
 class Migration(migrations.Migration):
-    dependencies = [
+    dependencies: Sequence[tuple[str, str]] = [
         ('issuer', '0119_populate_recipient_name'),
     ]
 
-    operations = [
+    operations: Sequence[Operation] = [
         migrations.SeparateDatabaseAndState(
-            # Database operations: only remove if the column exists in the database
+            # Database operations: safe removal that handles already-removed columns
             database_operations=[
                 migrations.RunPython(
                     safe_remove_field('issuer', 'BadgeInstance', 'public'),
-                    reverse=lambda apps, schema_editor: None,
-                    description='Remove public field from BadgeInstance if it exists'
+                    reverse_code=lambda apps, schema_editor: None,
                 ),
                 migrations.RunPython(
                     safe_remove_field('issuer', 'BadgeInstanceCollection', 'public'),
-                    reverse=lambda apps, schema_editor: None,
-                    description='Remove public field from BadgeInstanceCollection if it exists'
+                    reverse_code=lambda apps, schema_editor: None,
                 ),
             ],
             # State operations: always update Django's model state
