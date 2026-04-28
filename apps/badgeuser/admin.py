@@ -67,10 +67,11 @@ class BadgeUserAdmin(UserAdmin):
                     admin_list_linkify('institution', 'name'))
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
     search_fields = ('email', 'first_name', 'last_name', 'username', 'entity_id')
-    filter_horizontal = ('groups', 'user_permissions', 'faculty',)
+    filter_horizontal = ('groups', 'user_permissions',)
     inlines = [
         EmailAddressInline, TermsAgreementInline
     ]
+    autocomplete_fields = ("faculty",)
 
     def eppn(self, obj):
         student_affiliations = StudentAffiliation.objects.filter(user=obj).all()

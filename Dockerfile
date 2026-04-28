@@ -1,5 +1,5 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.9
+FROM python:3.12
 
 # Install system dependencies for cairo and MySQL client
 RUN apt-get update && apt-get install -y \
@@ -22,10 +22,7 @@ RUN chmod +x /app/docker/entrypoint.sh
 
 RUN pip install --upgrade pip setuptools wheel
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Install development dependencies
-RUN pip install --system --no-cache -r requirements-dev.txt
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
