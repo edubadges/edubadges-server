@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
-    'markdownify',
     'badgeuser',
     'allauth',
     'allauth.account',
