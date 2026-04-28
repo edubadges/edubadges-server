@@ -131,3 +131,5 @@ protobuf>=6.31.1,<7.0.0
 grpcio<2
 grpcio-status==1.76.0
 pyasn1-modules==0.4.2
+
+python_jose==3.5.0
