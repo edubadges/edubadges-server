@@ -1,15 +1,11 @@
 import datetime
 
-from django.core.exceptions import ValidationError as DjangoValidationError
 from django.urls import reverse
 from django.utils.dateparse import parse_datetime, parse_date
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError as RestframeworkValidationError
 from rest_framework.fields import SkipField
 
 import badgrlog
-from issuer.helpers import BadgeCheckHelper
-from issuer.models import BadgeInstance
 from mainsite.drf_fields import Base64FileField
 from mainsite.serializers import MarkdownCharField
 from mainsite.utils import OriginSetting
@@ -73,27 +69,6 @@ class LocalBadgeInstanceUploadSerializerV1(serializers.Serializer):
             raise serializers.ValidationError('Only one instance input field allowed.')
 
         return data
-
-    def create(self, validated_data):
-        owner = validated_data.get('created_by')
-        try:
-            instance, created = BadgeCheckHelper.get_or_create_assertion(
-                url=validated_data.get('url', None),
-                imagefile=validated_data.get('image', None),
-                assertion=validated_data.get('assertion', None),
-                created_by=owner,
-            )
-            if not created:
-                if instance.acceptance == BadgeInstance.ACCEPTANCE_ACCEPTED:
-                    raise RestframeworkValidationError(
-                        [{'name': 'DUPLICATE_BADGE', 'description': 'You already have this badge in your backpack'}]
-                    )
-                instance.acceptance = BadgeInstance.ACCEPTANCE_ACCEPTED
-                instance.save()
-            owner.publish()  # update BadgeUser.cached_badgeinstances()
-        except DjangoValidationError as e:
-            raise RestframeworkValidationError(e.args[0])
-        return instance
 
     def update(self, instance, validated_data):
         """Updating acceptance status (to 'Accepted') is permitted as well as changing public status."""
