@@ -3,8 +3,11 @@
 
 
 import django.db.models.deletion
-import issuer.models
 from django.db import migrations, models
+
+
+def baked_badge_instance_filename_generator(instance, filename):
+    return f"baked_badges/{filename}"
 
 
 class Migration(migrations.Migration):
@@ -19,7 +22,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('obi_version', models.CharField(max_length=254)),
-                ('image', models.FileField(blank=True, upload_to=issuer.models._baked_badge_instance_filename_generator)),
+                ('image', models.FileField(blank=True, upload_to=baked_badge_instance_filename_generator)),
                 ('badgeinstance', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='issuer.BadgeInstance')),
             ],
             options={

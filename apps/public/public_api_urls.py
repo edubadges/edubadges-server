@@ -13,7 +13,6 @@ from .public_api import (
     BadgeClassCriteria,
     BadgeInstanceJson,
     BadgeInstanceImage,
-    BakedBadgeInstanceImage,
     BadgeClassPublicKeyJson,
     IssuerPublicKeyJson,
     AssertionValidate,
@@ -93,11 +92,6 @@ image_patterns = [
         r'^assertions/(?P<entity_id>[^/]+)/image',
         BadgeInstanceImage.as_view(slugToEntityIdRedirect=True),
         name='badgeinstance_image',
-    ),
-    re_path(
-        r'^assertions/(?P<entity_id>[^/]+)/baked',
-        BakedBadgeInstanceImage.as_view(slugToEntityIdRedirect=True),
-        name='badgeinstance_bakedimage',
     ),
 ]
 

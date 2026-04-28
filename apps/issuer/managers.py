@@ -10,9 +10,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import DefaultStorage
 from django.db import models, transaction
 from django.urls import Resolver404, resolve
-from issuer.utils import UNVERSIONED_BAKED_VERSION
 from mainsite.utils import OriginSetting, fetch_remote_file_to_storage, list_of
-from openbadges_bakery import bake
 
 
 def resolve_source_url_referencing_local_object(source_url):
@@ -182,13 +180,6 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
 
             badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)
             new_image = io.BytesIO()
-            bake(
-                image_file=new_instance.cached_badgeclass.image.file,
-                assertion_json_string=json_dumps(
-                    new_instance.get_json(obi_version=UNVERSIONED_BAKED_VERSION), indent=2
-                ),
-                output_file=new_image,
-            )
             new_instance.image.save(
                 name='assertion-{id}{ext}'.format(id=new_instance.entity_id, ext=ext),
                 content=ContentFile(new_image.read()),

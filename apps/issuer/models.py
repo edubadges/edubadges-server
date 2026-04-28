@@ -20,7 +20,6 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 from jsonfield import JSONField
-from openbadges_bakery import bake
 from rest_framework import serializers
 
 from cachemodel.decorators import cached_method
@@ -44,7 +43,6 @@ from .utils import (
     CURRENT_OBI_VERSION,
     get_obi_context,
     add_obi_version_ifneeded,
-    UNVERSIONED_BAKED_VERSION,
 )
 
 AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -1203,30 +1201,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
         self.badgeclass.remove_cached_data(['cached_assertions'])
         self.user.remove_cached_data(['cached_badgeinstances'])
 
-    def rebake(self, obi_version=CURRENT_OBI_VERSION, save=True, signature=None, replace_image=False):
-        if self.source_url:
-            # dont rebake imported assertions
-            return
-
-        new_image = io.BytesIO()
-        if not signature:
-            bake(
-                image_file=self.cached_badgeclass.image.file,
-                assertion_json_string=json_dumps(self.get_json(obi_version=obi_version), indent=2),
-                output_file=new_image,
-            )
-        else:
-            bake(image_file=self.cached_badgeclass.image.file, assertion_json_string=signature, output_file=new_image)
-
-        new_name = default_storage.save(self.image.name, ContentFile(new_image.read()))
-        if not replace_image:
-            self.image.name = new_name
-        if replace_image:
-            self.image.delete()
-            self.image.name = new_name
-        if save:
-            self.save()
-
     def publish(self):
         super(BadgeInstance, self).publish()
         self.badgeclass.publish()
@@ -1460,36 +1434,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     def cached_badgrapp(self):
         return self.cached_issuer.cached_badgrapp
 
-    def get_baked_image_url(self, obi_version=CURRENT_OBI_VERSION):
-        if obi_version == UNVERSIONED_BAKED_VERSION:
-            # requested version is the one referenced in assertion.image
-            return self.image.url
-
-        try:
-            baked_image = BadgeInstanceBakedImage.cached.get(badgeinstance=self, obi_version=obi_version)
-        except BadgeInstanceBakedImage.DoesNotExist:
-            # rebake
-            baked_image = BadgeInstanceBakedImage(badgeinstance=self, obi_version=obi_version)
-
-            json_to_bake = self.get_json(
-                obi_version=obi_version, expand_issuer=True, expand_badgeclass=True, include_extra=True
-            )
-            _badgeclass_name, ext = os.path.splitext(self.badgeclass.image.file.name)
-            new_image = io.StringIO()
-            bake(
-                image_file=self.cached_badgeclass.image.file,
-                assertion_json_string=json_dumps(json_to_bake, indent=2),
-                output_file=new_image,
-            )
-            baked_image.image.save(
-                name='assertion-{id}-{version}{ext}'.format(id=self.entity_id, ext=ext, version=obi_version),
-                content=ContentFile(new_image.read()),
-                save=False,
-            )
-            baked_image.save()
-
-        return baked_image.image.url
-
 
 class BadgeInstanceEvidence(OriginalJsonMixin, CacheModel):
     badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
@@ -1520,24 +1464,6 @@ class BadgeInstanceEvidence(OriginalJsonMixin, CacheModel):
         if self.description:
             json['description'] = self.description
         return json
-
-
-def _baked_badge_instance_filename_generator(instance, filename):
-    return 'baked/{version}/{filename}'.format(version=instance.obi_version, filename=filename)
-
-
-class BadgeInstanceBakedImage(CacheModel):
-    badgeinstance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
-    obi_version = models.CharField(max_length=254)
-    image = models.FileField(upload_to=_baked_badge_instance_filename_generator, blank=True)
-
-    def publish(self):
-        self.publish_by('badgeinstance', 'obi_version')
-        return super(BadgeInstanceBakedImage, self).publish()
-
-    def delete(self, *args, **kwargs):
-        self.publish_delete('badgeinstance', 'obi_version')
-        return super(BadgeInstanceBakedImage, self).delete(*args, **kwargs)
 
 
 class BadgeClassAlignment(OriginalJsonMixin, CacheModel):
