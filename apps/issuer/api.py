@@ -171,7 +171,6 @@ class BatchSignAssertions(BaseEntityListView):
             if len(matching_assertion) > 1:
                 raise ValidationError('Signing failed: Signed json could not be matched to a BadgeInstance')
             matching_assertion = matching_assertion[0]
-            matching_assertion.rebake(signature=signature, replace_image=True, save=False)
             matching_assertion.signature = signature
             matching_assertion.public_key_issuer.public_key = private_key.public_key
             matching_assertion.public_key_issuer.save()
