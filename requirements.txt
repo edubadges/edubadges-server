@@ -67,10 +67,6 @@ Markdown==3.8.1
 django-markdownify==0.1.0
 bleach==3.3.0
 
-# Open Badges related utilities
-# openbadges==1.1.2
-git+https://github.com/edubadges/openbadges-validator-core@develop#egg=openbadges
-
 celery==5.2.7
 django-celery-results==2.4.0
 importlib-metadata==4.13.0
