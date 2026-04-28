@@ -47,7 +47,7 @@ class InstitutionAdmin(admin.ModelAdmin):
 
 
 class FacultyAdmin(admin.ModelAdmin):
-    list_display = ('name_english', 'name_dutch')
+    search_fields = ('name_english', 'name_dutch')
     readonly_fields = ('entity_id', 'created_by', 'updated_by', 'institution')
     list_display = ('name_english', 'entity_id', admin_list_linkify('institution', 'name'))
 
