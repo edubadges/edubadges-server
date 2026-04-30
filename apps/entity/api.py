@@ -134,7 +134,8 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         context = self.get_context_data(**kwargs)
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(obj, data=data, partial=allow_partial, context=context)
-        validate_errors(serializer)
+
+        serializer.is_valid(raise_exception=True)
 
         serializer.save(updated_by=request.user)
         return Response(serializer.data)
