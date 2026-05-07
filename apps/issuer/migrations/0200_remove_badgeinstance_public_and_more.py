@@ -10,7 +10,7 @@ been, and why we ended up with this workaround.
 WHAT HAPPENED:
 - The feature/ewi branch introduced migration 0118_remove_badgeinstance_public_and_more.py
   to remove the 'public' field from BadgeInstance and BadgeInstanceCollection models.
-- The develop branch, in parallel, introduced migrations 0118_badgeinstance_recipient_name.py
+- The develop branch, in parallel, introduced migrations 0119_badgeinstance_recipient_name.py
   and 0119_populate_recipient_name.py (adding recipient_name field and populating it).
 - When develop was merged into feature/ewi (commit 1bc4fb10), Django detected a conflict:
   both branches had migration 0118 with different operations. This is a migration numbering
@@ -68,7 +68,9 @@ from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.migrations.operations.base import Operation
 
 
-def safe_remove_field(app_label: str, model_name: str, field_name: str) -> Callable[[Apps, BaseDatabaseSchemaEditor], None]:
+def safe_remove_field(
+    app_label: str, model_name: str, field_name: str
+) -> Callable[[Apps, BaseDatabaseSchemaEditor], None]:
     """Conditionally remove a field from the database if it exists.
 
     This handles the case where the field may have already been removed

@@ -9,7 +9,7 @@ previously removed by an earlier migration (0118_remove_badgeinstance_public_and
 that was later renamed to 0200_remove_badgeinstance_public_and_more).
 
 Some environments had already run the original 0118 migration that removed the 'public'
-field. When subsequent migrations (0118_badgeinstance_recipient_name and 0119_populate_recipient_name)
+field. When subsequent migrations (0119_badgeinstance_recipient_name and 0120_populate_recipient_name)
 run, they use apps.get_model() which returns a model state that still expects the 'public'
 field to exist, causing database errors if the column was already removed.
 
@@ -55,7 +55,9 @@ from django.db.backends.base.schema import BaseDatabaseSchemaEditor
 from django.db.migrations.operations.base import Operation
 
 
-def safe_add_field(app_label: str, model_name: str, field_name: str, field: models.Field) -> Callable[[Apps, BaseDatabaseSchemaEditor], None]:
+def safe_add_field(
+    app_label: str, model_name: str, field_name: str, field: models.Field
+) -> Callable[[Apps, BaseDatabaseSchemaEditor], None]:
     """Conditionally add a field to the database if it doesn't exist.
 
     This handles the case where the field may have already been removed
@@ -79,7 +81,10 @@ def safe_add_field(app_label: str, model_name: str, field_name: str, field: mode
 
 class Migration(migrations.Migration):
     dependencies: Sequence[tuple[str, str]] = [
-        ('issuer', '0117_rename_badgeinstance_recipient_identifier_badgeclass_revoked_issuer_badg_recipie_6a2cd8_idx_and_more'),
+        (
+            'issuer',
+            '0117_rename_badgeinstance_recipient_identifier_badgeclass_revoked_issuer_badg_recipie_6a2cd8_idx_and_more',
+        ),
     ]
 
     operations: Sequence[Operation] = [
