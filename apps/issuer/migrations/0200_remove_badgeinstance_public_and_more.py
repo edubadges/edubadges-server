@@ -101,7 +101,7 @@ def safe_remove_field(
 
 class Migration(migrations.Migration):
     dependencies: Sequence[tuple[str, str]] = [
-        ('issuer', '0119_populate_recipient_name'),
+        ('issuer', '0120_populate_recipient_name'),
     ]
 
     operations: Sequence[Operation] = [
