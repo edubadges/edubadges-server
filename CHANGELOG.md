@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [9.0.1] - 2026-05-07
+
+- Backend: https://github.com/edubadges/edubadges-server/releases/tag/v9.0.1
+
+## [9.0.0] - 2026-03-31
+
+- Backend: https://github.com/edubadges/edubadges-server/releases/tag/v9.0.0
+- Frontend: https://github.com/edubadges/edubadges-ui/releases/tag/v9.0.0
+
 ## [8.4.1] - 2026-02-05
 
 #### Full GitHub changelogs:
