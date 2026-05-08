@@ -13,6 +13,8 @@ from mainsite.seeds.constants import (
     AWARDED_STUDENT_EMAIL,
     DEMO_STUDENT_EMAIL,
     DEMO_STUDENT_EPPN,
+    DEMO_STUDENT_EMAIL_20,
+    DEMO_STUDENT_EPPN_20,
 )
 from staff.models import InstitutionStaff
 from .util import add_terms_institution
@@ -212,6 +214,7 @@ def create_student(username, first_name, last_name, email, uid, **kwargs):
 
     social_account.save()
 
+
 students = [
     {
         'username': 'user',
@@ -251,9 +254,19 @@ students = [
             'schac_home': 'university-example.org',
             'eppn': DEMO_STUDENT_EPPN,
         },
-        'extra_data': {
-            'eduid': '7bf2c4ae-f355-496d-8bc2-db550f1e2d7a'
-        }
+        'extra_data': {'eduid': '7bf2c4ae-f355-496d-8bc2-db550f1e2d7a'},
+    },
+    {
+        'username': 'peter',
+        'first_name': 'Peter',
+        'last_name': 'Pan',
+        'email': DEMO_STUDENT_EMAIL_20,
+        'uid': 'fc4f39e6-b8b5-4af0-a5a1-43d9876503eb',
+        'affiliation': {
+            'schac_home': 'university-example.org',
+            'eppn': DEMO_STUDENT_EPPN_20,
+        },
+        'extra_data': {'eduid': 'f028e2fe-7ba4-4c9b-8432-d863df577ab4'},
     },
 ]
 
