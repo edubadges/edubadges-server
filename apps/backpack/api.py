@@ -17,16 +17,6 @@ from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from public.public_api import ImagePropertyDetailView
 
 
-class BackpackAssertionList(BaseEntityListView):
-    model = BadgeInstance
-    v1_serializer_class = LocalBadgeInstanceUploadSerializerV1
-    permission_classes = (AuthenticatedWithVerifiedEmail, RecipientIdentifiersMatch)
-    http_method_names = ('post',)
-
-    def post(self, request, **kwargs):
-        """Upload a new Assertion to the backpack"""
-        return super(BackpackAssertionList, self).post(request, **kwargs)
-
 
 class BackpackAssertionDetail(BaseEntityDetailView):
     model = BadgeInstance
