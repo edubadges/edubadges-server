@@ -590,30 +590,6 @@ class BadgeInstanceImage(ImagePropertyDetailView):
         return obj
 
 
-class BakedBadgeInstanceImage(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMixin):
-    permission_classes = (permissions.AllowAny,)
-    model = BadgeInstance
-
-    def get(self, request, **kwargs):
-        try:
-            assertion = self.get_object(request, **kwargs)
-        except Http404:
-            if self.slugToEntityIdRedirect:
-                return self.get_slug_to_entity_id_redirect(kwargs.get('entity_id', None))
-            else:
-                raise
-
-        requested_version = request.query_params.get('v', utils.CURRENT_OBI_VERSION)
-        if requested_version not in list(utils.OBI_VERSION_CONTEXT_IRIS.keys()):
-            raise ValidationError('Invalid OpenBadges version')
-
-        # self.log(assertion)
-
-        redirect_url = assertion.get_baked_image_url(obi_version=requested_version)
-
-        return redirect(redirect_url, permanent=True)
-
-
 class AssertionRecipientName(APIView):
     permission_classes = (permissions.AllowAny,)
     http_method_names = ('get',)
