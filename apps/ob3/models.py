@@ -13,7 +13,7 @@ from typing_extensions import override
 logger = logging.getLogger('django')
 
 
-def generate_sha256_hashstring(identifier: str, salt: Optional[str] = None):
+def generate_sha256_hashstring(identifier: str, salt: Optional[str] = None) -> str:
     """
     Generate a SHA-256 hash string from an identifier and salt.
     This is now exactly the same as the one in issuer/utils, but that's accidental
@@ -285,14 +285,14 @@ class IdentityObject:
     but contrary to all other "objects" in the OBv3 spec, it's what the spec calls it.
     """
 
-    def __init__(self, recipient_identifier, salt, hasher=generate_sha256_hashstring):
-        self.identity_hash = hasher(recipient_identifier, salt)
-        self.identity_type = 'emailAddress'
-        self.hashed = True
-        self.salt = salt
+    def __init__(self, recipient_identifier: str, salt: str, hasher=generate_sha256_hashstring):
+        self.identity_hash: str = hasher(recipient_identifier, salt)
+        self.identity_type: str = 'emailAddress'
+        self.hashed: bool = True
+        self.salt: str = salt
 
     @staticmethod
-    def from_badge_instance(badge_instance):
+    def from_badge_instance(badge_instance: BadgeInstance):
         return IdentityObject(badge_instance.recipient_identifier, badge_instance.salt)
 
 
