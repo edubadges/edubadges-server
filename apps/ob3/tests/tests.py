@@ -339,7 +339,7 @@ class TestOfferRequestCallMethods(SimpleTestCase):
     def test_veramo_offer_request_call_method(self):
         """Test that VeramoOfferRequest.call() works correctly."""
         badge_instance = BadgeInstanceMock()
-        callback_url = DEFAULT_DOMAIN + reverse('ob3_callback')
+        callback_url = DEFAULT_DOMAIN + reverse('ob3:callback')
         # sanity check
         expected_callback_url = 'http://0.0.0.0:8000/ob3/v1/ob3/callback'
         self.assertEqual(
@@ -352,7 +352,11 @@ class TestOfferRequestCallMethods(SimpleTestCase):
         offer_request.set_url('http://test-url.com')
 
         with patch('ob3.models.requests.post') as mock_post:
-            mock_response = type('MockResponse', (), {'status_code': 200, 'text': '{"uri": "test-offer-uri"}'})()
+            mock_response = type('MockResponse', (), {
+                'status_code': 200,
+                'text': '{"uri": "test-offer-uri"}',
+                'json': lambda self: {'uri': 'test-offer-uri'}
+            })()
             mock_post.return_value = mock_response
             _ = offer_request.call()
             mock_post.assert_called_once()
