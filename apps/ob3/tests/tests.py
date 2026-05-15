@@ -9,6 +9,7 @@ from ob3.models import IdentityObject, ImpierceOfferRequest, VeramoOfferRequest
 from ob3.models import SphereonOfferRequest as SphereonOfferRequest
 from ob3.serializers import ImpierceOfferRequestSerializer as OfferRequestSerializer
 
+
 class BadgeClassMock:
     def __init__(self):
         self.criteria_text: str = 'You must Lorem Ipsum, **dolor** _sit_ amet'
@@ -36,7 +37,7 @@ class BadgeInstanceMock:
 
 class IssuerMock:
     def __init__(self):
-        self.id: str = 'ISS1234'
+        self.entity_id: str = 'ISS1234'
         self.name: str = 'Mock Issuer'
 
 
@@ -63,7 +64,12 @@ class TestCredentialsSerializers(SimpleTestCase):
             'credentialConfigurationId': 'credential_configuration_id',
             'credential': {
                 'id': f'{UI_URL}/public/assertions/BADGE1234',
-                'issuer': {'id': f'{UI_URL}/ob3/issuers/ISS1234', 'type': ['Profile'], 'name': 'Mock Issuer'},
+                'issuer': {
+                    'id': f'{UI_URL}/ob3/issuers/ISS1234',
+                    'type': ['Profile'],
+                    'name': 'Mock Issuer',
+                    'image': {'type': 'Image', 'id': 'https://example.com/images/issuers/mock.png'},
+                },
                 'credentialSubject': {
                     'type': ['AchievementSubject'],
                     'achievement': {
@@ -78,7 +84,7 @@ class TestCredentialsSerializers(SimpleTestCase):
             },
         }
 
-        self.maxDiff: Union[None, bool, int]  = None  # Debug full diff
+        self.maxDiff: Union[None, bool, int] = None  # Debug full diff
         self.assertDictEqual(actual_data, expected_data)
 
     def test_recipient(self):
@@ -98,13 +104,12 @@ class TestCredentialsSerializers(SimpleTestCase):
 
     def test_issuer(self):
         badge_instance = BadgeInstanceMock()
-        badge_instance.badgeclass.issuer.id = 'http://localhost:8080/ob3/issuers/ISS4567'
-        badge_instance.badgeclass.issuer.name = 'issuer name'
         actual_data = self._serialize_it(badge_instance)
         expected_issuer = {
-            'id': 'http://localhost:8080/ob3/issuers/ISS4567',
+            'id': 'http://localhost:8080/ob3/issuers/ISS1234',
             'type': ['Profile'],
-            'name': 'issuer name',
+            'name': 'Mock Issuer',
+            'image': {'type': 'Image', 'id': 'https://example.com/images/issuers/mock.png'},
         }
         self.assertEqual(actual_data['credential']['issuer'], expected_issuer)
 
@@ -363,11 +368,15 @@ class TestOfferRequestCallMethods(SimpleTestCase):
         offer_request.set_url('http://test-url.com')
 
         with patch('ob3.models.requests.post') as mock_post:
-            mock_response = type('MockResponse', (), {
-                'status_code': 200,
-                'text': '{"uri": "test-offer-uri"}',
-                'json': lambda self: {'uri': 'test-offer-uri'}
-            })()
+            mock_response = type(
+                'MockResponse',
+                (),
+                {
+                    'status_code': 200,
+                    'text': '{"uri": "test-offer-uri"}',
+                    'json': lambda self: {'uri': 'test-offer-uri'},
+                },
+            )()
             mock_post.return_value = mock_response
             _ = offer_request.call()
             mock_post.assert_called_once()
@@ -385,7 +394,9 @@ class TestOfferRequestCallMethods(SimpleTestCase):
         """Test that VeramoOfferRequest.call() handles errors correctly."""
         badge_instance = BadgeInstanceMock()
         offer_request = VeramoOfferRequest(
-            'test-credential-config-id', badge_instance, 'http://not-relevant.example.com/'  # pyright: ignore[reportArgumentType] BK: I could not manage to make a standin for a Django model that inherits or otherwise is compatible to a model
+            'test-credential-config-id',
+            badge_instance,  # pyright: ignore[reportArgumentType] BK: I could not manage to make a standin for a Django model that inherits or otherwise is compatible to a model
+            'http://not-relevant.example.com/',
         )
         offer_request.set_url('http://test-url.com')
         with patch('ob3.models.requests.post') as mock_post:
@@ -393,7 +404,7 @@ class TestOfferRequestCallMethods(SimpleTestCase):
             mock_post.return_value = mock_response
 
             with self.assertRaises(Exception) as context:
-                _= offer_request.call()
+                _ = offer_request.call()
 
             self.assertIn('Failed to create offer', str(context.exception))
             self.assertIn('400', str(context.exception))
