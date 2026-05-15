@@ -6,7 +6,7 @@ from typing import Optional
 from urllib.parse import urljoin
 
 import requests
-from issuer.models import BadgeInstance
+from issuer.models import BadgeInstance, Issuer
 from ob3.serializers import ImpierceOfferRequestSerializer, SphereonOfferRequestSerializer, VeramoOfferRequestSerializer
 from typing_extensions import override
 
@@ -228,10 +228,7 @@ class VeramoOfferRequest(OfferRequest):
         Returns:
             The response text from the HTTP call containing the offer URI
         """
-        headers = {
-            'Accept': 'application/json',
-            'Authorization': f'Bearer {self._get_authz_token()}'
-        }
+        headers = {'Accept': 'application/json', 'Authorization': f'Bearer {self._get_authz_token()}'}
 
         payload = VeramoOfferRequestSerializer(self).data
 
@@ -250,10 +247,49 @@ class VeramoOfferRequest(OfferRequest):
         return offer_uri
 
 
+class Creator:
+    def __init__(self, entity_id: str, name: str, image: dict[str, str], parent_org: Optional['Creator'] = None):
+        self.id: str = entity_id
+        self.name: str = name
+        self.image: dict[str, str] = image
+        self.parent_org: Optional['Creator'] = parent_org
+
+    @staticmethod
+    def from_issuer(issuer: Issuer) -> 'Creator':
+        faculty = issuer.faculty
+        institution = faculty.institution
+
+        instiution_profile = Creator(
+            entity_id=institution.entity_id,
+            name=institution.name,
+            image={'id': institution.image_url()},
+            parent_org=None,
+        )
+        faculty_profile = Creator(
+            entity_id=faculty.entity_id,
+            name=faculty.name,
+            image={'id': faculty.image_url()},
+            parent_org=instiution_profile,
+        )
+
+        return faculty_profile
+
+
+class CredentialIssuer:
+    def __init__(self, entity_id: str, name: str, image: dict[str, str]):
+        self.id: str = entity_id
+        self.name: str = name
+        self.image: dict[str, str] = image
+
+    @staticmethod
+    def from_issuer(issuer: Issuer) -> 'CredentialIssuer':
+        return CredentialIssuer(entity_id=issuer.entity_id, name=issuer.name, image={'id': issuer.image_url()})
+
+
 class Credential:
     def __init__(self, entity_id, issuer, valid_from, credential_subject, **kwargs):
         self.id = entity_id
-        self.issuer = issuer
+        self.issuer = CredentialIssuer.from_issuer(issuer)
         self.valid_from = valid_from
         self.credential_subject = credential_subject
 
@@ -299,6 +335,7 @@ class IdentityObject:
 class Achievement(StructFieldsMixin):
     FIELDS = [
         'id',
+        'creator',
         'criteria',
         'description',
         'ects',
@@ -313,6 +350,7 @@ class Achievement(StructFieldsMixin):
     @staticmethod
     def from_badge_instance(badge_instance: BadgeInstance) -> 'Achievement':
         badge_class = badge_instance.badgeclass
+        creator = Creator.from_issuer(badge_class.issuer)
         in_language = None
         ects = None
         education_program_identifier = None
@@ -330,6 +368,7 @@ class Achievement(StructFieldsMixin):
 
         return Achievement(
             id=badge_instance.entity_id,
+            creator=creator,
             criteria={'narrative': badge_class.criteria_text},
             description=badge_class.description,
             name=badge_class.name,

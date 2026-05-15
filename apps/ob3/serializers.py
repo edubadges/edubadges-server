@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.utils import timezone
+import institution
 from mainsite.settings import UI_URL
 from rest_framework import serializers
 
@@ -53,6 +54,38 @@ class IssuerSerializer(OmitNoneFieldsMixin, serializers.Serializer):
         ret['id'] = f'{UI_URL}/ob3/issuers/{ret["id"]}'
         return ret
 
+
+# Ideally, we'd re-use a more generic Profile Serializer, but for that we'd need
+# a complex and poorly maintained "Recursive field" serializer. Let's not go there.
+# Instead, we'll just hardcode the structure and make it explicit. That introduces
+# duplication, but also adds clarity.
+class InstitutionSerializer(OmitNoneFieldsMixin, serializers.Serializer):
+    OMIT_IF_NONE = ['image']
+
+    id = serializers.URLField()
+    type = serializers.ListField(child=serializers.CharField(), read_only=True, default=['Profile'])
+    name = serializers.CharField()
+    image = ImageSerializer(allow_null=True)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['id'] = f'{UI_URL}/public/institutions/{ret["id"]}'
+        return ret
+
+
+class CreatorSerializer(OmitNoneFieldsMixin, serializers.Serializer):
+    OMIT_IF_NONE = ['image', 'parentOrg']
+
+    type = serializers.ListField(child=serializers.CharField(), read_only=True, default=['Profile'])
+    id = serializers.URLField()
+    name = serializers.CharField()
+    image = ImageSerializer(allow_null=True)
+    parentOrg = InstitutionSerializer(allow_null=True, source='parent_org')
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['id'] = f'{UI_URL}/public/faculties/{ret["id"]}'
+        return ret
 
 class AlignmentSerializer(serializers.Serializer):
     type = serializers.ListField(child=serializers.CharField(), read_only=True, default=['Alignment'])
@@ -117,6 +150,7 @@ class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
         required=False,
         allow_null=True,
     )
+    creator = CreatorSerializer()
     ECTS = serializers.DecimalField(
         source='ects',
         decimal_places=1,

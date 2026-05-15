@@ -35,10 +35,33 @@ class BadgeInstanceMock:
         self.expires_at: Optional[DateTime] = None
 
 
+class InstitutionMock:
+    def __init__(self):
+        self.entity_id: str = 'INST1234'
+        self.name: str = 'Mock Institution'
+
+    def image_url(self):
+        return 'https://example.com/images/institutions/mock.png'
+
+
+class FacultyMock:
+    def __init__(self):
+        self.entity_id: str = 'FAC1234'
+        self.name: str = 'Mock Faculty'
+        self.institution: InstitutionMock = InstitutionMock()
+
+    def image_url(self):
+        return 'https://example.com/images/faculties/mock.png'
+
+
 class IssuerMock:
     def __init__(self):
         self.entity_id: str = 'ISS1234'
         self.name: str = 'Mock Issuer'
+        self.faculty: FacultyMock = FacultyMock()
+
+    def image_url(self) -> str:
+        return 'https://example.com/images/issuers/mock.png'
 
 
 class AligmentItemMock:
@@ -79,6 +102,18 @@ class TestCredentialsSerializers(SimpleTestCase):
                         'description': 'This badge is a Lorem Ipsum, **dolor** _sit_ amet',
                         'name': 'Mock Badge',
                         'image': {'type': 'Image', 'id': 'https://example.com/images/mock.png'},
+                        'creator': {
+                            'type': ['Profile'],
+                            'id': f'{UI_URL}/public/faculties/FAC1234',
+                            'name': 'Mock Faculty',
+                            'image': {'type': 'Image', 'id': 'https://example.com/images/faculties/mock.png'},
+                            'parentOrg': {
+                                'type': ['Profile'],
+                                'id': f'{UI_URL}/public/institutions/INST1234',
+                                'name': 'Mock Institution',
+                                'image': {'type': 'Image', 'id': 'https://example.com/images/institutions/mock.png'},
+                            },
+                        },
                     },
                 },
             },
@@ -112,6 +147,26 @@ class TestCredentialsSerializers(SimpleTestCase):
             'image': {'type': 'Image', 'id': 'https://example.com/images/issuers/mock.png'},
         }
         self.assertEqual(actual_data['credential']['issuer'], expected_issuer)
+
+    def test_creator(self):
+        badge_instance = BadgeInstanceMock()
+        actual_data = self._serialize_it(badge_instance)
+
+        expected_data = {
+            'type': ['Profile'],
+            'id': 'http://localhost:8080/public/faculties/FAC1234',
+            'name': 'Mock Faculty',
+            'image': {'type': 'Image', 'id': 'https://example.com/images/faculties/mock.png'},
+            'parentOrg': {
+                'type': ['Profile'],
+                'id': 'http://localhost:8080/public/institutions/INST1234',
+                'name': 'Mock Institution',
+                'image': {'type': 'Image', 'id': 'https://example.com/images/institutions/mock.png'},
+            },
+        }
+
+        self.maxDiff: Union[int, None] = None
+        self.assertEqual(actual_data['credential']['credentialSubject']['achievement']['creator'], expected_data)
 
     def test_optional_valid_from_field_set(self):
         badge_instance = BadgeInstanceMock()
