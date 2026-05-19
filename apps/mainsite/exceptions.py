@@ -1,5 +1,7 @@
+from rest_framework import status
 from rest_framework.exceptions import APIException
 from rest_framework.serializers import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
 class BadgrApiException400(APIException):
@@ -58,3 +60,9 @@ class BadgrValidationMultipleFieldError(BadgrValidationError):
 
 class GraphQLException(Exception):
     pass
+
+
+class TermsNotAcceptedException(APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    default_detail = _('General terms not accepted.')
+    default_code = 'general_terms_not_accepted'

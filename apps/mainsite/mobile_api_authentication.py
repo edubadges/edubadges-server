@@ -9,6 +9,8 @@ from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
+from mainsite.exceptions import TermsNotAcceptedException
+
 GENERAL_TERMS_PATH = '/mobile/api/accept-general-terms'
 
 API_LOGIN_PATH = '/mobile/api/login'
@@ -107,12 +109,13 @@ class MobileAPIAuthentication(BaseAuthentication):
             request.mobile_api_call = True
             return user, bearer_token
         elif not user.general_terms_accepted():
-            # If not heading to login-endpoint or agree-terms, we raise AuthenticationFailed resulting in 401
+            # If not heading to login-endpoint or agree-terms, we raise TermsNotAccepted resulting in 403
+            # The mobile app depends on the detail of the error message, so it should not be changed without notifying.
             logger.info(
                 f'MobileAPIAuthentication User {user.email} has not accepted the general terms. '
                 f'Not allowed to access {request.path}'
             )
-            raise AuthenticationFailed('Authentication credentials were not provided.')
+            raise TermsNotAcceptedException
 
         logger.info(f'MobileAPIAuthentication forwarding User {user.email} to {request.path}')
         request.mobile_api_call = True
