@@ -259,7 +259,7 @@ class Creator:
         faculty = issuer.faculty
         institution = faculty.institution
 
-        instiution_profile = Creator(
+        institution_profile = Creator(
             entity_id=institution.entity_id,
             name=institution.name,
             image={'id': institution.image_url()},
@@ -269,7 +269,7 @@ class Creator:
             entity_id=faculty.entity_id,
             name=faculty.name,
             image={'id': faculty.image_url()},
-            parent_org=instiution_profile,
+            parent_org=institution_profile,
         )
 
         return faculty_profile

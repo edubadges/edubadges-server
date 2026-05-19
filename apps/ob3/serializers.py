@@ -1,7 +1,6 @@
 from typing import Any
 
 from django.utils import timezone
-import institution
 from mainsite.settings import UI_URL
 from rest_framework import serializers
 
