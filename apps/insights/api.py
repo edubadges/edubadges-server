@@ -1,5 +1,4 @@
-from datetime import datetime
-from datetime import timezone
+import datetime
 from itertools import groupby
 
 from django.conf import settings
@@ -7,7 +6,6 @@ from django.db import connection
 from django.db.models import Count
 from django.db.models import Q
 from django.db.models.functions import ExtractMonth, ExtractYear
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,7 +43,7 @@ class InsightsView(APIView):
         else:
             institution = request.user.institution
         include_surf = request.data.get('include_surf', True)
-        today = datetime.now(timezone.utc)
+        today = datetime.datetime.now(datetime.timezone.utc)
         assertions_query_set = (
             BadgeInstance.objects.values(
                 'award_type',

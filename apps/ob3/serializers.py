@@ -1,3 +1,4 @@
+import datetime
 from typing import Any, Dict
 from django.utils import timezone
 
@@ -175,13 +176,13 @@ class CredentialSerializer(OmitNoneFieldsMixin, serializers.Serializer):
             source='valid_from',
             required=False,
             allow_null=True,
-            default_timezone=timezone.utc
+            default_timezone=datetime.timezone.utc
     )
     validUntil = serializers.DateTimeField(
             source='valid_until',
             required=False,
             allow_null=True,
-            default_timezone=timezone.utc
+            default_timezone=datetime.timezone.utc
     )
     credentialSubject = AchievementSubjectSerializer(source='credential_subject')
 
@@ -218,5 +219,5 @@ class ImpierceOfferRequestSerializer(serializers.Serializer):
             ret['expiresAt'] = instance.expires_at.strftime('%Y-%m-%dT%H:%M:%SZ')
         else:
             ret['expiresAt'] = "never"
-            
+
         return ret
