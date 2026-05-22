@@ -1,5 +1,5 @@
 from datetime import datetime as DateTime
-from typing import List, Optional
+from typing import Any, Optional, Union
 from unittest.mock import patch
 
 from django.test import SimpleTestCase
@@ -12,13 +12,13 @@ from ob3.serializers import ImpierceOfferRequestSerializer as OfferRequestSerial
 
 class BadgeClassMock:
     def __init__(self):
-        self.criteria_text = 'You must Lorem Ipsum, **dolor** _sit_ amet'
-        self.description = 'This badge is a Lorem Ipsum, **dolor** _sit_ amet'
-        self.name = 'Mock Badge'
-        self.issuer = IssuerMock()
+        self.criteria_text: str = 'You must Lorem Ipsum, **dolor** _sit_ amet'
+        self.description: str = 'This badge is a Lorem Ipsum, **dolor** _sit_ amet'
+        self.name: str = 'Mock Badge'
+        self.issuer: IssuerMock = IssuerMock()
         self.participation: Optional[str] = None
-        self.alignment_items: List[AligmentItemMock] = []
-        self.extension_items = {}
+        self.alignment_items: list[AligmentItemMock] = []
+        self.extension_items: dict[str, dict[str, Union[str, int, float]]] = {}
 
     def image_url(self):
         return 'https://example.com/images/mock.png'
@@ -26,31 +26,54 @@ class BadgeClassMock:
 
 class BadgeInstanceMock:
     def __init__(self):
-        self.entity_id = 'BADGE1234'
+        self.entity_id: str = 'BADGE1234'
         self.salt: Optional[str] = None
         self.recipient_identifier: Optional[str] = None
 
-        self.badgeclass = BadgeClassMock()
+        self.badgeclass: BadgeClassMock = BadgeClassMock()
         self.issued_on: Optional[DateTime] = None
         self.expires_at: Optional[DateTime] = None
 
 
+class InstitutionMock:
+    def __init__(self):
+        self.entity_id: str = 'INST1234'
+        self.name: str = 'Mock Institution'
+
+    def image_url(self):
+        return 'https://example.com/images/institutions/mock.png'
+
+
+class FacultyMock:
+    def __init__(self):
+        self.entity_id: str = 'FAC1234'
+        self.name: str = 'Mock Faculty'
+        self.institution: InstitutionMock = InstitutionMock()
+
+    def image_url(self):
+        return 'https://example.com/images/faculties/mock.png'
+
+
 class IssuerMock:
     def __init__(self):
-        self.id = 'ISS1234'
-        self.name = 'Mock Issuer'
+        self.entity_id: str = 'ISS1234'
+        self.name: str = 'Mock Issuer'
+        self.faculty: FacultyMock = FacultyMock()
+
+    def image_url(self) -> str:
+        return 'https://example.com/images/issuers/mock.png'
 
 
 class AligmentItemMock:
     def __init__(self):
-        self.target_name = 'interne geneeskunde'
-        self.target_url = 'https://example.com/esco/1337'
-        self.target_code = '1337'
-        self.target_framework = 'ESCO'
-        self.target_description = '# example cool'
+        self.target_name: str = 'interne geneeskunde'
+        self.target_url: str = 'https://example.com/esco/1337'
+        self.target_code: str = '1337'
+        self.target_framework: str = 'ESCO'
+        self.target_description: str = '# example cool'
 
 
-def mock_hasher(_id, _salt):
+def mock_hasher(_id: str, _salt: str):
     return 'mock_hash'
 
 
@@ -64,7 +87,12 @@ class TestCredentialsSerializers(SimpleTestCase):
             'credentialConfigurationId': 'credential_configuration_id',
             'credential': {
                 'id': f'{UI_URL}/public/assertions/BADGE1234',
-                'issuer': {'id': f'{UI_URL}/ob3/issuers/ISS1234', 'type': ['Profile'], 'name': 'Mock Issuer'},
+                'issuer': {
+                    'id': f'{UI_URL}/ob3/issuers/ISS1234',
+                    'type': ['Profile'],
+                    'name': 'Mock Issuer',
+                    'image': {'type': 'Image', 'id': 'https://example.com/images/issuers/mock.png'},
+                },
                 'credentialSubject': {
                     'type': ['AchievementSubject'],
                     'achievement': {
@@ -74,12 +102,24 @@ class TestCredentialsSerializers(SimpleTestCase):
                         'description': 'This badge is a Lorem Ipsum, **dolor** _sit_ amet',
                         'name': 'Mock Badge',
                         'image': {'type': 'Image', 'id': 'https://example.com/images/mock.png'},
+                        'creator': {
+                            'type': ['Profile'],
+                            'id': f'{UI_URL}/public/faculties/FAC1234',
+                            'name': 'Mock Faculty',
+                            'image': {'type': 'Image', 'id': 'https://example.com/images/faculties/mock.png'},
+                            'parentOrg': {
+                                'type': ['Profile'],
+                                'id': f'{UI_URL}/public/institutions/INST1234',
+                                'name': 'Mock Institution',
+                                'image': {'type': 'Image', 'id': 'https://example.com/images/institutions/mock.png'},
+                            },
+                        },
                     },
                 },
             },
         }
 
-        self.maxDiff = None  # Debug full diff
+        self.maxDiff: Union[None, bool, int] = None  # Debug full diff
         self.assertDictEqual(actual_data, expected_data)
 
     def test_recipient(self):
@@ -96,6 +136,37 @@ class TestCredentialsSerializers(SimpleTestCase):
         }
         self.assertEqual(len(actual_data['credential']['credentialSubject']['identifier']), 1)
         self.assertEqual(actual_data['credential']['credentialSubject']['identifier'][0], expected_identifier)
+
+    def test_issuer(self):
+        badge_instance = BadgeInstanceMock()
+        actual_data = self._serialize_it(badge_instance)
+        expected_issuer = {
+            'id': 'http://localhost:8080/ob3/issuers/ISS1234',
+            'type': ['Profile'],
+            'name': 'Mock Issuer',
+            'image': {'type': 'Image', 'id': 'https://example.com/images/issuers/mock.png'},
+        }
+        self.assertEqual(actual_data['credential']['issuer'], expected_issuer)
+
+    def test_creator(self):
+        badge_instance = BadgeInstanceMock()
+        actual_data = self._serialize_it(badge_instance)
+
+        expected_data = {
+            'type': ['Profile'],
+            'id': 'http://localhost:8080/public/faculties/FAC1234',
+            'name': 'Mock Faculty',
+            'image': {'type': 'Image', 'id': 'https://example.com/images/faculties/mock.png'},
+            'parentOrg': {
+                'type': ['Profile'],
+                'id': 'http://localhost:8080/public/institutions/INST1234',
+                'name': 'Mock Institution',
+                'image': {'type': 'Image', 'id': 'https://example.com/images/institutions/mock.png'},
+            },
+        }
+
+        self.maxDiff: Union[int, None] = None
+        self.assertEqual(actual_data['credential']['credentialSubject']['achievement']['creator'], expected_data)
 
     def test_optional_valid_from_field_set(self):
         badge_instance = BadgeInstanceMock()
@@ -195,10 +266,10 @@ class TestCredentialsSerializers(SimpleTestCase):
 
         self.assertIn(expected_alignment, actual_data['alignment'])
 
-    def _serialize_it(self, badge_instance: BadgeInstanceMock):
+    def _serialize_it(self, badge_instance: BadgeInstanceMock) -> dict[str, Any]:  # pyright: ignore[reportExplicitAny] BK: Serialize data is too complex for our poorly typed codebase
         # TODO: We should test both impierce and sphereon models and serializers
         edu_credential = ImpierceOfferRequest('offer_id', 'credential_configuration_id', badge_instance)
-        return dict(OfferRequestSerializer(edu_credential).data)
+        return dict(OfferRequestSerializer(edu_credential).data)  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType] BK: serailzie data too complex
 
 
 class TestCredentialModels(SimpleTestCase):
@@ -312,7 +383,7 @@ class TestOfferRequestCallMethods(SimpleTestCase):
             mock_post.return_value = mock_response
 
             with self.assertRaises(Exception) as context:
-                offer_request.call()
+                _ = offer_request.call()
 
             self.assertIn('Failed to issue badge', str(context.exception))
             self.assertIn('400', str(context.exception))
@@ -330,7 +401,7 @@ class TestOfferRequestCallMethods(SimpleTestCase):
             mock_post.return_value = mock_response
 
             with self.assertRaises(Exception) as context:
-                offer_request.call()
+                _ = offer_request.call()
 
             self.assertIn('Failed to issue badge', str(context.exception))
             self.assertIn('500', str(context.exception))
@@ -339,7 +410,7 @@ class TestOfferRequestCallMethods(SimpleTestCase):
     def test_veramo_offer_request_call_method(self):
         """Test that VeramoOfferRequest.call() works correctly."""
         badge_instance = BadgeInstanceMock()
-        callback_url = DEFAULT_DOMAIN + reverse('ob3_callback')
+        callback_url = DEFAULT_DOMAIN + reverse('ob3:callback')
         # sanity check
         expected_callback_url = 'http://0.0.0.0:8000/ob3/v1/ob3/callback'
         self.assertEqual(
@@ -352,7 +423,15 @@ class TestOfferRequestCallMethods(SimpleTestCase):
         offer_request.set_url('http://test-url.com')
 
         with patch('ob3.models.requests.post') as mock_post:
-            mock_response = type('MockResponse', (), {'status_code': 200, 'text': '{"uri": "test-offer-uri"}'})()
+            mock_response = type(
+                'MockResponse',
+                (),
+                {
+                    'status_code': 200,
+                    'text': '{"uri": "test-offer-uri"}',
+                    'json': lambda self: {'uri': 'test-offer-uri'},
+                },
+            )()
             mock_post.return_value = mock_response
             _ = offer_request.call()
             mock_post.assert_called_once()
@@ -370,7 +449,9 @@ class TestOfferRequestCallMethods(SimpleTestCase):
         """Test that VeramoOfferRequest.call() handles errors correctly."""
         badge_instance = BadgeInstanceMock()
         offer_request = VeramoOfferRequest(
-            'test-credential-config-id', badge_instance, 'http://not-relevant.example.com/'
+            'test-credential-config-id',
+            badge_instance,  # pyright: ignore[reportArgumentType] BK: I could not manage to make a standin for a Django model that inherits or otherwise is compatible to a model
+            'http://not-relevant.example.com/',
         )
         offer_request.set_url('http://test-url.com')
         with patch('ob3.models.requests.post') as mock_post:
@@ -378,7 +459,7 @@ class TestOfferRequestCallMethods(SimpleTestCase):
             mock_post.return_value = mock_response
 
             with self.assertRaises(Exception) as context:
-                offer_request.call()
+                _ = offer_request.call()
 
             self.assertIn('Failed to create offer', str(context.exception))
             self.assertIn('400', str(context.exception))

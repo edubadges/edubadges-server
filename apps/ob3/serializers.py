@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from django.utils import timezone
 from mainsite.settings import UI_URL
@@ -20,7 +20,7 @@ class OmitNoneFieldsMixin:
 
     OMIT_IF_NONE = []
 
-    def to_representation(self, instance: Any) -> Dict[str, Any]:
+    def to_representation(self, instance: Any) -> dict[str, Any]:
         # Juggling to call the parent's to_representation method and not raise type errors
         def fallback_to_representation(x):
             return dict(x.__dict__)
@@ -34,10 +34,18 @@ class OmitNoneFieldsMixin:
         return representation
 
 
-class IssuerSerializer(serializers.Serializer):
+class ImageSerializer(serializers.Serializer):
+    type = serializers.CharField(read_only=True, default='Image')
+    id = serializers.URLField()
+
+
+class IssuerSerializer(OmitNoneFieldsMixin, serializers.Serializer):
+    OMIT_IF_NONE = ['image']
+
     id = serializers.URLField()
     type = serializers.ListField(child=serializers.CharField(), read_only=True, default=['Profile'])
     name = serializers.CharField()
+    image = ImageSerializer(allow_null=True)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -46,10 +54,37 @@ class IssuerSerializer(serializers.Serializer):
         return ret
 
 
-class ImageSerializer(serializers.Serializer):
-    type = serializers.CharField(read_only=True, default='Image')
-    id = serializers.URLField()
+# Ideally, we'd re-use a more generic Profile Serializer, but for that we'd need
+# a complex and poorly maintained "Recursive field" serializer. Let's not go there.
+# Instead, we'll just hardcode the structure and make it explicit. That introduces
+# duplication, but also adds clarity.
+class InstitutionSerializer(OmitNoneFieldsMixin, serializers.Serializer):
+    OMIT_IF_NONE = ['image']
 
+    id = serializers.URLField()
+    type = serializers.ListField(child=serializers.CharField(), read_only=True, default=['Profile'])
+    name = serializers.CharField()
+    image = ImageSerializer(allow_null=True)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['id'] = f'{UI_URL}/public/institutions/{ret["id"]}'
+        return ret
+
+
+class CreatorSerializer(OmitNoneFieldsMixin, serializers.Serializer):
+    OMIT_IF_NONE = ['image', 'parentOrg']
+
+    type = serializers.ListField(child=serializers.CharField(), read_only=True, default=['Profile'])
+    id = serializers.URLField()
+    name = serializers.CharField()
+    image = ImageSerializer(allow_null=True)
+    parentOrg = InstitutionSerializer(allow_null=True, source='parent_org')
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['id'] = f'{UI_URL}/public/faculties/{ret["id"]}'
+        return ret
 
 class AlignmentSerializer(serializers.Serializer):
     type = serializers.ListField(child=serializers.CharField(), read_only=True, default=['Alignment'])
@@ -114,6 +149,7 @@ class AchievementSerializer(OmitNoneFieldsMixin, serializers.Serializer):
         required=False,
         allow_null=True,
     )
+    creator = CreatorSerializer()
     ECTS = serializers.DecimalField(
         source='ects',
         decimal_places=1,
