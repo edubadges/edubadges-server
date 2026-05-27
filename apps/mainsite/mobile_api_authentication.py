@@ -12,7 +12,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from mainsite.exceptions import TermsNotAcceptedException
 
 GENERAL_TERMS_PATH = '/mobile/api/accept-general-terms'
-
+PROFILE_PATH = '/mobile/api/profile'
 API_LOGIN_PATH = '/mobile/api/login'
 
 
@@ -103,7 +103,8 @@ class MobileAPIAuthentication(BaseAuthentication):
         # SocialAccount always has a User
         user = social_account.user
         agree_terms_endpoint = request.path == GENERAL_TERMS_PATH
-        if login_endpoint or agree_terms_endpoint:
+        profile_endpoint = request.path == PROFILE_PATH
+        if login_endpoint or agree_terms_endpoint or profile_endpoint:
             # further logic is dealt with in /mobile/api/login
             logger.info(f'MobileAPIAuthentication User {user.email} allowed to access {request.path}')
             request.mobile_api_call = True
