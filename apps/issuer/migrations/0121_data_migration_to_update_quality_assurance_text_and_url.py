@@ -16,10 +16,10 @@ def update_quality_assurance_description_and_url(apps, _):
 
     description = micro_credentials_framework.get('description')
 
-    for badge in hbo_wo_micro_credentials:
-        badge.quality_assurance_url = "https://npuls.nl/doorbouwen-aan-microcredentials"
-        badge.quality_assurance_description = description
-        badge.save(update_fields=["quality_assurance_url", "quality_assurance_description"])
+    hbo_wo_micro_credentials.update(
+        quality_assurance_url="https://npuls.nl/doorbouwen-aan-microcredentials",
+        quality_assurance_description=description,
+    )
 
 
 class Migration(migrations.Migration):
