@@ -1377,7 +1377,7 @@ class TermsAgreementViewSet(viewsets.ModelViewSet):
     lookup_field = 'entity_id'
 
     def get_queryset(self):
-        return TermsAgreement.objects.filter(user=self.request.user)
+        return TermsAgreement.objects.filter(user=self.request.user, terms__institution__isnull=False)
 
     def get_serializer_class(self):
         if self.action == 'create':
