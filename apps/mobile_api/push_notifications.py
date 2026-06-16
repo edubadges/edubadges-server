@@ -2,12 +2,13 @@ import logging
 
 from fcm_django.models import FCMDevice
 from firebase_admin import messaging
+from firebase_admin.messaging import APNSConfig, APNSPayload, Aps, AndroidConfig, AndroidNotification
 from google.auth.exceptions import DefaultCredentialsError
 
 
 logger = logging.getLogger('Badgr.Debug')
 
-def send_push_notification(user, title, body, data):
+def send_push_notification(user, title, body, data, badge_count):
     if not user:
         logger.info(f"No user found, skipping push notification.")
         return None
@@ -22,6 +23,20 @@ def send_push_notification(user, title, body, data):
     message = messaging.Message(
             notification=messaging.Notification(title=title, body=body),
             data=data,
+            # Apple Specific Badge Setup
+            apns=APNSConfig(
+                payload=APNSPayload(
+                    aps=Aps(
+                        badge=badge_count,
+                    ),
+                ),
+            ),
+            # Android Specific Badge Setup
+            android=AndroidConfig(
+                notification=AndroidNotification(
+                    notification_count=badge_count,
+                ),
+            ),
         )
 
     logger.info(f"Sending push to {devices.count()} devices for user {user.id} ({user.entity_id})")

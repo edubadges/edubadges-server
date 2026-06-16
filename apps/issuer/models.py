@@ -886,7 +886,8 @@ class BadgeClass(
                     "title_key": "push.badge_received_title",
                     "body_key": "push.badge_received_body",
                     "badge": self.name,
-                }
+                },
+                badge_count=user.direct_awards.count(),
             )
 
         return assertion
