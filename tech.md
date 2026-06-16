@@ -2,7 +2,7 @@
 
 ## Core Framework
 - **Django 4.2.24**: Python web framework
-- **Python 3.9**: Primary programming language
+- **Python 3.12**: Primary programming language
 - **Django REST Framework 3.15.2**: API development
 - **MySQL**: Primary database (mysqlclient 2.2.4)
 - **Memcached**: Caching layer
@@ -32,7 +32,7 @@
 ### Local Development Setup
 ```bash
 # Environment setup
-python3.9 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 

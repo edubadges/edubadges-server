@@ -14,7 +14,7 @@ Backend: https://github.com/edubadges/edubadges-server/releases/tag/v9.1.0
 -  Refactor badge extension validator to remove dependency on openbadges
 -  Chore/remove unused badge check helper and endpoints
 -  Fix path to local serviceaccount json
--  Chore/upgrade to django 5.2
+-  Chore/upgrade to django 5.2 and python 3.12
 -  Chore/update extension validators
 -  Add dedicated exception in mobile auth backend for terms not accepted
 -  Add profile endpoint to allowed urls before general terms are accepted

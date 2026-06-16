@@ -105,7 +105,7 @@ TODO: can we run the server so it reboots on detecting changes instead of having
 Prerequisites:
 
 - git
-- python 3.9
+- python 3.12
 - mysql
 - [cairo](https://www.cairographics.org/download/) (SVG utility)
 
@@ -124,7 +124,7 @@ Note: some of these packages would introduce additional security considerations 
 ### Create project directory and environment
 
 - `mkdir edubadges && cd edubadges`
-- `python3.9 -m venv .venv`
+- `python3.12 -m venv .venv`
 - `source .venv/bin/activate` _Activate the environment (each time you start a session working with the code)_
 
 _Obtain source code and clone into code directory_
