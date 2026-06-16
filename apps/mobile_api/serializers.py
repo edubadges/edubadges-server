@@ -4,6 +4,7 @@ from urllib.parse import urlencode, urljoin
 from django.conf import settings
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, extend_schema_field
+from rest_framework.fields import SerializerMethodField
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
@@ -501,7 +502,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     institution = serializers.SlugRelatedField(slug_field='name', read_only=True)
-    termsagreement_set = TermsAgreementSerializer(many=True, read_only=True)
+    termsagreement_set = serializers.SerializerMethodField()
     terms_agreed = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -520,6 +521,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'terms_agreed',
             'termsagreement_set',
         ]
+
+    def get_termsagreement_set(self, obj):
+        termsagreements = TermsAgreement.objects.filter(user=obj, terms__institution__isnull=False)
+        return TermsAgreementSerializer(termsagreements, many=True).data
 
 
 class CatalogBadgeClassSerializer(serializers.ModelSerializer):
