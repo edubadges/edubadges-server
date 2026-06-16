@@ -21,23 +21,24 @@ def send_push_notification(user, title, body, data, badge_count):
     data = {k: str(v) for k, v in data.items()}
 
     message = messaging.Message(
-            notification=messaging.Notification(title=title, body=body),
-            data=data,
-            # Apple Specific Badge Setup
-            apns=APNSConfig(
-                payload=APNSPayload(
-                    aps=Aps(
-                        badge=badge_count,
-                    ),
+        notification=messaging.Notification(title=title, body=body),
+        data=data,
+        # Apple Specific Badge Setup
+        apns=APNSConfig(
+            payload=APNSPayload(
+                aps=Aps(
+                    badge=badge_count,
                 ),
             ),
-            # Android Specific Badge Setup
-            android=AndroidConfig(
-                notification=AndroidNotification(
-                    notification_count=badge_count,
-                ),
+        ),
+        # Android Specific Badge Setup
+        android=AndroidConfig(
+            notification=AndroidNotification(
+                notification_count=badge_count,
+                tag="user_unclaimed_awards",
             ),
-        )
+        ),
+    )
 
     logger.info(f"Sending push to {devices.count()} devices for user {user.id} ({user.entity_id})")
     try:
