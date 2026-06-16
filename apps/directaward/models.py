@@ -175,7 +175,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                 "title_key": "push.badge_received_title",
                 "body_key": "push.badge_received_body",
                 "badge": self.badgeclass.name,
-            }
+            },
+            badge_count=user.direct_awards.count(),
         )
 
     def get_recipient_name(self):
@@ -275,7 +276,8 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                     "title_key": "push.badge_received_title",
                     "body_key": "push.badge_received_body",
                     "badge": self.badgeclass.name,
-                }
+                },
+                badge_count=user.direct_awards.count(),
             )
 
     def notify_awarder(self):
