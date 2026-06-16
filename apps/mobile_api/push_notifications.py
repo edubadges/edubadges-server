@@ -35,6 +35,7 @@ def send_push_notification(user, title, body, data, badge_count):
         android=AndroidConfig(
             notification=AndroidNotification(
                 notification_count=badge_count,
+                tag="user_unclaimed_awards",
             ),
         ),
     )
