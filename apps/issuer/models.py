@@ -877,13 +877,13 @@ class BadgeClass(
             user = BadgeUser.objects.filter(email=recipient.email).first()
             send_push_notification(
                 user=user,
-                title="Edubadge received",
-                body="You earned an edubadge, claim it now!",
+                title='Edubadge received',
+                body='You earned an edubadge, claim it now!',
                 data={
-                    "title_key": "push.badge_received_title",
-                    "body_key": "push.badge_received_body",
-                    "badge": self.name,
-                }
+                    'title_key': 'push.badge_received_title',
+                    'body_key': 'push.badge_received_body',
+                    'badge': self.name,
+                },
             )
 
         # Log the badge instance creation event
@@ -1051,6 +1051,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     )
 
     recipient_identifier = models.CharField(max_length=512, blank=False, null=False, db_index=True)
+    recipient_name = models.CharField(max_length=255, blank=True, null=True)
 
     image = models.FileField(upload_to='uploads/badges', blank=True, null=True, db_index=True)
 
@@ -1150,10 +1151,11 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     def issuer_jsonld_id(self):
         return self.cached_issuer.jsonld_id
 
-    """ 
-    While the name suggests this returns a URL that can be used by anyone to access the badge instance, it
-    will return a URL even for private badge instances. 
     """
+    While the name suggests this returns a URL that can be used by anyone to access the badge instance, it
+    will return a URL even for private badge instances.
+    """
+
     @property
     def public_url(self):
         return OriginSetting.HTTP + self.get_absolute_url()
