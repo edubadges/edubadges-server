@@ -217,9 +217,8 @@ EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS = str(
 EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 82))
 DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get('DIRECT_AWARDS_DELETION_THRESHOLD_DAYS', 30))
 
-OB3_AGENT_URL_SPHEREON = os.environ.get('OB3_AGENT_URL_SPHEREON', '')
-OB3_AGENT_AUTHZ_TOKEN_SPHEREON = os.environ.get('OB3_AGENT_AUTHZ_TOKEN_SPHEREON', '')
-OB3_AGENT_URL_UNIME = os.environ.get('OB3_AGENT_URL_UNIME', '')
+EC_ISSUER_URL = os.environ.get('EC_ISSUER_URL', '')
+EC_ISSUER_ADMIN_TOKEN = os.environ.get('EC_ISSUER_ADMIN_TOKEN', '')
 
 # If you have an informational front page outside the Django site that can link back to '/login', specify it here
 ROOT_INFO_REDIRECT = '/login'
@@ -651,8 +650,6 @@ SPECTACULAR_SETTINGS = {
 }
 
 AUDITLOG_DISABLE_REMOTE_ADDR = True
-
-API_PROXY = {'HOST': OB3_AGENT_URL_UNIME}
 
 # FCM Django (Tell Firebase Admin SDK where the service account JSON is)
 FIREBASE_JSON_FILE = os.environ.get("FIREBASE_JSON_FILE")

@@ -48,9 +48,8 @@ services:
       - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
       - UI_URL=http://localhost:8080
       - UNSUBSCRIBE_SECRET_KEY=secret
-      - OB3_AGENT_URL_UNIME=https://agent.poc9.eduwallet.nl
-      - OB3_AGENT_URL_SPHEREON=http://veramo-agent:3000
-      - OB3_AGENT_AUTHZ_TOKEN_SPHEREON=${OB3_AGENT_AUTHZ_TOKEN_SPHEREON}
+      - EC_ISSUER_URL=${EC_ISSUER_URL}
+      - EC_ISSUER_ADMIN_TOKEN=${EC_ISSUER_ADMIN_TOKEN}
       - LOKI_API_URL=http://localhost
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
     networks:
