@@ -7,5 +7,5 @@ from ob3.api import CredentialsView
 # (see apps/ob3/openapi.yaml), so wallets talk to it directly and no proxy
 # routes are needed here anymore.
 urlpatterns = [
-    re_path(r"^v1/ob3", CredentialsView.as_view(), name="credentials"),
+    re_path(r"^v1/ob3", CredentialsView.as_view(), name="verifiable_credentials"),
 ]
