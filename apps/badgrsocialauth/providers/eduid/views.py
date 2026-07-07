@@ -269,24 +269,6 @@ def after_terms_agreement(request, **kwargs):
     return ret
 
 
-def create_edu_id_badge_instance(social_login):
-    user = social_login.user
-    super_user = BadgeUser.objects.get(username=settings.SUPERUSER_NAME)
-    badge_class = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME)
-
-    # Issue first badge for user
-    badge_class.issue(
-        recipient=user,
-        created_by=super_user,
-        allow_uppercase=True,
-        enforce_validated_name=False,
-        recipient_type=BadgeInstance.RECIPIENT_TYPE_EDUID,
-        expires_at=None,
-        extensions=None,
-    )
-    logger.info(f'Assertion created for {user.email} based on {badge_class.name}')
-
-
 from django.contrib.auth.signals import user_logged_out, user_logged_in
 
 
