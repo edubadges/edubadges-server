@@ -852,7 +852,6 @@ class BadgeClass(
         created_by=None,
         allow_uppercase=False,
         extensions=None,
-        send_email=True,
         enforce_validated_name=True,
         include_evidence=True,
         **kwargs,
@@ -871,24 +870,6 @@ class BadgeClass(
             extensions=extensions,
             **kwargs,
         )
-        message = EmailMessageMaker.create_earned_badge_mail(assertion)
-        if send_email:
-            recipient.email_user(
-                subject='Je hebt een edubadge ontvangen! You received an edubadge!', html_message=message
-            )
-
-            user = BadgeUser.objects.filter(email=recipient.email).first()
-            send_push_notification(
-                user=user,
-                title="Edubadge received",
-                body="You earned an edubadge, claim it now!",
-                data={
-                    "title_key": "push.badge_received_title",
-                    "body_key": "push.badge_received_body",
-                    "badge": self.name,
-                },
-                badge_count=user.direct_awards.count(),
-            )
 
         return assertion
 
