@@ -13,6 +13,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
+from django.db.models.constraints import UniqueConstraint
 from django.utils import timezone
 from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
@@ -53,6 +54,11 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     )
     type = models.CharField(max_length=254, choices=TYPE_CHOICES)
     notes = models.TextField(blank=True, null=True, default=None)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['email', 'content_type', 'object_id'], name='unique_email_content_type_object_id'),
+        ]
 
     def _validate_unique(self, exclude=None):
         """Custom uniqueness validation of the provisionment, used before save"""
