@@ -166,17 +166,18 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         )
 
         user = BadgeUser.objects.filter(email=self.recipient_email).first()
-        send_push_notification(
-            user=user,
-            title="Edubadge received",
-            body="You earned an edubadge, claim it now!",
-            data={
-                "title_key": "push.badge_received_title",
-                "body_key": "push.badge_received_body",
-                "badge": self.badgeclass.name,
-            },
-            badge_count=user.direct_awards.count(),
-        )
+        if user:
+            send_push_notification(
+                user=user,
+                title="Edubadge received",
+                body="You earned an edubadge, claim it now!",
+                data={
+                    "title_key": "push.badge_received_title",
+                    "body_key": "push.badge_received_body",
+                    "badge": self.badgeclass.name,
+                },
+                badge_count=user.direct_awards.count(),
+            )
 
     def get_recipient_name(self):
         if self.recipient_first_name and self.recipient_surname:
