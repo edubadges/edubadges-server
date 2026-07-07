@@ -82,6 +82,11 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
             if invite != self and invite.entity in all_entities_in_same_branch:
                 raise BadgrValidationError('Cannot invite user for this entity. There is a conflicting invite.', 503)
 
+    def _validate_user_exists(self):
+        """validate to see if a user already exists"""
+        if BadgeUser.objects.filter(email=self.email).exists():
+            raise BadgrValidationError('User already exists, try adding permissions via the Users tab.', 511)
+
     def get_permissions(self, user):
         return self.entity.get_permissions(user)
 
@@ -155,6 +160,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         else:
             self._validate_staff_collision()
             self._validate_invite_collision()
+            self._validate_user_exists()
 
     def _remove_cache(self):
         if self.entity:
