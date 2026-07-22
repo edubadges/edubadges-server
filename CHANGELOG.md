@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [9.2.0] - 2026-07-22
+
+Frontend: https://github.com/edubadges/edubadges-ui/releases/tag/v9.2.0</br>
+Backend: https://github.com/edubadges/edubadges-server/releases/tag/v9.2.0
+
+- Hide general terms in mobile profile endpoint
+- Add badge count to push notifications
+- Fix/mobile badge count on android
+- Update text referencing python 3.9 to python 3.12
+- Chore/clean up unused email template
+- Add unique constraint to user provisionment
+- Only send push notification if there is a user
+
 ## [9.1.0] - 2026-06-15
 
 Frontend: https://github.com/edubadges/edubadges-ui/releases/tag/v9.1.0</br>
