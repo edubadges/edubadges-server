@@ -1,0 +1,2482 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../1.%20Project%20Overview/">
+      
+      
+        <link rel="next" href="../3.%20Workflow%20Overview/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Architecture Overview - Edubadges Server Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture-overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Edubadges Server Documentation" class="md-header__button md-logo" aria-label="Edubadges Server Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Edubadges Server Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/edubadges/edubadges-server" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    edubadges/edubadges-server
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Edubadges Server Documentation" class="md-nav__button md-logo" aria-label="Edubadges Server Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Edubadges Server Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/edubadges/edubadges-server" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    edubadges/edubadges-server
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1.%20Project%20Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#system-context-c4-level-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Context (C4 Level 1)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-architecture-c4-level-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Architecture (C4 Level 2)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-architecture-c4-level-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Architecture (C4 Level 3)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architectural Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-entity-id-based-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Entity-ID Based Routing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-hierarchical-permission-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Hierarchical Permission System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-three-layer-api-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Three-Layer API Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-caching-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Caching Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-badge-instance-assertion-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Badge Instance (Assertion) Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-environment-driven-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Environment-Driven Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-multi-language-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Multi-Language Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module Breakdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Infrastructure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Infrastructure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mainsite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mainsite
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badgeuser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        badgeuser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic_models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basic_models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        entity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cachemodel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cachemodel
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badge-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Badge Domain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Badge Domain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issuer-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        issuer (CORE)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        signing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#endorsement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        endorsement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#directaward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        directaward
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backpack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        backpack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#institutional-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Institutional Hierarchy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Institutional Hierarchy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#institution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        institution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        staff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lti13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lti13
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lti_edu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lti_edu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ob3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ob3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badgrsocialauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        badgrsocialauth
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Services
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mobile_api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mobile_api
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#public" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        public
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badge_connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        badge_connect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#insights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        insights
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        notifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#theming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        theming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badgrlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        badgrlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        health
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-entity-id-over-primary-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Entity-ID Over Primary Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-hybrid-api-strategy-rest-graphql-json-ld" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Hybrid API Strategy (REST + GraphQL + JSON-LD)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-hierarchical-rbac-with-cascading-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Hierarchical RBAC with Cascading Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-environment-driven-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Environment-Driven Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-django-monolith-with-modular-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Django Monolith with Modular Apps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3.%20Workflow%20Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deep Dive
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/1.%20Badge%20Domain%20%28issuer%29/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Badge Domain (issuer)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/2.%20User%20Model%20%26%20Authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User & Authentication
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/3.%20Signing%20Infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Signing Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/4.%20Institutional%20Hierarchy%20%26%20RBAC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Institutional Hierarchy & RBAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/5.%20LTI%20Integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LTI Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/6.%20Direct%20Award%20System/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Direct Award System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/7.%20Backpack%20%26%20Public%20Verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backpack & Public Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/8.%20Mobile%20API/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mobile API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/9.%20Open%20Badges%203%20%26%20BadgeConnect/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OB3 & BadgeConnect
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4.%20Deep%20Dive/10.%20Infrastructure%20Components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#system-context-c4-level-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Context (C4 Level 1)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-architecture-c4-level-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Architecture (C4 Level 2)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-architecture-c4-level-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Architecture (C4 Level 3)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architectural-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architectural Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-entity-id-based-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Entity-ID Based Routing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-hierarchical-permission-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Hierarchical Permission System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-three-layer-api-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Three-Layer API Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-caching-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Caching Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-badge-instance-assertion-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Badge Instance (Assertion) Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-environment-driven-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Environment-Driven Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-multi-language-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Multi-Language Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module Breakdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Infrastructure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Infrastructure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mainsite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mainsite
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badgeuser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        badgeuser
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic_models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        basic_models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        entity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cachemodel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cachemodel
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badge-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Badge Domain
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Badge Domain">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issuer-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        issuer (CORE)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        signing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#endorsement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        endorsement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#directaward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        directaward
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backpack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        backpack
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#institutional-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Institutional Hierarchy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Institutional Hierarchy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#institution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        institution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        staff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lti13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lti13
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lti_edu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lti_edu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ob3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ob3
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badgrsocialauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        badgrsocialauth
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Services
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mobile_api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mobile_api
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#public" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        public
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badge_connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        badge_connect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#insights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        insights
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        notifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#theming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        theming
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#badgrlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        badgrlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        health
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-entity-id-over-primary-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Entity-ID Over Primary Key
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-hybrid-api-strategy-rest-graphql-json-ld" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Hybrid API Strategy (REST + GraphQL + JSON-LD)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-hierarchical-rbac-with-cascading-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Hierarchical RBAC with Cascading Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-environment-driven-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Environment-Driven Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-django-monolith-with-modular-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Django Monolith with Modular Apps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="architecture-overview">Architecture Overview</h1>
+<h2 id="system-context-c4-level-1">System Context (C4 Level 1)</h2>
+<p>Edubadges Server sits at the center of a digital badge ecosystem, connecting educational institutions with learning management systems, authentication providers, and mobile/web clients.</p>
+<pre class="mermaid"><code>graph TB
+  subgraph Users
+    Student[Student / Learner&lt;br/&gt;Earns and manages badges]
+    Instructor[Instructor / Admin&lt;br/&gt;Creates and issues badges]
+    HR[HR Department&lt;br/&gt;Recognizes skills]
+  end
+
+  subgraph Clients
+    Frontend[Edubadges UI&lt;br/&gt;Svelte frontend]
+    Mobile[Mobile App&lt;br/&gt;iOS / Android]
+  end
+
+  Edubadges[Edubadges Server&lt;br/&gt;Django backend API&lt;br/&gt;Digital badge management]
+
+  subgraph External
+    LMS[LMS&lt;br/&gt;Canvas, Moodle&lt;br/&gt;LTI 1.3]
+    EduID[eduID&lt;br/&gt;Dutch higher ed SSO]
+    SurfConext[SURFConext&lt;br/&gt;Identity federation]
+    Verifier[Badge Verifier&lt;br/&gt;Third-party tools]
+    Firebase[Firebase Cloud Messaging&lt;br/&gt;Push notifications]
+    Blockchain[BTC Ledger&lt;br/&gt;Timestamp anchoring]
+  end
+
+  Student --&gt; Frontend
+  Instructor --&gt; Frontend
+  HR --&gt; Frontend
+  Student --&gt; Mobile
+
+  Frontend --&gt;|REST / GraphQL| Edubadges
+  Mobile --&gt;|Mobile API| Edubadges
+
+  Edubadges --&gt;|LTI 1.3| LMS
+  Edubadges --&gt;|OIDC| EduID
+  Edubadges --&gt;|OIDC| SurfConext
+  Verifier --&gt;|JSON-LD public API| Edubadges
+  Edubadges --&gt;|FCM| Firebase
+  Edubadges --&gt;|BTC ledger| Blockchain</code></pre>
+<h2 id="container-architecture-c4-level-2">Container Architecture (C4 Level 2)</h2>
+<pre class="mermaid"><code>graph TB
+  subgraph "Web Application"
+    Frontend[Edubadges UI&lt;br/&gt;Svelte + JavaScript&lt;br/&gt;User-facing web interface]
+    Server[Edubadges Server&lt;br/&gt;Python / Django 5.2&lt;br/&gt;DRF + GraphQL API]
+  end
+
+  Mobile[Mobile App&lt;br/&gt;iOS / Android&lt;br/&gt;Badge management]
+  User[User&lt;br/&gt;Student, Instructor, HR]
+
+  subgraph Infrastructure
+    MySQL[(MySQL 8.4&lt;br/&gt;Relational database)]
+    Memcached[(Memcached&lt;br/&gt;In-memory cache)]
+    Celery[Celery Workers&lt;br/&gt;Task queue]
+    Firebase[FCM&lt;br/&gt;Push notifications]
+  end
+
+  subgraph External Services
+    LMS[LMS&lt;br/&gt;Canvas / Moodle&lt;br/&gt;LTI 1.3]
+    SSO[eduID / SURFConext&lt;br/&gt;OpenID Connect SSO]
+    Verifier[Badge Verifiers&lt;br/&gt;JSON-LD verification]
+  end
+
+  User --&gt;|HTTPS| Frontend
+  User --&gt;|HTTPS| Mobile
+  Frontend --&gt;|REST / GraphQL| Server
+  Mobile --&gt;|Mobile API| Server
+  Server --&gt;|TCP| MySQL
+  Server --&gt;|TCP| Memcached
+  Server --&gt;|AMQP| Celery
+  Celery --&gt;|FCM API| Firebase
+  Server --&gt;|HTTPS / OIDC| LMS
+  Server --&gt;|OIDC| SSO
+  Verifier --&gt;|HTTPS / JSON-LD| Server</code></pre>
+<h2 id="component-architecture-c4-level-3">Component Architecture (C4 Level 3)</h2>
+<pre class="mermaid"><code>graph LR
+  subgraph API_Layer["API Layer"]
+    REST["REST API&lt;br/&gt;DRF ViewSets"]
+    GraphQL["GraphQL API&lt;br/&gt;Graphene-Django"]
+    Public["Public JSON-LD API"]
+    Mobile["Mobile API"]
+  end
+
+  subgraph Core_Domain["Core Domain"]
+    Issuer["Issuer Service&lt;br/&gt;Organization mgmt"]
+    BadgeClass["BadgeClass Service&lt;br/&gt;Badge definition"]
+    BadgeInstance["BadgeInstance Service&lt;br/&gt;Assertion lifecycle"]
+    Sign["Signing Service&lt;br/&gt;Cryptographic proofs"]
+  end
+
+  subgraph User_Auth["User and Auth"]
+    BadgeUser["BadgeUser Model&lt;br/&gt;Custom user"]
+    Auth["Social Auth&lt;br/&gt;eduID / SURFConext"]
+    Staff["RBAC System&lt;br/&gt;Institution to Faculty to Issuer"]
+  end
+
+  subgraph Integration["Integration"]
+    LTI["LTI 1.3 Engine&lt;br/&gt;Deep linking"]
+    LTI_Edu["LTI Edu&lt;br/&gt;Legacy enrollments"]
+    OB3["OB3 Service&lt;br/&gt;W3C Verifiable Credentials"]
+    BC["BadgeConnect&lt;br/&gt;API protocol"]
+  end
+
+  subgraph Support["Support"]
+    Backpack["Backpack Service&lt;br/&gt;User collections"]
+    Notify["Notifications&lt;br/&gt;FCM push"]
+    DirectAward["DirectAward&lt;br/&gt;Bulk issuance"]
+    Insights["Insights&lt;br/&gt;Analytics"]
+    Theme["Theming&lt;br/&gt;Per-subdomain"]
+  end
+
+  subgraph Infrastructure["Infrastructure"]
+    Cache["CacheModel&lt;br/&gt;cached_method"]
+    Log["BadgrLogger&lt;br/&gt;Structured logging"]
+    Health["Health Check&lt;br/&gt;Server status"]
+    Prometheus["Prometheus&lt;br/&gt;Metrics"]
+  end
+
+  subgraph Data["Data"]
+    MySQL[(("MySQL 8.4"))]
+    Memcached[(("Memcached"))]
+  end
+
+  REST --&gt; Issuer
+  REST --&gt; BadgeClass
+  REST --&gt; BadgeInstance
+  GraphQL --&gt; BadgeUser
+  GraphQL --&gt; Staff
+  Public --&gt; BadgeInstance
+  Public --&gt; BadgeClass
+  Mobile --&gt; BadgeInstance
+  Mobile --&gt; BadgeClass
+
+  Issuer --&gt; BadgeClass
+  BadgeClass --&gt; BadgeInstance
+  BadgeInstance --&gt; Sign
+  BadgeClass --&gt; DirectAward
+
+  Auth --&gt; BadgeUser
+  LTI --&gt; BadgeClass
+  LTI_Edu --&gt; BadgeClass
+  OB3 --&gt; BadgeInstance
+  BC --&gt; BadgeClass
+
+  Backpack --&gt; BadgeInstance
+  Notify --&gt; BadgeInstance
+  Theme --&gt; Issuer
+  Insights --&gt; BadgeInstance
+  Insights --&gt; BadgeClass
+
+  Cache --&gt; MySQL
+  Log --&gt; MySQL
+  Health --&gt; MySQL
+  Prometheus --&gt; MySQL
+
+  MySQL -.-&gt; Memcached</code></pre>
+<h2 id="architectural-patterns">Architectural Patterns</h2>
+<h3 id="1-entity-id-based-routing">1. Entity-ID Based Routing</h3>
+<p>Every major entity uses a UUID-based <code>entity_id</code> for URL routing and JSON-LD <code>@id</code> fields, enabling:
+- Stable, opaque identifiers across all APIs
+- JSON-LD <code>@id</code> compliance with Open Badges specification
+- Decoupled URLs from database primary keys</p>
+<h3 id="2-hierarchical-permission-system">2. Hierarchical Permission System</h3>
+<p>RBAC via <code>PermissionedRelationshipBase</code> with cascading permissions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Institution (admin)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  └── Faculty (staff)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>      └── Issuer (staff)
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>          └── BadgeClass (staff)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>              └── BadgeInstance (awarded)
+</code></pre></div>
+<p>Seven permission types cascade down the hierarchy:
+- <code>may_create</code> — create child entities
+- <code>may_read</code> — read entities
+- <code>may_update</code> — update entities
+- <code>may_delete</code> — delete entities
+- <code>may_award</code> — award badges
+- <code>may_sign</code> — sign/cryptographically prove badges
+- <code>may_administrate_users</code> — manage staff membership</p>
+<h3 id="3-three-layer-api-strategy">3. Three-Layer API Strategy</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REST API</strong></td>
+<td>DRF ViewSets</td>
+<td>CRUD operations, versioned (v1, v2)</td>
+</tr>
+<tr>
+<td><strong>GraphQL API</strong></td>
+<td>Graphene-Django</td>
+<td>Complex queries, aggregations</td>
+</tr>
+<tr>
+<td><strong>Public JSON-LD</strong></td>
+<td>Custom views</td>
+<td>Open Badges spec compliance, verification</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-caching-layer">4. Caching Layer</h3>
+<p>Custom <code>CacheModel</code> base class with <code>@cached_method</code> decorator provides:
+- Automatic method-level caching with cache invalidation on save/delete
+- Per-model cache keys based on entity_id
+- Memcached-backed storage via pymemcache</p>
+<h3 id="5-badge-instance-assertion-lifecycle">5. Badge Instance (Assertion) Lifecycle</h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Created → Submitted for Timestamping → Signed → Awarded → [Revoked]
+</code></pre></div>
+Each badge instance progresses through cryptographic signing with timestamp proofs anchored to the BTC ledger.</p>
+<h3 id="6-environment-driven-configuration">6. Environment-Driven Configuration</h3>
+<p>All configuration is environment-variable driven via <code>env_vars.sh</code>. No hardcoded secrets. Docker Compose for local development.</p>
+<h3 id="7-multi-language-support">7. Multi-Language Support</h3>
+<p>Dutch/English bilingual content for Institutions, Faculties, Issuers, and BadgeClasses:
+- <code>name_english</code> / <code>name_dutch</code>
+- <code>description_english</code> / <code>description_dutch</code>
+- <code>criteria_english</code> / <code>criteria_dutch</code></p>
+<h2 id="module-breakdown">Module Breakdown</h2>
+<h3 id="core-infrastructure">Core Infrastructure</h3>
+<h4 id="mainsite"><code>mainsite</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Central Django project configuration</li>
+<li><strong>Key Components</strong>: <code>settings.py</code>, <code>urls.py</code>, <code>schema.py</code> (GraphQL), <code>admin.py</code> (BadgrAdmin), middleware, context processors</li>
+<li><strong>Dependencies</strong>: All other apps</li>
+</ul>
+<h4 id="badgeuser"><code>badgeuser</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Custom user model and authentication</li>
+<li><strong>Key Models</strong>: <code>BadgeUser</code> — custom user with institution, is_teacher, validated_name, TOTP support</li>
+<li><strong>Dependencies</strong>: allauth, social_django, django-otp</li>
+</ul>
+<h4 id="basic_models"><code>basic_models</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Abstract base model classes</li>
+<li><strong>Key Models</strong>: <code>NameSlug</code>, <code>CreatedUpdatedAt</code>, <code>IsActive</code>, <code>TitleBody</code></li>
+<li><strong>Dependencies</strong>: None (foundation layer)</li>
+</ul>
+<h4 id="entity"><code>entity</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Base versioned entity with entity_id routing</li>
+<li><strong>Key Models</strong>: <code>BaseVersionedEntity</code> — provides <code>entity_id</code> (UUID), versioning support</li>
+<li><strong>Dependencies</strong>: basic_models</li>
+</ul>
+<h4 id="cachemodel"><code>cachemodel</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Caching infrastructure</li>
+<li><strong>Key Components</strong>: <code>CacheModel</code> base class, <code>@cached_method</code> decorator, custom managers</li>
+<li><strong>Dependencies</strong>: pymemcache</li>
+</ul>
+<h3 id="badge-domain">Badge Domain</h3>
+<h4 id="issuer-core"><code>issuer</code> (CORE)</h4>
+<ul>
+<li><strong>Purpose</strong>: Core badge domain — issuers, badge classes, badge instances</li>
+<li><strong>Key Models</strong>: <code>Issuer</code>, <code>BadgeClass</code>, <code>BadgeInstance</code>, <code>BadgeInstanceEvidence</code>, <code>BadgeClassAlignment</code>, <code>BadgeInstanceCollection</code></li>
+<li><strong>Dependencies</strong>: entity, signing, basic_models</li>
+<li><strong>Management Commands</strong>: <code>fix_badgeclass_images</code>, <code>verify_get_json</code></li>
+</ul>
+<h4 id="signing"><code>signing</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Cryptographic key management and assertion timestamping</li>
+<li><strong>Key Models</strong>: <code>SymmetricKey</code>, <code>PrivateKey</code>, <code>PublicKey</code>, <code>AssertionTimeStamp</code>, <code>PublicKeyIssuer</code></li>
+<li><strong>Dependencies</strong>: issuer</li>
+<li><strong>Management Commands</strong>: <code>update_timestamp_proofs</code></li>
+</ul>
+<h4 id="endorsement"><code>endorsement</code></h4>
+<ul>
+<li><strong>Purpose</strong>: BadgeClass endorsement relationships</li>
+<li><strong>Key Models</strong>: <code>Endorsement</code> — one badge endorses another</li>
+<li><strong>Dependencies</strong>: issuer</li>
+</ul>
+<h4 id="directaward"><code>directaward</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Bulk/direct badge awarding via SIS integration</li>
+<li><strong>Key Models</strong>: <code>DirectAward</code>, <code>DirectAwardBundle</code>, <code>DirectAwardAuditTrail</code></li>
+<li><strong>Dependencies</strong>: issuer</li>
+<li><strong>Management Commands</strong>: <code>award_scheduled_direct_awards</code>, <code>delete_direct_awards</code>, <code>reminders_direct_awards</code></li>
+</ul>
+<h4 id="backpack"><code>backpack</code></h4>
+<ul>
+<li><strong>Purpose</strong>: User badge collections and sharing</li>
+<li><strong>Key Models</strong>: <code>BackpackBadgeShare</code>, <code>ImportedAssertion</code></li>
+<li><strong>Dependencies</strong>: issuer, badgeuser</li>
+<li><strong>Features</strong>: Social media sharing integrations</li>
+</ul>
+<h3 id="institutional-hierarchy">Institutional Hierarchy</h3>
+<h4 id="institution"><code>institution</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Organizational hierarchy management</li>
+<li><strong>Key Models</strong>: <code>Institution</code>, <code>Faculty</code>, <code>BadgeClassTag</code></li>
+<li><strong>Dependencies</strong>: entity, basic_models</li>
+</ul>
+<h4 id="staff"><code>staff</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Role-based access control at all hierarchy levels</li>
+<li><strong>Key Models</strong>: <code>InstitutionStaff</code>, <code>FacultyStaff</code>, <code>IssuerStaff</code>, <code>BadgeClassStaff</code></li>
+<li><strong>Dependencies</strong>: institution, badgeuser</li>
+<li><strong>Pattern</strong>: <code>PermissionedRelationshipBase</code> abstract base for M2M staff relationships</li>
+</ul>
+<h3 id="integration">Integration</h3>
+<h4 id="lti13"><code>lti13</code></h4>
+<ul>
+<li><strong>Purpose</strong>: LTI 1.3 deep linking and tool configuration</li>
+<li><strong>Key Models</strong>: <code>LtiToolKey</code>, <code>LtiTool</code>, <code>LtiCourse</code></li>
+<li><strong>Dependencies</strong>: institution, issuer</li>
+<li><strong>Features</strong>: OIDC integration, deep linking, SameSite middleware</li>
+</ul>
+<h4 id="lti_edu"><code>lti_edu</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Legacy LTI education integration</li>
+<li><strong>Key Models</strong>: <code>StudentsEnrolled</code></li>
+<li><strong>Dependencies</strong>: issuer</li>
+</ul>
+<h4 id="ob3"><code>ob3</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Open Badges 3 (W3C Verifiable Credentials) integration</li>
+<li><strong>Dependencies</strong>: issuer, badgeuser</li>
+<li><strong>Features</strong>: Proxy integration with impierce/Sphereon agents</li>
+</ul>
+<h4 id="badgrsocialauth"><code>badgrsocialauth</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Social authentication providers</li>
+<li><strong>Providers</strong>: eduID, SURFConext, Facebook, Azure, LinkedIn</li>
+<li><strong>Dependencies</strong>: allauth, social_django</li>
+</ul>
+<h3 id="api-services">API Services</h3>
+<h4 id="mobile_api"><code>mobile_api</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Mobile app API endpoints</li>
+<li><strong>Endpoints</strong>: Login, badge instances, enrollments, direct awards, profiles, catalog</li>
+<li><strong>Authentication</strong>: <code>MobileAPIAuthentication</code></li>
+</ul>
+<h4 id="public"><code>public</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Public JSON-LD endpoints for Open Badges verification</li>
+<li><strong>Endpoints</strong>: <code>/public/assertions/&lt;entity_id&gt;</code>, <code>/public/badges/&lt;entity_id&gt;</code>, <code>/public/issuers/&lt;entity_id&gt;</code></li>
+<li><strong>Compliance</strong>: Open Badges 1.1 and 2.0 JSON-LD</li>
+</ul>
+<h4 id="badge_connect"><code>badge_connect</code></h4>
+<ul>
+<li><strong>Purpose</strong>: BadgeConnect protocol integration</li>
+</ul>
+<h4 id="insights"><code>insights</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Analytics and insights API</li>
+</ul>
+<h4 id="queries"><code>queries</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Query API for complex badge data retrieval</li>
+</ul>
+<h3 id="support">Support</h3>
+<h4 id="notifications"><code>notifications</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Badge notifications and push notifications</li>
+<li><strong>Dependencies</strong>: firebase-admin, fcm-django</li>
+</ul>
+<h4 id="theming"><code>theming</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Per-subdomain theming (logos, welcome messages, terms)</li>
+<li><strong>Dependencies</strong>: entity</li>
+</ul>
+<h4 id="badgrlog"><code>badgrlog</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Custom structured logging (Badgr Events)</li>
+<li><strong>Dependencies</strong>: loki-logger-handler</li>
+</ul>
+<h4 id="health"><code>health</code></h4>
+<ul>
+<li><strong>Purpose</strong>: Server health check endpoint</li>
+</ul>
+<h2 id="key-design-decisions">Key Design Decisions</h2>
+<h3 id="1-entity-id-over-primary-key">1. Entity-ID Over Primary Key</h3>
+<ul>
+<li><strong>Decision</strong>: Use UUID <code>entity_id</code> for all external references instead of database PKs</li>
+<li><strong>Rationale</strong>: Stable identifiers across migrations, JSON-LD compliance, opaque URLs</li>
+<li><strong>Trade-off</strong>: Slightly larger indices, but better security and portability</li>
+</ul>
+<h3 id="2-hybrid-api-strategy-rest-graphql-json-ld">2. Hybrid API Strategy (REST + GraphQL + JSON-LD)</h3>
+<ul>
+<li><strong>Decision</strong>: Three parallel API strategies for different consumers</li>
+<li><strong>Rationale</strong>: REST for CRUD, GraphQL for complex queries, JSON-LD for Open Badges spec compliance</li>
+<li><strong>Trade-off</strong>: Higher development/maintenance cost, but serves all consumer needs optimally</li>
+</ul>
+<h3 id="3-hierarchical-rbac-with-cascading-permissions">3. Hierarchical RBAC with Cascading Permissions</h3>
+<ul>
+<li><strong>Decision</strong>: Institution → Faculty → Issuer → BadgeClass permission cascading</li>
+<li><strong>Rationale</strong>: Mirrors real organizational structures in education</li>
+<li><strong>Trade-off</strong>: Complex permission resolution, but matches domain requirements</li>
+</ul>
+<h3 id="4-environment-driven-configuration">4. Environment-Driven Configuration</h3>
+<ul>
+<li><strong>Decision</strong>: All configuration via environment variables</li>
+<li><strong>Rationale</strong>: Security (no secrets in code), deployment flexibility, Docker-native</li>
+<li><strong>Trade-off</strong>: Requires careful environment setup for new developers</li>
+</ul>
+<h3 id="5-django-monolith-with-modular-apps">5. Django Monolith with Modular Apps</h3>
+<ul>
+<li><strong>Decision</strong>: Single Django project with 30+ loosely coupled apps</li>
+<li><strong>Rationale</strong>: Shared database, simple deployment, clear app boundaries</li>
+<li><strong>Trade-off</strong>: Database coupling between apps, but enables cross-domain queries</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "search.highlight", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
