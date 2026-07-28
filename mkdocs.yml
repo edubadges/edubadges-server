@@ -17,6 +17,8 @@ theme:
 
 repo_url: https://github.com/edubadges/edubadges-server
 repo_name: edubadges/edubadges-server
+docs_dir: mkdocs
+site_dir: docs
 
 markdown_extensions:
   - pymdownx.highlight:
