@@ -7,3 +7,8 @@ from .settings import *
 LOGGING = {}
 DISABLE_AUTH_SIGNALS = True
 ENABLE_EXTENSION_VALIDATION = False
+
+# Insecure but faster password hashing
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+)
