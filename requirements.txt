@@ -113,7 +113,6 @@ pycryptodome==3.21.0
 #https://github.com/aiselis/django-api-proxy
 django-api-proxy==0.1.1
 
-django-upgrade==1.23.1
 django-prometheus==2.3.1
 loki-logger-handler==1.1.1
 
