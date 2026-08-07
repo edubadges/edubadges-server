@@ -51,7 +51,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [format]
 # Like Black, use double quotes for strings.
-quote-style = "single"
+quote-style = "double"
 
 # Like Black, indent with spaces, rather than tabs.
 indent-style = "space"
