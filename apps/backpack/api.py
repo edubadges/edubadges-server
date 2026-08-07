@@ -11,11 +11,10 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 from entity.api import BaseEntityDetailView
-from issuer.models import BadgeInstance
+from issuer.models import BadgeClass, BadgeInstance, Issuer
 from issuer.permissions import BadgrOAuthTokenHasScope, RecipientIdentifiersMatch
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from mobile_api.serializers import BadgeInstanceSerializer
 from public.public_api import ImagePropertyDetailView
 from rest_framework import permissions, serializers
 from rest_framework.response import Response
@@ -36,6 +35,41 @@ permission_denied_response = OpenApiResponse(
 )
 
 
+class AwardIssuerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Issuer
+        fields = ["id", "entity_id", "name_dutch", "name_english", "image_dutch", "image_english", "faculty"]
+
+
+class AwardBadgeClassSerializer(serializers.ModelSerializer):
+    issuer = AwardIssuerSerializer(read_only=True)
+
+    class Meta:
+        model = BadgeClass
+        fields = ["id", "entity_id", "name", "description", "criteria_text", "image", "issuer"]
+
+
+class AwardSerializer(serializers.ModelSerializer):
+    badgeclass = AwardBadgeClassSerializer(read_only=True)
+
+    class Meta:
+        model = BadgeInstance
+        fields = [
+            "id",
+            "entity_id",
+            "created_at",
+            "issued_on",
+            "award_type",
+            "revoked",
+            "expires_at",
+            "acceptance",
+            "public",
+            "badgeclass",
+            "grade_achieved",
+            "include_grade_achieved",
+        ]
+
+
 class BackpackAwardDetail(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -54,7 +88,7 @@ class BackpackAwardDetail(APIView):
         responses={
             200: OpenApiResponse(
                 description="Badge instance details",
-                response=BadgeInstanceSerializer(),
+                response=AwardSerializer(),
                 examples=[
                     OpenApiExample(
                         "Badge Instance",
@@ -72,8 +106,12 @@ class BackpackAwardDetail(APIView):
                                 "id": 3,
                                 "name": "Edubadge account complete",
                                 "entity_id": "nwsL-dHyQpmvOOKBscsN_A",
+                                "description": "Complete your account to start earning badges",
+                                "criteria_text": "Register and verify your email address",
                                 "image_url": "https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png",
                                 "issuer": {
+                                    "id": 1,
+                                    "entity_id": "issuer-entity-id-123",
                                     "name_dutch": "SURF Edubadges",
                                     "name_english": "SURF Edubadges",
                                     "image_dutch": "null",
@@ -135,7 +173,7 @@ class BackpackAwardDetail(APIView):
         if instance is None:
             return Response({"detail": "Badge instance not found"}, status=404)
 
-        serializer = BadgeInstanceSerializer(instance)
+        serializer = AwardSerializer(instance)
         return Response(serializer.data)
 
 
