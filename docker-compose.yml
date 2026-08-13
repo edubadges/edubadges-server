@@ -49,7 +49,6 @@ services:
       - UI_URL=http://localhost:8080
       - UNSUBSCRIBE_SECRET_KEY=secret
       - EC_ISSUER_URL=${EC_ISSUER_URL}
-      - EC_ISSUER_ADMIN_TOKEN=${EC_ISSUER_ADMIN_TOKEN}
       - LOKI_API_URL=http://localhost
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
     networks:
