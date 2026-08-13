@@ -38,7 +38,7 @@ class TestCredentialsView(Ob3TestCase):
 
         response = self.client.post(
             self.URL,
-            data=json.dumps({"badge_id": assertion.id}),
+            data=json.dumps({"badge_entity_id": assertion.entity_id}),
             content_type="application/json",
             **AUTH_HEADER,
         )
@@ -51,7 +51,7 @@ class TestCredentialsView(Ob3TestCase):
         self.assertTrue(kwargs["url"].endswith("/api/v1/offers"))
         self.assertEqual(
             kwargs["json"],
-            {"award_id": assertion.entity_id, "access_token": FAKE_ACCESS_TOKEN},
+            {"award_id": assertion.entity_id},
         )
         self.assertTrue(kwargs["headers"]["Authorization"].startswith("Bearer "))
         self.assertEqual(kwargs["timeout"], 5)
@@ -62,7 +62,7 @@ class TestCredentialsView(Ob3TestCase):
 
         response = self.client.post(
             self.URL,
-            data=json.dumps({"badge_id": 999999}),
+            data=json.dumps({"badge_entity_id": "999999"}),
             content_type="application/json",
             **AUTH_HEADER,
         )
@@ -77,7 +77,7 @@ class TestCredentialsView(Ob3TestCase):
 
         response = self.client.post(
             self.URL,
-            data=json.dumps({"badge_id": assertion.id}),
+            data=json.dumps({"badge_entity_id": assertion.entity_id}),
             content_type="application/json",
             **AUTH_HEADER,
         )
@@ -88,11 +88,14 @@ class TestCredentialsView(Ob3TestCase):
     @patch("ob3.api.requests.post")
     def test_ec_issuer_error_response_is_propagated_as_bad_request(self, mock_post):
         _, assertion = self._setup_assertion()
-        mock_post.return_value = Mock(status_code=502, text="upstream error")
+        resp_mock = Mock()
+        resp_mock.status_code = 502
+        resp_mock.text = "upstream error"
+        mock_post.return_value = resp_mock
 
         response = self.client.post(
             self.URL,
-            data=json.dumps({"badge_id": assertion.id}),
+            data=json.dumps({"badge_entity_id": assertion.entity_id}),
             content_type="application/json",
             **AUTH_HEADER,
         )
@@ -104,12 +107,14 @@ class TestCredentialsView(Ob3TestCase):
 
         # Authenticated (force_authenticate), but no Authorization header to forward.
         response = self.client.post(
-            self.URL, data=json.dumps({"badge_id": assertion.id}), content_type="application/json"
+            self.URL, data=json.dumps({"badge_entity_id": assertion.entity_id}), content_type="application/json"
         )
 
         self.assertEqual(response.status_code, 400)
 
     def test_unauthenticated_request_is_rejected(self):
-        response = self.client.post(self.URL, data=json.dumps({"badge_id": 1}), content_type="application/json")
+        response = self.client.post(
+            self.URL, data=json.dumps({"badge_entity_id": "1"}), content_type="application/json"
+        )
 
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)

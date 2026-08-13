@@ -2,7 +2,8 @@ import logging
 from typing import Any, Dict, Optional
 
 import requests
-from django.core.exceptions import BadRequest
+from django.core.exceptions import BadRequest, ObjectDoesNotExist
+from django.http import Http404
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.settings import EC_ISSUER_URL
 from rest_framework import status
@@ -20,8 +21,6 @@ def _bearer_token(request: Request) -> str:
     """
     auth_header = request.META.get("HTTP_AUTHORIZATION", "")
     if not auth_header.lower().startswith("bearer "):
-        # Should not happen once permission_classes requires authentication,
-        # but we can't forward a token we don't have.
         raise BadRequest("Missing bearer token, cannot forward it to ec-issuer")
     return auth_header.split(" ", 1)[1]
 
@@ -44,26 +43,39 @@ class CredentialsView(APIView):
     http_method_names = ["post"]
 
     def post(self, request: Request, **_kwargs: Any) -> Response:
-        _ = _kwargs  # explicitly ignore kwargs
+        _ = _kwargs
 
         badge_entity_id = request.data.get("badge_entity_id")
 
-        offer_uri = self.__create_offer(request, badge_entity_id)
+        badge_instance = self._find_badge_instance(badge_entity_id, request.user)
+        if badge_instance is None:
+            raise Http404("Badge instance not found")
+
+        offer_uri = self._create_offer(request, badge_entity_id)
         logger.info(f"Issued credential offer for badge {badge_entity_id}")
         logger.debug(f"Offer: {offer_uri}")
 
         return Response({"offer": offer_uri}, status=status.HTTP_201_CREATED)
 
-    def __create_offer(self, request: Request, badge_entity_id: str) -> Optional[str]:
+    def _find_badge_instance(self, entity_id: str, user) -> Optional[Any]:
+        """
+        Look up a BadgeInstance by its entity_id and verify the requesting
+        user is the recipient.  Returns None when the badge does not exist
+        or does not belong to the user.
+        """
+        from issuer.models import BadgeInstance
+
+        try:
+            return BadgeInstance.objects.get(entity_id=entity_id, user=user)
+        except (ObjectDoesNotExist, ValueError):
+            return None
+
+    def _create_offer(
+        self, request: Request, badge_entity_id: str
+    ) -> Optional[str]:
         """
         Ask ec-issuer to create a credential and an offer for the given
-        badge instance. See "Create Credential and Offer" in
-        apps/ob3/openapi.yaml.
-
-        The requesting user's own access token is forwarded so ec-issuer can
-        later present it back to us (this view's GET method) to authenticate
-        the user and fetch the award data needed to serialize an OpenBadges
-        v3 credential.
+        badge instance.
         """
         url = f"{EC_ISSUER_URL}/api/v1/offers"
         headers = {
@@ -79,7 +91,11 @@ class CredentialsView(APIView):
         logger.debug(f"Response: {resp.status_code} {resp.text}")
 
         if resp.status_code >= 400:
-            msg = f"Failed to create offer:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
+            msg = (
+                f"Failed to create offer:\n"
+                f"\tcode: {resp.status_code}\n"
+                f"\tcontent:\n {resp.text}"
+            )
             raise BadRequest(msg)
 
         return resp.json().get("uri")
