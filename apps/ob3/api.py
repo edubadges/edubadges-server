@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional
 import requests
 from django.core.exceptions import BadRequest
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from mainsite.settings import EC_ISSUER_ADMIN_TOKEN, EC_ISSUER_URL
+from mainsite.settings import EC_ISSUER_URL
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -68,11 +68,10 @@ class CredentialsView(APIView):
         url = f"{EC_ISSUER_URL}/api/v1/offers"
         headers = {
             "Accept": "application/json",
-            "Authorization": f"Bearer {EC_ISSUER_ADMIN_TOKEN}",
+            "Authorization": f"Bearer {_bearer_token(request)}",
         }
         payload: Dict[str, str] = {
             "award_id": badge_entity_id,
-            "access_token": _bearer_token(request),
         }
 
         logger.debug(f"Requesting offer creation: {url} {payload['award_id']}")
