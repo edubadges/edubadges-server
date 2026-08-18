@@ -41,7 +41,7 @@ django-cors-middleware==1.5.0
 django-autoslug==1.9.8
 
 # wsgiref==0.1.2 # python3 incompatible
-sqlparse==0.5.4
+sqlparse==0.6.0
 netaddr
 django-extensions==3.2.3
 
