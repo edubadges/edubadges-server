@@ -30,7 +30,7 @@ from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
 from .provider import SurfConextProvider
 
-logger = logging.getLogger('Badgr.Debug')
+logger = logging.getLogger("Badgr.Debug")
 
 
 def login(request):
@@ -42,33 +42,41 @@ def login(request):
     # state contains the data required for the redirect after the login via SURFconext,
     # it contains the user token, type of process and which badge_app
 
-    badgr_app_pk = request.session.get('badgr_app_pk', None)
+    badgr_app_pk = request.session.get("badgr_app_pk", None)
     try:
         badgr_app_pk = int(badgr_app_pk)
     except:
         badgr_app_pk = settings.BADGR_APP_ID
+
+    logger.debug(
+        "login redirect: session_badgr_app_pk=%s process=%s auth_token_present=%s force_login=%s",
+        badgr_app_pk,
+        request.GET.get("process"),
+        "yes" if get_session_authcode(request) else "no",
+        request.GET.get("force_login"),
+    )
     state = json.dumps(
         [
-            request.GET.get('process', 'login'),
+            request.GET.get("process", "login"),
             get_session_authcode(request),
             badgr_app_pk,
         ]
     )
 
     params = {
-        'state': state,
-        'client_id': settings.SURF_CONEXT_CLIENT,
-        'response_type': 'code',
-        'scope': 'openid',
-        'redirect_uri': f'{settings.HTTP_ORIGIN}/account/openid/login/callback/',
-        'claims': '{"id_token":{"preferred_username":null,"given_name":null,'
+        "state": state,
+        "client_id": settings.SURF_CONEXT_CLIENT,
+        "response_type": "code",
+        "scope": "openid",
+        "redirect_uri": f"{settings.HTTP_ORIGIN}/account/openid/login/callback/",
+        "claims": '{"id_token":{"preferred_username":null,"given_name":null,'
         '"family_name":null,"email":null,"schac_home_organization":null}}',
     }
-    if request.GET.get('force_login') == 'True':
-        params['prompt'] = 'login'
+    if request.GET.get("force_login") == "True":
+        params["prompt"] = "login"
     args = urllib.parse.urlencode(params)
     # Redirect to eduID and enforce a linked SURFconext user with validated names
-    login_url = f'{settings.SURFCONEXT_DOMAIN_URL}/authorize?{args}'
+    login_url = f"{settings.SURFCONEXT_DOMAIN_URL}/authorize?{args}"
     return redirect(login_url)
 
 
@@ -92,90 +100,135 @@ def callback(request):
     :return: Either renders authentication error, or completes the social login
     """
     # extract the state of the redirect
+    logger.debug(
+        "callback called: method=%s user_authenticated=%s params=%s session_badgr_app=%s",
+        request.method,
+        request.user.is_authenticated,
+        dict(request.GET),
+        request.session.get("badgr_app_pk"),
+    )
     if request.user.is_authenticated:
+        logger.debug("User was pre-authenticated, logging out")
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
 
-    state = request.GET.get('state')
+    state = request.GET.get("state")
     if state is None:
-        error = 'Server error: No state found in callback'
+        error = "Server error: No state found in callback"
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
     process, auth_token, badgr_app_pk = json.loads(state)
 
-    code = request.GET.get('code', None)
+    code = request.GET.get("code", None)
     if code is None:
-        error = 'Server error: No userToken found in callback'
+        error = "Server error: No userToken found in callback"
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
     # 1. Exchange callback Token for id token
     payload = {
-        'grant_type': 'authorization_code',
-        'redirect_uri': f'{settings.HTTP_ORIGIN}/account/openid/login/callback/',
-        'code': code,
-        'scope': 'openid',
-        'client_id': settings.SURF_CONEXT_CLIENT,
-        'client_secret': settings.SURF_CONEXT_SECRET,
+        "grant_type": "authorization_code",
+        "redirect_uri": f"{settings.HTTP_ORIGIN}/account/openid/login/callback/",
+        "code": code,
+        "scope": "openid",
+        "client_id": settings.SURF_CONEXT_CLIENT,
+        "client_secret": settings.SURF_CONEXT_SECRET,
     }
     headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cache-Control': 'no-cache',
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cache-Control": "no-cache",
     }
     response = requests.post(
-        f'{settings.SURFCONEXT_DOMAIN_URL}/token',
+        f"{settings.SURFCONEXT_DOMAIN_URL}/token",
         data=urllib.parse.urlencode(payload),
         headers=headers,
     )
 
+    logger.debug(
+        "token exchange: status=%s headers=%s body=%s",
+        response.status_code,
+        dict(response.headers),
+        response.text[:500],
+    )
+
     if response.status_code != 200:
-        error = 'Server error: Token endpoint error (http %s) try alternative login methods' % response.status_code
+        error = "Server error: Token endpoint error (http %s) try alternative login methods" % response.status_code
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
     data = response.json()
-    id_token = data.get('id_token', None)
+    id_token = data.get("id_token", None)
 
     if id_token is None:
-        error = 'Server error: No id_token token, try alternative login methods.'
+        error = "Server error: No id_token token, try alternative login methods."
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
 
     payload = jwt.get_unverified_claims(id_token)
-    for attr in ['sub', 'email', 'schac_home_organization']:
+    for attr in ["sub", "email", "schac_home_organization"]:
         if attr not in payload:
-            error = f'Sorry, your account does not have a {attr} attribute. Login with SURFconext and then try again'
+            error = f"Sorry, your account does not have a {attr} attribute. Login with SURFconext and then try again"
             logger.error(error)
             return render_authentication_error(request, SurfConextProvider.id, error)
 
     # 3. Complete social login and return to frontend
-    payload['email'] = payload['email'].lower()
+    payload["email"] = payload["email"].lower()
     provider = SurfConextProvider(request)
     login = provider.sociallogin_from_response(request, payload)
     # connect process in which OpenID connects with, either login or connect, if you connect then login user with token
-    login.state = {'process': process}
+    login.state = {"process": process}
     # login for connect because socialLogin can only connect to request.user
-    if process == 'connect' and request.user.is_anonymous and auth_token:
+    if process == "connect" and request.user.is_anonymous and auth_token:
         request.user = get_verified_user(auth_token=auth_token)
     ret = complete_social_login(request, login)
-    new_url = ret.url + '&role=teacher'
+    new_url = ret.url + "&role=teacher"
     ret = HttpResponseRedirect(new_url)
 
     if not request.user.is_anonymous:  # the social login succeeded
-        institution_identifier = payload['schac_home_organization']
+        institution_identifier = payload["schac_home_organization"]
+        logger.debug(
+            "SURFconext social login succeeded: %s email=%s institution=%s",
+            request.user.id,
+            request.user.email,
+            institution_identifier,
+        )
+
         try:
             institution = Institution.objects.get(identifier=institution_identifier)
+            logger.debug(
+                "Institution found: pk=%s identifier=%s email=%s",
+                institution.pk,
+                institution.identifier,
+                institution.email,
+            )
             # the institution exists
+            logger.debug(
+                "User invited_flag=%s is_teacher=%s institution=%s",
+                request.user.invited,
+                request.user.is_teacher,
+                request.user.institution_id,
+            )
             if request.user.invited:  # this user has been invited in the past
+                logger.debug("User already flagged as invited, running provisions")
                 provisions = request.user.match_provisionments()
+                logger.debug("Provisionments for invited user: %s count=%s", provisions, len(provisions))
                 for provision in provisions:
                     provision.perform_provisioning()
             else:  # user has not been invited, check for invitations
+                logger.debug(
+                    "User NOT invited yet, pre-marking invited/institution and re-checking provisions",
+                )
                 request.user.institution = institution
                 request.user.is_teacher = True
                 request.user.invited = True
                 try:
                     provisionments = request.user.match_provisionments()
+                    logger.debug(
+                        "Provisionments after pre-marking invited: count=%s items=%s",
+                        len(provisionments),
+                        provisionments,
+                    )
                     if not provisionments:
+                        logger.debug("No provisionments found — will show invite-error")
                         raise UserProvisionment.DoesNotExist()
                     request.user.save()
                     for provisionment in provisionments:
@@ -185,20 +238,31 @@ def callback(request):
                     UserProvisionment.DoesNotExist,
                     BadgrValidationError,
                 ):  # there is no provisionment
+                    logger.warning(
+                        "REGISTER_WITHOUT_INVITE fired: user=%s email=%s institution=%s "
+                        "match_provisionments returned empty, Institution.email=%s "
+                        "cached_staff=%s",
+                        request.user.pk,
+                        request.user.email,
+                        institution_identifier,
+                        institution.email,
+                        institution.cached_staff(),
+                    )
                     extra_context = {}
                     if institution.email:
-                        extra_context['admin_email'] = institution.email
+                        extra_context["admin_email"] = institution.email
                     elif institution and institution.cached_staff():
                         cached_staff = institution.cached_staff()
                         admins = list(filter(lambda u: u.may_administrate_users, cached_staff))
                         if len(admins) > 0:
-                            extra_context['admin_email'] = admins[0].user.email
+                            extra_context["admin_email"] = admins[0].user.email
 
-                    error = 'Sorry, you can not register without an invite.'
-                    extra_context['code'] = AuthErrorCode.REGISTER_WITHOUT_INVITE
+                    error = "Sorry, you can not register without an invite."
+                    extra_context["code"] = AuthErrorCode.REGISTER_WITHOUT_INVITE
                     if (
                         request.user.date_joined.today().date() == datetime.datetime.today().date()
                     ):  # extra protection before deletion
+                        logger.warning("Deleting newly-joined user to avoid orphan record: user=%s", request.user.pk)
                         request.user.delete()
                     return render_authentication_error(
                         request,
@@ -208,12 +272,16 @@ def callback(request):
                     )
 
         except Institution.DoesNotExist:  # no institution yet, and therefore also first login ever
-            error = 'Sorry, your institution has not been created yet.'
+            logger.warning(
+                "Institution.DoesNotExist: schac_home_organization=%s",
+                institution_identifier,
+            )
+            error = "Sorry, your institution has not been created yet."
             return render_authentication_error(
                 request,
                 SurfConextProvider.id,
                 error,
-                extra_context={'code': AuthErrorCode.REGISTER_WITHOUT_INVITE},
+                extra_context={"code": AuthErrorCode.REGISTER_WITHOUT_INVITE},
             )
 
     request.user.accept_general_terms()
