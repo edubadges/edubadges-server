@@ -1,5 +1,5 @@
 {% extends 'email/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 {% block style %}
 <style>
   .main {
@@ -170,6 +170,43 @@
       </div>
     </div>
   </div>
+
+  <p class="text text_header">Download de app!</p>
+  <p class="text">
+        Met de app heb je je backpack gewoon op zak. Claim nieuwe edubadges zodra je ze ontvangt, houd overzicht over alles wat je hebt behaald en deel ze direct op LinkedIn, waar en wanneer je wil.
+  </p>
+  <table role="presentation" style="width:280px; margin:15px auto 0 auto;">
+    <tr>
+      <td style="padding:0 5px;">
+        <a
+          href="https://apps.apple.com/us/app/edubadges-surf/id6756307079"
+          target="_blank"
+          style="display:block;"
+        >
+          <img
+            alt="Download in de Apple App Store"
+            src="{% static 'images/app_apple.png' %}"
+            width="120"
+            style="display:block; width:120px; height:40px; border:0;"
+          >
+        </a>
+      </td>
+      <td style="padding:0 5px;">
+        <a
+          href="https://play.google.com/store/apps/details?id=nl.surf.edubadges"
+          target="_blank"
+          style="display:block;"
+        >
+          <img
+            alt="Download in de Google Play Store"
+            src="{% static 'images/app_google.png' %}"
+            width="120"
+            style="display:block; width:120px; height:40px; border:0;"
+          >
+        </a>
+      </td>
+    </tr>
+  </table>
 </div>
 {% endlanguage %}
 
@@ -230,6 +267,43 @@
       </div>
     </div>
   </div>
+
+  <p class="text text_header">Download the app!</p>
+  <p class="text">
+        With the app you have your backpack with you. Claim new edubadges when you receive them, keep an overview of all your achievements and share them directly on LinkedIn, where and whenever you want.
+  </p>
+  <table role="presentation" style="width:280px; margin:15px auto 0 auto;">
+    <tr>
+      <td style="padding:0 5px;">
+        <a
+          href="https://apps.apple.com/us/app/edubadges-surf/id6756307079"
+          target="_blank"
+          style="display:block;"
+        >
+          <img
+            alt="Download in de Apple App Store"
+            src="{% static 'images/app_apple.png' %}"
+            width="120"
+            style="display:block; width:120px; height:40px; border:0;"
+          >
+        </a>
+      </td>
+      <td style="padding:0 5px;">
+        <a
+          href="https://play.google.com/store/apps/details?id=nl.surf.edubadges"
+          target="_blank"
+          style="display:block;"
+        >
+          <img
+            alt="Download in de Google Play Store"
+            src="{% static 'images/app_google.png' %}"
+            width="120"
+            style="display:block; width:120px; height:40px; border:0;"
+          >
+        </a>
+      </td>
+    </tr>
+  </table>
 </div>
 {% endlanguage %}
 {% endblock %}
