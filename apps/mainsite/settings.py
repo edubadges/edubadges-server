@@ -391,6 +391,10 @@ CACHES = {
         # using django_prometheus to monitor cache: https://github.com/korfuri/django-prometheus/blob/master/README.md#monitoring-your-caches
         "BACKEND": "django_prometheus.cache.backends.memcached.PyMemcacheCache",
         "LOCATION": os.environ.get("MEMCACHED", "0.0.0.0:11211"),
+        "OPTIONS": {
+            "pool_size": 10,       # max concurrent connections per server
+            "timeout": 5,          # socket timeout (seconds) — prevents slow FD leaks
+        },
     }
 }
 

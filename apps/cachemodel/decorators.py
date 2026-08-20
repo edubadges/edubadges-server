@@ -10,10 +10,17 @@ def cached_method(auto_publish=False):
         @wraps(target)
         def wrapper(self, *args, **kwargs):
             key = generate_cache_key([self.__class__.__name__, target.__name__, self.pk], *args, **kwargs)
-            data = cache.get(key)
+            try:
+                data = cache.get(key)
+            except (OSError, ConnectionError, TimeoutError):
+                # pymemcache leaks FDs on connection errors; fall back to uncached
+                data = None
             if data is None:
                 data = target(self, *args, **kwargs)
-                cache.set(key, data, CACHE_FOREVER_TIMEOUT)
+                try:
+                    cache.set(key, data, CACHE_FOREVER_TIMEOUT)
+                except (OSError, ConnectionError, TimeoutError):
+                    pass  # cache.set failure is non-fatal
             return data
         wrapper._cached_method = True
         wrapper._cached_method_auto_publish = auto_publish
