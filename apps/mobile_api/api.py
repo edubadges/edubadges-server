@@ -8,7 +8,7 @@ from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet, FCMDeviceS
 
 from badgeuser.models import StudentAffiliation, TermsAgreement
 from directaward.models import DirectAward, DirectAwardBundle
-from django.db.models import Q, Subquery
+from django.db.models import Subquery
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
     OpenApiExample,
@@ -1093,47 +1093,6 @@ class CatalogBadgeClassListView(generics.ListAPIView):
             200: OpenApiResponse(
                 description='Paginated list of badge classes',
                 response=CatalogBadgeClassSerializer(many=True),
-                examples=[
-                    OpenApiExample(
-                        'Filtered and Paginated Badge Classes Example',
-                        value={
-                            'count': 124,
-                            'next': 'https://api.example.com/catalog/badge-classes/?page=2&page_size=2&q=edubadge',
-                            'previous': None,
-                            'results': [
-                                {
-                                    'created_at': '2025-05-02T12:20:51.573423',
-                                    'name': 'Edubadge account complete',
-                                    'image': 'uploads/badges/edubadge_student.png',
-                                    'archived': 0,
-                                    'entity_id': 'qNGehQ2dRTKyjNtiDvhWsQ',
-                                    'is_private': 0,
-                                    'is_micro_credentials': 0,
-                                    'badge_class_type': 'regular',
-                                    'issuer_name_english': 'Team edubadges',
-                                    'issuer_name_dutch': 'Team edubadges',
-                                    'issuer_entity_id': 'WOLxSjpWQouas1123Z809Q',
-                                    'issuer_image_dutch': '',
-                                    'issuer_image_english': 'uploads/issuers/surf.png',
-                                    'faculty_name_english': 'eduBadges',
-                                    'faculty_name_dutch': 'null',
-                                    'faculty_entity_id': 'lVu1kbaqSDyJV_1Bu8_bcw',
-                                    'faculty_image_dutch': '',
-                                    'faculty_image_english': '',
-                                    'faculty_on_behalf_of': 0,
-                                    'faculty_type': 'null',
-                                    'institution_name_english': 'SURF',
-                                    'institution_name_dutch': 'SURF',
-                                    'institution_entity_id': 'NiqkZiz2TaGT8B4RRwG8Fg',
-                                    'institution_image_dutch': 'uploads/issuers/surf.png',
-                                    'institution_image_english': 'uploads/issuers/surf.png',
-                                    'institution_type': 'null',
-                                },
-                            ],
-                        },
-                        response_only=True,
-                    )
-                ],
             ),
             500: OpenApiResponse(description='Internal server error occurred while retrieving badge classes.'),
         },
