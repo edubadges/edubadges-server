@@ -104,6 +104,8 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
     badgeclassextension_set = BadgeClassExtensionSerializer(many=True, read_only=True)
     self_enrollment_enabled = serializers.SerializerMethodField()
     user_may_enroll = serializers.SerializerMethodField()
+    required_terms = serializers.SerializerMethodField()
+    user_has_accepted_terms = serializers.SerializerMethodField()
     alignments = BadgeClassAlignmentSerializer(
         source='badgeclassalignment_set',
         many=True,
@@ -132,6 +134,8 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             'criteria_text',
             'self_enrollment_enabled',
             'user_may_enroll',
+            'required_terms',
+            'user_has_accepted_terms',
             'eqf_nlqf_level_verified',
             'alignments',
             'badgeclassextension_set',
@@ -149,6 +153,20 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
             return False
         user = request.user
         return obj.user_may_enroll(user)
+
+    def get_required_terms(self, obj):
+        try:
+            terms = obj.get_required_terms()
+        except ValueError:
+            return None
+
+        return TermsSerializer(terms, context=self.context).data
+
+    def get_user_has_accepted_terms(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+        return obj.terms_accepted(request.user)
 
 
 class BadgeInstanceSerializer(serializers.ModelSerializer):
@@ -537,10 +555,6 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     is_private = serializers.BooleanField()
     is_micro_credentials = serializers.BooleanField()
     badge_class_type = serializers.CharField()
-    required_terms = serializers.SerializerMethodField()
-    user_has_accepted_terms = serializers.SerializerMethodField()
-    self_enrollment_enabled = serializers.SerializerMethodField()
-    user_may_enroll = serializers.SerializerMethodField()
 
     # Issuer fields
     issuer_name_english = serializers.CharField(source='issuer.name_english', read_only=True)
@@ -566,14 +580,9 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     institution_image_english = serializers.CharField(source='issuer.faculty.institution.image_english', read_only=True)
     institution_type = serializers.CharField(source='issuer.faculty.institution.institution_type', read_only=True)
 
-    # Annotated counts
-    self_requested_assertions_count = serializers.IntegerField(read_only=True)
-    direct_awarded_assertions_count = serializers.IntegerField(read_only=True)
-
     class Meta:
         model = BadgeClass
         fields = [
-            # BadgeClass
             'created_at',
             'name',
             'image',
@@ -582,19 +591,11 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             'is_private',
             'is_micro_credentials',
             'badge_class_type',
-            'required_terms',
-            'user_has_accepted_terms',
-            'self_enrollment_enabled',
-            'user_may_enroll',
-
-            # Issuer
             'issuer_name_english',
             'issuer_name_dutch',
             'issuer_entity_id',
             'issuer_image_dutch',
             'issuer_image_english',
-
-            # Faculty
             'faculty_name_english',
             'faculty_name_dutch',
             'faculty_entity_id',
@@ -602,44 +603,10 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             'faculty_image_english',
             'faculty_on_behalf_of',
             'faculty_type',
-
-            # Institution
             'institution_name_english',
             'institution_name_dutch',
             'institution_entity_id',
             'institution_image_dutch',
             'institution_image_english',
             'institution_type',
-
-            # Counts
-            'self_requested_assertions_count',
-            'direct_awarded_assertions_count'
         ]
-
-    def get_required_terms(self, obj):
-        try:
-            terms = obj.get_required_terms()
-        except ValueError:
-            return None  # Should not break the serializer
-
-        return TermsSerializer(terms, context=self.context).data
-
-    def get_user_has_accepted_terms(self, obj):
-        request = self.context.get("request")
-        if not request or not request.user.is_authenticated:
-            return False
-
-        user = request.user
-        return obj.terms_accepted(user)
-
-    @extend_schema_field(serializers.BooleanField)
-    def get_self_enrollment_enabled(self, obj):
-        return not obj.self_enrollment_disabled
-
-    @extend_schema_field(serializers.BooleanField)
-    def get_user_may_enroll(self, obj):
-        request = self.context.get("request")
-        if not request or not request.user.is_authenticated:
-            return False
-        user = request.user
-        return obj.user_may_enroll(user)

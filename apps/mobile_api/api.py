@@ -8,7 +8,7 @@ from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet, FCMDeviceS
 
 from badgeuser.models import StudentAffiliation, TermsAgreement
 from directaward.models import DirectAward, DirectAwardBundle
-from django.db.models import Q, Subquery, Count
+from django.db.models import Q, Subquery
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import (
     OpenApiExample,
@@ -1110,35 +1110,6 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                                     'is_private': 0,
                                     'is_micro_credentials': 0,
                                     'badge_class_type': 'regular',
-                                    'required_terms': {
-                                        'entity_id': 'terms-123',
-                                        'terms_type': 'FORMAL_BADGE',
-                                        'institution': {
-                                            'name_dutch': 'SURF',
-                                            'name_english': 'SURF',
-                                            'image_dutch': '',
-                                            'image_english': '',
-                                            'identifier': 'surf.nl',
-                                            'alternative_identifier': None,
-                                            'grondslag_formeel': 'gerechtvaardigd_belang',
-                                            'grondslag_informeel': 'gerechtvaardigd_belang'
-                                        },
-                                        'terms_urls': [
-                                            {
-                                                'url': 'https://example.org/terms/nl',
-                                                'language': 'nl',
-                                                'excerpt': 'Door deel te nemen accepteer je...'
-                                            },
-                                            {
-                                                'url': 'https://example.org/terms/en',
-                                                'language': 'en',
-                                                'excerpt': 'By participating you accept...'
-                                            }
-                                        ]
-                                    },
-                                    'user_has_accepted_terms': True,
-                                    'self_enrollment_enabled': True,
-                                    'user_may_enroll': True,
                                     'issuer_name_english': 'Team edubadges',
                                     'issuer_name_dutch': 'Team edubadges',
                                     'issuer_entity_id': 'WOLxSjpWQouas1123Z809Q',
@@ -1157,67 +1128,6 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                                     'institution_image_dutch': 'uploads/issuers/surf.png',
                                     'institution_image_english': 'uploads/issuers/surf.png',
                                     'institution_type': 'null',
-                                    'self_requested_assertions_count': 1,
-                                    'direct_awarded_assertions_count': 0,
-                                },
-                                {
-                                    'created_at': '2025-05-02T12:20:57.914064',
-                                    'name': 'Growth and Development',
-                                    'image': 'uploads/badges/eduid.png',
-                                    'archived': 0,
-                                    'entity_id': 'Ge4D7gf1RLGYNZlSiCv-qA',
-                                    'is_private': 0,
-                                    'is_micro_credentials': 0,
-                                    'badge_class_type': 'regular',
-                                    'required_terms': {
-                                        'entity_id': 'terms-123',
-                                        'terms_type': 'FORMAL_BADGE',
-                                        'institution': {
-                                            'name_dutch': 'SURF',
-                                            'name_english': 'SURF',
-                                            'image_dutch': '',
-                                            'image_english': '',
-                                            'identifier': 'surf.nl',
-                                            'alternative_identifier': None,
-                                            'grondslag_formeel': 'gerechtvaardigd_belang',
-                                            'grondslag_informeel': 'gerechtvaardigd_belang'
-                                        },
-                                        'terms_urls': [
-                                            {
-                                                'url': 'https://example.org/terms/nl',
-                                                'language': 'nl',
-                                                'excerpt': 'Door deel te nemen accepteer je...'
-                                            },
-                                            {
-                                                'url': 'https://example.org/terms/en',
-                                                'language': 'en',
-                                                'excerpt': 'By participating you accept...'
-                                            }
-                                        ]
-                                    },
-                                    'user_has_accepted_terms': True,
-                                    'self_enrollment_enabled': True,
-                                    'user_may_enroll': True,
-                                    'issuer_name_english': 'Medicine',
-                                    'issuer_name_dutch': 'null',
-                                    'issuer_entity_id': 'yuflXDK8ROukQkxSPmh5ag',
-                                    'issuer_image_dutch': '',
-                                    'issuer_image_english': 'uploads/issuers/surf.png',
-                                    'faculty_name_english': 'Medicine',
-                                    'faculty_name_dutch': 'null',
-                                    'faculty_entity_id': 'yYPphJ3bS5qszI7P69degA',
-                                    'faculty_image_dutch': '',
-                                    'faculty_image_english': '',
-                                    'faculty_on_behalf_of': 0,
-                                    'faculty_type': 'null',
-                                    'institution_name_english': 'university-example.org',
-                                    'institution_name_dutch': 'null',
-                                    'institution_entity_id': '5rZhvRonT3OyyLQhhmuPmw',
-                                    'institution_image_dutch': 'uploads/institution/surf.png',
-                                    'institution_image_english': 'uploads/institution/surf.png',
-                                    'institution_type': 'WO',
-                                    'self_requested_assertions_count': 0,
-                                    'direct_awarded_assertions_count': 0,
                                 },
                             ],
                         },
@@ -1235,26 +1145,13 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                 'issuer__faculty',
                 'issuer__faculty__institution',
             )
-            .prefetch_related(
-                'issuer__faculty__institution__terms',
-                'issuer__faculty__institution__terms__terms_urls',
-            )
             .filter(
                 is_private=False,
                 issuer__archived=False,
                 issuer__faculty__archived=False,
             )
             .exclude(issuer__faculty__visibility_type='TEST')
-            .annotate(
-                selfRequestedAssertionsCount=Count(
-                    'badgeinstances',
-                    filter=Q(badgeinstances__award_type='requested'),
-                ),
-                directAwardedAssertionsCount=Count(
-                    'badgeinstances',
-                    filter=Q(badgeinstances__award_type='direct_award'),
-                ),
-            ).order_by('name')
+            .order_by('name')
         )
 
 
@@ -1296,6 +1193,8 @@ class BadgeClassDetailView(generics.RetrieveAPIView):
     ).prefetch_related(
         'badgeclassextension_set',
         'badgeclassalignment_set',
+        'issuer__faculty__institution__terms',
+        'issuer__faculty__institution__terms__terms_urls',
     )
 
 
