@@ -156,7 +156,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
             sender=self.__class__,
             user=validated_data['created_by'],
             method='CREATE',
-            change_summary='No permissions to create directawards',
+            summary='No permissions to create directawards',
             request=self.context['request'],
             direct_award_id=0,
             badgeclass_id=0,
