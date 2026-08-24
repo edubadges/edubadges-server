@@ -144,9 +144,9 @@ class DirectAwardBundleSerializer(serializers.Serializer):
 
                 thread = threading.Thread(target=send_mail, args=(successful_direct_awards,))
                 thread.start()
-            if batch_mode and not scheduled_at:
+            if not scheduled_at:
                 direct_award_bundle.notify_awarder()
-            if batch_mode and scheduled_at:
+            if scheduled_at:
                 direct_award_bundle.notify_awarder_for_scheduled()
             if un_successful_direct_awards:
                 direct_award_bundle.un_successful_direct_award = un_successful_direct_awards
