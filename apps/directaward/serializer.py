@@ -74,7 +74,9 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         if badgeclass.direct_awarding_disabled:
             raise BadRequest(f'Direct awarding disabled for {badgeclass.name}')
         if badgeclass.is_private:
-            raise BadRequest(f' Badgeclass {badgeclass.name} is not published. Direct awarding not allowed')
+            raise BadRequest(f'Badgeclass {badgeclass.name} is not published. Direct awarding not allowed')
+        if badgeclass.archived:
+            raise BadRequest(f'Badgeclass {badgeclass.name} is archived. Direct awarding not allowed')
 
         scheduled_at = validated_data.get('scheduled_at')
         if scheduled_at:
