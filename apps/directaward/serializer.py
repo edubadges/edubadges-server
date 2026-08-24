@@ -4,6 +4,7 @@ import threading
 
 from django.core.exceptions import ValidationError, BadRequest
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from directaward.models import DirectAward, DirectAwardBundle, DirectAwardAuditTrail
@@ -78,7 +79,12 @@ class DirectAwardBundleSerializer(serializers.Serializer):
 
         scheduled_at = validated_data.get('scheduled_at')
         if scheduled_at:
+            if scheduled_at <= timezone.now():
+                raise serializers.ValidationError({
+                    'scheduled_at': 'Scheduled time must be in the future.'
+                })
             validated_data['status'] = DirectAwardBundle.STATUS_SCHEDULED
+
         batch_mode = validated_data.pop('batch_mode')
         notify_recipients = validated_data.pop('notify_recipients')
         direct_awards = validated_data.pop('direct_awards')
