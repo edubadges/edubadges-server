@@ -580,6 +580,10 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     institution_image_english = serializers.CharField(source='issuer.faculty.institution.image_english', read_only=True)
     institution_type = serializers.CharField(source='issuer.faculty.institution.institution_type', read_only=True)
 
+    # Necessary for backward compatibility with the mobile app
+    self_requested_assertions_count = serializers.SerializerMethodField()
+    direct_awarded_assertions_count = serializers.SerializerMethodField()
+
     class Meta:
         model = BadgeClass
         fields = [
@@ -609,4 +613,16 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             'institution_image_dutch',
             'institution_image_english',
             'institution_type',
+            'self_requested_assertions_count',
+            'direct_awarded_assertions_count',
         ]
+
+    @staticmethod
+    def get_self_requested_assertions_count(obj):
+        # Necessary for backward compatibility with the mobile app
+        return 0
+
+    @staticmethod
+    def get_direct_awarded_assertions_count(obj):
+        # Necessary for backward compatibility with the mobile app
+        return 0
