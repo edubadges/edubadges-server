@@ -277,6 +277,10 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
             'required_terms',
             'user_has_accepted_terms',
             'grade_achieved',
+            'eppn',
+            'recipient_email',
+            'recipient_first_name',
+            'recipient_surname',
         ]
 
     def get_required_terms(self, obj):
