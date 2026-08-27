@@ -569,10 +569,10 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     # TODO: remove later
     self_requested_assertions_count = serializers.SerializerMethodField()
     direct_awarded_assertions_count = serializers.SerializerMethodField()
-    user_has_Accepted_terms = serializers.SerializerMethodField()
+    user_has_accepted_terms = serializers.SerializerMethodField()
     self_enrollment_enabled = serializers.SerializerMethodField()
     required_terms = serializers.SerializerMethodField()
-    user_has_Accepted_terms = serializers.SerializerMethodField()
+    user_may_enroll = serializers.SerializerMethodField()
 
     class Meta:
         model = BadgeClass
