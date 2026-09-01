@@ -1,53 +1,51 @@
 import logging
 
 import requests
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.generics import ListAPIView
-from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet, FCMDeviceSerializer
-
 from badgeuser.models import StudentAffiliation, TermsAgreement
 from directaward.models import DirectAward, DirectAwardBundle
-from django.db.models import Subquery
+from django.db.models import Q, Subquery
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
     OpenApiResponse,
     OpenApiTypes,
     extend_schema,
-    inline_serializer,
     extend_schema_view,
+    inline_serializer,
 )
-
+from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet, FCMDeviceSerializer
 from institution.models import Institution
-from issuer.models import BadgeInstance, BadgeInstanceCollection, BadgeClass
+from issuer.models import BadgeClass, BadgeInstance, BadgeInstanceCollection
 from lti_edu.models import StudentsEnrolled
 from mainsite.exceptions import BadgrApiException400
 from mainsite.mobile_api_authentication import TemporaryUser
 from mainsite.permissions import MobileAPIPermission
 from mobile_api.eduid import EduIDClient
 from mobile_api.filters import CatalogBadgeClassFilter
-from mobile_api.helper import provision_user_from_temporary, extract_bearer_token, sync_user_with_eduid
+from mobile_api.helper import extract_bearer_token, provision_user_from_temporary, sync_user_with_eduid
 from mobile_api.pagination import CatalogPagination
 from mobile_api.serializers import (
+    BadgeClassDetailSerializer,
     BadgeCollectionSerializer,
     BadgeInstanceDetailSerializer,
     BadgeInstanceSerializer,
+    CatalogBadgeClassSerializer,
     DirectAwardDetailSerializer,
     DirectAwardSerializer,
-    StudentsEnrolledSerializer,
-    StudentsEnrolledDetailSerializer,
-    UserSerializer,
-    CatalogBadgeClassSerializer,
-    UserProfileSerializer,
-    BadgeClassDetailSerializer,
     InstitutionListSerializer,
-    TermsAgreementSerializer,
+    StudentsEnrolledDetailSerializer,
+    StudentsEnrolledSerializer,
     TermsAgreementCreateSerializer,
+    TermsAgreementSerializer,
     TermsAgreementUpdateSerializer,
+    UserProfileSerializer,
+    UserSerializer,
 )
-from rest_framework import serializers, status, generics, viewsets
+from rest_framework import generics, serializers, status, viewsets
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -186,7 +184,7 @@ class Login(APIView):
             logger.warning("eduID timeout")
             return Response({"error": "eduID timeout"}, status=504)
 
-        except requests.HTTPError as e:
+        except requests.HTTPError:
             logger.exception("eduID returned error")
             return Response({"error": "eduID error"}, status=502)
 
@@ -1076,6 +1074,127 @@ class CatalogBadgeClassListView(generics.ListAPIView):
             200: OpenApiResponse(
                 description="Paginated list of badge classes",
                 response=CatalogBadgeClassSerializer(many=True),
+                examples=[
+                    OpenApiExample(
+                        "Filtered and Paginated Badge Classes Example",
+                        value={
+                            "count": 124,
+                            "next": "https://api.example.com/catalog/badge-classes/?page=2&page_size=2&q=edubadge",
+                            "previous": None,
+                            "results": [
+                                {
+                                    "created_at": "2025-05-02T12:20:51.573423",
+                                    "name": "Edubadge account complete",
+                                    "image": "uploads/badges/edubadge_student.png",
+                                    "archived": 0,
+                                    "entity_id": "qNGehQ2dRTKyjNtiDvhWsQ",
+                                    "is_private": 0,
+                                    "is_micro_credentials": 0,
+                                    "badge_class_type": "regular",
+                                    "required_terms": {
+                                        "entity_id": "terms-123",
+                                        "terms_type": "FORMAL_BADGE",
+                                        "institution": {
+                                            "name_dutch": "SURF",
+                                            "name_english": "SURF",
+                                            "image_dutch": "",
+                                            "image_english": "",
+                                            "identifier": "surf.nl",
+                                            "alternative_identifier": None,
+                                            "grondslag_formeel": "gerechtvaardigd_belang",
+                                            "grondslag_informeel": "gerechtvaardigd_belang",
+                                        },
+                                        "terms_urls": [
+                                            {
+                                                "url": "https://example.org/terms/nl",
+                                                "language": "nl",
+                                                "excerpt": "Door deel te nemen accepteer je...",
+                                            },
+                                            {
+                                                "url": "https://example.org/terms/en",
+                                                "language": "en",
+                                                "excerpt": "By participating you accept...",
+                                            },
+                                        ],
+                                    },
+                                    "issuer_name_english": "Team edubadges",
+                                    "issuer_name_dutch": "Team edubadges",
+                                    "issuer_entity_id": "WOLxSjpWQouas1123Z809Q",
+                                    "issuer_image_dutch": "",
+                                    "issuer_image_english": "uploads/issuers/surf.png",
+                                    "faculty_name_english": "eduBadges",
+                                    "faculty_name_dutch": "null",
+                                    "faculty_entity_id": "lVu1kbaqSDyJV_1Bu8_bcw",
+                                    "faculty_image_dutch": "",
+                                    "faculty_image_english": "",
+                                    "faculty_on_behalf_of": 0,
+                                    "faculty_type": "null",
+                                    "institution_name_english": "SURF",
+                                    "institution_name_dutch": "SURF",
+                                    "institution_entity_id": "NiqkZiz2TaGT8B4RRwG8Fg",
+                                    "institution_image_dutch": "uploads/issuers/surf.png",
+                                    "institution_image_english": "uploads/issuers/surf.png",
+                                    "institution_type": "null",
+                                },
+                                {
+                                    "created_at": "2025-05-02T12:20:57.914064",
+                                    "name": "Growth and Development",
+                                    "image": "uploads/badges/eduid.png",
+                                    "archived": 0,
+                                    "entity_id": "Ge4D7gf1RLGYNZlSiCv-qA",
+                                    "is_private": 0,
+                                    "is_micro_credentials": 0,
+                                    "badge_class_type": "regular",
+                                    "required_terms": {
+                                        "entity_id": "terms-123",
+                                        "terms_type": "FORMAL_BADGE",
+                                        "institution": {
+                                            "name_dutch": "SURF",
+                                            "name_english": "SURF",
+                                            "image_dutch": "",
+                                            "image_english": "",
+                                            "identifier": "surf.nl",
+                                            "alternative_identifier": None,
+                                            "grondslag_formeel": "gerechtvaardigd_belang",
+                                            "grondslag_informeel": "gerechtvaardigd_belang",
+                                        },
+                                        "terms_urls": [
+                                            {
+                                                "url": "https://example.org/terms/nl",
+                                                "language": "nl",
+                                                "excerpt": "Door deel te nemen accepteer je...",
+                                            },
+                                            {
+                                                "url": "https://example.org/terms/en",
+                                                "language": "en",
+                                                "excerpt": "By participating you accept...",
+                                            },
+                                        ],
+                                    },
+                                    "issuer_name_english": "Medicine",
+                                    "issuer_name_dutch": "null",
+                                    "issuer_entity_id": "yuflXDK8ROukQkxSPmh5ag",
+                                    "issuer_image_dutch": "",
+                                    "issuer_image_english": "uploads/issuers/surf.png",
+                                    "faculty_name_english": "Medicine",
+                                    "faculty_name_dutch": "null",
+                                    "faculty_entity_id": "yYPphJ3bS5qszI7P69degA",
+                                    "faculty_image_dutch": "",
+                                    "faculty_image_english": "",
+                                    "faculty_on_behalf_of": 0,
+                                    "faculty_type": "null",
+                                    "institution_name_english": "university-example.org",
+                                    "institution_name_dutch": "null",
+                                    "institution_entity_id": "5rZhvRonT3OyyLQhhmuPmw",
+                                    "institution_image_dutch": "uploads/institution/surf.png",
+                                    "institution_image_english": "uploads/institution/surf.png",
+                                    "institution_type": "WO",
+                                },
+                            ],
+                        },
+                        response_only=True,
+                    )
+                ],
             ),
             500: OpenApiResponse(description="Internal server error occurred while retrieving badge classes."),
         },
@@ -1170,7 +1289,7 @@ class InstitutionListView(ListAPIView):
     create=extend_schema(
         description="""
         Register a device for push notifications
-        
+
         - If the device is already registered, sending the same `registration_id` will update the existing record.
         - Use this endpoint for both new registrations and updates.
         - Use field 'active' to toggle push notifications for this user.
