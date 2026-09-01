@@ -23,7 +23,7 @@ django-object-actions==4.3.0
 
 pymemcache==4.0.0
 
-djangorestframework==3.15.2
+djangorestframework==3.17.2
 django-filter==25.1
 
 # Django Allauth
