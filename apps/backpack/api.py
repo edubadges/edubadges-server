@@ -2,11 +2,11 @@
 
 from backpack.models import BackpackBadgeShare
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
     OpenApiResponse,
-    OpenApiTypes,
     extend_schema,
     inline_serializer,
 )
@@ -51,6 +51,9 @@ class AwardBadgeClassSerializer(serializers.ModelSerializer):
 
 class AwardSerializer(serializers.ModelSerializer):
     badgeclass = AwardBadgeClassSerializer(read_only=True)
+    given_name = serializers.CharField(source="user.first_name", read_only=True, allow_null=True)
+    family_name = serializers.CharField(source="user.last_name", read_only=True, allow_null=True)
+    email = serializers.EmailField(source="user.primary_email", read_only=True, allow_null=True)
 
     class Meta:
         model = BadgeInstance
@@ -67,6 +70,9 @@ class AwardSerializer(serializers.ModelSerializer):
             "badgeclass",
             "grade_achieved",
             "include_grade_achieved",
+            "given_name",
+            "family_name",
+            "email",
         ]
 
 
@@ -102,6 +108,9 @@ class BackpackAwardDetail(APIView):
                             "expires_at": "2030-04-20T16:20:30.521307+02:00",
                             "acceptance": "Accepted",
                             "public": "true",
+                            "given_name": "John",
+                            "family_name": "Smith",
+                            "email": "john.smith@example.com",
                             "badgeclass": {
                                 "id": 3,
                                 "name": "Edubadge account complete",
@@ -162,6 +171,7 @@ class BackpackAwardDetail(APIView):
             .select_related("badgeclass__issuer")
             .select_related("badgeclass__issuer__faculty")
             .select_related("badgeclass__issuer__faculty__institution")
+            .select_related("user")
             .filter(
                 entity_id=entity_id,
                 user=request.user,
@@ -226,7 +236,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
             },
         ),
     )
-    def put(self, request, **kwargs):
+    def put(self, request, data=None, allow_partial=False, **kwargs):
         """Update acceptance of an Assertion in the user's Backpack and make public / private"""
         fields_whitelist = ("acceptance", "public", "include_evidence", "include_grade_achieved")
         data = {k: v for k, v in list(request.data.items()) if k in fields_whitelist}
