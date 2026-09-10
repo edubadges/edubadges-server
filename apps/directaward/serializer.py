@@ -4,6 +4,7 @@ import threading
 
 from django.core.exceptions import ValidationError, BadRequest
 from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from directaward.models import DirectAward, DirectAwardBundle, DirectAwardAuditTrail
@@ -74,11 +75,18 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         if badgeclass.direct_awarding_disabled:
             raise BadRequest(f'Direct awarding disabled for {badgeclass.name}')
         if badgeclass.is_private:
-            raise BadRequest(f' Badgeclass {badgeclass.name} is not published. Direct awarding not allowed')
+            raise BadRequest(f'Badgeclass {badgeclass.name} is not published. Direct awarding not allowed')
+        if badgeclass.archived:
+            raise BadRequest(f'Badgeclass {badgeclass.name} is archived. Direct awarding not allowed')
 
         scheduled_at = validated_data.get('scheduled_at')
         if scheduled_at:
+            if scheduled_at <= timezone.now():
+                raise serializers.ValidationError({
+                    'scheduled_at': 'Scheduled time must be in the future.'
+                })
             validated_data['status'] = DirectAwardBundle.STATUS_SCHEDULED
+
         batch_mode = validated_data.pop('batch_mode')
         notify_recipients = validated_data.pop('notify_recipients')
         direct_awards = validated_data.pop('direct_awards')
@@ -144,9 +152,9 @@ class DirectAwardBundleSerializer(serializers.Serializer):
 
                 thread = threading.Thread(target=send_mail, args=(successful_direct_awards,))
                 thread.start()
-            if batch_mode and not scheduled_at:
+            if not scheduled_at:
                 direct_award_bundle.notify_awarder()
-            if batch_mode and scheduled_at:
+            if scheduled_at:
                 direct_award_bundle.notify_awarder_for_scheduled()
             if un_successful_direct_awards:
                 direct_award_bundle.un_successful_direct_award = un_successful_direct_awards
@@ -156,7 +164,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
             sender=self.__class__,
             user=validated_data['created_by'],
             method='CREATE',
-            change_summary='No permissions to create directawards',
+            summary='No permissions to create directawards',
             request=self.context['request'],
             direct_award_id=0,
             badgeclass_id=0,

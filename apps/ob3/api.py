@@ -1,119 +1,101 @@
-from typing import Optional
-import uuid
+import logging
+from typing import Any, Dict, Optional
 
 import requests
-import logging
-from django.http import Http404
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
-from rest_framework import status, permissions
+from django.http import Http404
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.settings import EC_ISSUER_URL
+from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from pprint import pformat
+logger = logging.getLogger("django")
 
-from issuer.models import BadgeInstance
-from mainsite.settings import OB3_AGENT_URL_SPHEREON, OB3_AGENT_AUTHZ_TOKEN_SPHEREON, OB3_AGENT_URL_UNIME
-from .serializers import ImpierceOfferRequestSerializer
-from .models import ImpierceOfferRequest
 
-logger = logging.getLogger('django')
+def _bearer_token(request: Request) -> str:
+    """
+    Extract the raw bearer token from the Authorization header of an
+    already-authenticated request, so it can be forwarded to ec-issuer.
+    """
+    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+    if not auth_header.lower().startswith("bearer "):
+        raise BadRequest("Missing bearer token, cannot forward it to ec-issuer")
+    return auth_header.split(" ", 1)[1]
+
 
 class CredentialsView(APIView):
-    permission_classes = (permissions.AllowAny,)
-    http_method_names = ['post']
+    """
+    Thin client for the ec-issuer administrative API, and the endpoint
+    ec-issuer calls back into to authenticate the user and fetch award data.
 
-    def post(self, request, **_kwargs):
-        _ = _kwargs # explicitly ignore kwargs
+    All credential templating / OpenBadges-v3 shaping and the actual
+    OID4VCI protocol flow are handled by the separate ec-issuer / ssi-agent
+    services:
+    - POST: resolves the badge instance being requested and asks ec-issuer
+      to create a credential offer for it, forwarding the caller's own
+      access token.
 
-        offer: Optional[str] = None
-        offer_id = str(uuid.uuid4())
-        badge_id = request.data.get('badge_id')
-        variant = request.data.get('variant')
+    """
 
-        badge_instance = self.__badge_instance(badge_id, request.user)
-        logger.debug(f"Badge instance: {pformat(badge_instance.__dict__)}")
+    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    http_method_names = ["post"]
 
-        if variant == 'unime':
-            credential = ImpierceOfferRequest(offer_id, "openbadge_credential", badge_instance)
-            serializer = ImpierceOfferRequestSerializer(credential)
-            self.__issue_unime_badge(serializer.data)
-            offer = self.__get_unime_offer(offer_id)
-            logger.debug(f"Unime offer: {offer}")
-        else:
-            raise BadRequest("variant not supported. We only support unime")
+    def post(self, request: Request, **_kwargs: Any) -> Response:
+        _ = _kwargs
 
-        logger.info(f"Issued credential for badge {badge_id} with offer_id {offer_id}")
-        logger.debug(f"Credential: {pformat(serializer.data)}")
+        badge_entity_id = request.data.get("badge_entity_id")
 
-        return Response({"offer": offer}, status=status.HTTP_201_CREATED)
+        badge_instance = self._find_badge_instance(badge_entity_id, request.user)
+        if badge_instance is None:
+            raise Http404("Badge instance not found")
 
-    def __badge_instance(self, badge_id, user):
+        offer_uri = self._create_offer(request, badge_entity_id)
+        logger.info(f"Issued credential offer for badge {badge_entity_id}")
+        logger.debug(f"Offer: {offer_uri}")
+
+        return Response({"offer": offer_uri}, status=status.HTTP_201_CREATED)
+
+    def _find_badge_instance(self, entity_id: str, user) -> Optional[Any]:
+        """
+        Look up a BadgeInstance by its entity_id and verify the requesting
+        user is the recipient.  Returns None when the badge does not exist
+        or does not belong to the user.
+        """
+        from issuer.models import BadgeInstance
+
         try:
-            return BadgeInstance.objects.get(id=badge_id, user=user)
-        except ObjectDoesNotExist:
-            raise Http404
+            return BadgeInstance.objects.get(entity_id=entity_id, user=user)
+        except (ObjectDoesNotExist, ValueError):
+            return None
 
-    def __issue_sphereon_badge(self, credential):
-        random_offer_id = str(uuid.uuid4());
-        offer_request_body = {
-            "credentials": ["OpenBadgeCredential"],
-            "grants": {
-                "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
-                    "pre-authorized_code": random_offer_id,
-                    "user_pin_required": False
-                }
-            },
-            "credentialDataSupplierInput": credential
+    def _create_offer(
+        self, request: Request, badge_entity_id: str
+    ) -> Optional[str]:
+        """
+        Ask ec-issuer to create a credential and an offer for the given
+        badge instance.
+        """
+        url = f"{EC_ISSUER_URL}/api/v1/offers"
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {_bearer_token(request)}",
         }
-        resp = requests.post(
-                timeout=5,
-                url=f"{OB3_AGENT_URL_SPHEREON}/edubadges/api/create-offer",
-                json=offer_request_body,
-                headers={'Accept': 'application/json',
-                         "Authorization": f"Bearer {OB3_AGENT_AUTHZ_TOKEN_SPHEREON}"}
-        )
+        payload: Dict[str, str] = {
+            "award_id": badge_entity_id,
+        }
 
-        if resp.status_code >= 400:
-            msg = f"Failed to issue badge:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
-            raise BadRequest(msg)
-
-
-        # We get back a json object that wraps an openid-credential-offer:// uri
-        # Inside this, is a a parameter credential_offer_uri that contains the actual offer uri
-        # Which we can fetch to get the offer
-        json_resp = resp.json()
-        return json_resp.get('uri')
-
-    def __issue_unime_badge(self, credential):
-        url = f"{OB3_AGENT_URL_UNIME}/v0/credentials"
-        headers = { 'Accept': 'application/json' }
-        payload = credential
-
-        logger.debug(f"Requesting credential issuance: {url} {headers} {payload}")
-        resp = requests.post(
-                timeout=5,
-                json=payload,
-                url=url,
-                headers=headers
-        )
+        logger.debug(f"Requesting offer creation: {url} {payload['award_id']}")
+        resp = requests.post(timeout=5, url=url, json=payload, headers=headers)
         logger.debug(f"Response: {resp.status_code} {resp.text}")
 
         if resp.status_code >= 400:
-            msg = f"Failed to issue badge:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
+            msg = (
+                f"Failed to create offer:\n"
+                f"\tcode: {resp.status_code}\n"
+                f"\tcontent:\n {resp.text}"
+            )
             raise BadRequest(msg)
 
-    def __get_unime_offer(self, offer_id):
-        url = f"{OB3_AGENT_URL_UNIME}/v0/offers"
-        headers = { 'Accept': 'application/json' }
-        payload = { "offerId": offer_id }
-
-        logger.debug(f"Requesting offer: {url} {headers} {payload}")
-        response = requests.post(
-                timeout=5,
-                url=url,
-                json=payload,
-                headers=headers
-        )
-        logger.debug(f"Response: {response.status_code} {response.text}")
-
-        return response.text
+        return resp.json().get("uri")
