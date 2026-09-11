@@ -58,7 +58,7 @@ class BackpackAPITest(BadgrTestCase):
         assertion = self.setup_assertion(student, badgeclass, teacher1)
 
         response = self.client.get(
-            "/earner/badges/{}".format(assertion.entity_id),
+            "/earner/awards/{}".format(assertion.entity_id),
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)  # type: ignore[attr-defined]
@@ -75,7 +75,7 @@ class BackpackAPITest(BadgrTestCase):
         self.assertEqual(data["award_type"], "requested")
         self.assertFalse(data["revoked"])
         self.assertIsNone(data["expires_at"])
-        self.assertEqual(data["acceptance"], "Accepted")
+        self.assertEqual(data["acceptance"], "Unaccepted")
         self.assertFalse(data["public"])
         self.assertFalse(data["include_grade_achieved"])
         self.assertIsNone(data["grade_achieved"])
