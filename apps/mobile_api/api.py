@@ -835,7 +835,7 @@ class Enrollments(APIView):
             .select_related("badge_class__issuer")
             .select_related("badge_class__issuer__faculty")
             .select_related("badge_class__issuer__faculty__institution")
-            .filter(user=request.user)
+            .filter(user=request.user, denied=False, date_awarded__isnull=True)
         )
 
         serializer = StudentsEnrolledSerializer(enrollments, many=True)
