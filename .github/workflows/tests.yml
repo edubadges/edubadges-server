@@ -46,10 +46,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Wait for MySQL
+      - name: Wait for MariaDB
         run: |
-          until mariadb-admin ping -h "127.0.0.1" --silent; do
-            echo "Waiting for MySQL..."
+          until mysqladmin ping -h "127.0.0.1" --silent; do
+            echo "Waiting for MariaDB..."
             sleep 2
           done
 
