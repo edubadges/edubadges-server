@@ -15,7 +15,7 @@ jobs:
         image: mariadb:11
         env:
           innodb_temp_data_file_path: /tmp/ibtmp1:12M:autoextend
-          MARIADB_RANDOM_ROOT_PASSWORD: 1
+          MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: badgr
           MARIADB_USER: badgr
           MARIADB_PASSWORD: badgr
