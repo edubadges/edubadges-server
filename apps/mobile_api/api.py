@@ -1207,6 +1207,7 @@ class CatalogBadgeClassListView(generics.ListAPIView):
                 "issuer__faculty__institution",
             )
             .filter(
+                archived=False,
                 is_private=False,
                 issuer__archived=False,
                 issuer__faculty__archived=False,
