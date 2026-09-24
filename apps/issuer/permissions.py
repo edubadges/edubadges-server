@@ -79,3 +79,12 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
             return []
 
         return valid_scopes
+
+
+class IsBadgeInstanceOwner(permissions.BasePermission):
+    """
+    Only grant access to owner of BadgeInstance.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user

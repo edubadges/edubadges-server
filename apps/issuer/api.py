@@ -9,6 +9,7 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP
 import badgrlog
 from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin, BaseEntityView, BaseArchiveView
 from issuer.models import Issuer, BadgeClass, BadgeInstance, BadgeInstanceCollection
+from issuer.permissions import IsBadgeInstanceOwner
 from issuer.serializers import (
     IssuerSerializer,
     BadgeClassSerializer,
@@ -197,7 +198,7 @@ class BadgeInstanceRevoke(LogAccessMixin, BaseEntityDetailView):
 
 class BadgeInstanceCollectionDetail(BaseEntityDetailView):
     model = BadgeInstanceCollection
-    permission_classes = (AuthenticatedWithVerifiedEmail,)
+    permission_classes = (AuthenticatedWithVerifiedEmail, IsBadgeInstanceOwner)
     serializer_class = BadgeInstanceCollectionSerializer
     http_method_names = ['delete', 'put']
 

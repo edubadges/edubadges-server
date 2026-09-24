@@ -267,6 +267,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
     def resolve_pending_enrollments(self, info, **kwargs):
         return self.cached_pending_enrollments()
 
+    @resolver_blocker_for_students
     def resolve_pending_enrollments_including_denied(self, info, **kwargs):
         return self.cached_pending_enrollments_including_denied()
 

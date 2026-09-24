@@ -643,7 +643,7 @@ class BadgeInstanceCollectionSerializer(serializers.Serializer):
 
     def validate_badge_instances(self, badge_instances):
         user = self.context['request'].user
-        for bc in badge_instances:
-            if bc.user != user:
+        for badge_instance in badge_instances:
+            if badge_instance.user != user:
                 raise IntegrityError('BadgeInstance must be owned by the current user.')
         return badge_instances

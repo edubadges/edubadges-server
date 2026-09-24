@@ -120,6 +120,7 @@ class AcceptTermsView(APIView):
     """
     Endpoint used for accepting terms
     POST to accept terms
+    DELETE to reject terms
     """
     model = Terms
     permission_classes = (AuthenticatedWithVerifiedEmail,)
@@ -153,7 +154,10 @@ class AcceptTermsView(APIView):
     )
     def delete(self, request, **kwargs):
         if request.data:
-            term_agreement = TermsAgreement.objects.get(entity_id=request.data['terms_agreement_entity_id'])
+            term_agreement = TermsAgreement.objects.get(
+                user=request.user,
+                entity_id=request.data['terms_agreement_entity_id'],
+            )
             term_agreement.agreed = False
             term_agreement.save()
             request.user.remove_cached_data(['cached_terms_agreements'])
