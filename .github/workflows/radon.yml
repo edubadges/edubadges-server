@@ -6,13 +6,13 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [develop]
-    
+
 jobs:
   radon:
     runs-on: ubuntu-latest
     name: "radon"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7.0.1
       - uses: davidslusser/actions_python_radon@v1.0.0
         with:
           src: "apps"

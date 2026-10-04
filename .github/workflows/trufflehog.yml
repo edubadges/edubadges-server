@@ -6,12 +6,11 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [develop]
-    
+
 jobs:
   trufflehog:
     runs-on: ubuntu-latest
     name: "trufflehog"
     steps:
-    - uses: actions/checkout@v3
-    - name: trufflehog-actions-scan
-      uses: trufflesecurity/trufflehog@v3.84.2
+    - uses: actions/checkout@v7.0.1
+    - uses: trufflesecurity/trufflehog@v3.84.2
