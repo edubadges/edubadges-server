@@ -3,6 +3,7 @@ HTTP endpoint for verifying the health of the Badgr API, as hosted on one server
 Thanks to edx.org for endpoint design pattern. Licensed by edX under aGPL.
 https://github.com/edx/ecommerce/blob/master/LICENSE.txt
 """
+
 from django.db import DatabaseError, connection
 from django.http import JsonResponse
 from rest_framework import status
@@ -48,7 +49,7 @@ def health(req):
         "detailed_status": {
             "database_status": database_status
             # Future: Report any other dependency statuses here.
-        }
+        },
     }
 
     if overall_status == OK:

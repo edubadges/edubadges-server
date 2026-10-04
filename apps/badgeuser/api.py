@@ -55,6 +55,7 @@ class UserCreateProvisionment(BaseEntityListView):
     Endpoint used for provisioning
     POST to create a provisionment for another
     """
+
     permission_classes = (AuthenticatedWithVerifiedEmail,)  # permissioned in serializer
     v1_serializer_class = UserProvisionmentSerializer
     http_method_names = ["post"]
@@ -69,18 +70,18 @@ class UserCreateProvisionment(BaseEntityListView):
             try:
                 serializer.is_valid(raise_exception=True)
                 serializer.save(created_by=request.user)
-                message = {"status": "success",
-                           "message": serializer.data}
+                message = {"status": "success", "message": serializer.data}
             except ValidationError as e:
                 if not isinstance(e, BadgrValidationError) and "email" in e.detail:
                     # Consistency with other BadgrValidationErrors
                     e = BadgrValidationError("Enter a valid email address", 509)
                 # check if email address was a duplicate
-                duplicate_with_success = [x for x in response if x["status"] == "success" and x["email"] == provisionment["email"]]
+                duplicate_with_success = [
+                    x for x in response if x["status"] == "success" and x["email"] == provisionment["email"]
+                ]
                 if duplicate_with_success:
                     e = BadgrValidationError("You entered this email address multiple times.", 510)
-                message = {"status": "failure",
-                           "message": e.detail}
+                message = {"status": "failure", "message": e.detail}
             message["email"] = provisionment["email"]
             response.append(message)
         return Response(response, status=status.HTTP_201_CREATED)
@@ -92,6 +93,7 @@ class UserProvisionmentDetail(BaseEntityDetailView):
     PUT to edit a provisionment for another'
     DELETE to remove a provisionment for another'
     """
+
     model = UserProvisionment
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     v1_serializer_class = UserProvisionmentSerializerForEdit
@@ -104,6 +106,7 @@ class AcceptProvisionmentDetail(BaseEntityDetailView):
     Endpoint used for provisioning
     POST to accept or deny your own provisionment'
     """
+
     model = UserProvisionment
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     v1_serializer_class = UserProvisionmentSerializer
@@ -128,6 +131,7 @@ class AcceptTermsView(APIView):
     POST to accept terms
     DELETE to reject terms
     """
+
     model = Terms
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     http_method_names = ["post", "delete"]
@@ -140,9 +144,7 @@ class AcceptTermsView(APIView):
     )
     def post(self, request, **kwargs):
         if request.data:
-            serializer = TermsAgreementSerializer(data=request.data,
-                                                  many=True,
-                                                  context={"request": request})
+            serializer = TermsAgreementSerializer(data=request.data, many=True, context={"request": request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=HTTP_201_CREATED)
@@ -152,9 +154,7 @@ class AcceptTermsView(APIView):
         methods=["DELETE"],
         request=inline_serializer(
             name="AcceptTermsReject",
-            fields={
-                "terms_agreement_entity_id": serializers.CharField()
-            },
+            fields={"terms_agreement_entity_id": serializers.CharField()},
         ),
         description="Reject terms",
     )
@@ -176,6 +176,7 @@ class PublicTermsView(APIView):
     Public endpoint used for getting general terms
     GET to get terms
     """
+
     model = Terms
     permission_classes = (permissions.AllowAny,)
     http_method_names = ["get"]
@@ -184,11 +185,15 @@ class PublicTermsView(APIView):
         user_type = kwargs.get("user_type")
         data = []
         if user_type == "student":
-            data = list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_STUDENT,
-                                                             Terms.TYPE_TERMS_OF_SERVICE)))
+            data = list(
+                Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_STUDENT, Terms.TYPE_TERMS_OF_SERVICE))
+            )
         elif user_type == "teacher":
-            data = list(Terms.objects.filter(terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE,
-                                                             Terms.TYPE_TERMS_OF_SERVICE)))
+            data = list(
+                Terms.objects.filter(
+                    terms_type__in=(Terms.TYPE_SERVICE_AGREEMENT_EMPLOYEE, Terms.TYPE_TERMS_OF_SERVICE)
+                )
+            )
         if data:
             return Response(TermsSerializer(many=True).to_representation(data), status=HTTP_200_OK)
         return Response(status=HTTP_404_NOT_FOUND)

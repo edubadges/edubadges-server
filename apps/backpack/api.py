@@ -1,4 +1,3 @@
-
 from backpack.models import BackpackBadgeShare
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
 from drf_spectacular.types import OpenApiTypes

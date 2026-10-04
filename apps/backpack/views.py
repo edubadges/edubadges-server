@@ -15,4 +15,3 @@ class LegacyBadgeShareRedirectView(RedirectView):
             return badgeinstance.public_url
         except BadgeInstance.DoesNotExist:
             raise Http404
-

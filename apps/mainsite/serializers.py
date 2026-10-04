@@ -18,7 +18,6 @@ class HumanReadableBooleanField(serializers.BooleanField):
 
 
 class BadgrBaseModelSerializer(serializers.ModelSerializer):
-
     def is_valid(self, raise_exception=False):
         try:
             return super().is_valid(raise_exception)

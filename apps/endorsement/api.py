@@ -19,12 +19,15 @@ def send_notifications(endorsement: Endorsement, current_user):
     for user_notification in user_notifications:
         perms = endorsement.endorser.get_permissions(user_notification.user)
         if perms["may_award"]:
-            html_message = EmailMessageMaker.create_endorsement_requested_mail(current_user,
-                                                                               user_notification.user,
-                                                                               endorsement)
-            send_mail(subject="Een endorsement is aangevraagd! An endorsement is requested!",
-                      message=None, html_message=html_message,
-                      recipient_list=[user_notification.user.email])
+            html_message = EmailMessageMaker.create_endorsement_requested_mail(
+                current_user, user_notification.user, endorsement
+            )
+            send_mail(
+                subject="Een endorsement is aangevraagd! An endorsement is requested!",
+                message=None,
+                html_message=html_message,
+                recipient_list=[user_notification.user.email],
+            )
         else:
             user_notification.delete()
 

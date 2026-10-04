@@ -5,7 +5,6 @@ from .admin import AutoGroupMeta, CreatedUpdatedBy, LocalPreview
 
 
 class site:
-
     @staticmethod
     def add_base(admin_class, base):
         if base not in admin_class.__bases__:

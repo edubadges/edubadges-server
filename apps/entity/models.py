@@ -8,7 +8,6 @@ from mainsite.utils import generate_entity_uri
 
 
 class BadgrCacheModel(CacheModel):
-
     class Meta:
         abstract = True
 
@@ -16,7 +15,7 @@ class BadgrCacheModel(CacheModel):
         """
         Deletes the cached values for the given method names
         """
-        for method_name  in method_names:
+        for method_name in method_names:
             method = getattr(self, method_name, None)
             if not getattr(method, "_cached_method", False):
                 raise AttributeError("method '%s' is not a cached_method.")
@@ -27,7 +26,6 @@ class BadgrCacheModel(CacheModel):
 
 
 class _AbstractVersionedEntity(BadgrCacheModel):
-
     class Meta:
         abstract = True
 
@@ -65,7 +63,6 @@ class BaseVersionedEntity(_AbstractVersionedEntity):
 
 
 class EntityUserProvisionmentMixin:
-
     @cached_method(auto_publish=True)
     def cached_content_type(self):
         return ContentType.objects.get_for_model(self)
@@ -73,4 +70,5 @@ class EntityUserProvisionmentMixin:
     @cached_method(auto_publish=True)
     def cached_userprovisionments(self):
         from badgeuser.models import UserProvisionment
+
         return UserProvisionment.objects.filter(content_type=self.cached_content_type(), object_id=self.pk)

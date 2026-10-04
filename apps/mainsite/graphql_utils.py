@@ -31,8 +31,7 @@ def resolver_blocker_only_for_current_user(f):
         user = info.context.user
         if not hasattr(user, "is_authenticated") or not user.is_authenticated:
             raise GraphQLException("Authentication required for this call")
-        if user == instance or (
-                hasattr(instance, "user") and instance.user == user):
+        if user == instance or (hasattr(instance, "user") and instance.user == user):
             return f(*args)
         raise GraphQLException("This call is only for the current user")
 
@@ -123,7 +122,6 @@ class ImageResolverMixin:
 
 
 class StaffResolverMixin:
-
     @resolver_blocker_for_students
     def resolve_staff(self, info):
         if self.has_permissions(info.context.user, ["may_read"]):

@@ -35,7 +35,9 @@ class RecipientIdentifiersMatch(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         recipient_identifier = getattr(obj, "recipient_identifier", None)
         verified_emails = [email.email for email in request.user.verified_emails]
-        result = recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers + verified_emails
+        result = (
+            recipient_identifier and recipient_identifier in request.user.all_recipient_identifiers + verified_emails
+        )
         if not result:
             logger.error("permission denied at VerifiedEmailMatchesRecipientIdentifier")
         return result
@@ -56,8 +58,7 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
                 if len(set(valid_scopes) & default_auth_scopes) > 0:
                     return True
 
-            logger.error({"valid_scopes": valid_scopes,
-                          "is_authenticated": request.user.is_authenticated })
+            logger.error({"valid_scopes": valid_scopes, "is_authenticated": request.user.is_authenticated})
             return False
 
         # Do not apply scope if using a non-oauth tokens

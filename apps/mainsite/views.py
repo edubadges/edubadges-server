@@ -29,9 +29,13 @@ def error404(request, exception):
         template = loader.get_template("error/404.html")
     except TemplateDoesNotExist:
         return HttpResponseServerError("<h1>Page not found (404)</h1>", content_type="text/html")
-    return HttpResponseNotFound(template.render({
-        "STATIC_URL": getattr(settings, "STATIC_URL", "/static/"),
-    }))
+    return HttpResponseNotFound(
+        template.render(
+            {
+                "STATIC_URL": getattr(settings, "STATIC_URL", "/static/"),
+            }
+        )
+    )
 
 
 @xframe_options_exempt
@@ -40,9 +44,14 @@ def error500(request):
         template = loader.get_template("error/500.html")
     except TemplateDoesNotExist:
         return HttpResponseServerError("<h1>Server Error (500)</h1>", content_type="text/html")
-    return HttpResponseServerError(template.render({
-        "STATIC_URL": getattr(settings, "STATIC_URL", "/static/"),
-    }))
+    return HttpResponseServerError(
+        template.render(
+            {
+                "STATIC_URL": getattr(settings, "STATIC_URL", "/static/"),
+            }
+        )
+    )
+
 
 def email_unsubscribe(request, *args, **kwargs):
     if time.time() > int(kwargs["expiration"]):
@@ -62,8 +71,10 @@ def email_unsubscribe(request, *args, **kwargs):
     except IntegrityError:
         pass
 
-    return HttpResponse("You will no longer receive email notifications for \
-                        earned badges from this domain.")
+    return HttpResponse(
+        "You will no longer receive email notifications for \
+                        earned badges from this domain."
+    )
 
 
 class SitewideActionForm(forms.Form):
@@ -74,10 +85,7 @@ class SitewideActionForm(forms.Form):
         ACTION_CLEAR_CACHE: clear_cache,
         ACTION_SEND_APP_REPORT: send_application_report,
     }
-    CHOICES = (
-        (ACTION_CLEAR_CACHE, "Clear Cache"),
-        (ACTION_SEND_APP_REPORT, "Send application Report")
-    )
+    CHOICES = ((ACTION_CLEAR_CACHE, "Clear Cache"), (ACTION_SEND_APP_REPORT, "Send application Report"))
 
     action = forms.ChoiceField(choices=CHOICES, required=True, label="Pick an action")
     confirmed = forms.BooleanField(required=True, label="Are you sure you want to perform this action?")

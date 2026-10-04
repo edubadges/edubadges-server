@@ -1,5 +1,3 @@
-
-
 from .settings import *
 
 # disable logging for tests

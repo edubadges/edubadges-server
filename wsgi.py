@@ -10,7 +10,7 @@ APPS_DIR = os.path.join(OUR_DIR, "..", "code", "apps")
 # the env dir is one level above us
 ENV_DIR = os.path.join(OUR_DIR, "..")
 # remove virtual env
-#, 'env')
+# , 'env')
 
 # activate the virtualenv
 # activate_this = os.path.join(ENV_DIR, 'bin', 'activate_this.py')

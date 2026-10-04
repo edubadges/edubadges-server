@@ -510,7 +510,10 @@ class InstitutionBadgesOverview(APIView):
                     [da["expired_count"] for da in da_expired if str(da["badgeclass_id"]) == str(key)]
                 )
                 total_da_count = (
-                        direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked + direct_awards_expired
+                    direct_awards_accepted
+                    + direct_awards_rejected_or_unaccepted
+                    + direct_awards_assertions_revoked
+                    + direct_awards_expired
                 )
                 results.append(
                     {
@@ -631,7 +634,10 @@ class SectorBadgesOverview(APIView):
                     [da["expired_count"] for da in da_expired if str(da["institution_id"]) == str(key)]
                 )
                 total_da_count = (
-                        direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked + direct_awards_expired
+                    direct_awards_accepted
+                    + direct_awards_rejected_or_unaccepted
+                    + direct_awards_assertions_revoked
+                    + direct_awards_expired
                 )
                 results.append(
                     {
@@ -641,10 +647,10 @@ class SectorBadgesOverview(APIView):
                         "Total edubadges in backpack": sum([b["backpack_count"] for b in values if not b["revoked"]]),
                         "Claim-rate": claim_rate(
                             (total_da_count - direct_awards_assertions_revoked), direct_awards_accepted
-                        )
+                        ),
                     }
                 )
-            sorted_results = sorted(results, key=lambda a: (a["Institution name"] or ""))
+            sorted_results = sorted(results, key=lambda a: a["Institution name"] or "")
             return Response(sorted_results, status=status.HTTP_200_OK)
 
 
@@ -655,29 +661,21 @@ class IssuerMembers(APIView):
         user = request.user
         is_super_user = user.is_superuser
 
-        badgeclasses = BadgeClass.objects.select_related(
-            "issuer__faculty__institution"
-        ).prefetch_related(
+        badgeclasses = BadgeClass.objects.select_related("issuer__faculty__institution").prefetch_related(
             "issuer__issuerstaff_set__user",
             "issuer__faculty__facultystaff_set__user",
             "badgeclassstaff_set__user",
         )
 
         if not is_super_user:
-            badgeclasses = badgeclasses.filter(
-                issuer__faculty__institution=user.institution
-            )
+            badgeclasses = badgeclasses.filter(issuer__faculty__institution=user.institution)
 
         results = []
 
-        institution_staff = InstitutionStaff.objects.select_related("user").filter(
-            may_administrate_users=True
-        )
+        institution_staff = InstitutionStaff.objects.select_related("user").filter(may_administrate_users=True)
 
         if not is_super_user:
-            institution_staff = institution_staff.filter(
-                institution=user.institution
-            )
+            institution_staff = institution_staff.filter(institution=user.institution)
 
         for badgeclass in badgeclasses:
             processed_users = set()
@@ -697,7 +695,6 @@ class IssuerMembers(APIView):
 
             # 2️⃣ Faculty staff
             for staff in issuer.faculty.facultystaff_set.all():
-
                 if staff.user_id in processed_users:
                     continue
 
@@ -705,15 +702,12 @@ class IssuerMembers(APIView):
                 if not role:
                     continue
 
-                results.append(
-                    self.build_result(badgeclass, staff.user, role)
-                )
+                results.append(self.build_result(badgeclass, staff.user, role))
 
                 processed_users.add(staff.user_id)
 
             # 3️⃣ Issuer staff
             for staff in issuer.issuerstaff_set.all():
-
                 if staff.user_id in processed_users:
                     continue
 
@@ -721,15 +715,12 @@ class IssuerMembers(APIView):
                 if not role:
                     continue
 
-                results.append(
-                    self.build_result(badgeclass, staff.user, role)
-                )
+                results.append(self.build_result(badgeclass, staff.user, role))
 
                 processed_users.add(staff.user_id)
 
             # 4️⃣ BadgeClass staff
             for staff in badgeclass.badgeclassstaff_set.all():
-
                 if staff.user_id in processed_users:
                     continue
 
@@ -737,14 +728,11 @@ class IssuerMembers(APIView):
                 if not role:
                     continue
 
-                results.append(
-                    self.build_result(badgeclass, staff.user, role)
-                )
+                results.append(self.build_result(badgeclass, staff.user, role))
 
                 processed_users.add(staff.user_id)
 
         return Response(results, status=status.HTTP_200_OK)
-
 
     def build_result(self, badgeclass, user, role):
         return {

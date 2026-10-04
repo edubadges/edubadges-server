@@ -49,24 +49,22 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     expiration_date = models.DateTimeField(blank=True, null=True, default=None)
 
     def validate_unique(self, exclude=None):
-        if ((
-                self.__class__.objects.filter(
-                    eppn=self.eppn,
-                    badgeclass=self.badgeclass,
-                    status="Unaccepted",
-                    bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN,
-                )
-                        .exclude(pk=self.pk)
-                        .exclude(eppn__isnull=True)
-                        .exists()
+        if (
+            self.__class__.objects.filter(
+                eppn=self.eppn,
+                badgeclass=self.badgeclass,
+                status="Unaccepted",
+                bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EPPN,
+            )
+            .exclude(pk=self.pk)
+            .exclude(eppn__isnull=True)
+            .exists()
         ) or self.__class__.objects.filter(
             recipient_email=self.recipient_email,
             badgeclass=self.badgeclass,
             status="Unaccepted",
             bundle__identifier_type=DirectAwardBundle.IDENTIFIER_EMAIL,
-        )
-                .exclude(pk=self.pk)
-                .exclude(recipient_email__isnull=True).exists()):
+        ).exclude(pk=self.pk).exclude(recipient_email__isnull=True).exists():
             raise IntegrityError(
                 f"DirectAward with eppn: {self.eppn} / email: {self.recipient_email} and status Unaccepted "
                 f"already exists for badgeclass {self.badgeclass.name} ({self.badgeclass.id})."
@@ -117,8 +115,8 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         expires_at = None
         if self.badgeclass.expiration_period:
             expires_at = (
-                    datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
-                    + self.badgeclass.expiration_period
+                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+                + self.badgeclass.expiration_period
             )
 
         # The recipient name filled in for the direct award (available only with awarding via email) should take precedence over the validated name
@@ -156,6 +154,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     def notify_recipient(self):
         from badgeuser.models import BadgeUser
+
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(
@@ -258,6 +257,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     def notify_recipients(self):
         from badgeuser.models import BadgeUser
+
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
         send_mail(

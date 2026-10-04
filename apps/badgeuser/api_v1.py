@@ -1,5 +1,3 @@
-
-
 import datetime
 
 from badgeuser.models import CachedEmailAddress
@@ -112,8 +110,10 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                 remaining_sec = remaining_time_obj.seconds % 60
                 remaining_time_rep = f"{remaining_min} minutes and {remaining_sec} seconds"
 
-                return Response("Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
-                                status=status.HTTP_429_TOO_MANY_REQUESTS)
+                return Response(
+                    "Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
         else:
             raise BadgrApiException400("Can't make unverified email address the primary email address", 105)
 
@@ -128,8 +128,10 @@ class FeedbackView(APIView):
     def post(self, request, **kwargs):
         message = request.data["message"]
         html_message = EmailMessageMaker.create_feedback_mail(request.user, message)
-        send_mail(subject="Feedback",
-                  message=message,
-                  html_message=html_message,
-                  recipient_list=[settings.REPORT_RECEIVER_EMAIL])
+        send_mail(
+            subject="Feedback",
+            message=message,
+            html_message=html_message,
+            recipient_list=[settings.REPORT_RECEIVER_EMAIL],
+        )
         return Response({}, status=status.HTTP_201_CREATED)

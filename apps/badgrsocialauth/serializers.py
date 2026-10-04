@@ -15,12 +15,14 @@ class BadgrSocialAccountSerializerV1(serializers.Serializer):
         email = common_fields.get("email", None)
         if not email and "userPrincipalName" in extra_data:
             email = extra_data["userPrincipalName"]
-        representation.update({
-            "firstName": common_fields.get("first_name", None),
-            "lastName": common_fields.get("last_name", None),
-            "preferredUsername": common_fields.get("preferred_username", None),
-            "primaryEmail": email,
-            "eduid": extra_data.get("eduid", None)
-        })
+        representation.update(
+            {
+                "firstName": common_fields.get("first_name", None),
+                "lastName": common_fields.get("last_name", None),
+                "preferredUsername": common_fields.get("preferred_username", None),
+                "primaryEmail": email,
+                "eduid": extra_data.get("eduid", None),
+            }
+        )
 
         return representation

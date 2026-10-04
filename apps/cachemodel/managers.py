@@ -26,6 +26,7 @@ class CacheModelManager(models.Manager):
         raise DeprecationWarning("get_by() has been deprecated, use .get() instead.")
         raise NotImplementedError
 
+
 class CachedTableManager(models.Manager):
     def _pk_field_name(self):
         for field in self.model._meta.fields:

@@ -8,13 +8,13 @@ class BadgrOauthServer(Server):
     """
     used for providing a default grant type
     """
+
     @property
     def default_grant_type(self):
         return "password"
 
 
 class BadgrRequestValidator(OAuth2Validator):
-
     def authenticate_client(self, request, *args, **kwargs):
         # if a request doesnt include client_id or grant_type assume defaults
         if not (request.client_id and request.grant_type and request.client_secret):
@@ -45,4 +45,3 @@ class BadgrRequestValidator(OAuth2Validator):
                 return True
 
         return False
-

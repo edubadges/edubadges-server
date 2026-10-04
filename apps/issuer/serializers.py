@@ -243,7 +243,8 @@ class BadgeClassSerializer(
     extensions = serializers.DictField(
         source="extension_items",
         required=False,
-        validators=[BadgeExtensionValidator()] if getattr(settings, "ENABLE_EXTENSION_VALIDATION", True) else [])
+        validators=[BadgeExtensionValidator()] if getattr(settings, "ENABLE_EXTENSION_VALIDATION", True) else [],
+    )
     expiration_period = PeriodField(required=False)
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
     tags = PrimaryKeyRelatedField(many=True, queryset=BadgeClassTag.objects.all(), required=False)
@@ -339,7 +340,7 @@ class BadgeClassSerializer(
             for ext_name, ext in extensions.items():
                 if "@context" in ext and not ext["@context"].startswith(settings.EXTENSIONS_ROOT_URL):
                     raise BadgrValidationError(
-                        error_code=999, error_message=f'extensions @context invalid {ext["@context"]}'
+                        error_code=999, error_message=f"extensions @context invalid {ext['@context']}"
                     )
         return extensions
 

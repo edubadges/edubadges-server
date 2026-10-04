@@ -5,10 +5,8 @@ from .signals import log_email_confirmed, log_user_signed_up
 
 
 class BadgeUserConfig(AppConfig):
-    name="badgeuser"
+    name = "badgeuser"
 
     def ready(self):
-        user_signed_up.connect(log_user_signed_up,
-                               dispatch_uid="user_signed_up")
-        email_confirmed.connect(log_email_confirmed,
-                                dispatch_uid="email_confirmed")
+        user_signed_up.connect(log_user_signed_up, dispatch_uid="user_signed_up")
+        email_confirmed.connect(log_email_confirmed, dispatch_uid="email_confirmed")

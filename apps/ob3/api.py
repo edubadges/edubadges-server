@@ -70,9 +70,7 @@ class CredentialsView(APIView):
         except (ObjectDoesNotExist, ValueError):
             return None
 
-    def _create_offer(
-        self, request: Request, badge_entity_id: str
-    ) -> str | None:
+    def _create_offer(self, request: Request, badge_entity_id: str) -> str | None:
         """
         Ask ec-issuer to create a credential and an offer for the given
         badge instance.
@@ -91,11 +89,7 @@ class CredentialsView(APIView):
         logger.debug(f"Response: {resp.status_code} {resp.text}")
 
         if resp.status_code >= 400:
-            msg = (
-                f"Failed to create offer:\n"
-                f"\tcode: {resp.status_code}\n"
-                f"\tcontent:\n {resp.text}"
-            )
+            msg = f"Failed to create offer:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
             raise BadRequest(msg)
 
         return resp.json().get("uri")

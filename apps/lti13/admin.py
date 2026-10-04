@@ -7,15 +7,12 @@ from .models import LtiTool, LtiToolKey
 
 class LtiToolKeyAdmin(admin.ModelAdmin):
     """Admin for LTI Tool Key"""
+
     list_display = ("id", "name")
 
-    add_fieldsets = (
-        (None, {"fields": ("name", "private_key", "public_key")}),
-    )
+    add_fieldsets = ((None, {"fields": ("name", "private_key", "public_key")}),)
 
-    change_fieldsets = (
-        (None, {"fields": ("name", "private_key", "public_key", "public_jwk")}),
-    )
+    change_fieldsets = ((None, {"fields": ("name", "private_key", "public_key", "public_jwk")}),)
 
     readonly_fields = ("public_jwk",)
 
@@ -32,6 +29,7 @@ class LtiToolKeyAdmin(admin.ModelAdmin):
 
 class LtiToolAdmin(admin.ModelAdmin):
     """Admin for LTI Tool"""
+
     search_fields = ("title", "issuer", "client_id", "auth_login_url", "auth_token_url", "key_set_url")
     list_display = ("id", "title", "is_active", "issuer", "client_id")
 

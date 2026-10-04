@@ -34,9 +34,7 @@ class Base64FileField(FileField):
             )
             filesize = sys.getsizeof(ret.file)
             if filesize > settings.MAX_IMAGE_UPLOAD_SIZE:
-                raise ValidationError(
-                    f"Image too large, max file size is {settings.MAX_IMAGE_UPLOAD_SIZE_LABEL}", 999
-                )
+                raise ValidationError(f"Image too large, max file size is {settings.MAX_IMAGE_UPLOAD_SIZE_LABEL}", 999)
             return ret
         except (ValueError, binascii.Error):
             return super().to_internal_value(data)
@@ -47,9 +45,7 @@ class ValidImageField(Base64FileField):
 
     def __init__(self, skip_http=True, allow_empty_file=False, use_url=True, allow_null=True, **kwargs):
         self.skip_http = skip_http
-        super().__init__(
-            allow_empty_file=allow_empty_file, use_url=use_url, allow_null=allow_null, **kwargs
-        )
+        super().__init__(allow_empty_file=allow_empty_file, use_url=use_url, allow_null=allow_null, **kwargs)
 
     def to_internal_value(self, data):
         # Skip http/https urls to avoid overwriting valid data when, for example, a client GETs and subsequently PUTs an

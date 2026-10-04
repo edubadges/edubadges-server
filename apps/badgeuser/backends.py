@@ -8,4 +8,3 @@ class CachedModelBackend(ModelBackend):
             return BadgeUser.cached.get(pk=user_id)
         except BadgeUser.DoesNotExist:
             return None
-

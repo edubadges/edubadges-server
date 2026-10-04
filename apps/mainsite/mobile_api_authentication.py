@@ -91,11 +91,11 @@ class MobileAPIAuthentication(BaseAuthentication):
             if login_endpoint:
                 # further logic is dealt with in /mobile/api/login
                 request.mobile_api_call = True
-                logger.info(f'MobileAPIAuthentication created TemporaryUser {introspect_json["email"]} for login')
+                logger.info(f"MobileAPIAuthentication created TemporaryUser {introspect_json['email']} for login")
                 return TemporaryUser(introspect_json, bearer_token), bearer_token
             # If not heading to login-endpoint, we raise AuthenticationFailed resulting in 401
             logger.info(
-                f'MobileAPIAuthentication TemporaryUser {introspect_json["email"]} not allowed to access {request.path}'
+                f"MobileAPIAuthentication TemporaryUser {introspect_json['email']} not allowed to access {request.path}"
             )
             raise AuthenticationFailed("Authentication credentials were not provided.")
         # SocialAccount always has a User

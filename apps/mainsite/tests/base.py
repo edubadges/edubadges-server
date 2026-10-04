@@ -1,4 +1,3 @@
-
 import base64
 import os
 import random
@@ -46,9 +45,7 @@ class SetupHelper:
         return os.path.join(self.get_testfiles_path(), "too_large_test_image.png")
 
     def add_eduid_socialaccount(self, user):
-        random_eduid = (
-            f"urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{random.randint(1, 99999)}c14-b952-4d7e-85fd-{random.randint(1, 9999)}ac5c6f18"
-        )
+        random_eduid = f"urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{random.randint(1, 99999)}c14-b952-4d7e-85fd-{random.randint(1, 9999)}ac5c6f18"
         extra_data = {
             "family_name": user.last_name,
             "sub": random_eduid,
@@ -282,7 +279,11 @@ class SetupHelper:
         if not kwargs.get("image", False):
             kwargs["image"] = resize_image(open(self.get_test_image_path()))
         return BadgeClass.objects.create(
-            issuer=issuer, formal=kwargs.pop("formal", False), description="Description", criteria_text="Criteria text", **kwargs
+            issuer=issuer,
+            formal=kwargs.pop("formal", False),
+            description="Description",
+            criteria_text="Criteria text",
+            **kwargs,
         )
 
     def setup_assertion(self, recipient, badgeclass, created_by, **kwargs):

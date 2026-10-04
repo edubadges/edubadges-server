@@ -16,14 +16,36 @@ from staff.schema import FacultyStaffType, InstitutionStaffType
 from .models import BadgeClassTag, Faculty, Institution
 
 
-class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin,
-                  ImageResolverMixin, ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
+class FacultyType(
+    UserProvisionmentResolverMixin,
+    PermissionsResolverMixin,
+    StaffResolverMixin,
+    ImageResolverMixin,
+    ContentTypeIdResolverMixin,
+    DefaultLanguageResolverMixin,
+    DjangoObjectType,
+):
     class Meta:
         model = Faculty
-        fields = ("name_english", "name_dutch", "entity_id", "institution", "created_at", "description_english",
-                  "description_dutch", "content_type_id", "on_behalf_of", "on_behalf_of_url", "archived",
-                  "on_behalf_of_display_name", "faculty_type", "image_english", "image_dutch",
-                  "linkedin_org_identifier", "visibility_type")
+        fields = (
+            "name_english",
+            "name_dutch",
+            "entity_id",
+            "institution",
+            "created_at",
+            "description_english",
+            "description_dutch",
+            "content_type_id",
+            "on_behalf_of",
+            "on_behalf_of_url",
+            "archived",
+            "on_behalf_of_display_name",
+            "faculty_type",
+            "image_english",
+            "image_dutch",
+            "linkedin_org_identifier",
+            "visibility_type",
+        )
 
     issuers = graphene.List(IssuerType)
     issuer_count = graphene.Int()
@@ -65,25 +87,62 @@ class FacultyType(UserProvisionmentResolverMixin, PermissionsResolverMixin, Staf
     def resolve_has_assertions(self, info):
         return bool(self.assertions)
 
+
 class BadgeClassTagType(DjangoObjectType):
     class Meta:
         model = BadgeClassTag
         fields = ("id", "name", "archived")
 
+
 def terms_type():
     from badgeuser.schema import TermsType
+
     return TermsType
 
-class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, StaffResolverMixin, ImageResolverMixin,
-                      ContentTypeIdResolverMixin, DefaultLanguageResolverMixin, DjangoObjectType):
+
+class InstitutionType(
+    UserProvisionmentResolverMixin,
+    PermissionsResolverMixin,
+    StaffResolverMixin,
+    ImageResolverMixin,
+    ContentTypeIdResolverMixin,
+    DefaultLanguageResolverMixin,
+    DjangoObjectType,
+):
     class Meta:
         model = Institution
-        fields = ("entity_id", "identifier", "name_english", "name_dutch", "staff", "created_at", "description_english",
-                  "description_dutch", "institution_type", "image_english", "image_dutch", "grading_table", "brin",
-                  "content_type_id", "grondslag_formeel", "grondslag_informeel", "default_language", "id", "email",
-                  "direct_awarding_enabled", "award_allow_all_institutions", "lti_enabled", "alternative_identifier",
-                  "eppn_reg_exp_format", "linkedin_org_identifier", "sis_integration_enabled", "ob3_ssi_agent_enabled",
-                  "micro_credentials_enabled", "country_code", "virtual_organization_allowed")
+        fields = (
+            "entity_id",
+            "identifier",
+            "name_english",
+            "name_dutch",
+            "staff",
+            "created_at",
+            "description_english",
+            "description_dutch",
+            "institution_type",
+            "image_english",
+            "image_dutch",
+            "grading_table",
+            "brin",
+            "content_type_id",
+            "grondslag_formeel",
+            "grondslag_informeel",
+            "default_language",
+            "id",
+            "email",
+            "direct_awarding_enabled",
+            "award_allow_all_institutions",
+            "lti_enabled",
+            "alternative_identifier",
+            "eppn_reg_exp_format",
+            "linkedin_org_identifier",
+            "sis_integration_enabled",
+            "ob3_ssi_agent_enabled",
+            "micro_credentials_enabled",
+            "country_code",
+            "virtual_organization_allowed",
+        )
 
     faculties = graphene.List(FacultyType)
     public_faculties = graphene.List(FacultyType)
@@ -114,11 +173,16 @@ class InstitutionType(UserProvisionmentResolverMixin, PermissionsResolverMixin, 
 
     def resolve_public_faculties(self, info):
         faculties = self.cached_faculties()
-        return [faculty for faculty in faculties if
-                faculty.visibility_type is None or faculty.visibility_type == Faculty.VISIBILITY_PUBLIC]
+        return [
+            faculty
+            for faculty in faculties
+            if faculty.visibility_type is None or faculty.visibility_type == Faculty.VISIBILITY_PUBLIC
+        ]
 
     def resolve_award_allowed_institutions(self, info):
-        institutions = Institution.objects.all() if self.award_allow_all_institutions else self.award_allowed_institutions.all()
+        institutions = (
+            Institution.objects.all() if self.award_allow_all_institutions else self.award_allowed_institutions.all()
+        )
         return [institution.identifier for institution in institutions]
 
     def resolve_terms(self, info):
@@ -143,16 +207,18 @@ class Query:
 
     def resolve_issuers(self, info, **kwargs):
         user = info.context.user
-        return [iss for iss in Issuer.objects.filter(faculty__institution=user.institution) if
-                iss.has_permissions(user, ["may_update"])]
+        return [
+            iss
+            for iss in Issuer.objects.filter(faculty__institution=user.institution)
+            if iss.has_permissions(user, ["may_update"])
+        ]
 
     def resolve_institutions(self, info, **kwargs):
         user = info.context.user
         if not hasattr(user, "is_authenticated") or not user.is_authenticated:
             return []
         is_superuser = hasattr(user, "is_superuser") and user.is_superuser
-        return [inst for inst in Institution.objects.all() if
-                inst.has_permissions(user, ["may_read"]) or is_superuser]
+        return [inst for inst in Institution.objects.all() if inst.has_permissions(user, ["may_read"]) or is_superuser]
 
     def resolve_public_institution(self, info, **kwargs):
         id = kwargs.get("id")

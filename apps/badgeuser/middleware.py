@@ -14,9 +14,12 @@ class InactiveUserMiddleware:
                 " authentication middleware to be installed.  Edit your"
                 " MIDDLEWARE_CLASSES setting to insert"
                 " 'django.contrib.auth.middleware.AuthenticationMiddleware'"
-                " before the InactiveAccountMiddleware class.")
-        if (request.user.is_authenticated and
-            request.user.is_active == False and
-            request.path != reverse("account_enabled")):
-                return HttpResponseRedirect(reverse("account_enabled"))
+                " before the InactiveAccountMiddleware class."
+            )
+        if (
+            request.user.is_authenticated
+            and request.user.is_active == False
+            and request.path != reverse("account_enabled")
+        ):
+            return HttpResponseRedirect(reverse("account_enabled"))
         return self.get_response(request)

@@ -26,5 +26,3 @@ class BadgeUserChangeForm(UserChangeForm):
     class Meta:
         model = BadgeUser
         exclude = []
-
-

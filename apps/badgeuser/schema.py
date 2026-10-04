@@ -43,8 +43,17 @@ class TermsAgreementType(DjangoObjectType):
 class BadgeUserType(DjangoObjectType):
     class Meta:
         model = BadgeUser
-        fields = ("id", "first_name", "last_name", "email", "date_joined", "entity_id", "userprovisionments",
-                  "validated_name", "full_name")
+        fields = (
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "date_joined",
+            "entity_id",
+            "userprovisionments",
+            "validated_name",
+            "full_name",
+        )
 
     direct_awards = graphene.List(DirectAwardType)
     institution = graphene.Field("institution.schema.InstitutionType")

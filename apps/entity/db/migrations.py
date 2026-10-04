@@ -1,5 +1,3 @@
-
-
 from django.db.migrations import RunPython
 from mainsite.utils import generate_entity_uri
 

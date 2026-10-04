@@ -1,5 +1,3 @@
-
-
 class BaseExtensionValidator:
     """
     Base class for all extension validators.
@@ -17,9 +15,7 @@ class BaseExtensionValidator:
             return  # allow abstract base classes
 
         if cls.extension_key in cls.REGISTRY:
-            raise ValueError(
-                f"Duplicate validator for extension '{cls.extension_key}'"
-            )
+            raise ValueError(f"Duplicate validator for extension '{cls.extension_key}'")
 
         cls.REGISTRY[cls.extension_key] = cls()
 
@@ -35,14 +31,13 @@ class BaseExtensionValidator:
     @staticmethod
     def expect_type(value, expected_type, field: str) -> list[str]:
         if not isinstance(value, expected_type):
-            return [
-                f"Field '{field}' must be {expected_type}, got {type(value)}"
-            ]
+            return [f"Field '{field}' must be {expected_type}, got {type(value)}"]
         return []
 
 
 class ECTSExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add an ECTS - European Credit Transfer and Accumulation System - number to a badgeclass object."""
+
     extension_key = "extensions:ECTSExtension"
 
     def validate(self, data):
@@ -60,6 +55,7 @@ class ECTSExtensionValidator(BaseExtensionValidator):
 
 class EducationProgramIdentifierExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add a single string EducationProgramIdentifier to a badgeclass object."""
+
     extension_key = "extensions:EducationProgramIdentifierExtension"
 
     def validate(self, data):
@@ -77,6 +73,7 @@ class EducationProgramIdentifierExtensionValidator(BaseExtensionValidator):
 
 class EQFExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add a single number EQF to a badgeclass object."""
+
     extension_key = "extensions:EQFExtension"
 
     def validate(self, data):
@@ -94,6 +91,7 @@ class EQFExtensionValidator(BaseExtensionValidator):
 
 class GradingTableExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add a single url to a webpage providing the institution Grading Table."""
+
     extension_key = "extensions:GradingTableExtension"
 
     def validate(self, data):
@@ -111,6 +109,7 @@ class GradingTableExtensionValidator(BaseExtensionValidator):
 
 class InstitutionIdentifierExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add a single string InstitutionIdentifier to an issuer object."""
+
     extension_key = "extensions:InstitutionIdentifierExtension"
 
     def validate(self, data):
@@ -128,6 +127,7 @@ class InstitutionIdentifierExtensionValidator(BaseExtensionValidator):
 
 class InstitutionNameExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add a single string InstitutionName to an issuer object."""
+
     extension_key = "extensions:InstitutionNameExtension"
 
     def validate(self, data):
@@ -145,6 +145,7 @@ class InstitutionNameExtensionValidator(BaseExtensionValidator):
 
 class LanguageExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add a single string Language to a badgeclass object that represents the language of the course."""
+
     extension_key = "extensions:LanguageExtension"
 
     def validate(self, data):
@@ -162,6 +163,7 @@ class LanguageExtensionValidator(BaseExtensionValidator):
 
 class LearningOutcomeExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add a single string LearningOutcome to a badgeclass object."""
+
     extension_key = "extensions:LearningOutcomeExtension"
 
     def validate(self, data):
@@ -179,6 +181,7 @@ class LearningOutcomeExtensionValidator(BaseExtensionValidator):
 
 class StudyLoadExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add the study load in hours to a badgeclass object."""
+
     extension_key = "extensions:StudyLoadExtension"
 
     def validate(self, data):
@@ -196,6 +199,7 @@ class StudyLoadExtensionValidator(BaseExtensionValidator):
 
 class TimeInvestmentExtensionValidator(BaseExtensionValidator):
     """An extension that allows you to add the time investment, expressed in hours needed to earn that badgeclass object."""
+
     extension_key = "extensions:TimeInvestmentExtension"
 
     def validate(self, data):

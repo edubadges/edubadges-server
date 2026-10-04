@@ -11,6 +11,7 @@ class ExplicitCSRFSessionAuthentication(SessionAuthentication):
     Wrapper class that raises an explicit CSRFPermissionDenied on CSRF failure to facilitate custom behavior in
     entity.views.exception_handler.
     """
+
     def enforce_csrf(self, request):
         try:
             return super().enforce_csrf(request)

@@ -1,5 +1,3 @@
-
-
 from urllib.parse import urljoin
 
 import requests
@@ -42,16 +40,16 @@ class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):
     def validate(self, profile_type, recipient_identifier):
         assertion_json = requests.get(self.import_url).json()
         data = {"profile": {profile_type: recipient_identifier}, "data": assertion_json}
-        response = requests.post(json=data,
-                                 url=urljoin(settings.VALIDATOR_URL, "results"),
-                                 headers={"Accept": "application/json"})
+        response = requests.post(
+            json=data, url=urljoin(settings.VALIDATOR_URL, "results"), headers={"Accept": "application/json"}
+        )
         return response.json()
 
     def validate_unique(self, exclude=None):
         if self.__class__.objects.filter(import_url=self.import_url, user=self.user).exclude(pk=self.pk).exists():
-            raise BadgrValidationFieldError("import_url",
-                                            "ImportedAssertion with this url already exists for this user.",
-                                            936)
+            raise BadgrValidationFieldError(
+                "import_url", "ImportedAssertion with this url already exists for this user.", 936
+            )
         return super().validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):

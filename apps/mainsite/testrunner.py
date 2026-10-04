@@ -1,11 +1,8 @@
-
-
 from django.conf import settings
 from django.test.runner import DiscoverRunner
 
 
 class BadgrRunner(DiscoverRunner):
-
     # def __init__(self, *args, **kwargs):
     #     super(BadgrRunner, self).__init__(*args, **kwargs)
     #     self.keepdb = True

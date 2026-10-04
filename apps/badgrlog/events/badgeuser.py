@@ -1,9 +1,7 @@
-
 from .base import BaseBadgrEvent
 
 
 class UserSignedUp(BaseBadgrEvent):
-
     def __init__(self, request, user, **kwargs):
         self.request = request
         self.user = user
@@ -18,7 +16,6 @@ class UserSignedUp(BaseBadgrEvent):
 
 
 class EmailConfirmed(BaseBadgrEvent):
-
     def __init__(self, request, email_address, **kwargs):
         self.request = request
         self.email_address = email_address

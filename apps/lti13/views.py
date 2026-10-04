@@ -64,8 +64,9 @@ def login(request):
 def launch(request):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-    message_launch = DjangoMessageLaunch(request, tool_conf, launch_data_storage=launch_data_storage,
-                                         deployment_validation=False)
+    message_launch = DjangoMessageLaunch(
+        request, tool_conf, launch_data_storage=launch_data_storage, deployment_validation=False
+    )
     message_launch_data = message_launch.get_launch_data()
     # Get the mandatory data from the launch data
     email = message_launch_data["email"]
@@ -94,10 +95,13 @@ def launch(request):
     social_login.user = user
     badgr_app = BadgrApp.objects.all().first()
     set_session_badgr_app(request, badgr_app)
-    ret = perform_login(request, social_login.user,
-                        email_verification=app_settings.EMAIL_VERIFICATION,
-                        redirect_url=social_login.get_redirect_url(request),
-                        signal_kwargs={"sociallogin": social_login})
+    ret = perform_login(
+        request,
+        social_login.user,
+        email_verification=app_settings.EMAIL_VERIFICATION,
+        redirect_url=social_login.get_redirect_url(request),
+        signal_kwargs={"sociallogin": social_login},
+    )
     auth_token = parse_qs(urlparse(ret.url).query)["authToken"][0]
     args = {"status": "success", "launch_id": launch_id, "auth_token": auth_token}
     return redirect(f"{settings.UI_URL}/launch/lti?{urllib.parse.urlencode(args)}")
@@ -111,8 +115,9 @@ def get_jwks(request):
 def get_lti_context(request, launch_id):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-    message_launch = DjangoMessageLaunch.from_cache(launch_id, request, tool_conf,
-                                                    launch_data_storage=launch_data_storage)
+    message_launch = DjangoMessageLaunch.from_cache(
+        launch_id, request, tool_conf, launch_data_storage=launch_data_storage
+    )
     launch_data = message_launch.get_launch_data()
     return JsonResponse(launch_data, safe=False)
 
@@ -120,8 +125,9 @@ def get_lti_context(request, launch_id):
 def get_grades(request, launch_id):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-    message_launch = DjangoMessageLaunch.from_cache(launch_id, request, tool_conf,
-                                                    launch_data_storage=launch_data_storage)
+    message_launch = DjangoMessageLaunch.from_cache(
+        launch_id, request, tool_conf, launch_data_storage=launch_data_storage
+    )
     ags = message_launch.get_ags()
     line_items = ags.get_lineitems()
     grades = [ags.get_grades(LineItem(line_item)) for line_item in line_items]
@@ -131,8 +137,9 @@ def get_grades(request, launch_id):
 def get_members(request, launch_id):
     tool_conf = get_tool_conf()
     launch_data_storage = get_launch_data_storage()
-    message_launch = DjangoMessageLaunch.from_cache(launch_id, request, tool_conf,
-                                                    launch_data_storage=launch_data_storage)
+    message_launch = DjangoMessageLaunch.from_cache(
+        launch_id, request, tool_conf, launch_data_storage=launch_data_storage
+    )
     nrps = message_launch.get_nrps()
     members = nrps.get_members()
     return JsonResponse(members, safe=False)

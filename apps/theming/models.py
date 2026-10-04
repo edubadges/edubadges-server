@@ -41,16 +41,12 @@ class Theme(models.Model):
     badgr_app = models.OneToOneField(BadgrApp, on_delete=models.SET_NULL, null=True, related_name="theme")
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name="theme")
     changed_on = models.DateTimeField(auto_now=True)
-    terms_and_conditions_template = models.CharField("Terms and conditions template",
-                                                     null=True,
-                                                     blank=True,
-                                                     max_length=512
-                                                     )
-    terms_and_conditions_template_en = models.CharField("Terms and conditions template english",
-                                                        null=True,
-                                                        blank=True,
-                                                        max_length=512
-                                                        )
+    terms_and_conditions_template = models.CharField(
+        "Terms and conditions template", null=True, blank=True, max_length=512
+    )
+    terms_and_conditions_template_en = models.CharField(
+        "Terms and conditions template english", null=True, blank=True, max_length=512
+    )
 
     def __str__(self):
         return self.service_name or ""

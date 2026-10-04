@@ -26,9 +26,7 @@ class Command(BaseCommand):
                     try:
                         existing_email = CachedEmailAddress.objects.get(email=user.email)
                     except CachedEmailAddress.DoesNotExist:
-                        new_primary = CachedEmailAddress(
-                            user=user, email=user.email, verified=False, primary=True
-                        )
+                        new_primary = CachedEmailAddress(user=user, email=user.email, verified=False, primary=True)
                         new_primary.save()
                         new_primary.send_confirmation(signup="canvas")
                     else:

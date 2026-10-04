@@ -35,9 +35,7 @@ class BadgrSocialAuthProviderMixin:
     def extract_email_addresses(self, data, user=None):
         # Force verification of email addresses because SurfConext will only transmit verified emails
         if data.get("email"):
-            return [EmailAddress(email=data["email"].strip().lower(),
-                                 verified=True,
-                                 primary=True)]
+            return [EmailAddress(email=data["email"].strip().lower(), verified=True, primary=True)]
         return []
 
     def extract_common_fields(self, data):
@@ -45,12 +43,13 @@ class BadgrSocialAuthProviderMixin:
         return dict(  # email=data['email'],
             email=data.get("email", None),
             first_name=data.get("given_name", None),
-            last_name=data.get("family_name", None)
+            last_name=data.get("family_name", None),
         )
 
 
 def get_social_account(sociallogin_identifier):
     from allauth.socialaccount.models import SocialAccount
+
     try:
         social_account = SocialAccount.objects.get(uid=sociallogin_identifier)
         return social_account
@@ -116,10 +115,7 @@ def update_user_params(user, userinfo):
         user.email = userinfo["email"].lower()
         for email in user.email_items:
             email.delete()
-        EmailAddress.objects.create(email=userinfo["email"],
-                                    verified=True,
-                                    primary=True,
-                                    user=user)
+        EmailAddress.objects.create(email=userinfo["email"], verified=True, primary=True, user=user)
         user.save()
 
 
@@ -137,4 +133,3 @@ def get_privacy_content(name):
     with codecs.open(privacy_files[name], "r", encoding="utf-8") as myfile:
         data = myfile.read()
     return data
-

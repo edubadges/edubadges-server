@@ -41,9 +41,9 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
     linkedin_org_identifier = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
     tags = BadgeClassTagSerializer(many=True, required=False)
-    sis_default_user = PrimaryKeyRelatedField(many=False,
-                                              queryset=BadgeUser.objects.filter(is_teacher=True),
-                                              required=False)
+    sis_default_user = PrimaryKeyRelatedField(
+        many=False, queryset=BadgeUser.objects.filter(is_teacher=True), required=False
+    )
     sis_integration_enabled = serializers.BooleanField(default=False, required=False)
     manage_client_id = serializers.CharField(max_length=254, required=False, allow_null=True, allow_blank=True)
 
@@ -87,11 +87,13 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
                     tag_db.save()
                 else:
                     from issuer.models import BadgeClass
+
                     # Now remove all the cached tags on badgeClasses
-                    badge_classes = BadgeClass.objects \
-                        .filter(tags__name=tag_db.name) \
-                        .filter(issuer__faculty__institution=instance) \
+                    badge_classes = (
+                        BadgeClass.objects.filter(tags__name=tag_db.name)
+                        .filter(issuer__faculty__institution=instance)
                         .all()
+                    )
                     for bc in badge_classes:
                         bc.remove_cached_data(["cached_tags"])
                     tag_db.delete()
@@ -117,10 +119,12 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
             errors = OrderedDict(chain(errors.items(), e.items()))
         if not data.get("description_english", False) and not data.get("description_dutch", False):
             e = OrderedDict(
-                [("description_english", [ErrorDetail("English or Dutch description is required", code=925)])])
+                [("description_english", [ErrorDetail("English or Dutch description is required", code=925)])]
+            )
             errors = OrderedDict(chain(errors.items(), e.items()))
             e = OrderedDict(
-                [("description_dutch", [ErrorDetail("Dutch or English description is required", code=913)])])
+                [("description_dutch", [ErrorDetail("Dutch or English description is required", code=913)])]
+            )
             errors = OrderedDict(chain(errors.items(), e.items()))
         if institution.institution_type != "MBO" and not data.get("grading_table", False):
             e = OrderedDict([("grading_table", [ErrorDetail("Grading Table is required", code=903)])])
@@ -158,26 +162,24 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
             errors = OrderedDict(chain(errors.items(), e.items()))
         if not data.get("description_english", False) and not data.get("description_dutch", False):
             e = OrderedDict(
-                [("description_english", [ErrorDetail("English or Dutch description is required", code=925)])])
+                [("description_english", [ErrorDetail("English or Dutch description is required", code=925)])]
+            )
             errors = OrderedDict(chain(errors.items(), e.items()))
             e = OrderedDict(
-                [("description_dutch", [ErrorDetail("English or Dutch description is required", code=913)])])
+                [("description_dutch", [ErrorDetail("English or Dutch description is required", code=913)])]
+            )
             errors = OrderedDict(chain(errors.items(), e.items()))
         user_institution = self.context["request"].user.institution
         if user_institution.institution_type == Institution.TYPE_HBO_MBO and not data.get("faculty_type", False):
-            e = OrderedDict(
-                [("faculty_type", [ErrorDetail("faculty_type is required", code=945)])])
+            e = OrderedDict([("faculty_type", [ErrorDetail("faculty_type is required", code=945)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if user_institution.institution_type == Institution.TYPE_SURF and not data.get("visibility_type", False):
-            e = OrderedDict(
-                [("visibility_type", [ErrorDetail("visibility_type is required", code=946)])])
+            e = OrderedDict([("visibility_type", [ErrorDetail("visibility_type is required", code=946)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         if data.get("on_behalf_of") and not data.get("image_english", False) and not data.get("image_dutch", False):
-            e = OrderedDict(
-                [("image_english", [ErrorDetail("English or Dutch logo is required", code=947)])])
+            e = OrderedDict([("image_english", [ErrorDetail("English or Dutch logo is required", code=947)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
-            e = OrderedDict(
-                [("image_dutch", [ErrorDetail("English or Dutch logo is required", code=947)])])
+            e = OrderedDict([("image_dutch", [ErrorDetail("English or Dutch logo is required", code=947)])])
             errors = OrderedDict(chain(errors.items(), e.items()))
         return errors
 

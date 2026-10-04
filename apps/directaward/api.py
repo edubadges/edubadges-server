@@ -581,11 +581,9 @@ class DirectAwardAuditTrailListView(ListAPIView):
             403: permission_denied_response,
         },
     )
-
     def get_queryset(self):
         return (
-            DirectAwardAuditTrail.objects
-            .filter(
+            DirectAwardAuditTrail.objects.filter(
                 action="CREATE",
                 direct_award__isnull=False,
             )

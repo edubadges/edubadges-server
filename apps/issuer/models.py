@@ -980,9 +980,7 @@ class BadgeClass(
             return True
 
         if not self.formal:
-            return self.award_allowed_institutions.filter(
-                identifier__in=user.schac_homes
-            ).exists()
+            return self.award_allowed_institutions.filter(identifier__in=user.schac_homes).exists()
 
         return False
 

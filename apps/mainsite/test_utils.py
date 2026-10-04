@@ -114,11 +114,7 @@ class TestFirstNodeMatch(TestCase):
     """new"""
 
     def test_finds_matching_node(self):
-        graph = [
-            {"id": 1, "name": "first"},
-            {"id": 2, "name": "second"},
-            {"id": 3, "name": "third"}
-        ]
+        graph = [{"id": 1, "name": "first"}, {"id": 2, "name": "second"}, {"id": 3, "name": "third"}]
         condition = {"id": 2}
         result = first_node_match(graph, condition)
         self.assertEqual(result, {"id": 2, "name": "second"})
@@ -130,10 +126,7 @@ class TestFirstNodeMatch(TestCase):
         self.assertIsNone(result)
 
     def test_matches_multiple_conditions(self):
-        graph = [
-            {"id": 1, "name": "first", "type": "A"},
-            {"id": 2, "name": "second", "type": "B"}
-        ]
+        graph = [{"id": 1, "name": "first", "type": "A"}, {"id": 2, "name": "second", "type": "B"}]
         condition = {"id": 2, "type": "B"}
         result = first_node_match(graph, condition)
         self.assertEqual(result, {"id": 2, "name": "second", "type": "B"})

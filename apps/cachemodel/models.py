@@ -22,6 +22,7 @@ from django.db import models
 
 class CacheModel(models.Model):
     """An abstract model that has convienence functions for dealing with caching."""
+
     objects = models.Manager()
     cached = CacheModelManager()
 
@@ -29,7 +30,7 @@ class CacheModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        #find all the denormalized fields and update them
+        # find all the denormalized fields and update them
         self.denormalize()
 
         # save ourselves to the database

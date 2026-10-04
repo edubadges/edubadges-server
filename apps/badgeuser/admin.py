@@ -32,8 +32,8 @@ class TermsAgreementInline(TabularInline):
     fk_name = "user"
     can_delete = False
     extra = 0
-    fields = ["agreed", "term_type", "institution", "admin_link" ]
-    readonly_fields = ["agreed", "term_type", "institution", "admin_link" ]
+    fields = ["agreed", "term_type", "institution", "admin_link"]
+    readonly_fields = ["agreed", "term_type", "institution", "admin_link"]
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -58,27 +58,33 @@ class TermsAgreementInline(TabularInline):
 class BadgeUserAdmin(UserAdmin):
     # Fields shown when editing an existing user
     fieldsets = (
-        (None, {"fields": ("username", "password", "email", "first_name", "last_name", "is_teacher",
-                           "institution")}),
-        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions" )}),
+        (None, {"fields": ("username", "password", "email", "first_name", "last_name", "is_teacher", "institution")}),
+        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
         ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
 
     # Fields shown when adding a new user
     add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-            "fields": ("username", "password1", "password2", "email", "first_name", "last_name"),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("username", "password1", "password2", "email", "first_name", "last_name"),
+            },
+        ),
     )
-    list_display = ("last_name", "first_name", "email", "eppn", "date_joined",
-                    admin_list_linkify("institution", "name"))
+    list_display = (
+        "last_name",
+        "first_name",
+        "email",
+        "eppn",
+        "date_joined",
+        admin_list_linkify("institution", "name"),
+    )
     list_filter = ("is_active", "is_staff", "is_superuser", "date_joined", "last_login")
     search_fields = ("email", "first_name", "last_name", "username", "entity_id")
     filter_horizontal = ("groups", "user_permissions")
-    inlines = [
-        EmailAddressInline, TermsAgreementInline
-    ]
+    inlines = [EmailAddressInline, TermsAgreementInline]
     autocomplete_fields = ("faculty",)
 
     def eppn(self, obj):
@@ -118,8 +124,7 @@ class TermsUrlInline(TabularInline):
 
 
 class TermsAdmin(ModelAdmin):
-    list_display = ("terms_type", admin_list_linkify("institution", "name"),
-                    "version", "created_at", "terms_url_count")
+    list_display = ("terms_type", admin_list_linkify("institution", "name"), "version", "created_at", "terms_url_count")
     readonly_fields = ("created_at", "created_by", "updated_at", "updated_by", "entity_id")
 
     inlines = [TermsUrlInline]

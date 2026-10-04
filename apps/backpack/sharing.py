@@ -59,7 +59,7 @@ class LinkedinShareProvider(ShareProvider):
         if title is None:
             title = "I earned a badge from Badgr!"
         if summary is None:
-            summary = badge_instance.cached_badgeclass.name,
+            summary = (badge_instance.cached_badgeclass.name,)
         return f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(badge_instance.share_url)}&title={title}&summary={summary}"
 
     def certification_share_url(self, badge_instance, **kwargs):

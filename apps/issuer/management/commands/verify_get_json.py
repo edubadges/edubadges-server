@@ -1,5 +1,3 @@
-
-
 from collections import OrderedDict
 
 from django.core.management import BaseCommand
@@ -7,11 +5,10 @@ from issuer.models import BadgeClass, BadgeInstance, Issuer
 
 
 def sorted_dict(d):
-    return OrderedDict((k,d[k]) for k in sorted(d.keys()))
+    return OrderedDict((k, d[k]) for k in sorted(d.keys()))
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         self.verbosity = int(options.get("verbosity", 1))
         self.check_jsons(Issuer)
@@ -26,12 +23,14 @@ class Command(BaseCommand):
             orig_json = obj.old_json
             if cmp(new_json, orig_json) != 0:
                 if self.verbosity > 1:
-                    self.stdout.write(f"  Jsons don't match! pk={obj.pk}\n  old: {sorted_dict(orig_json)}\n  new: {sorted_dict(new_json)}\n\n")
+                    self.stdout.write(
+                        f"  Jsons don't match! pk={obj.pk}\n  old: {sorted_dict(orig_json)}\n  new: {sorted_dict(new_json)}\n\n"
+                    )
                 mismatch += 1
             else:
                 correct += 1
 
         if self.verbosity > 0:
-            self.stdout.write(f"Found {mismatch+correct} {model_cls.__name__}s. {correct} correct. {mismatch} mismatch")
-
-
+            self.stdout.write(
+                f"Found {mismatch + correct} {model_cls.__name__}s. {correct} correct. {mismatch} mismatch"
+            )

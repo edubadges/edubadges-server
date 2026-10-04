@@ -7,6 +7,7 @@ from google.auth.exceptions import DefaultCredentialsError
 
 logger = logging.getLogger("Badgr.Debug")
 
+
 def send_push_notification(user, title, body, data, badge_count):
     if not user:
         logger.info("No user found, skipping push notification.")

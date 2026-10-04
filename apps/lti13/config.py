@@ -15,6 +15,7 @@ class DjangoDbToolConf(ToolConfAbstract):
 
     def __init__(self):
         from .models import LtiTool, LtiToolKey
+
         super().__init__()
         self._lti_tools = {}
         self._tools_cls = LtiTool
@@ -62,16 +63,13 @@ class DjangoDbToolConf(ToolConfAbstract):
         tool_public_key = lti_tool.tool_key.public_key or None
 
         reg = Registration()
-        reg.set_auth_login_url(lti_tool.auth_login_url) \
-            .set_auth_token_url(lti_tool.auth_token_url) \
-            .set_auth_audience(auth_audience) \
-            .set_client_id(lti_tool.client_id) \
-            .set_institution_identifier(lti_tool.institution.identifier) \
-            .set_key_set(key_set) \
-            .set_key_set_url(key_set_url) \
-            .set_issuer(lti_tool.issuer) \
-            .set_tool_private_key(lti_tool.tool_key.private_key) \
-            .set_tool_public_key(tool_public_key)
+        reg.set_auth_login_url(lti_tool.auth_login_url).set_auth_token_url(lti_tool.auth_token_url).set_auth_audience(
+            auth_audience
+        ).set_client_id(lti_tool.client_id).set_institution_identifier(lti_tool.institution.identifier).set_key_set(
+            key_set
+        ).set_key_set_url(key_set_url).set_issuer(lti_tool.issuer).set_tool_private_key(
+            lti_tool.tool_key.private_key
+        ).set_tool_public_key(tool_public_key)
         return reg
 
     def find_deployment(self, iss, deployment_id):
@@ -107,6 +105,4 @@ class DjangoDbToolConf(ToolConfAbstract):
                 else:
                     jwks.append(Registration.get_jwk(key.public_key))
                 public_key_lst.append(key.public_key)
-        return {
-            "keys": jwks
-        }
+        return {"keys": jwks}

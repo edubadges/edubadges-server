@@ -1,5 +1,3 @@
-
-
 import datetime
 import json
 
@@ -60,12 +58,10 @@ def decrypt_authcode(cipher, secret_key=None):
 
 # helper functions for {encrypt,decrypt}_authcode
 
+
 def _marshall(payload, expires_seconds):
     expires_at = timezone.now() + datetime.timedelta(seconds=expires_seconds)
-    return json.dumps(dict(
-        expires=expires_at.isoformat(),
-        payload=payload
-    ))
+    return json.dumps(dict(expires=expires_at.isoformat(), payload=payload))
 
 
 def _unmarshall(digest):

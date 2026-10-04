@@ -22,6 +22,7 @@ class StudentEnrollmentList(BaseEntityListView):
     GET a list of enrollments for a student
     DELETE for a student to delete your own enrollment
     """
+
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     model = StudentsEnrolled
     serializer_class = StudentsEnrolledSerializerWithRelations
@@ -53,6 +54,7 @@ class StudentsEnrolledList(BaseEntityListView):
     """
     POST: for a student to enroll himself
     """
+
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     model = StudentsEnrolled
     http_method_names = ["post"]
@@ -67,10 +69,7 @@ class StudentsEnrolledList(BaseEntityListView):
         responses={
             201: inline_serializer(
                 name="BadgeRequestResponse",
-                fields={
-                    "entity_id": serializers.CharField(),
-                    "status": serializers.CharField()
-                },
+                fields={"entity_id": serializers.CharField(), "status": serializers.CharField()},
             ),
         },
         examples=[
@@ -95,7 +94,7 @@ class StudentsEnrolledList(BaseEntityListView):
                 user=request.user,
                 narrative=request.data.get("narrative"),
                 evidence_url=request.data.get("evidence_url"),
-                date_consent_given=timezone.now()
+                date_consent_given=timezone.now(),
             )
             # Clear cache for the enrollments of this badgeclass
             badge_class.remove_cached_data(["cached_pending_enrollments"])
@@ -109,12 +108,15 @@ class StudentsEnrolledList(BaseEntityListView):
                 for user_notification in user_notifications:
                     perms = badge_class.get_permissions(user_notification.user)
                     if perms["may_sign"]:
-                        html_message = EmailMessageMaker.create_enrolment_notification_mail(badge_class,
-                                                                                            request.user,
-                                                                                            created_enrollment)
-                        send_mail(subject="Een edubadge is aangevraagd! An edubadge is requested!",
-                                  message=None, html_message=html_message,
-                                  recipient_list=[user_notification.user.email])
+                        html_message = EmailMessageMaker.create_enrolment_notification_mail(
+                            badge_class, request.user, created_enrollment
+                        )
+                        send_mail(
+                            subject="Een edubadge is aangevraagd! An edubadge is requested!",
+                            message=None,
+                            html_message=html_message,
+                            recipient_list=[user_notification.user.email],
+                        )
                     else:
                         user_notification.delete()
 
@@ -128,6 +130,7 @@ class EnrollmentDetail(BaseEntityDetailView):
     """
     PUT: update enrollment
     """
+
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     permission_map = {"PUT": "may_award"}
     model = StudentsEnrolled

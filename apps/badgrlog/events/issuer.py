@@ -26,11 +26,7 @@ class BadgeClassCreatedEvent(BaseBadgrEvent):
             image_data["size"] = self.badge_class.image.size
         if hasattr(self.badge_class.image, "content_type"):
             image_data["fileType"] = self.badge_class.image.content_type
-        return {
-            "creator": self.badge_class.cached_creator,
-            "badgeClass": self.badge_class.json,
-            "image": image_data
-        }
+        return {"creator": self.badge_class.cached_creator, "badgeClass": self.badge_class.json, "image": image_data}
 
 
 class BadgeClassDeletedEvent(BaseBadgrEvent):
@@ -65,8 +61,4 @@ class BadgeAssertionRevokedEvent(BaseBadgrEvent):
         self.user = user
 
     def to_representation(self):
-        return {
-            "user": self.user,
-            "badgeInstance": self.badge_instance.json
-        }
-
+        return {"user": self.user, "badgeInstance": self.badge_instance.json}

@@ -29,6 +29,7 @@ class SymmetricKey(models.Model):
 
     def create_private_key(self, password):
         from signing import tsob
+
         self.validate_password(password)
         return tsob.create_new_private_key(password, self)
 
@@ -43,13 +44,14 @@ class PrivateKey(models.Model):
     public_key = models.ForeignKey("signing.PublicKey", on_delete=models.PROTECT)
 
     def get_params(self):
-        return {"initialization_vector": self.initialization_vector,
-                "encrypted_private_key": self.encrypted_private_key,
-                "tag": self.tag,
-                "associated_data": self.associated_data,
-                "time_created": self.time_created.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "public_key": self.public_key.public_key_pem
-                }
+        return {
+            "initialization_vector": self.initialization_vector,
+            "encrypted_private_key": self.encrypted_private_key,
+            "tag": self.tag,
+            "associated_data": self.associated_data,
+            "time_created": self.time_created.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "public_key": self.public_key.public_key_pem,
+        }
 
     @property
     def user(self):
@@ -80,8 +82,9 @@ class AssertionTimeStamp(models.Model):
         public_key_issuer = self.badge_instance.issuer.create_empty_key_address()
         self.badge_instance.public_key_issuer = public_key_issuer
         self.badge_instance.save()
-        assertion_json = self.badge_instance.get_json(expand_badgeclass=True, expand_issuer=True, signed=True,
-                                                      public_key_issuer=public_key_issuer)
+        assertion_json = self.badge_instance.get_json(
+            expand_badgeclass=True, expand_issuer=True, signed=True, public_key_issuer=public_key_issuer
+        )
         canonicalized_json, hashed_json, hash_id_nodes = timestamping.submit_json_for_timestamping(assertion_json)
         self.hash_id_nodes = json.dumps(hash_id_nodes)
         self.hash = hashed_json
@@ -124,6 +127,7 @@ class PublicKeyIssuer(BaseVersionedEntity, models.Model):
     """
     Class made for the purpose of creating a temporary address that points to a public key that wil be filled later.
     """
+
     issuer = models.ForeignKey("issuer.Issuer", on_delete=models.PROTECT)
     public_key = models.ForeignKey("signing.PublicKey", on_delete=models.PROTECT, null=True, default=None)
 
@@ -144,5 +148,5 @@ class PublicKeyIssuer(BaseVersionedEntity, models.Model):
             owner=self.owner_public_url,
             type="CryptographicKey",
             id=self.public_url,
-            publicKeyPem=self.public_key.public_key_pem
+            publicKeyPem=self.public_key.public_key_pem,
         )

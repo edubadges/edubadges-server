@@ -12,5 +12,3 @@ class BadgrLogger:
             raise NotImplementedError
         obj = event.compacted()
         self.logger.info(obj)
-
-

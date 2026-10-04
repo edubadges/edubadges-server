@@ -7,7 +7,6 @@ from mainsite.models import EmailBlacklist
 
 
 class BadgrAccountAdapter(DefaultAccountAdapter):
-
     def send_mail(self, template_prefix, email, context, attachment=None):
         context["STATIC_URL"] = settings.STATIC_URL
         context["HTTP_ORIGIN"] = settings.HTTP_ORIGIN
@@ -35,7 +34,8 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
                 accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
                     request.user,
                     application=badgr_app.oauth_application if badgr_app.oauth_application_id else None,
-                    scope="rw:backpack rw:profile rw:issuer")
+                    scope="rw:backpack rw:profile rw:issuer",
+                )
 
                 if badgr_app.use_auth_code_exchange:
                     authcode = authcode_for_accesstoken(accesstoken)

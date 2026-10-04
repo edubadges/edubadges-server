@@ -10,7 +10,6 @@ logger = badgrlog.BadgrLogger()
 
 
 class BaseStaffSerializer(serializers.Serializer):
-
     may_create = serializers.CharField(allow_blank=False, required=True)
     may_read = serializers.CharField(allow_blank=False, required=True)
     may_update = serializers.CharField(allow_blank=False, required=True)
@@ -21,7 +20,6 @@ class BaseStaffSerializer(serializers.Serializer):
 
 
 class StaffUpdateSerializer(BaseStaffSerializer):
-
     def update(self, instance, validated_data):
         original_perms = instance.permissions
         for permission in original_perms.keys():
@@ -30,9 +28,11 @@ class StaffUpdateSerializer(BaseStaffSerializer):
             if original_value != new_value:  # this permission is changed
                 setattr(instance, permission, new_value)  # update the permission
         instance.save()
-        logger.event(badgrlog.PermissionChangedEvent(staff_instance=instance,
-                                                     previous_permissions=original_perms,
-                                                     request=self.context["request"]))
+        logger.event(
+            badgrlog.PermissionChangedEvent(
+                staff_instance=instance, previous_permissions=original_perms, request=self.context["request"]
+            )
+        )
         html_message = EmailMessageMaker.create_staff_rights_changed_email(instance)
         subject = f"You role has changed for you staff membership for the {instance.object.__class__.__name__.lower()} {instance.object.name}"
         instance.user.email_user(subject=subject, html_message=html_message)
@@ -53,10 +53,12 @@ class BaseStaffCreateSerializer(BaseStaffSerializer):
             message = EmailMessageMaker.create_staff_member_addition_email(new_staff_membership)
             entity_name = new_staff_membership.object.__class__.__name__
             determiner = "an" if entity_name[0] in "aeiouAEIOU" else "a"
-            new_staff_membership.user.email_user(subject=f"You have been added to {determiner} {entity_name}",
-                                                 html_message=message)
-            logger.event(badgrlog.PermissionCreatedEvent(staff_instance=new_staff_membership,
-                                                         request=self.context["request"]))
+            new_staff_membership.user.email_user(
+                subject=f"You have been added to {determiner} {entity_name}", html_message=message
+            )
+            logger.event(
+                badgrlog.PermissionCreatedEvent(staff_instance=new_staff_membership, request=self.context["request"])
+            )
             return new_staff_membership
         raise serializers.ValidationError("You may not administrate this user.")
 
@@ -107,4 +109,3 @@ class BadgeClassStaffSerializer(BaseStaffCreateSerializer):
 
     def create(self, validated_data):
         return self._base_create(validated_data, "badgeclass", BadgeClassStaff)
-

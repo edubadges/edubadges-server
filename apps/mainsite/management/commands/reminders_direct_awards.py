@@ -9,7 +9,8 @@ from mainsite import settings
 
 def _remove_cached_direct_awards(direct_award):
     direct_award.badgeclass.remove_cached_data(
-        ["cached_direct_awards", "cached_pending_direct_awards", "cached_direct_award_bundles"])
+        ["cached_direct_awards", "cached_pending_direct_awards", "cached_direct_award_bundles"]
+    )
     direct_award.bundle.remove_cached_data(["cached_direct_awards"])
 
 
@@ -38,13 +39,15 @@ class Command(BaseCommand):
         for days in threshold_days:
             reminder_cutoff = now + timedelta(days=days)
             self.stdout.write(
-                f"Query for direct_awards with reminders={index} and expiration_date__lt {reminder_cutoff}\n")
-            direct_awards = DirectAward.objects.filter(expiration_date__lt=reminder_cutoff,
-                                                       reminders=index,
-                                                       status=unaccepted).all()
+                f"Query for direct_awards with reminders={index} and expiration_date__lt {reminder_cutoff}\n"
+            )
+            direct_awards = DirectAward.objects.filter(
+                expiration_date__lt=reminder_cutoff, reminders=index, status=unaccepted
+            ).all()
             # When run as standalone job the logger messages are not outputted
             self.stdout.write(
-                f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}\n")
+                f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}\n"
+            )
             logger.info(f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}")
 
             for direct_award in direct_awards:
@@ -57,7 +60,7 @@ class Command(BaseCommand):
                         subject="Reminder: your edubadge will expire",
                         message=None,
                         html_message=html_message,
-                        recipient_list=[direct_award.recipient_email]
+                        recipient_list=[direct_award.recipient_email],
                     )
                 except IntegrityError:
                     # Already exists, just skip it
@@ -65,8 +68,7 @@ class Command(BaseCommand):
 
             index += 1
 
-        direct_awards = DirectAward.objects.filter(expiration_date__lt=now,
-                                                   status=unaccepted).all()
+        direct_awards = DirectAward.objects.filter(expiration_date__lt=now, status=unaccepted).all()
 
         self.stdout.write(f"Deleting {len(direct_awards)} expired direct_awards")
         logger.info(f"Deleting {len(direct_awards)} expired direct_awards")
@@ -78,9 +80,11 @@ class Command(BaseCommand):
             bundle.direct_award_expired_count = bundle.direct_award_expired_count + 1
             bundle.save()
             direct_award.delete()
-            send_mail(subject="Your edubadge has been deleted",
-                      message=None,
-                      html_message=html_message,
-                      recipient_list=[direct_award.recipient_email])
+            send_mail(
+                subject="Your edubadge has been deleted",
+                message=None,
+                html_message=html_message,
+                recipient_list=[direct_award.recipient_email],
+            )
 
         self.stdout.write(f"Direct awards {len(direct_awards)} deleted!\n")

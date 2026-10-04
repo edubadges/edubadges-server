@@ -6,7 +6,6 @@ from django.utils import timezone
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **kwargs):
         from directaward.models import DirectAward, DirectAwardBundle
 
@@ -16,8 +15,9 @@ class Command(BaseCommand):
         logger = logging.getLogger("Badgr.Debug")
         logger.info("Running award_scheduled_direct_awards")
 
-        direct_award_bundles = DirectAwardBundle.objects.filter(scheduled_at__lt=timezone.now(),
-                                                                status=DirectAwardBundle.STATUS_SCHEDULED).all()
+        direct_award_bundles = DirectAwardBundle.objects.filter(
+            scheduled_at__lt=timezone.now(), status=DirectAwardBundle.STATUS_SCHEDULED
+        ).all()
 
         for bundle in direct_award_bundles:
             for da in bundle.directaward_set.all():

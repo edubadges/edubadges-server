@@ -12,4 +12,3 @@ class Command(BaseCommand):
         dirname = os.path.join(TOP_DIR, "apps", "mainsite", "static")
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-

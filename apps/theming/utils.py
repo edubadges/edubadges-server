@@ -1,4 +1,3 @@
-
 from mainsite.models import BadgrApp
 from theming.models import Theme
 

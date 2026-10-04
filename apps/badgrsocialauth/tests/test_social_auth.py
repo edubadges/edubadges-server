@@ -2,7 +2,6 @@ from mainsite.tests import BadgrTestCase
 
 
 class SocialAuthTests(BadgrTestCase):
-
     def test_student_login(self):
         """test login and successful also is_student should be set"""
 

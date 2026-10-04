@@ -20,7 +20,9 @@ urlpatterns = [
     re_path(r"^faculties", Faculties.as_view(), name="api_queries_fac"),
     re_path(r"^users", Users.as_view(), name="api_queries_users"),
     re_path(r"^notifications", Notifications.as_view(), name="api_queries_notifications"),
-    re_path(r"^endorsement-badge-classes", EndorsementBadgeClasses.as_view(), name="api_queries_endorsement_badge_classes"),
+    re_path(
+        r"^endorsement-badge-classes", EndorsementBadgeClasses.as_view(), name="api_queries_endorsement_badge_classes"
+    ),
     re_path(r"^current-institution", CurrentInstitution.as_view(), name="api_queries_ins"),
     re_path(r"^catalog/badge-classes", CatalogBadgeClasses.as_view(), name="api_queries_cat"),
 ]

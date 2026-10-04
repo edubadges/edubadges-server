@@ -164,15 +164,11 @@ class IssuerAPITest(BadgrTestCase):
             f"/issuer/badgeclasses/delete/{badgeclass.entity_id}", content_type="application/json"
         )
         self.assertEqual(badgeclass_response.status_code, 404)
-        issuer_response = self.client.delete(
-            f"/issuer/delete/{issuer.entity_id}", content_type="application/json"
-        )
+        issuer_response = self.client.delete(f"/issuer/delete/{issuer.entity_id}", content_type="application/json")
         self.assertEqual(issuer_response.status_code, 404)
         assertion.revoke("For test reasons", student)
         # after revoking it should work
-        issuer_response = self.client.delete(
-            f"/issuer/delete/{issuer.entity_id}", content_type="application/json"
-        )
+        issuer_response = self.client.delete(f"/issuer/delete/{issuer.entity_id}", content_type="application/json")
         self.assertEqual(issuer_response.status_code, 204)
         # and its child badgeclass is still gettable, even though it has been archived
         query = 'query foo{badgeClass(id: "' + badgeclass.entity_id + '") { entityId name } }'
@@ -210,9 +206,7 @@ class IssuerAPITest(BadgrTestCase):
             f"/issuer/badgeclasses/delete/{badgeclass.entity_id}", content_type="application/json"
         )
         self.assertEqual(badgeclass_response.status_code, 204)
-        issuer_response = self.client.delete(
-            f"/issuer/delete/{issuer.entity_id}", content_type="application/json"
-        )
+        issuer_response = self.client.delete(f"/issuer/delete/{issuer.entity_id}", content_type="application/json")
         self.assertEqual(issuer_response.status_code, 204)
         self.assertTrue(self.instance_is_removed(badgeclass))
         self.assertTrue(self.instance_is_removed(issuer))
@@ -531,7 +525,11 @@ class IssuerModelsTest(BadgrTestCase):
             eppn_direct_award.award(student)
 
     def _create_badge_and_student(
-            self, self_enrollment_disabled=False, formal=False, same_institution=False, schac_home_match_in_allowed_institutions=False,
+        self,
+        self_enrollment_disabled=False,
+        formal=False,
+        same_institution=False,
+        schac_home_match_in_allowed_institutions=False,
     ):
         """Helper to create a badgeclass and test users"""
         teacher = self.setup_teacher()
@@ -570,37 +568,69 @@ class IssuerModelsTest(BadgrTestCase):
 
         for formal, same_institution, schac_home_match_in_allowed_institutions in test_cases:
             badgeclass, student = self._create_badge_and_student(
-                self_enrollment_disabled=True, formal=formal, same_institution=same_institution, schac_home_match_in_allowed_institutions=schac_home_match_in_allowed_institutions
+                self_enrollment_disabled=True,
+                formal=formal,
+                same_institution=same_institution,
+                schac_home_match_in_allowed_institutions=schac_home_match_in_allowed_institutions,
             )
             self.assertFalse(badgeclass.user_may_enroll(student))
 
     def test_enrollment_allowed_for_formal_on_same_institution(self):
         # Not allowed when not same institution
-        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=True, same_institution=False)
+        badgeclass, student = self._create_badge_and_student(
+            self_enrollment_disabled=False, formal=True, same_institution=False
+        )
         self.assertFalse(badgeclass.user_may_enroll(student))
 
         # Allowed when same institution
-        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=True, same_institution=True)
+        badgeclass, student = self._create_badge_and_student(
+            self_enrollment_disabled=False, formal=True, same_institution=True
+        )
         self.assertTrue(badgeclass.user_may_enroll(student))
 
         # Having a match of schac home in allowed institutions should not make a difference for formal badges
-        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=True, same_institution=False, schac_home_match_in_allowed_institutions=True)
+        badgeclass, student = self._create_badge_and_student(
+            self_enrollment_disabled=False,
+            formal=True,
+            same_institution=False,
+            schac_home_match_in_allowed_institutions=True,
+        )
         self.assertFalse(badgeclass.user_may_enroll(student))
 
-        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=True, same_institution=True, schac_home_match_in_allowed_institutions=True)
+        badgeclass, student = self._create_badge_and_student(
+            self_enrollment_disabled=False,
+            formal=True,
+            same_institution=True,
+            schac_home_match_in_allowed_institutions=True,
+        )
         self.assertTrue(badgeclass.user_may_enroll(student))
 
     def test_enrollment_allowed_for_informal_when_schac_home_matches(self):
         # Not allowed when not same institution and no schac home match
-        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=False, same_institution=False, schac_home_match_in_allowed_institutions=False)
+        badgeclass, student = self._create_badge_and_student(
+            self_enrollment_disabled=False,
+            formal=False,
+            same_institution=False,
+            schac_home_match_in_allowed_institutions=False,
+        )
         self.assertFalse(badgeclass.user_may_enroll(student))
 
         # Allowed when same institution
-        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=False, same_institution=True, schac_home_match_in_allowed_institutions=False)
+        badgeclass, student = self._create_badge_and_student(
+            self_enrollment_disabled=False,
+            formal=False,
+            same_institution=True,
+            schac_home_match_in_allowed_institutions=False,
+        )
         self.assertTrue(badgeclass.user_may_enroll(student))
 
         # Allowed when not same institution but with schac home match
-        badgeclass, student = self._create_badge_and_student(self_enrollment_disabled=False, formal=False, same_institution=False, schac_home_match_in_allowed_institutions=True)
+        badgeclass, student = self._create_badge_and_student(
+            self_enrollment_disabled=False,
+            formal=False,
+            same_institution=False,
+            schac_home_match_in_allowed_institutions=True,
+        )
         self.assertTrue(badgeclass.user_may_enroll(student))
 
 

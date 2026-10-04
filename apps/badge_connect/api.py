@@ -19,17 +19,19 @@ class BadgeConnectView(APIView):
         authorization = request.environ.get("HTTP_AUTHORIZATION")
         if not authorization:
             raise PermissionDenied()
-        bearer_token = authorization[len("bearer "):]
+        bearer_token = authorization[len("bearer ") :]
         if not bearer_token:
             raise PermissionDenied()
 
         payload = {"token": bearer_token}
         headers = {"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"}
         url = f"{settings.EDUID_PROVIDER_URL}/introspect"
-        response = requests.post(url,
-                                 data=urllib.parse.urlencode(payload),
-                                 auth=(settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET),
-                                 headers=headers)
+        response = requests.post(
+            url,
+            data=urllib.parse.urlencode(payload),
+            auth=(settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET),
+            headers=headers,
+        )
         if response.status_code != 200:
             raise PermissionDenied()
 

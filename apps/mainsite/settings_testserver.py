@@ -5,7 +5,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "badgr",
         "OPTIONS": {
-           # "init_command": "SET storage_engine=InnoDB",  # Uncomment when using MySQL to ensure consistency across servers
+            # "init_command": "SET storage_engine=InnoDB",  # Uncomment when using MySQL to ensure consistency across servers
         },
     }
 }
@@ -21,9 +21,7 @@ CACHES = {
 
 
 # django test speedups
-PASSWORD_HASHERS = (
-    "django.contrib.auth.hashers.MD5PasswordHasher",
-)
+PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 DEBUG = False
 logging.disable(logging.CRITICAL)
 

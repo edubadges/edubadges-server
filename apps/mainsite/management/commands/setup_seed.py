@@ -44,7 +44,7 @@ def clear_data():
             "institution_institution",
             "institution_faculty",
             "issuer_issuer",
-            "issuer_badgeclass"
+            "issuer_badgeclass",
         )
 
         cursor.execute("SET FOREIGN_KEY_CHECKS=0")

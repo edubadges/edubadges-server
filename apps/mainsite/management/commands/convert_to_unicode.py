@@ -11,7 +11,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         with connection.cursor() as cursor:
-
             # Ignore "PROCEDURE convert_to_unicode does not exist" warning.
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")

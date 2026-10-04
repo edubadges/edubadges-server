@@ -52,7 +52,11 @@ class SetIssuerSignerView(APIView):
         issuer = Issuer.objects.get(entity_id=request.data["issuer_slug"])
         remove = request.data.get("action") == "remove"
         add = request.data.get("action") == "add"
-        signer_matching_email = [email for email in CachedEmailAddress.objects.filter(email=request.data["signer_email"], verified=True) if email.user.is_teacher]
+        signer_matching_email = [
+            email
+            for email in CachedEmailAddress.objects.filter(email=request.data["signer_email"], verified=True)
+            if email.user.is_teacher
+        ]
         if not signer_matching_email:
             raise ValidationError("No matching email found")
         if len(signer_matching_email) > 1:
@@ -83,6 +87,6 @@ class PublicKeyIssuerDetailView(APIView):
                 "type": "CryptographicKey",
                 "id": pubkey_issuer.public_url,
                 "owner": pubkey_issuer.owner_public_url,
-                "publicKeyPem": pubkey_issuer.public_key.public_key_pem
+                "publicKeyPem": pubkey_issuer.public_key.public_key_pem,
             }
         )

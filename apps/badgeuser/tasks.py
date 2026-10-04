@@ -8,6 +8,7 @@ email_task_queue_name = getattr(settings, "BACKGROUND_TASK_QUEUE_NAME", "default
 @app.task(bind=True, queue=email_task_queue_name)
 def process_email_verification(self, email_address_id):
     from issuer.models import BadgeInstance
+
     try:
         email_address = CachedEmailAddress.cached.get(id=email_address_id)
     except CachedEmailAddress.DoesNotExist:
@@ -18,9 +19,11 @@ def process_email_verification(self, email_address_id):
     variants = list(email_address.cached_variants())
 
     for i in issuer_instances:
-        if i.recipient_identifier not in variants and \
-                i.recipient_identifier != email_address.email and \
-                user.can_add_variant(i.recipient_identifier):
+        if (
+            i.recipient_identifier not in variants
+            and i.recipient_identifier != email_address.email
+            and user.can_add_variant(i.recipient_identifier)
+        ):
             email_address.add_variant(i.recipient_identifier)
 
             variants.append(i.recipient_identifier)

@@ -12,6 +12,7 @@ class ValidImageValidator:
         if image:
             try:
                 from PIL import Image
+
                 img = Image.open(image)
                 img.verify()
             except Exception:

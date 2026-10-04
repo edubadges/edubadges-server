@@ -7,6 +7,7 @@ from django.core.cache import cache
 
 def cached_method(auto_publish=False):
     """A decorator for CacheModel methods."""
+
     def decorator(target):
         @wraps(target)
         def wrapper(self, *args, **kwargs):
@@ -16,6 +17,7 @@ def cached_method(auto_publish=False):
                 data = target(self, *args, **kwargs)
                 cache.set(key, data, CACHE_FOREVER_TIMEOUT)
             return data
+
         wrapper._cached_method = True
         wrapper._cached_method_auto_publish = auto_publish
         wrapper._cached_method_target = target
@@ -38,10 +40,12 @@ def denormalized_field(field_name):
     Arguments:
       field_name -- the name of a field on the model that will store the results of the function
     """
+
     def decorator(target):
         @wraps(target)
         def wrapper(self):
             return target(self)
+
         wrapper._denormalized_field = True
         wrapper._denormalized_field_name = field_name
         return wrapper
@@ -52,10 +56,10 @@ def denormalized_field(field_name):
 
     return decorator
 
+
 def find_fields_decorated_with(instance, property_name):
     """helper function that finds all methods decorated with property_name"""
     non_field_attributes = set(dir(instance.__class__)) - set(instance._meta.get_fields())
     for m in non_field_attributes:
         if hasattr(getattr(instance.__class__, m), property_name):
             yield getattr(instance.__class__, m)
-

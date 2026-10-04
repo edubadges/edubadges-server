@@ -35,7 +35,6 @@ class TrailingSlashMiddleware(MiddlewareMixin):
 
 
 class ExceptionHandlerMiddleware:
-
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -54,7 +53,6 @@ class ExceptionHandlerMiddleware:
 
 
 class RequestResponseLoggerMiddleware(MiddlewareMixin):
-
     def process_request(self, request):
         if request.method in ["POST", "PUT", "PATCH"]:
             request.req_body = request.body  # for later retrieval

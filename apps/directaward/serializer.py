@@ -80,9 +80,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
         scheduled_at = validated_data.get("scheduled_at")
         if scheduled_at:
             if scheduled_at <= timezone.now():
-                raise serializers.ValidationError({
-                    "scheduled_at": "Scheduled time must be in the future."
-                })
+                raise serializers.ValidationError({"scheduled_at": "Scheduled time must be in the future."})
             validated_data["status"] = DirectAwardBundle.STATUS_SCHEDULED
 
         batch_mode = validated_data.pop("batch_mode")
@@ -138,8 +136,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                         )
                 if not successful_direct_awards:
                     raise BadRequest(
-                        f"No valid DirectAwards are created. All of them were rejected: "
-                        f"{un_successful_direct_awards!s}"
+                        f"No valid DirectAwards are created. All of them were rejected: {un_successful_direct_awards!s}"
                     )
 
             if notify_recipients and not scheduled_at:
@@ -185,14 +182,8 @@ class DirectAwardAuditTrailSerializer(serializers.ModelSerializer):
         source="badgeclass.issuer.faculty.institution.name",
         read_only=True,
     )
-    recipient_email = serializers.EmailField(
-        source="direct_award.recipient_email",
-        read_only=True
-    )
-    recipient_eppn = serializers.CharField(
-        source="direct_award.eppn",
-        read_only=True
-    )
+    recipient_email = serializers.EmailField(source="direct_award.recipient_email", read_only=True)
+    recipient_eppn = serializers.CharField(source="direct_award.eppn", read_only=True)
 
     class Meta:
         model = DirectAwardAuditTrail

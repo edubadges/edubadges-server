@@ -8,6 +8,7 @@ class JSONLDRenderer(renderers.JSONRenderer):
     """
     A simple wrapper for JSONRenderer that declares that we're delivering LD.
     """
+
     media_type = "application/ld+json"
     format = "ld+json"
 

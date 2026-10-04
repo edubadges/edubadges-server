@@ -32,6 +32,7 @@ class StudentsEnrolledSerializerWithRelations(BadgrBaseModelSerializer):
     """
     Serializer of students enrolled with representation of it's relations to badgeclass and issuer
     """
+
     badge_class = BadgeClassSerializerWithRelations()
     revoked = serializers.SerializerMethodField("get_assertion_revokation")
 

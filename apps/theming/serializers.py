@@ -1,4 +1,3 @@
-
 from badgrsocialauth.utils import get_privacy_content
 from django.utils import translation
 from rest_framework import serializers
@@ -27,8 +26,6 @@ from rest_framework import serializers
 
 
 class ThemeSerializer(serializers.Serializer):
-
-
     def to_representation(self, instance):
         """
         :type instance: Theme
@@ -40,17 +37,13 @@ class ThemeSerializer(serializers.Serializer):
             "showApiDocsLink": instance.show_api_docs_link,
             "termsOfServiceLink": instance.terms_of_service_link,
             "privacyPolicyLink": instance.privacy_policy_link,
-            "logoImg": {
-                "small": instance.logo_small.url,
-                "desktop": instance.logo_desktop.url
-            },
-            "consent_apply_badge":get_privacy_content("consent_apply_badge"),
-            "consent_apply_badge_en":get_privacy_content("consent_apply_badge_en"),
-            "privacy_statement":get_privacy_content("privacy_statement"),
-            "privacy_statement_en":get_privacy_content("privacy_statement_en"),
-            "language_detected":translation.get_language().lower(),
+            "logoImg": {"small": instance.logo_small.url, "desktop": instance.logo_desktop.url},
+            "consent_apply_badge": get_privacy_content("consent_apply_badge"),
+            "consent_apply_badge_en": get_privacy_content("consent_apply_badge_en"),
+            "privacy_statement": get_privacy_content("privacy_statement"),
+            "privacy_statement_en": get_privacy_content("privacy_statement_en"),
+            "language_detected": translation.get_language().lower(),
             "dutch_language_codes": ["nl-nl", "nl-be", "nl"],
-
         }
 
         return theme

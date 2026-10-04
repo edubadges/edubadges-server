@@ -119,6 +119,7 @@ class EncryptedCursorPagination(BasePagination):
         else:
             sleep(60) # Or some other retry behavior
     """
+
     cursor_query_param = "cursor"
 
     page_size = 100
@@ -216,29 +217,29 @@ class EncryptedCursorPagination(BasePagination):
         if lower_limit is not None:
             with transaction.atomic():
                 # Select up page_size + 1 elements in forward order to populate page and hasNext
-                padded_page = queryset.filter(**{self.ordering + "__gt": lower_limit}) \
-                                      .order_by(self.ordering)[:self.page_size + 1]
+                padded_page = queryset.filter(**{self.ordering + "__gt": lower_limit}).order_by(self.ordering)[
+                    : self.page_size + 1
+                ]
                 # Select element for hasPrevious
-                prev_elem = queryset.filter(**{self.ordering + "__lte": lower_limit}) \
-                                    .order_by("-" + self.ordering) \
-                                    .first()
+                prev_elem = (
+                    queryset.filter(**{self.ordering + "__lte": lower_limit}).order_by("-" + self.ordering).first()
+                )
 
             page, next_elem = self._partition_padded_page(padded_page)
         elif upper_limit is not None:
             with transaction.atomic():
                 # Select up page_size + 1 elements in reverse order to populate page and hasPrevious
-                padded_page = queryset.filter(**{self.ordering + "__lt": upper_limit}) \
-                                      .order_by("-" + self.ordering)[:self.page_size + 1]
+                padded_page = queryset.filter(**{self.ordering + "__lt": upper_limit}).order_by("-" + self.ordering)[
+                    : self.page_size + 1
+                ]
                 # Select element for hasNext
-                next_elem = queryset.filter(**{self.ordering + "__gte": upper_limit}) \
-                                    .order_by(self.ordering) \
-                                    .first()
+                next_elem = queryset.filter(**{self.ordering + "__gte": upper_limit}).order_by(self.ordering).first()
 
             page, prev_elem = self._partition_padded_page(padded_page)
             page = list(reversed(page))
         else:
             # Select up page_size + 1 elements in forward order to populate page and hasNext
-            padded_page = queryset.order_by(self.ordering)[:self.page_size + 1]
+            padded_page = queryset.order_by(self.ordering)[: self.page_size + 1]
             prev_elem = None  # Special case--hasPrevious is always False
 
             page, next_elem = self._partition_padded_page(padded_page)
@@ -269,14 +270,16 @@ class EncryptedCursorPagination(BasePagination):
         return Response(info)
 
     def get_page_info(self):
-        return OrderedDict([
-            ("hasNext", self.has_next),
-            ("nextResults", self.next_link if self.has_next else None),
-            ("nextCursor", self.next_cursor if self.has_next else None),
-            ("hasPrevious", self.has_prev),
-            ("previousResults", self.prev_link if self.has_prev else None),
-            ("previousCursor", self.prev_cursor if self.has_prev else None),
-        ])
+        return OrderedDict(
+            [
+                ("hasNext", self.has_next),
+                ("nextResults", self.next_link if self.has_next else None),
+                ("nextCursor", self.next_cursor if self.has_next else None),
+                ("hasPrevious", self.has_prev),
+                ("previousResults", self.prev_link if self.has_prev else None),
+                ("previousCursor", self.prev_cursor if self.has_prev else None),
+            ]
+        )
 
     def get_link_header(self):
         links = []

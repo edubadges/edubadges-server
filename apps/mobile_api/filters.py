@@ -7,6 +7,7 @@ INSTITUTION_TYPE_FILTER_CHOICES = [
     ("WO", "WO"),
 ]
 
+
 class CatalogBadgeClassFilter(filters.FilterSet):
     name = filters.CharFilter(field_name="name", lookup_expr="icontains")
     institution = filters.CharFilter(

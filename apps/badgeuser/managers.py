@@ -7,15 +7,16 @@ from mainsite.models import BadgrApp
 class BadgeUserManager(UserManager):
     duplicate_email_error = "Account could not be created. An account with this email address may already exist."
 
-    def create(self,
-               email,
-               first_name,
-               last_name,
-               request=None,
-               send_confirmation=True,
-               create_email_address=True,
-               marketing_opt_in=False
-               ):
+    def create(
+        self,
+        email,
+        first_name,
+        last_name,
+        request=None,
+        send_confirmation=True,
+        create_email_address=True,
+        marketing_opt_in=False,
+    ):
         from badgeuser.models import CachedEmailAddress
 
         user = None
@@ -54,9 +55,9 @@ class CachedEmailAddressManager(EmailAddressManager):
 
 
 class EmailAddressCacheModelManager(CacheModelManager):
-
     def get_student_email(self, email_address):
         from badgeuser.models import CachedEmailAddress
+
         all_matching_emails = CachedEmailAddress.cached.filter(email=email_address)
         student_email = [email for email in all_matching_emails if email.user.is_student]
         if not student_email:

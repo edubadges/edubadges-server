@@ -37,8 +37,10 @@ def clear_data():
 
         dbname = environ.get("BADGR_DB_NAME")
         migration_filled_tables = ("auth_permission", "django_content_type", "django_migrations")
-        sql = f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' " \
-              f"AND table_name NOT IN {migration_filled_tables}"
+        sql = (
+            f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' "
+            f"AND table_name NOT IN {migration_filled_tables}"
+        )
 
         cursor.execute("SET FOREIGN_KEY_CHECKS=0")
         try:
@@ -82,15 +84,19 @@ def run_scaled_seed(scale):
         name_english=faculty_name,
         description_english=f"Description for {faculty_name}",
         description_dutch=f"Beschrijving voor {faculty_name}",
-        institution=institution
+        institution=institution,
     )
     issuer_name = "Many Assertions"
-    issuer, _ = Issuer.objects.get_or_create(name_english=issuer_name,
-                                             description_english=f"Description for {issuer_name}",
-                                             description_dutch=f"Beschrijving voor {issuer_name}",
-                                             faculty=faculty, old_json="{}",
-                                             url_english="https://issuer", email="issuer@info.nl",
-                                             image_english="uploads/issuers/surf.png")
+    issuer, _ = Issuer.objects.get_or_create(
+        name_english=issuer_name,
+        description_english=f"Description for {issuer_name}",
+        description_dutch=f"Beschrijving voor {issuer_name}",
+        faculty=faculty,
+        old_json="{}",
+        url_english="https://issuer",
+        email="issuer@info.nl",
+        image_english="uploads/issuers/surf.png",
+    )
     badgeclass, _ = BadgeClass.objects.get_or_create(
         name="Many Assertions",
         issuer=issuer,
@@ -107,7 +113,9 @@ def run_scaled_seed(scale):
             print(f"Seeding assertion {i} out of {scale}")
         recipient = setup_helper.setup_student(affiliated_institutions=[institution])
         assertion = BadgeInstance.objects.create(
-            badgeclass=badgeclass, recipient_identifier=recipient.get_recipient_identifier(),
+            badgeclass=badgeclass,
+            recipient_identifier=recipient.get_recipient_identifier(),
             created_by=issuing_teacher,
             created_at=timezone.now().replace(month=randrange(12) + 1),
-            user=recipient)
+            user=recipient,
+        )

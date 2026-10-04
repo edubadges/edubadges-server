@@ -16,10 +16,7 @@ class BadgeUserTokenSerializer(serializers.Serializer):
         apispec_definition = ("BadgeUserToken", {})
 
     def to_representation(self, instance):
-        representation = {
-            "username": instance.username,
-            "token": instance.cached_token()
-        }
+        representation = {"username": instance.username, "token": instance.cached_token()}
         if self.context.get("tokenReplaced", False):
             representation["replace"] = True
         return representation
@@ -42,14 +39,17 @@ class BadgeUserProfileSerializer(serializers.Serializer):
     email = serializers.EmailField(source="primary_email", required=False)
     entity_id = serializers.CharField(read_only=True)
     marketing_opt_in = serializers.BooleanField(required=False)
-    institution = InstitutionForProfileSerializer(read_only=True )
+    institution = InstitutionForProfileSerializer(read_only=True)
     is_superuser = serializers.BooleanField(required=False)
 
 
 class EmailSerializer(BadgrBaseModelSerializer):
     variants = serializers.ListField(
         child=serializers.EmailField(required=False),
-        required=False, source="cached_variants", allow_null=True, read_only=True
+        required=False,
+        source="cached_variants",
+        allow_null=True,
+        read_only=True,
     )
     email = serializers.EmailField(required=True)
 

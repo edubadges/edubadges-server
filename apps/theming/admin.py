@@ -6,7 +6,6 @@ from .models import Theme, get_current_templates
 
 
 class ThemeForm(forms.ModelForm):
-
     class Meta:
         model = Theme
         fields = "__all__"

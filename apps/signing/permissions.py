@@ -11,4 +11,3 @@ class OwnsSymmetricKey(permissions.BasePermission):
         if symmetric_key:
             return symmetric_key.user == request.user
         return True
-

@@ -1,5 +1,3 @@
-
-
 import uuid
 from collections.abc import MutableMapping
 
@@ -17,13 +15,11 @@ class DjangoCacheDict(MutableMapping):
         if id is None:
             id = uuid.uuid4().hexdigest()
         self._id = id
-        self.keymap_cache_key = self._keymap_cache_key+"_"+self._id
+        self.keymap_cache_key = self._keymap_cache_key + "_" + self._id
 
     def build_key(self, *args):
         return "{keymap_cache_key}{namespace}{key}".format(
-            keymap_cache_key=self.keymap_cache_key,
-            namespace=self.namespace,
-            key="".join(args)
+            keymap_cache_key=self.keymap_cache_key, namespace=self.namespace, key="".join(args)
         ).encode("utf-8")
 
     def timeout(self):
@@ -73,7 +69,7 @@ class DjangoCacheDict(MutableMapping):
 
     def clear(self):
         self._id = uuid.uuid4().hexdigest()
-        self.keymap_cache_key = self._keymap_cache_key+"_"+self._id
+        self.keymap_cache_key = self._keymap_cache_key + "_" + self._id
 
 
 class DjangoCacheRequestsCacheBackend(BaseCache):

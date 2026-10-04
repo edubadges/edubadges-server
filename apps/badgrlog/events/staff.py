@@ -2,7 +2,6 @@ from .base import BaseBadgrEvent
 
 
 class BasePermissionEvent(BaseBadgrEvent):
-
     def __init__(self, staff_instance, request):
         self.staff_instance = staff_instance
         self.request = request
@@ -17,12 +16,11 @@ class BasePermissionEvent(BaseBadgrEvent):
             "staff_object_type": self.staff_instance.object.__class__.__name__,
             "staff_object_id": self.staff_instance.object.id,
             "staff_object_name": self.staff_instance.object.name,
-            "permissions": self.staff_instance.permissions
+            "permissions": self.staff_instance.permissions,
         }
 
 
 class PermissionChangedEvent(BasePermissionEvent):
-
     def __init__(self, staff_instance, previous_permissions, request):
         self.previous_permissions = previous_permissions
         super().__init__(staff_instance, request)

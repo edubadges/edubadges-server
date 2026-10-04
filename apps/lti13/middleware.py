@@ -4,10 +4,8 @@ from django.utils.deprecation import MiddlewareMixin
 
 
 class SameSiteMiddleware(MiddlewareMixin):
-
     def process_response(self, request, response):
-        django_support_samesite_none = django.VERSION[0] > 3 \
-                                       or (django.VERSION[0] == 3 and django.VERSION[1] >= 1)
+        django_support_samesite_none = django.VERSION[0] > 3 or (django.VERSION[0] == 3 and django.VERSION[1] >= 1)
         if request.is_secure() and not django_support_samesite_none:
             session_cookie_samesite = getattr(settings, "SESSION_COOKIE_SAMESITE", None)
             csrf_cookie_samesite = getattr(settings, "CSRF_COOKIE_SAMESITE", None)

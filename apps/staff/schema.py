@@ -5,8 +5,16 @@ from staff.models import BadgeClassStaff, FacultyStaff, InstitutionStaff, Issuer
 
 class StaffTypeMeta:
     class Meta:
-        fields = ("user", "may_create", "may_read", "may_update", "may_delete", "may_award", "may_sign",
-                  "may_administrate_users")
+        fields = (
+            "user",
+            "may_create",
+            "may_read",
+            "may_update",
+            "may_delete",
+            "may_award",
+            "may_sign",
+            "may_administrate_users",
+        )
 
 
 class InstitutionStaffType(DjangoObjectType):

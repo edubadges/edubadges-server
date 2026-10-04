@@ -7,12 +7,12 @@ from mainsite.tests import BadgrTestCase
 
 
 class InstitutionTest(BadgrTestCase):
-
     def test_create_faculty(self):
         teacher1 = self.setup_teacher(authenticate=True)
         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True)
-        response = self.client.post("/institution/faculties/create", data=json.dumps(faculty_json),
-                                    content_type="application/json")
+        response = self.client.post(
+            "/institution/faculties/create", data=json.dumps(faculty_json), content_type="application/json"
+        )
         self.assertEqual(response.status_code, 201)
 
     def test_edit_institution(self):
@@ -21,23 +21,29 @@ class InstitutionTest(BadgrTestCase):
         description = "description"
         institution_json["description_english"] = description
         institution_json["description_dutch"] = description
-        response = self.client.put(f"/institution/edit/{teacher1.institution.entity_id}",
-                                   data=json.dumps(institution_json), content_type="application/json")
+        response = self.client.put(
+            f"/institution/edit/{teacher1.institution.entity_id}",
+            data=json.dumps(institution_json),
+            content_type="application/json",
+        )
         self.assertEqual(response.status_code, 200)
         institution = Institution.objects.get(pk=teacher1.institution.pk)
         self.assertEqual(institution.description_english, description)
-        response = self.client.delete(f"/institution/edit/{teacher1.institution.entity_id}",
-                                      content_type="application/json")
+        response = self.client.delete(
+            f"/institution/edit/{teacher1.institution.entity_id}", content_type="application/json"
+        )
         self.assertEqual(response.status_code, 405)
 
     def test_check_institutions_validity(self):
         teacher1 = self.setup_teacher()
         teacher1.institution.identifier
-        response = self.client.post("/institution/check", data=json.dumps([teacher1.institution.identifier]),
-                                    content_type="application/json")
+        response = self.client.post(
+            "/institution/check", data=json.dumps([teacher1.institution.identifier]), content_type="application/json"
+        )
         self.assertTrue(response.data[0]["valid"])
-        response = self.client.post("/institution/check", data=json.dumps(["NOT EXIST"]),
-                                    content_type="application/json")
+        response = self.client.post(
+            "/institution/check", data=json.dumps(["NOT EXIST"]), content_type="application/json"
+        )
         self.assertFalse(response.data[0]["valid"])
 
     def test_faculty_delete(self):
@@ -48,15 +54,15 @@ class InstitutionTest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
-        assertion = self.setup_assertion(recipient=student,
-                                         badgeclass=badgeclass,
-                                         created_by=teacher1)
-        response_fail = self.client.delete(f"/institution/faculties/delete/{faculty.entity_id}",
-                                                 content_type="application/json")
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        response_fail = self.client.delete(
+            f"/institution/faculties/delete/{faculty.entity_id}", content_type="application/json"
+        )
         self.assertEqual(response_fail.status_code, 404)
         assertion.delete()
-        response_success = self.client.delete(f"/institution/faculties/delete/{faculty.entity_id}",
-                                      content_type="application/json")
+        response_success = self.client.delete(
+            f"/institution/faculties/delete/{faculty.entity_id}", content_type="application/json"
+        )
         self.assertEqual(response_success.status_code, 204)
         self.assertTrue(self.instance_is_removed(faculty))
         self.assertTrue(self.instance_is_removed(issuer))
@@ -65,7 +71,6 @@ class InstitutionTest(BadgrTestCase):
 
 
 class InstitutionModelsTest(BadgrTestCase):
-
     def test_faculty_uniqueness_constraints_when_archiving(self):
         """Checks if uniquness constraints on name dont trigger for archived Faculties"""
         teacher1 = self.setup_teacher(authenticate=True)
@@ -83,7 +88,6 @@ class InstitutionModelsTest(BadgrTestCase):
 
 
 class TestInstitutionSchema(BadgrTestCase):
-
     def test_institution_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
         query = "query foo {institutions {entityId grondslagFormeel grondslagInformeel identifier contentTypeId, defaultLanguage}}"

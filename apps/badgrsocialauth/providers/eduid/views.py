@@ -144,7 +144,9 @@ def callback(request):
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error=error)
         eppn_json = response.json()
-        keyword_arguments["validated_name"] = bool([info["validated_name"] for info in eppn_json if "validated_name" in info])
+        keyword_arguments["validated_name"] = bool(
+            [info["validated_name"] for info in eppn_json if "validated_name" in info]
+        )
         keyword_arguments["re_sign"] = False if not social_account else True
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
@@ -201,8 +203,8 @@ def after_terms_agreement(request, **kwargs):
     logger.info(f"payload from surfconext {json.dumps(payload)}")
 
     if "acr" in payload and payload["acr"] == "https://eduid.nl/trust/validate-names":
-        request.user.validated_name = f'{payload["given_name"]} {payload["family_name"]}'
-        logger.info(f'Stored validated name {payload["given_name"]} {payload["family_name"]}')
+        request.user.validated_name = f"{payload['given_name']} {payload['family_name']}"
+        logger.info(f"Stored validated name {payload['given_name']} {payload['family_name']}")
 
     access_token = kwargs.get("access_token")
     headers = {
@@ -226,7 +228,7 @@ def after_terms_agreement(request, **kwargs):
                     }
                 ]
             )
-            logger.info(f'Stored affiliations {info["eppn"]} {info["schac_home_organization"]}')
+            logger.info(f"Stored affiliations {info['eppn']} {info['schac_home_organization']}")
     validated_names = [info["validated_name"] for info in eppn_json if "validated_name" in info]
     if request.user.validated_name and len(validated_names) == 0:
         ret = HttpResponseRedirect(ret.url + "&revalidate-name=true")
@@ -276,6 +278,7 @@ def print_logout_message(sender, user, request, **kwargs):
 
 def print_login_message(sender, user, request, **kwargs):
     print("user logged in")
+
 
 if not getattr(settings, "DISABLE_AUTH_SIGNALS", False):
     user_logged_out.connect(print_logout_message)
