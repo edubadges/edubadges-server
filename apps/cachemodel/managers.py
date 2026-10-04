@@ -1,7 +1,7 @@
-from django.core.cache import cache
-from django.db import models
 from cachemodel import CACHE_FOREVER_TIMEOUT
 from cachemodel.utils import generate_cache_key
+from django.core.cache import cache
+from django.db import models
 
 
 class CacheModelManager(models.Manager):
@@ -9,7 +9,7 @@ class CacheModelManager(models.Manager):
         key = generate_cache_key([self.model.__name__, "get"], **kwargs)
         obj = cache.get(key)
         if obj is None:
-            obj = super(CacheModelManager, self).get(**kwargs)
+            obj = super().get(**kwargs)
             cache.set(key, obj, CACHE_FOREVER_TIMEOUT)
 
             # update cache_key_index with obj.pk <- key
@@ -19,9 +19,8 @@ class CacheModelManager(models.Manager):
         key = generate_cache_key([self.model.__name__, "get"], **kwargs)
         obj = cache.get(key)
         if obj is None:
-            return super(CacheModelManager, self).get_or_create(**kwargs)
-        else:
-            return obj, False
+            return super().get_or_create(**kwargs)
+        return obj, False
 
     def get_by(self, *args, **kwargs):
         raise DeprecationWarning("get_by() has been deprecated, use .get() instead.")
@@ -41,11 +40,11 @@ class CachedTableManager(models.Manager):
     def _rebuild_index(self, field_name):
         cache_key = generate_cache_key([self.model.__name__, "table"], field_name)
         table = {}
-        for obj in super(CachedTableManager, self).all().select_related():
+        for obj in super().all().select_related():
             key = getattr(obj, field_name, None)
             if key is not None:
                 table[key] = obj
-        cache.set(cache_key, table, CACHE_FOREVER_TIMEOUT);
+        cache.set(cache_key, table, CACHE_FOREVER_TIMEOUT)
         return table
 
     def _fetch_index(self, field_name):
@@ -60,7 +59,7 @@ class CachedTableManager(models.Manager):
             raise NotImplementedError("Multiple indices are not supported on CachedTable.")
 
         field, value = list(kwargs.items())[0]
-        if field == 'pk':
+        if field == "pk":
             field = self._pk_field_name()
         table = self._fetch_index(field)
         if value not in table:

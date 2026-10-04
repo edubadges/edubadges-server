@@ -1,7 +1,6 @@
+from directaward.models import DirectAwardAuditTrail
 from django.core.management.base import BaseCommand
 from django.db import transaction
-
-from directaward.models import DirectAwardAuditTrail
 
 
 class Command(BaseCommand):
@@ -11,7 +10,7 @@ class Command(BaseCommand):
         qs = (
             DirectAwardAuditTrail.objects
             .filter(badgeclass__isnull=True, direct_award__isnull=False)
-            .select_related('direct_award__badgeclass')
+            .select_related("direct_award__badgeclass")
         )
 
         total = qs.count()
@@ -26,7 +25,7 @@ class Command(BaseCommand):
                     continue
 
                 audit.badgeclass = badgeclass
-                audit.save(update_fields=['badgeclass'])
+                audit.save(update_fields=["badgeclass"])
                 updated += 1
 
         self.stdout.write(

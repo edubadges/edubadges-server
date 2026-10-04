@@ -5,7 +5,7 @@ import sys
 
 import semver
 
-__all__ = ['APPS_DIR', 'TOP_DIR', 'get_version']
+__all__ = ["APPS_DIR", "TOP_DIR", "get_version"]
 
 
 def get_version(version=None):

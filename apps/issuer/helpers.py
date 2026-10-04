@@ -1,8 +1,7 @@
-# encoding: utf-8
 
 
 import uuid
-from collections import MutableMapping
+from collections.abc import MutableMapping
 
 from django.core.cache import cache
 from requests_cache.backends import BaseCache
@@ -70,7 +69,7 @@ class DjangoCacheDict(MutableMapping):
             yield cache.get(key)
 
     def __str__(self):
-        return '<{}>'.format(self.keymap_cache_key)
+        return f"<{self.keymap_cache_key}>"
 
     def clear(self):
         self._id = uuid.uuid4().hexdigest()
@@ -78,7 +77,7 @@ class DjangoCacheDict(MutableMapping):
 
 
 class DjangoCacheRequestsCacheBackend(BaseCache):
-    def __init__(self, namespace='requests-cache', **options):
-        super(DjangoCacheRequestsCacheBackend, self).__init__(**options)
-        self.responses = DjangoCacheDict(namespace, 'responses')
-        self.keys_map = DjangoCacheDict(namespace, 'urls')
+    def __init__(self, namespace="requests-cache", **options):
+        super().__init__(**options)
+        self.responses = DjangoCacheDict(namespace, "responses")
+        self.keys_map = DjangoCacheDict(namespace, "urls")

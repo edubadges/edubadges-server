@@ -1,4 +1,3 @@
-# encoding: utf-8
 
 from entity.api import BaseEntityDetailView
 from theming.serializers import ThemeSerializer

@@ -1,10 +1,9 @@
-from django.db import models, transaction
+from django.db import transaction
 from django.db.models import ProtectedError
-
 from staff.models import PermissionedRelationshipBase
 
 
-class PermissionedModelMixin(object):
+class PermissionedModelMixin:
     """
     Abstract class used for inheritance by all the Models (Badgeclass, Issuer, Faculty & Institution) that have a related
     Staff model. Used for retrieving permissions and staff members. And instant caching when changes happen.
@@ -18,8 +17,7 @@ class PermissionedModelMixin(object):
         staff = self.get_staff_member(user)
         if staff:
             return staff.permissions
-        else:
-            return PermissionedRelationshipBase.empty_permissions()
+        return PermissionedRelationshipBase.empty_permissions()
 
     def check_local_permissions(self, user, required_permissions):
         """
@@ -83,12 +81,12 @@ class PermissionedModelMixin(object):
             local_perms = self._get_local_permissions(user)
             combined_perms = {}
             for key in local_perms:
-                combined_perms[key] = local_perms[key] if local_perms[key] > parent_perms[key] else parent_perms[key]
+                combined_perms[key] = max(parent_perms[key], local_perms[key])
             return combined_perms
         except AttributeError:  # recursive base case (reached root of permission tree, i.e. the Institution)
             perms = self._get_local_permissions(user)
-            if hasattr(user, 'is_teacher') and user.is_teacher and self == user.institution:  # if at the recursive base case the institution is the same as user's institution
-                perms['may_read'] = True  # then add may_read, everyone in institution is a reader
+            if hasattr(user, "is_teacher") and user.is_teacher and self == user.institution:  # if at the recursive base case the institution is the same as user's institution
+                perms["may_read"] = True  # then add may_read, everyone in institution is a reader
             return perms
 
     def has_permissions(self, user, permissions):
@@ -102,13 +100,11 @@ class PermissionedModelMixin(object):
         perm_count = 0
         if not user_perms:
             return False
-        else:
-            for perm in permissions:
-                if not user_perms[perm]:
-                    return False
-                else:
-                    perm_count += 1
-            return len(permissions) == perm_count
+        for perm in permissions:
+            if not user_perms[perm]:
+                return False
+            perm_count += 1
+        return len(permissions) == perm_count
 
     @property
     def staff_items(self):
@@ -130,8 +126,7 @@ class PermissionedModelMixin(object):
                 if len(has_perms) == len(permissions):
                     result.append(staff)
             return result
-        else:
-            return self.staff_items
+        return self.staff_items
 
     def get_staff_member(self, user):
         """
@@ -144,12 +139,12 @@ class PermissionedModelMixin(object):
                 return staff
 
     def publish(self, *args, **kwargs):
-        super(PermissionedModelMixin, self).publish(*args, **kwargs)
+        super().publish(*args, **kwargs)
         for member in self.cached_staff():
             member.cached_user.publish()
 
     def save(self, *args, **kwargs):
-        super(PermissionedModelMixin, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         try:
             self.parent.publish()
         except AttributeError:
@@ -163,10 +158,10 @@ class PermissionedModelMixin(object):
             - only publishes the parent of the initially deleted entity
             - removes all associated staff memberships without publishing the associated object (the one that is deleted)
         """
-        publish_parent = kwargs.pop('publish_parent', True)
+        publish_parent = kwargs.pop("publish_parent", True)
         if self.assertions:
             raise ProtectedError(
-                "{} may only be deleted if there are no awarded Assertions.".format(self.__class__.__name__), self)
+                f"{self.__class__.__name__} may only be deleted if there are no awarded Assertions.", self)
         try:  # first the children
             kids = self.children
             for child in kids:
@@ -175,7 +170,7 @@ class PermissionedModelMixin(object):
             pass
         for membership in self.staff_items:
             membership.delete(publish_object=False)
-        ret = super(PermissionedModelMixin, self).delete(*args, **kwargs)
+        ret = super().delete(*args, **kwargs)
         if publish_parent:
             try:
                 self.parent.publish()
@@ -186,7 +181,7 @@ class PermissionedModelMixin(object):
     def return_value_according_to_language(self, attribute_english, attribute_dutch):
         """Convenience function that returns the right attribute according to the
         language selection of its parent institution"""
-        if self.__class__.__name__ == 'Institution':
+        if self.__class__.__name__ == "Institution":
             institution = self
         else:
             institution = self.institution
@@ -196,4 +191,4 @@ class PermissionedModelMixin(object):
         elif institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
             if attribute_dutch:
                 return attribute_dutch
-        return attribute_english if attribute_english else attribute_dutch
+        return attribute_english or attribute_dutch

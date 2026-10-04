@@ -1,23 +1,22 @@
 import graphene
-from graphene_django.types import DjangoObjectType
-
 from directaward.models import DirectAward, DirectAwardBundle
+from graphene_django.types import DjangoObjectType
 
 
 class DirectAwardType(DjangoObjectType):
     class Meta:
         model = DirectAward
-        fields = ('entity_id', 'eppn', 'status', 'recipient_email', 'badgeclass', 'created_at', 'updated_at',
-                  'resend_at', 'delete_at', 'expiration_date', 'recipient_first_name', 'recipient_surname')
+        fields = ("entity_id", "eppn", "status", "recipient_email", "badgeclass", "created_at", "updated_at",
+                  "resend_at", "delete_at", "expiration_date", "recipient_first_name", "recipient_surname")
 
 
 class DirectAwardBundleType(DjangoObjectType):
     class Meta:
         model = DirectAwardBundle
-        fields = ('entity_id', 'badgeclass', 'created_at', 'updated_at', 'identifier_type',
-                  'assertion_count', 'direct_award_count', 'direct_award_rejected_count', 'direct_award_expired_count',
-                  'direct_award_removed_count', 'direct_award_deleted_count', 'direct_award_scheduled_count',
-                  'direct_award_revoked_count', 'initial_total')
+        fields = ("entity_id", "badgeclass", "created_at", "updated_at", "identifier_type",
+                  "assertion_count", "direct_award_count", "direct_award_rejected_count", "direct_award_expired_count",
+                  "direct_award_removed_count", "direct_award_deleted_count", "direct_award_scheduled_count",
+                  "direct_award_revoked_count", "initial_total")
 
     assertion_count = graphene.Int()
     direct_award_count = graphene.Int()
@@ -31,7 +30,7 @@ class DirectAwardBundleType(DjangoObjectType):
         return self.cached_direct_awards()
 
 
-class Query(object):
+class Query:
     direct_awards = graphene.List(DirectAwardType)
     all_unclaimed_direct_awards = graphene.List(DirectAwardType)
     all_deleted_direct_awards = graphene.List(DirectAwardType)
@@ -40,12 +39,12 @@ class Query(object):
 
     def resolve_direct_awards(self, info, **kwargs):
         user = info.context.user
-        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+        if not hasattr(user, "is_authenticated") or not user.is_authenticated:
             return []
         return list(user.direct_awards)
 
     def resolve_direct_award(self, info, **kwargs):
-        id = kwargs.get('id')
+        id = kwargs.get("id")
         if id is not None:
             da = DirectAward.objects.get(entity_id=id)
             user = info.context.user
@@ -58,10 +57,10 @@ class Query(object):
         return [da for da in DirectAward.objects.filter(badgeclass__issuer__faculty__institution=user.institution,
                                                         status__in=[DirectAward.STATUS_UNACCEPTED,
                                                                     DirectAward.STATUS_SCHEDULED]) if
-                da.badgeclass.has_permissions(info.context.user, ['may_award'])]
+                da.badgeclass.has_permissions(info.context.user, ["may_award"])]
 
     def resolve_all_deleted_direct_awards(self, info, **kwargs):
         user = info.context.user
         return [da for da in DirectAward.objects.filter(badgeclass__issuer__faculty__institution=user.institution,
                                                         status=DirectAward.STATUS_DELETED) if
-                da.badgeclass.has_permissions(info.context.user, ['may_award'])]
+                da.badgeclass.has_permissions(info.context.user, ["may_award"])]

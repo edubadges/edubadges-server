@@ -1,33 +1,31 @@
 import urllib.parse
-from urllib.parse import parse_qs
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from allauth.account.utils import perform_login
 from allauth.socialaccount import app_settings
 from allauth.socialaccount.models import SocialLogin
+from badgeuser.models import BadgeUser
+from badgrsocialauth.utils import set_session_badgr_app
 from django.conf import settings
 from django.contrib.auth import logout
 from django.core.cache import caches  # type: ignore
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
-from pylti1p3.contrib.django import DjangoOIDCLogin, DjangoMessageLaunch
-from pylti1p3.launch_data_storage.cache import CacheDataStorage
-from pylti1p3.lineitem import LineItem
-
-from badgeuser.models import BadgeUser
-from badgrsocialauth.utils import set_session_badgr_app
 from institution.models import Institution
 from lti13.config import DjangoDbToolConf
 from mainsite.models import BadgrApp
+from pylti1p3.contrib.django import DjangoMessageLaunch, DjangoOIDCLogin
+from pylti1p3.launch_data_storage.cache import CacheDataStorage
+from pylti1p3.lineitem import LineItem
 
 
 class DjangoNoSessionCacheDataStorage(CacheDataStorage):
     _cache = None
 
-    def __init__(self, cache_name='default', **kwargs):
+    def __init__(self, cache_name="default", **kwargs):
         self._cache = caches[cache_name]
-        super(DjangoNoSessionCacheDataStorage, self).__init__(cache_name, **kwargs)
+        super().__init__(cache_name, **kwargs)
 
     def get_session_cookie_name(self):
         # We are stateless as the client and server do not share the domain
@@ -46,7 +44,7 @@ def get_launch_data_storage():
 
 
 def get_launch_url(request):
-    target_link_uri = request.POST.get('target_link_uri', request.GET.get('target_link_uri'))
+    target_link_uri = request.POST.get("target_link_uri", request.GET.get("target_link_uri"))
     if not target_link_uri:
         raise Exception('Missing "target_link_uri" param')
     return target_link_uri
@@ -70,9 +68,9 @@ def launch(request):
                                          deployment_validation=False)
     message_launch_data = message_launch.get_launch_data()
     # Get the mandatory data from the launch data
-    email = message_launch_data['email']
-    issuer = message_launch_data['iss']
-    client_id = message_launch_data['aud']
+    email = message_launch_data["email"]
+    issuer = message_launch_data["iss"]
+    client_id = message_launch_data["aud"]
     # This can not fail as the launch would have been aborted
     registration = tool_conf.find_registration_by_params(issuer, client_id)
     institution = Institution.objects.get(identifier=registration.get_institution_identifier())
@@ -100,7 +98,7 @@ def launch(request):
                         email_verification=app_settings.EMAIL_VERIFICATION,
                         redirect_url=social_login.get_redirect_url(request),
                         signal_kwargs={"sociallogin": social_login})
-    auth_token = parse_qs(urlparse(ret.url).query)['authToken'][0]
+    auth_token = parse_qs(urlparse(ret.url).query)["authToken"][0]
     args = {"status": "success", "launch_id": launch_id, "auth_token": auth_token}
     return redirect(f"{settings.UI_URL}/launch/lti?{urllib.parse.urlencode(args)}")
 

@@ -1,33 +1,50 @@
 from datetime import datetime
 
 import graphene
+from directaward.schema import DirectAwardBundleType, DirectAwardType
 from django.conf import settings
-from graphene.relay import ConnectionField
-from graphene_django.types import DjangoObjectType, Connection
-
-from directaward.schema import DirectAwardType, DirectAwardBundleType
 from endorsement.schema import EndorsementType
+from graphene.relay import ConnectionField
+from graphene_django.types import Connection, DjangoObjectType
 from lti_edu.schema import StudentsEnrolledType
-from mainsite.graphql_utils import JSONType, UserProvisionmentResolverMixin, ContentTypeIdResolverMixin, \
-    StaffResolverMixin, ImageResolverMixin, PermissionsResolverMixin, resolver_blocker_for_students, \
-    DefaultLanguageResolverMixin, resolver_blocker_only_for_current_user
+from mainsite.graphql_utils import (
+    ContentTypeIdResolverMixin,
+    DefaultLanguageResolverMixin,
+    ImageResolverMixin,
+    JSONType,
+    PermissionsResolverMixin,
+    StaffResolverMixin,
+    UserProvisionmentResolverMixin,
+    resolver_blocker_for_students,
+    resolver_blocker_only_for_current_user,
+)
 from mainsite.utils import generate_image_url
-from staff.schema import IssuerStaffType, BadgeClassStaffType
-from .models import Issuer, BadgeClass, BadgeInstance, BadgeClassExtension, IssuerExtension, BadgeInstanceExtension, \
-    BadgeClassAlignment, BadgeInstanceEvidence, BadgeInstanceCollection
+from staff.schema import BadgeClassStaffType, IssuerStaffType
+
+from .models import (
+    BadgeClass,
+    BadgeClassAlignment,
+    BadgeClassExtension,
+    BadgeInstance,
+    BadgeInstanceCollection,
+    BadgeInstanceEvidence,
+    BadgeInstanceExtension,
+    Issuer,
+    IssuerExtension,
+)
 
 
-class ExtensionResolverMixin(object):
+class ExtensionResolverMixin:
 
     def resolve_extensions(self, info):
         return self.cached_extensions()
 
 
-class ExtensionTypeMetaMixin(object):
-    fields = ('name', 'original_json')
+class ExtensionTypeMetaMixin:
+    fields = ("name", "original_json")
 
 
-class BaseExtensionMixin(object):
+class BaseExtensionMixin:
 
     def resolve_original_json(self, info):
         return self.original_json
@@ -51,14 +68,14 @@ class BadgeInstanceExtensionType(BaseExtensionMixin, DjangoObjectType):
 class BadgeClassAlignmentType(DjangoObjectType):
     class Meta:
         model = BadgeClassAlignment
-        fields = ('target_name', 'original_json', 'target_url',
-                  'target_description', 'target_framework', 'target_code')
+        fields = ("target_name", "original_json", "target_url",
+                  "target_description", "target_framework", "target_code")
 
 
 class BadgeInstanceEvidenceType(DjangoObjectType):
     class Meta:
         model = BadgeInstanceEvidence
-        fields = ('evidence_url', 'narrative', 'name', 'description')
+        fields = ("evidence_url", "narrative", "name", "description")
 
 
 def schema_badge_class_type():
@@ -71,13 +88,13 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
                  DjangoObjectType):
     class Meta:
         model = Issuer
-        fields = ('entity_id', 'archived',
-                  'badgeclasses', 'faculty',
-                  'name_english', 'name_dutch',
-                  'image_dutch', 'image_english',
-                  'url_english', 'url_dutch',
-                  'description_english', 'description_dutch',
-                  'email', 'created_at', 'content_type_id', 'public_url')
+        fields = ("entity_id", "archived",
+                  "badgeclasses", "faculty",
+                  "name_english", "name_dutch",
+                  "image_dutch", "image_english",
+                  "url_english", "url_dutch",
+                  "description_english", "description_dutch",
+                  "email", "created_at", "content_type_id", "public_url")
 
     staff = graphene.List(IssuerStaffType)
     public_badgeclasses = graphene.List(schema_badge_class_type)
@@ -116,10 +133,10 @@ class IssuerType(ContentTypeIdResolverMixin, PermissionsResolverMixin, StaffReso
         return self.cached_assertions().__len__()
 
     def resolve_badgeclasses(self, info):
-        return self.get_badgeclasses(info.context.user, ['may_read'])
+        return self.get_badgeclasses(info.context.user, ["may_read"])
 
     def resolve_badgeclass_count(self, info):
-        return self.get_badgeclasses(info.context.user, ['may_read']).__len__()
+        return self.get_badgeclasses(info.context.user, ["may_read"]).__len__()
 
     def resolve_public_badgeclasses(self, info):
         return [bc for bc in self.cached_badgeclasses() if not bc.is_private]
@@ -156,10 +173,10 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
 
     class Meta:
         model = BadgeInstance
-        fields = ('id', 'entity_id', 'badgeclass', 'identifier', 'image', 'updated_at',
-                  'recipient_identifier', 'recipient_type', 'revoked', 'issued_on',
-                  'revocation_reason', 'expires_at', 'acceptance', 'created_at',
-                  'public', 'award_type', 'grade_achieved')
+        fields = ("id", "entity_id", "badgeclass", "identifier", "image", "updated_at",
+                  "recipient_identifier", "recipient_type", "revoked", "issued_on",
+                  "revocation_reason", "expires_at", "acceptance", "created_at",
+                  "public", "award_type", "grade_achieved")
 
     def resolve_validation(self, info, **kwargs):
         return self.validate()
@@ -168,13 +185,13 @@ class BadgeInstanceType(ImageResolverMixin, ExtensionResolverMixin, DjangoObject
         return self.cached_evidence()
 
 
-class BadgeInstanceCollectionType(DjangoObjectType, ):
+class BadgeInstanceCollectionType(DjangoObjectType ):
     badge_instances = graphene.List(BadgeInstanceType)
     public_badge_instances = graphene.List(BadgeInstanceType)
 
     class Meta:
         model = BadgeInstanceCollection
-        fields = ('id', 'entity_id', 'name', 'description', 'public', 'updated_at', 'created_at')
+        fields = ("id", "entity_id", "name", "description", "public", "updated_at", "created_at")
 
     @resolver_blocker_only_for_current_user
     def resolve_badge_instances(self, info, **kwargs):
@@ -199,17 +216,17 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
                      DefaultLanguageResolverMixin, DjangoObjectType):
     class Meta:
         model = BadgeClass
-        fields = ('id', 'name', 'entity_id', 'issuer', 'image', 'staff', 'archived',
-                  'description', 'criteria_text', 'is_private',
-                  'created_at', 'expiration_period', 'public_url', 'assertions_count',
-                  'self_requested_assertions_count', 'direct_awarded_assertions_count',
-                  'content_type_id', 'formal', 'evidence_required', 'narrative_required',
-                  'award_non_validated_name_allowed', 'evidence_student_required', 'narrative_student_required',
-                  'is_micro_credentials', 'direct_awarding_disabled', 'self_enrollment_disabled',
-                  'participation', 'type_badge_class',
-                  'assessment_type', 'assessment_id_verified', 'assessment_supervised',
-                  'quality_assurance_name', 'quality_assurance_url', 'quality_assurance_description',
-                  'grade_achieved_required', 'eqf_nlqf_level_verified', 'stackable')
+        fields = ("id", "name", "entity_id", "issuer", "image", "staff", "archived",
+                  "description", "criteria_text", "is_private",
+                  "created_at", "expiration_period", "public_url", "assertions_count",
+                  "self_requested_assertions_count", "direct_awarded_assertions_count",
+                  "content_type_id", "formal", "evidence_required", "narrative_required",
+                  "award_non_validated_name_allowed", "evidence_student_required", "narrative_student_required",
+                  "is_micro_credentials", "direct_awarding_disabled", "self_enrollment_disabled",
+                  "participation", "type_badge_class",
+                  "assessment_type", "assessment_id_verified", "assessment_supervised",
+                  "quality_assurance_name", "quality_assurance_url", "quality_assurance_description",
+                  "grade_achieved_required", "eqf_nlqf_level_verified", "stackable")
 
     direct_awards = graphene.List(DirectAwardType)
     direct_award_bundles = graphene.List(DirectAwardBundleType)
@@ -307,7 +324,7 @@ class BadgeClassType(ContentTypeIdResolverMixin, PermissionsResolverMixin, Staff
         return self.badge_class_type
 
 
-class Query(object):
+class Query:
     issuers = graphene.List(IssuerType)
     badge_classes = graphene.List(BadgeClassType)
     badge_classes_to_award = graphene.List(BadgeClassType)
@@ -325,24 +342,24 @@ class Query(object):
     badge_classes_count = graphene.Int()
 
     def resolve_issuers(self, info, **kwargs):
-        return [issuer for issuer in Issuer.objects.all() if issuer.has_permissions(info.context.user, ['may_read'])]
+        return [issuer for issuer in Issuer.objects.all() if issuer.has_permissions(info.context.user, ["may_read"])]
 
     def resolve_issuer(self, info, **kwargs):
-        id = kwargs.get('id')
+        id = kwargs.get("id")
         if id is not None:
             issuer = Issuer.objects.get(entity_id=id)
-            if issuer.has_permissions(info.context.user, ['may_read']):
+            if issuer.has_permissions(info.context.user, ["may_read"]):
                 return issuer
 
     def resolve_public_issuer(self, info, **kwargs):
-        id = kwargs.get('id')
+        id = kwargs.get("id")
         if id is not None:
             issuer = Issuer.objects.get(entity_id=id, archived=False)
             return issuer
 
     def resolve_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.all()
-                if bc.has_permissions(info.context.user, ['may_read'])]
+                if bc.has_permissions(info.context.user, ["may_read"])]
 
     def resolve_badge_classes_to_award(self, info, **kwargs):
         user = info.context.user
@@ -350,7 +367,7 @@ class Query(object):
                          BadgeClass.objects.filter(archived=False).filter(issuer__faculty__institution=user.institution)
                          if
                          bc.has_permissions(info.context.user,
-                                            ['may_award']) and bc.cached_pending_enrollments().__len__() > 0]
+                                            ["may_award"]) and bc.cached_pending_enrollments().__len__() > 0]
         return badge_classes
 
     def resolve_enrollments_to_award(self, info, **kwargs):
@@ -359,58 +376,58 @@ class Query(object):
         enrollments = [se for se in
                        StudentsEnrolled.objects.filter(badge_class__issuer__faculty__institution=user.institution)
                        .filter(badge_instance=None, denied=False) if
-                       se.badge_class.has_permissions(user, ['may_award'])]
+                       se.badge_class.has_permissions(user, ["may_award"])]
         return enrollments
 
     def resolve_public_badge_classes(self, info, **kwargs):
         return [bc for bc in BadgeClass.objects.filter(is_private=False)]
 
     def resolve_badge_class(self, info, **kwargs):
-        id = kwargs.get('id')
+        id = kwargs.get("id")
         if id is not None:
             bc = BadgeClass.objects.get(entity_id=id)
             # Students who are logged in need to access this to start the enrollment and copy public data is allowed
             user = info.context.user
-            if hasattr(user, 'is_authenticated') and user.is_authenticated:
-                if (hasattr(user, 'is_student') and user.is_student) or (
-                        hasattr(user, 'is_teacher') and user.is_teacher):
+            if hasattr(user, "is_authenticated") and user.is_authenticated:
+                if (hasattr(user, "is_student") and user.is_student) or (
+                        hasattr(user, "is_teacher") and user.is_teacher):
                     return bc
         return None
 
     def resolve_badge_instance(self, info, **kwargs):
-        id = kwargs.get('id')
+        id = kwargs.get("id")
         if id is not None:
             bc = BadgeInstance.objects.get(entity_id=id)
             user = info.context.user
-            if hasattr(user, 'is_authenticated') and user.is_authenticated and bc.user_id == user.id:
+            if hasattr(user, "is_authenticated") and user.is_authenticated and bc.user_id == user.id:
                 return bc
         return None
 
     def resolve_badge_instance_collection(self, info, **kwargs):
-        id = kwargs.get('id')
+        id = kwargs.get("id")
         if id is not None:
             bc = BadgeInstanceCollection.objects.get(entity_id=id)
             # Called anonymous in public collection page
             user = info.context.user
-            if bc.public or (hasattr(user, 'is_authenticated') and user.is_authenticated and bc.user_id == user.id):
+            if bc.public or (hasattr(user, "is_authenticated") and user.is_authenticated and bc.user_id == user.id):
                 return bc
         return None
 
     def resolve_badge_instance_collections(self, info, **kwargs):
         user = info.context.user
-        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+        if not hasattr(user, "is_authenticated") or not user.is_authenticated:
             return BadgeInstanceCollection.objects.none()
         return BadgeInstanceCollection.objects.filter(user=user)
 
     def resolve_badge_instances(self, info, **kwargs):
         user = info.context.user
-        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+        if not hasattr(user, "is_authenticated") or not user.is_authenticated:
             return []
         return user.cached_badgeinstances()
 
     def resolve_revoked_badge_instances(self, info, **kwargs):
         user = info.context.user
-        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
+        if not hasattr(user, "is_authenticated") or not user.is_authenticated:
             return []
         return list(filter(lambda bi: bi.revoked == True, user.cached_badgeinstances()))
 

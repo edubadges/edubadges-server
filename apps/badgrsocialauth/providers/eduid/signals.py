@@ -41,6 +41,6 @@ def new_val_name_audit_trail(sender, user, old_validated_name, new_validated_nam
                     old_validated_name=old_validated_name,
                     new_validated_name=new_validated_name,
                 )
-            logger.info(f'val_name_audit_trail created {audit_trail.id}  for user {audit_trail.user}')
+            logger.info(f"val_name_audit_trail created {audit_trail.id}  for user {audit_trail.user}")
     except Exception as e:
-        logger.error('val_name_audit_trail error: %s' % (e))
+        logger.error("val_name_audit_trail error: %s" % (e))

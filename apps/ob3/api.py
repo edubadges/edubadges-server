@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
@@ -57,7 +57,7 @@ class CredentialsView(APIView):
 
         return Response({"offer": offer_uri}, status=status.HTTP_201_CREATED)
 
-    def _find_badge_instance(self, entity_id: str, user) -> Optional[Any]:
+    def _find_badge_instance(self, entity_id: str, user) -> Any | None:
         """
         Look up a BadgeInstance by its entity_id and verify the requesting
         user is the recipient.  Returns None when the badge does not exist
@@ -72,7 +72,7 @@ class CredentialsView(APIView):
 
     def _create_offer(
         self, request: Request, badge_entity_id: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Ask ec-issuer to create a credential and an offer for the given
         badge instance.
@@ -82,7 +82,7 @@ class CredentialsView(APIView):
             "Accept": "application/json",
             "Authorization": f"Bearer {_bearer_token(request)}",
         }
-        payload: Dict[str, str] = {
+        payload: dict[str, str] = {
             "award_id": badge_entity_id,
         }
 

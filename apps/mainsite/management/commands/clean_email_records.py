@@ -7,8 +7,8 @@ from django.db import IntegrityError
 
 
 class Command(BaseCommand):
-    args = ''
-    help = 'Ensures users have the proper EmailAddress objects created for their accounts'
+    args = ""
+    help = "Ensures users have the proper EmailAddress objects created for their accounts"
 
     def handle(self, *args, **options):
         users_processed = 0
@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 elif len([e for e in emails if e.primary is True]) == 0:
                     new_primary = emails.first()
                     new_primary.set_as_primary(conditional=True)
-                    self.stdout.write("Set {} as primary for user {}".format(new_primary.email, user.pk))
+                    self.stdout.write(f"Set {new_primary.email} as primary for user {user.pk}")
                     primaries_set += 1
 
                     prior_confirmations = EmailConfirmation.objects.filter(email_address=new_primary)
@@ -52,19 +52,15 @@ class Command(BaseCommand):
                         except SMTPException as e:
                             raise e
                         except Exception as e:
-                            raise SMTPException("Error sending mail to {} -- {}".format(
-                                new_primary.email, e.message
-                            ))
+                            raise SMTPException(f"Error sending mail to {new_primary.email} -- {e.message}")
             except IntegrityError as e:
                 user_errors += 1
-                self.stdout.write("Error in user {} record: {}".format(user.pk, e.message))
+                self.stdout.write(f"Error in user {user.pk} record: {e.message}")
                 continue
             except SMTPException as e:
                 email_errors += 1
-                self.stdout.write("Could not send mail: {}".format(e.message))
+                self.stdout.write(f"Could not send mail: {e.message}")
 
         self.stdout.write(
-            "Done cleaning email: {} users, {} updated primaries, {} user errors, {} email errors.".format(
-                users_processed, primaries_set, user_errors, email_errors
-            )
+            f"Done cleaning email: {users_processed} users, {primaries_set} updated primaries, {user_errors} user errors, {email_errors} email errors."
         )

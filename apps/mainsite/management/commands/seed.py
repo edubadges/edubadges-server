@@ -1,32 +1,33 @@
-import traceback
 import sys
-from os import listdir, environ
-from os.path import dirname, basename, isfile, join
-from django.utils import timezone
+import traceback
+from os import environ, listdir
+from os.path import basename, dirname, isfile, join
+from random import randrange
+
+from badgeuser.models import BadgeUser
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
-from random import randrange
-from badgeuser.models import BadgeUser
-from mainsite.tests.base import SetupHelper
+from django.utils import timezone
+from institution.models import Faculty, Institution
+from issuer.models import BadgeClass, BadgeInstance, Issuer
 from mainsite.seeds.constants import INSTITUTION_UNIVERSITY_EXAMPLE_ORG
-from institution.models import Institution, Faculty
-from issuer.models import Issuer, BadgeClass, BadgeInstance
+from mainsite.tests.base import SetupHelper
 
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('-c', '--clean', action="store_true")
-        parser.add_argument('-as', '--add_assertions', type=int)
+        parser.add_argument("-c", "--clean", action="store_true")
+        parser.add_argument("-as", "--add_assertions", type=int)
 
     def handle(self, *args, **options):
         if settings.ALLOW_SEEDS:
-            if options['clean']:
+            if options["clean"]:
                 clear_data()
 
             run_seeds()
-            if options['add_assertions']:
-                nr_of_assertions = options['add_assertions']
+            if options["add_assertions"]:
+                nr_of_assertions = options["add_assertions"]
                 run_scaled_seed(scale=nr_of_assertions)
 
 
@@ -35,7 +36,7 @@ def clear_data():
         print("Wiping data... ", end="")
 
         dbname = environ.get("BADGR_DB_NAME")
-        migration_filled_tables = ('auth_permission', 'django_content_type', 'django_migrations')
+        migration_filled_tables = ("auth_permission", "django_content_type", "django_migrations")
         sql = f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{dbname}' " \
               f"AND table_name NOT IN {migration_filled_tables}"
 
@@ -51,7 +52,7 @@ def clear_data():
 
 
 def run_seeds():
-    seedsdir = join(dirname(__file__), '../../seeds')
+    seedsdir = join(dirname(__file__), "../../seeds")
     seeds = [
         basename(x)[:-3]
         for x in listdir(seedsdir)
@@ -69,31 +70,31 @@ def run_seeds():
         except Exception as e:
             sys.stderr.write("\033[91mFAILED!\033[0m")
             sys.stderr.write(traceback.format_exc())
-            sys.stderr.write(f"{str(e)}\n")
+            sys.stderr.write(f"{e!s}\n")
             sys.exit(1)
 
 
 def run_scaled_seed(scale):
     setup_helper = SetupHelper()
     institution = Institution.objects.get(identifier=INSTITUTION_UNIVERSITY_EXAMPLE_ORG)
-    faculty_name = 'Many Assertions'
+    faculty_name = "Many Assertions"
     faculty, _ = Faculty.objects.get_or_create(
         name_english=faculty_name,
         description_english=f"Description for {faculty_name}",
         description_dutch=f"Beschrijving voor {faculty_name}",
         institution=institution
     )
-    issuer_name = 'Many Assertions'
+    issuer_name = "Many Assertions"
     issuer, _ = Issuer.objects.get_or_create(name_english=issuer_name,
                                              description_english=f"Description for {issuer_name}",
                                              description_dutch=f"Beschrijving voor {issuer_name}",
                                              faculty=faculty, old_json="{}",
-                                             url_english=f"https://issuer", email="issuer@info.nl",
+                                             url_english="https://issuer", email="issuer@info.nl",
                                              image_english="uploads/issuers/surf.png")
     badgeclass, _ = BadgeClass.objects.get_or_create(
-        name='Many Assertions',
+        name="Many Assertions",
         issuer=issuer,
-        description='Description',
+        description="Description",
         formal=True,
         old_json="{}",
         image="uploads/badges/eduid.png",
@@ -103,7 +104,7 @@ def run_scaled_seed(scale):
 
     for i in range(scale):
         if i % 50 == 0:
-            print('Seeding assertion {} out of {}'.format(i, scale))
+            print(f"Seeding assertion {i} out of {scale}")
         recipient = setup_helper.setup_student(affiliated_institutions=[institution])
         assertion = BadgeInstance.objects.create(
             badgeclass=badgeclass, recipient_identifier=recipient.get_recipient_identifier(),

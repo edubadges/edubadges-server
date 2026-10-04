@@ -13,6 +13,6 @@ class ExplicitCSRFSessionAuthentication(SessionAuthentication):
     """
     def enforce_csrf(self, request):
         try:
-            return super(ExplicitCSRFSessionAuthentication, self).enforce_csrf(request)
+            return super().enforce_csrf(request)
         except exceptions.PermissionDenied as e:
             raise CSRFPermissionDenied(e.detail)

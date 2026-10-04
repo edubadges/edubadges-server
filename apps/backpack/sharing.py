@@ -6,7 +6,7 @@ from django.conf import settings
 from issuer.models import BadgeInstance
 
 
-class ShareProvider(object):
+class ShareProvider:
     provider_code = None
 
     def __init__(self, provider):
@@ -14,47 +14,36 @@ class ShareProvider(object):
 
 
 class TwitterShareProvider(ShareProvider):
-    provider_code = 'twitter'
-    provider_name = 'Twitter'
+    provider_code = "twitter"
+    provider_name = "Twitter"
 
     def share_url(self, obj, **kwargs):
         if isinstance(obj, BadgeInstance):
-            text = "I earned a badge from {issuer}! {url}".format(
-                issuer=obj.cached_issuer.name,
-                url=obj.share_url
-            )
+            text = f"I earned a badge from {obj.cached_issuer.name}! {obj.share_url}"
         else:
             text = obj.share_url
-        return "https://twitter.com/intent/tweet?text={text}".format(
-            text=urllib.parse.quote(text)
-        )
+        return f"https://twitter.com/intent/tweet?text={urllib.parse.quote(text)}"
 
 
 class FacebookShareProvider(ShareProvider):
-    provider_code = 'facebook'
-    provider_name = 'Facebook'
+    provider_code = "facebook"
+    provider_name = "Facebook"
 
     def share_url(self, badge_instance, **kwargs):
-        return "https://www.facebook.com/sharer/sharer.php?u={url}".format(
-            url=urllib.parse.quote(badge_instance.share_url)
-        )
+        return f"https://www.facebook.com/sharer/sharer.php?u={urllib.parse.quote(badge_instance.share_url)}"
 
 
 class PinterestShareProvider(ShareProvider):
-    provider_code = 'pinterest'
-    provider_name = 'Pinterest'
+    provider_code = "pinterest"
+    provider_name = "Pinterest"
 
     def share_url(self, badge_instance, **kwargs):
-        return "http://www.pinterest.com/pin/create/button/?url={url}&media={image}&description={summary}".format(
-            url=urllib.parse.quote(badge_instance.share_url),
-            image=badge_instance.image_url,
-            summary=badge_instance.cached_badgeclass.name
-        )
+        return f"http://www.pinterest.com/pin/create/button/?url={urllib.parse.quote(badge_instance.share_url)}&media={badge_instance.image_url}&description={badge_instance.cached_badgeclass.name}"
 
 
 class LinkedinShareProvider(ShareProvider):
-    provider_code = 'linkedin'
-    provider_name = 'LinkedIn'
+    provider_code = "linkedin"
+    provider_name = "LinkedIn"
 
     def share_url(self, instance, **kwargs):
         url = None
@@ -71,24 +60,16 @@ class LinkedinShareProvider(ShareProvider):
             title = "I earned a badge from Badgr!"
         if summary is None:
             summary = badge_instance.cached_badgeclass.name,
-        return "https://www.linkedin.com/shareArticle?mini=true&url={url}&title={title}&summary={summary}".format(
-            url=urllib.parse.quote(badge_instance.share_url),
-            title=title,
-            summary=summary
-        )
+        return f"https://www.linkedin.com/shareArticle?mini=true&url={urllib.parse.quote(badge_instance.share_url)}&title={title}&summary={summary}"
 
     def certification_share_url(self, badge_instance, **kwargs):
-        cert_issuer_id = getattr(settings, 'LINKEDIN_CERTIFICATION_ISSUER_ID', None)
+        cert_issuer_id = getattr(settings, "LINKEDIN_CERTIFICATION_ISSUER_ID", None)
         if cert_issuer_id is None:
             return None
-        return "https://www.linkedin.com/profile/add?_ed={certIssuerId}&pfCertificationName={name}&pfCertificationUrl={url}".format(
-            certIssuerId=cert_issuer_id,
-            name=urllib.parse.quote(badge_instance.cached_badgeclass.name),
-            url=urllib.parse.quote(badge_instance.share_url)
-        )
+        return f"https://www.linkedin.com/profile/add?_ed={cert_issuer_id}&pfCertificationName={urllib.parse.quote(badge_instance.cached_badgeclass.name)}&pfCertificationUrl={urllib.parse.quote(badge_instance.share_url)}"
 
 
-class SharingManager(object):
+class SharingManager:
     provider_code = None
     ManagerProviders = {
         FacebookShareProvider.provider_code: FacebookShareProvider,
@@ -101,7 +82,7 @@ class SharingManager(object):
     def share_url(cls, provider, badge_instance, **kwargs):
         manager_cls = SharingManager.ManagerProviders.get(provider.lower(), None)
         if manager_cls is None:
-            raise NotImplementedError("Provider not supported: {}".format(provider))
+            raise NotImplementedError(f"Provider not supported: {provider}")
         manager = manager_cls(provider)
         url = manager.share_url(badge_instance, **kwargs)
         return url

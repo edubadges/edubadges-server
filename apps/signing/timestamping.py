@@ -1,5 +1,5 @@
 import json
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import PIPE, STDOUT, Popen
 
 from signing.utils import hash_string
 
@@ -18,7 +18,7 @@ def canonicalize_json(json_object):
     return json.dumps(
         json_object,
         sort_keys=True,
-        separators=(',', ':'),
+        separators=(",", ":"),
     )
 
 
@@ -28,12 +28,12 @@ def submit_hash(hash256):
     :return: a list of node_hash_ids
     """
     node_hash_ids = []
-    outputs_raw = outputs_raw = run_chp_command(['chp', 'submit', hash256])
-    outputs = outputs_raw.split('\n')
+    outputs_raw = outputs_raw = run_chp_command(["chp", "submit", hash256])
+    outputs = outputs_raw.split("\n")
     for output in outputs:
         try:
-            node_hash_id, hash_as_string, action = output.split(' | ')
-            if action == 'submitted':
+            node_hash_id, hash_as_string, action = output.split(" | ")
+            if action == "submitted":
                 node_hash_ids.append(node_hash_id)
         except ValueError:
             pass
@@ -45,11 +45,11 @@ def retrieve_proof(node_hash_id):
     :param node_hash_id: a node_hash_id
     :return: proof as canonicalized json
     """
-    shown_proof = run_chp_command(['chp', 'show', node_hash_id])
+    shown_proof = run_chp_command(["chp", "show", node_hash_id])
     try:
         return json.loads(shown_proof)
     except ValueError:
-        raise ValueError('Returned proof invalid')
+        raise ValueError("Returned proof invalid")
 
 
 def verify_proof(node_hash_id):
@@ -57,8 +57,8 @@ def verify_proof(node_hash_id):
     :param node_hash_id: the id for the proof
     :return: verification object
     """
-    verification = run_chp_command(['chp', 'verify', node_hash_id])
-    return verification.split(' | ')
+    verification = run_chp_command(["chp", "verify", node_hash_id])
+    return verification.split(" | ")
 
 
 def submit_json_for_timestamping(json_object):

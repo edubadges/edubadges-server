@@ -6,14 +6,13 @@ import urllib.request
 import requests
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
+from mainsite.exceptions import TermsNotAcceptedException
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
-from mainsite.exceptions import TermsNotAcceptedException
-
-GENERAL_TERMS_PATH = '/mobile/api/accept-general-terms'
-PROFILE_PATH = '/mobile/api/profile'
-API_LOGIN_PATH = '/mobile/api/login'
+GENERAL_TERMS_PATH = "/mobile/api/accept-general-terms"
+PROFILE_PATH = "/mobile/api/profile"
+API_LOGIN_PATH = "/mobile/api/login"
 
 
 class TemporaryUser:
@@ -29,59 +28,59 @@ class MobileAPIAuthentication(BaseAuthentication):
         Returns two-tuple of (user, token) if authentication succeeds,
         or None otherwise.
         """
-        logger = logging.getLogger('Badgr.Debug')
-        x_requested_with = request.headers.get('x-requested-with')
-        if not x_requested_with or x_requested_with.lower() != 'mobile':
-            logger.info('Skipping MobileAPIAuthentication as HTTP_X_REQUESTED_WITH is NOT mobile')
+        logger = logging.getLogger("Badgr.Debug")
+        x_requested_with = request.headers.get("x-requested-with")
+        if not x_requested_with or x_requested_with.lower() != "mobile":
+            logger.info("Skipping MobileAPIAuthentication as HTTP_X_REQUESTED_WITH is NOT mobile")
             return None
 
-        logger.info(f'MobileAPIAuthentication {request.META}')
-        authorization = request.environ.get('HTTP_AUTHORIZATION')
+        logger.info(f"MobileAPIAuthentication {request.META}")
+        authorization = request.environ.get("HTTP_AUTHORIZATION")
         if not authorization:
-            logger.info('MobileAPIAuthentication: raise AuthenticationFailed as no authorization header')
-            raise AuthenticationFailed('Authentication credentials were not provided.')
+            logger.info("MobileAPIAuthentication: raise AuthenticationFailed as no authorization header")
+            raise AuthenticationFailed("Authentication credentials were not provided.")
 
-        bearer_token = authorization[len('bearer ') :]
+        bearer_token = authorization[len("bearer ") :]
         if not bearer_token:
-            logger.info('MobileAPIAuthentication: raise AuthenticationFailed as no bearer_token in authorization')
-            raise AuthenticationFailed('Authentication credentials were not provided.')
+            logger.info("MobileAPIAuthentication: raise AuthenticationFailed as no bearer_token in authorization")
+            raise AuthenticationFailed("Authentication credentials were not provided.")
 
-        bearer_token = authorization[len('bearer ') :]
+        bearer_token = authorization[len("bearer ") :]
         if not bearer_token:
-            logger.info('MobileAPIAuthentication: return None as no bearer_token in authorization')
+            logger.info("MobileAPIAuthentication: return None as no bearer_token in authorization")
             return None
 
-        headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
-        url = f'{settings.EDUID_PROVIDER_URL}/introspect'
+        headers = {"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"}
+        url = f"{settings.EDUID_PROVIDER_URL}/introspect"
         auth = (settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET)
         response = requests.post(
-            url, data=urllib.parse.urlencode({'token': bearer_token}), auth=auth, headers=headers, timeout=60
+            url, data=urllib.parse.urlencode({"token": bearer_token}), auth=auth, headers=headers, timeout=60
         )
         if response.status_code != 200:
-            logger.info(f'MobileAPIAuthentication bad response from oidcng: {response.status_code} {response.json()}')
-            raise AuthenticationFailed('Invalid authentication credentials.')
+            logger.info(f"MobileAPIAuthentication bad response from oidcng: {response.status_code} {response.json()}")
+            raise AuthenticationFailed("Invalid authentication credentials.")
 
         introspect_json = response.json()
-        logger.info(f'MobileAPIAuthentication introspect {introspect_json}')
+        logger.info(f"MobileAPIAuthentication introspect {introspect_json}")
 
-        if not introspect_json['active']:
-            logger.info(f'MobileAPIAuthentication inactive introspect_json {introspect_json}')
-            raise AuthenticationFailed('Invalid authentication credentials.')
+        if not introspect_json["active"]:
+            logger.info(f"MobileAPIAuthentication inactive introspect_json {introspect_json}")
+            raise AuthenticationFailed("Invalid authentication credentials.")
         if settings.EDUID_IDENTIFIER not in introspect_json:
             logger.info(
-                f'MobileAPIAuthentication raise AuthenticationFailed as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}'
+                f"MobileAPIAuthentication raise AuthenticationFailed as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}"
             )
-            raise AuthenticationFailed('Invalid authentication credentials.')
+            raise AuthenticationFailed("Invalid authentication credentials.")
 
         introspect_json = response.json()
-        logger.info(f'MobileAPIAuthentication introspect {introspect_json}')
+        logger.info(f"MobileAPIAuthentication introspect {introspect_json}")
 
-        if not introspect_json['active']:
-            logger.info(f'MobileAPIAuthentication inactive introspect_json {introspect_json}')
+        if not introspect_json["active"]:
+            logger.info(f"MobileAPIAuthentication inactive introspect_json {introspect_json}")
             return None
         if settings.EDUID_IDENTIFIER not in introspect_json:
             logger.info(
-                f'MobileAPIAuthentication return None as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}'
+                f"MobileAPIAuthentication return None as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}"
             )
             return None
 
@@ -94,30 +93,29 @@ class MobileAPIAuthentication(BaseAuthentication):
                 request.mobile_api_call = True
                 logger.info(f'MobileAPIAuthentication created TemporaryUser {introspect_json["email"]} for login')
                 return TemporaryUser(introspect_json, bearer_token), bearer_token
-            else:
-                # If not heading to login-endpoint, we raise AuthenticationFailed resulting in 401
-                logger.info(
-                    f'MobileAPIAuthentication TemporaryUser {introspect_json["email"]} not allowed to access {request.path}'
-                )
-                raise AuthenticationFailed('Authentication credentials were not provided.')
+            # If not heading to login-endpoint, we raise AuthenticationFailed resulting in 401
+            logger.info(
+                f'MobileAPIAuthentication TemporaryUser {introspect_json["email"]} not allowed to access {request.path}'
+            )
+            raise AuthenticationFailed("Authentication credentials were not provided.")
         # SocialAccount always has a User
         user = social_account.user
         agree_terms_endpoint = request.path == GENERAL_TERMS_PATH
         profile_endpoint = request.path == PROFILE_PATH
         if login_endpoint or agree_terms_endpoint or profile_endpoint:
             # further logic is dealt with in /mobile/api/login
-            logger.info(f'MobileAPIAuthentication User {user.email} allowed to access {request.path}')
+            logger.info(f"MobileAPIAuthentication User {user.email} allowed to access {request.path}")
             request.mobile_api_call = True
             return user, bearer_token
-        elif not user.general_terms_accepted():
+        if not user.general_terms_accepted():
             # If not heading to login-endpoint or agree-terms, we raise TermsNotAccepted resulting in 403
             # The mobile app depends on the detail of the error message, so it should not be changed without notifying.
             logger.info(
-                f'MobileAPIAuthentication User {user.email} has not accepted the general terms. '
-                f'Not allowed to access {request.path}'
+                f"MobileAPIAuthentication User {user.email} has not accepted the general terms. "
+                f"Not allowed to access {request.path}"
             )
             raise TermsNotAcceptedException
 
-        logger.info(f'MobileAPIAuthentication forwarding User {user.email} to {request.path}')
+        logger.info(f"MobileAPIAuthentication forwarding User {user.email} to {request.path}")
         request.mobile_api_call = True
         return user, bearer_token

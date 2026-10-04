@@ -5,10 +5,9 @@ from django.db import models
 from django.urls import reverse
 from entity.models import BaseVersionedEntity
 from mainsite.utils import OriginSetting
-from signing import timestamping
-from signing import utils
+from signing import timestamping, utils
 
-AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+AUTH_USER_MODEL = getattr(settings, "AUTH_USER_MODEL", "auth.User")
 
 
 class SymmetricKey(models.Model):
@@ -22,11 +21,11 @@ class SymmetricKey(models.Model):
     current = models.BooleanField()
 
     def get_params(self):
-        return {'salt': self.salt, 'length': self.length, 'n': self.n, 'r': self.r, 'p': self.p}
+        return {"salt": self.salt, "length": self.length, "n": self.n, "r": self.r, "p": self.p}
 
     def validate_password(self, password):
         if self.password_hash != utils.hash_string(password.encode()):
-            raise ValueError('Wrong password, please try again.')
+            raise ValueError("Wrong password, please try again.")
 
     def create_private_key(self, password):
         from signing import tsob
@@ -35,21 +34,21 @@ class SymmetricKey(models.Model):
 
 
 class PrivateKey(models.Model):
-    symmetric_key = models.ForeignKey('signing.SymmetricKey', on_delete=models.PROTECT)
+    symmetric_key = models.ForeignKey("signing.SymmetricKey", on_delete=models.PROTECT)
     encrypted_private_key = models.TextField()
     initialization_vector = models.CharField(max_length=255)
     tag = models.CharField(max_length=255)
     associated_data = models.CharField(max_length=255)
     time_created = models.DateTimeField()
-    public_key = models.ForeignKey('signing.PublicKey', on_delete=models.PROTECT)
+    public_key = models.ForeignKey("signing.PublicKey", on_delete=models.PROTECT)
 
     def get_params(self):
-        return {'initialization_vector': self.initialization_vector,
-                'encrypted_private_key': self.encrypted_private_key,
-                'tag': self.tag,
-                'associated_data': self.associated_data,
-                'time_created': self.time_created.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'public_key': self.public_key.public_key_pem
+        return {"initialization_vector": self.initialization_vector,
+                "encrypted_private_key": self.encrypted_private_key,
+                "tag": self.tag,
+                "associated_data": self.associated_data,
+                "time_created": self.time_created.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "public_key": self.public_key.public_key_pem
                 }
 
     @property
@@ -67,7 +66,7 @@ class PublicKey(BaseVersionedEntity, models.Model):
 
 
 class AssertionTimeStamp(models.Model):
-    badge_instance = models.ForeignKey('issuer.BadgeInstance', on_delete=models.CASCADE)
+    badge_instance = models.ForeignKey("issuer.BadgeInstance", on_delete=models.CASCADE)
     hash = models.CharField(max_length=64)
     original_json = models.TextField()
     hash_id_nodes = models.TextField(null=True, default=None)
@@ -75,7 +74,7 @@ class AssertionTimeStamp(models.Model):
     signer = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.PROTECT)
 
     def proof_is_ready(self):
-        return self.proof != ''
+        return self.proof != ""
 
     def submit_assertion(self):
         public_key_issuer = self.badge_instance.issuer.create_empty_key_address()
@@ -102,7 +101,7 @@ class AssertionTimeStamp(models.Model):
 
     def get_json_with_proof(self):
         orignal_json = json.loads(self.original_json)
-        orignal_json['timestamp'] = json.loads(self.proof)
+        orignal_json["timestamp"] = json.loads(self.proof)
         return orignal_json
 
     def update_proof(self):
@@ -110,9 +109,9 @@ class AssertionTimeStamp(models.Model):
         for id_node in self._get_hash_id_nodes():
             verification = timestamping.verify_proof(id_node)
             print(verification)
-            if verification[1] == 'verified':
+            if verification[1] == "verified":
                 at_least_one_is_verified = True
-                if 'btc' in verification[2]:  # it has been written to the btc ledger
+                if "btc" in verification[2]:  # it has been written to the btc ledger
                     proof_json = timestamping.retrieve_proof(id_node)
                     self.proof = timestamping.canonicalize_json(proof_json)
                     self.save()
@@ -125,11 +124,11 @@ class PublicKeyIssuer(BaseVersionedEntity, models.Model):
     """
     Class made for the purpose of creating a temporary address that points to a public key that wil be filled later.
     """
-    issuer = models.ForeignKey('issuer.Issuer', on_delete=models.PROTECT)
-    public_key = models.ForeignKey('signing.PublicKey', on_delete=models.PROTECT, null=True, default=None)
+    issuer = models.ForeignKey("issuer.Issuer", on_delete=models.PROTECT)
+    public_key = models.ForeignKey("signing.PublicKey", on_delete=models.PROTECT, null=True, default=None)
 
     def get_absolute_url(self):
-        return reverse('signing_public_key_json', kwargs={'entity_id': self.entity_id})
+        return reverse("signing_public_key_json", kwargs={"entity_id": self.entity_id})
 
     @property
     def owner_public_url(self):

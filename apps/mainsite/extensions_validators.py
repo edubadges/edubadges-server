@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 
 class BaseExtensionValidator:
@@ -7,7 +6,7 @@ class BaseExtensionValidator:
     Automatically registers subclasses in REGISTRY.
     """
 
-    REGISTRY: Dict[str, "BaseExtensionValidator"] = {}
+    REGISTRY: dict[str, "BaseExtensionValidator"] = {}
 
     extension_key: str | None = None
 
@@ -24,17 +23,17 @@ class BaseExtensionValidator:
 
         cls.REGISTRY[cls.extension_key] = cls()
 
-    def validate(self, data: dict) -> List[str]:
+    def validate(self, data: dict) -> list[str]:
         raise NotImplementedError
 
     @staticmethod
-    def require_field(data: dict, field: str) -> List[str]:
+    def require_field(data: dict, field: str) -> list[str]:
         if field not in data:
             return [f"Missing required field '{field}'"]
         return []
 
     @staticmethod
-    def expect_type(value, expected_type, field: str) -> List[str]:
+    def expect_type(value, expected_type, field: str) -> list[str]:
         if not isinstance(value, expected_type):
             return [
                 f"Field '{field}' must be {expected_type}, got {type(value)}"
@@ -71,7 +70,7 @@ class EducationProgramIdentifierExtensionValidator(BaseExtensionValidator):
             return errors
 
         value = data["EducationProgramIdentifier"]
-        errors += self.expect_type(value, (int, List), "EducationProgramIdentifier")
+        errors += self.expect_type(value, (int, list), "EducationProgramIdentifier")
 
         return errors
 

@@ -2,11 +2,10 @@ import logging
 import os
 
 import firebase_admin
+from django.conf import settings
 from firebase_admin import credentials
 
-from django.conf import settings
-
-logger = logging.getLogger('Badgr.Debug')
+logger = logging.getLogger("Badgr.Debug")
 
 
 def initialize_firebase():

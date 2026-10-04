@@ -1,6 +1,5 @@
 import badgrlog
 
-
 badgrlogger = badgrlog.BadgrLogger()
 
 def log_user_signed_up(sender, **kwargs):

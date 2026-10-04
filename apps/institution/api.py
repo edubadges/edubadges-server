@@ -1,12 +1,11 @@
-from rest_framework import permissions
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_204_NO_CONTENT
-from rest_framework.views import APIView
-
-from entity.api import BaseEntityListView, VersionedObjectMixin, BaseEntityDetailView, BaseArchiveView
-from institution.models import Faculty, Institution, BadgeClassTag
+from entity.api import BaseArchiveView, BaseEntityDetailView, BaseEntityListView, VersionedObjectMixin
+from institution.models import Faculty, Institution
 from institution.serializers import FacultySerializer, InstitutionSerializer
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
+from rest_framework.views import APIView
 from staff.permissions import HasObjectPermission
 
 
@@ -16,17 +15,17 @@ class PublicCheckInstitutionsValidity(APIView):
     POST to check, expects a schac_home string
     """
     permission_classes = (permissions.AllowAny,)
-    http_method_names = ['post']
+    http_method_names = ["post"]
 
     def post(self, request, **kwargs):
         data = []
         schac_homes = request.data
         if schac_homes:
             for schac_home in schac_homes:
-                valid = {'schac_home': schac_home, 'valid': False}
+                valid = {"schac_home": schac_home, "valid": False}
                 try:
                     Institution.objects.get(identifier=schac_home)
-                    valid['valid'] = True
+                    valid["valid"] = True
                 except Institution.DoesNotExist:
                     pass
                 data.append(valid)
@@ -40,7 +39,7 @@ class InstitutionDetail(BaseEntityDetailView):
     model = Institution
     v1_serializer_class = InstitutionSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    http_method_names = ['put']
+    http_method_names = ["put"]
 
 
 class FacultyDeleteView(BaseArchiveView):
@@ -52,13 +51,13 @@ class FacultyArchiveView(BaseEntityDetailView):
     model = Faculty
     v1_serializer_class = FacultySerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    http_method_names = ['put']
+    http_method_names = ["put"]
 
     def put(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
             return Response(status=HTTP_404_NOT_FOUND)
-        obj.archived = False if request.data['archive'] else True
+        obj.archived = False if request.data["archive"] else True
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT, data={})
 
@@ -71,7 +70,7 @@ class FacultyDetail(BaseEntityDetailView):
     model = Faculty
     v1_serializer_class = FacultySerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
-    http_method_names = ['put']
+    http_method_names = ["put"]
 
 
 class FacultyList(VersionedObjectMixin, BaseEntityListView):
@@ -80,10 +79,10 @@ class FacultyList(VersionedObjectMixin, BaseEntityListView):
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
     v1_serializer_class = FacultySerializer
-    http_method_names = ['post']
+    http_method_names = ["post"]
 
     def post(self, request, **kwargs):
-        return super(FacultyList, self).post(request, **kwargs)
+        return super().post(request, **kwargs)
 
 
 class InstitutionsTagUsage(APIView):
@@ -92,7 +91,7 @@ class InstitutionsTagUsage(APIView):
     POST to check, expects a single dict with the tag name to check
     """
     permission_classes = (AuthenticatedWithVerifiedEmail,)
-    http_method_names = ['post']
+    http_method_names = ["post"]
 
     def post(self, request, **kwargs):
         tag_name = request.data.get("name")

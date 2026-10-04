@@ -1,4 +1,3 @@
-from allauth.account.auth_backends import AuthenticationBackend
 from badgeuser.models import BadgeUser
 from django.contrib.auth.backends import ModelBackend
 

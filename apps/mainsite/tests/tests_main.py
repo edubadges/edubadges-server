@@ -26,8 +26,8 @@ class MainGrapheneTest(BadgrTestCase):
                                 'node {'\
                                     'entityId }}}}}'
         response = self.graphene_post(teacher1, query)
-        end_cursor = response['data']['badgeClass']['assertionsPaginated']['pageInfo']['endCursor']
-        assertions_entity_ids_1 = [edge['node']['entityId'] for edge in response['data']['badgeClass']['assertionsPaginated']['edges']]
+        end_cursor = response["data"]["badgeClass"]["assertionsPaginated"]["pageInfo"]["endCursor"]
+        assertions_entity_ids_1 = [edge["node"]["entityId"] for edge in response["data"]["badgeClass"]["assertionsPaginated"]["edges"]]
         self.assertEqual(assertions_entity_ids_1.__len__(), 2)
         query = 'query foo{' \
                     'badgeClass(id: "' + badgeclass.entity_id + '") { '\
@@ -43,7 +43,7 @@ class MainGrapheneTest(BadgrTestCase):
                                 'node {'\
                                     'entityId }}}}}'
         response = self.graphene_post(teacher1, query)
-        assertions_entity_ids_2 = [edge['node']['entityId'] for edge in
-                                   response['data']['badgeClass']['assertionsPaginated']['edges']]
+        assertions_entity_ids_2 = [edge["node"]["entityId"] for edge in
+                                   response["data"]["badgeClass"]["assertionsPaginated"]["edges"]]
         self.assertEqual(assertions_entity_ids_2.__len__(), 3)
         self.assertFalse(all(entity_id in assertions_entity_ids_1 for entity_id in assertions_entity_ids_2))

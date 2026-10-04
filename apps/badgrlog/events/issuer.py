@@ -7,9 +7,9 @@ class IssuerCreatedEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'creator': self.issuer.cached_creator,
-            'issuer': self.issuer.json,
-            'image': self.issuer.image,
+            "creator": self.issuer.cached_creator,
+            "issuer": self.issuer.json,
+            "image": self.issuer.image,
         }
 
 
@@ -20,16 +20,16 @@ class BadgeClassCreatedEvent(BaseBadgrEvent):
     def to_representation(self):
 
         image_data = {
-            'id': self.badge_class.image.url,
+            "id": self.badge_class.image.url,
         }
-        if hasattr(self.badge_class.image, 'size'):
-            image_data['size'] = self.badge_class.image.size
-        if hasattr(self.badge_class.image, 'content_type'):
-            image_data['fileType'] = self.badge_class.image.content_type
+        if hasattr(self.badge_class.image, "size"):
+            image_data["size"] = self.badge_class.image.size
+        if hasattr(self.badge_class.image, "content_type"):
+            image_data["fileType"] = self.badge_class.image.content_type
         return {
-            'creator': self.badge_class.cached_creator,
-            'badgeClass': self.badge_class.json,
-            'image': image_data
+            "creator": self.badge_class.cached_creator,
+            "badgeClass": self.badge_class.json,
+            "image": image_data
         }
 
 
@@ -40,8 +40,8 @@ class BadgeClassDeletedEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'user': self.user,
-            'badgeClass': self.badge_class.json,
+            "user": self.user,
+            "badgeClass": self.badge_class.json,
         }
 
 
@@ -51,11 +51,11 @@ class BadgeInstanceCreatedEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'creator': self.badge_instance.created_by,
-            'issuer': self.badge_instance.issuer.jsonld_id,
-            'recipient': self.badge_instance.recipient_identifier,
-            'badgeClass': self.badge_instance.badgeclass.jsonld_id,
-            'badgeInstance': self.badge_instance.json,
+            "creator": self.badge_instance.created_by,
+            "issuer": self.badge_instance.issuer.jsonld_id,
+            "recipient": self.badge_instance.recipient_identifier,
+            "badgeClass": self.badge_instance.badgeclass.jsonld_id,
+            "badgeInstance": self.badge_instance.json,
         }
 
 
@@ -66,7 +66,7 @@ class BadgeAssertionRevokedEvent(BaseBadgrEvent):
 
     def to_representation(self):
         return {
-            'user': self.user,
-            'badgeInstance': self.badge_instance.json
+            "user": self.user,
+            "badgeInstance": self.badge_instance.json
         }
 

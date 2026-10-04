@@ -1,8 +1,9 @@
-from django.core.cache import cache
 from functools import wraps
 
 from cachemodel import CACHE_FOREVER_TIMEOUT
 from cachemodel.utils import generate_cache_key
+from django.core.cache import cache
+
 
 def cached_method(auto_publish=False):
     """A decorator for CacheModel methods."""
@@ -21,12 +22,11 @@ def cached_method(auto_publish=False):
         return wrapper
 
     if callable(auto_publish):
-        # we were used with no parens, fixup args 
+        # we were used with no parens, fixup args
         func = auto_publish
         auto_publish = False
         return decorator(func)
-    else:
-        return decorator
+    return decorator
 
 
 def denormalized_field(field_name):
@@ -49,7 +49,7 @@ def denormalized_field(field_name):
     if callable(field_name):
         # we were used without an argument
         raise ArgumentErrror("You must pass a field name to @denormalized_field")
-        
+
     return decorator
 
 def find_fields_decorated_with(instance, property_name):

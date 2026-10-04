@@ -1347,7 +1347,6 @@ class TermsAgreementViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return TermsAgreementCreateSerializer
-        elif self.action == "partial_update":
+        if self.action == "partial_update":
             return TermsAgreementUpdateSerializer
-        else:
-            return TermsAgreementSerializer
+        return TermsAgreementSerializer

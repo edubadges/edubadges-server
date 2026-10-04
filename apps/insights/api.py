@@ -1,22 +1,20 @@
 import datetime
 from itertools import groupby
 
-from django.conf import settings
-from django.db import connection
-from django.db.models import Count
-from django.db.models import Q
-from django.db.models.functions import ExtractMonth, ExtractYear
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
 from badgeuser.models import BadgeUser, StudentAffiliation
 from badgrsocialauth.permissions import IsSuperUser
 from directaward.models import DirectAward, DirectAwardBundle
+from django.conf import settings
+from django.db import connection
+from django.db.models import Count, Q
+from django.db.models.functions import ExtractMonth, ExtractYear
 from institution.models import Faculty, Institution
-from issuer.models import BadgeInstance, Issuer, BadgeClass
+from issuer.models import BadgeClass, BadgeInstance, Issuer
 from lti_edu.models import StudentsEnrolled
 from mainsite.permissions import TeachPermission
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from staff.models import InstitutionStaff
 
 
@@ -33,60 +31,60 @@ class InsightsView(APIView):
     def post(self, request, **kwargs):
         surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
         # Superusers may select an institution
-        institution_id = request.data.get('institution_id')
+        institution_id = request.data.get("institution_id")
         filter_by_institution = True
-        if institution_id and hasattr(request.user, 'is_superuser') and request.user.is_superuser:
-            if institution_id == 'all':
+        if institution_id and hasattr(request.user, "is_superuser") and request.user.is_superuser:
+            if institution_id == "all":
                 filter_by_institution = False
             else:
                 institution = Institution.objects.get(entity_id=institution_id)
         else:
             institution = request.user.institution
-        include_surf = request.data.get('include_surf', True)
-        today = datetime.datetime.now(datetime.timezone.utc)
+        include_surf = request.data.get("include_surf", True)
+        today = datetime.datetime.now(datetime.UTC)
         assertions_query_set = (
             BadgeInstance.objects.values(
-                'award_type',
-                'badgeclass_id',
-                'badgeclass__name',
-                'badgeclass__archived',
-                'badgeclass__badge_class_type',
-                'issuer_id',
-                'public',
-                'revoked',
-                'issuer__name_dutch',
-                'issuer__name_english',
-                'issuer__faculty_id',
-                'issuer__faculty__name_english',
-                'issuer__faculty__name_dutch',
-                'issuer__faculty__faculty_type',
-                'issuer__faculty__institution__institution_type',
+                "award_type",
+                "badgeclass_id",
+                "badgeclass__name",
+                "badgeclass__archived",
+                "badgeclass__badge_class_type",
+                "issuer_id",
+                "public",
+                "revoked",
+                "issuer__name_dutch",
+                "issuer__name_english",
+                "issuer__faculty_id",
+                "issuer__faculty__name_english",
+                "issuer__faculty__name_dutch",
+                "issuer__faculty__faculty_type",
+                "issuer__faculty__institution__institution_type",
             )
-            .annotate(year=ExtractYear('created_at'))
-            .annotate(month=ExtractMonth('created_at'))
-            .annotate(nbr=Count('month'))
+            .annotate(year=ExtractYear("created_at"))
+            .annotate(month=ExtractMonth("created_at"))
+            .annotate(nbr=Count("month"))
             .values(
-                'year',
-                'month',
-                'nbr',
-                'award_type',
-                'badgeclass_id',
-                'badgeclass__name',
-                'badgeclass__archived',
-                'badgeclass__badge_class_type',
-                'issuer_id',
-                'public',
-                'revoked',
-                'issuer__name_dutch',
-                'issuer__name_english',
-                'issuer__faculty_id',
-                'issuer__faculty__name_dutch',
-                'issuer__faculty__name_english',
-                'issuer__faculty__faculty_type',
-                'issuer__faculty__institution__institution_type',
+                "year",
+                "month",
+                "nbr",
+                "award_type",
+                "badgeclass_id",
+                "badgeclass__name",
+                "badgeclass__archived",
+                "badgeclass__badge_class_type",
+                "issuer_id",
+                "public",
+                "revoked",
+                "issuer__name_dutch",
+                "issuer__name_english",
+                "issuer__faculty_id",
+                "issuer__faculty__name_dutch",
+                "issuer__faculty__name_english",
+                "issuer__faculty__faculty_type",
+                "issuer__faculty__institution__institution_type",
             )
             .exclude(expires_at__lte=today)
-            .order_by('year', 'month')
+            .order_by("year", "month")
         )
         if filter_by_institution:
             assertions_query_set = assertions_query_set.filter(issuer__faculty__institution=institution)
@@ -95,45 +93,45 @@ class InsightsView(APIView):
 
         direct_awards_query_set = (
             DirectAward.objects.values(
-                'status',
-                'badgeclass_id',
-                'badgeclass__name',
-                'badgeclass__archived',
-                'badgeclass__issuer__id',
-                'badgeclass__badge_class_type',
-                'badgeclass__issuer__name_dutch',
-                'badgeclass__issuer__name_english',
-                'badgeclass__issuer__faculty_id',
-                'badgeclass__issuer__faculty__name_english',
-                'badgeclass__issuer__faculty__name_dutch',
-                'badgeclass__issuer__faculty__faculty_type',
-                'badgeclass__issuer__faculty__institution__institution_type',
+                "status",
+                "badgeclass_id",
+                "badgeclass__name",
+                "badgeclass__archived",
+                "badgeclass__issuer__id",
+                "badgeclass__badge_class_type",
+                "badgeclass__issuer__name_dutch",
+                "badgeclass__issuer__name_english",
+                "badgeclass__issuer__faculty_id",
+                "badgeclass__issuer__faculty__name_english",
+                "badgeclass__issuer__faculty__name_dutch",
+                "badgeclass__issuer__faculty__faculty_type",
+                "badgeclass__issuer__faculty__institution__institution_type",
             )
-            .annotate(year=ExtractYear('created_at'))
-            .annotate(month=ExtractMonth('created_at'))
-            .annotate(nbr=Count('month'))
+            .annotate(year=ExtractYear("created_at"))
+            .annotate(month=ExtractMonth("created_at"))
+            .annotate(nbr=Count("month"))
             .values(
-                'month',
-                'year',
-                'nbr',
-                'status',
-                'badgeclass_id',
-                'badgeclass__name',
-                'badgeclass__archived',
-                'badgeclass__issuer__id',
-                'badgeclass__badge_class_type',
-                'badgeclass__issuer__name_dutch',
-                'badgeclass__issuer__name_english',
-                'badgeclass__issuer__faculty_id',
-                'badgeclass__issuer__faculty__name_dutch',
-                'badgeclass__issuer__faculty__name_english',
-                'badgeclass__issuer__faculty__faculty_type',
-                'badgeclass__issuer__faculty__institution__institution_type',
+                "month",
+                "year",
+                "nbr",
+                "status",
+                "badgeclass_id",
+                "badgeclass__name",
+                "badgeclass__archived",
+                "badgeclass__issuer__id",
+                "badgeclass__badge_class_type",
+                "badgeclass__issuer__name_dutch",
+                "badgeclass__issuer__name_english",
+                "badgeclass__issuer__faculty_id",
+                "badgeclass__issuer__faculty__name_dutch",
+                "badgeclass__issuer__faculty__name_english",
+                "badgeclass__issuer__faculty__faculty_type",
+                "badgeclass__issuer__faculty__institution__institution_type",
             )
-            .order_by('year', 'month')
-            .exclude(status='Deleted')
-            .exclude(status='Revoked')
-            .exclude(status='Scheduled')
+            .order_by("year", "month")
+            .exclude(status="Deleted")
+            .exclude(status="Revoked")
+            .exclude(status="Scheduled")
         )
 
         if filter_by_institution:
@@ -147,42 +145,42 @@ class InsightsView(APIView):
 
         direct_award_bundles_query_set = (
             DirectAwardBundle.objects.values(
-                'direct_award_expired_count',
-                'badgeclass_id',
-                'badgeclass__name',
-                'badgeclass__archived',
-                'badgeclass__issuer__id',
-                'badgeclass__badge_class_type',
-                'badgeclass__issuer__name_dutch',
-                'badgeclass__issuer__name_english',
-                'badgeclass__issuer__faculty_id',
-                'badgeclass__issuer__faculty__name_english',
-                'badgeclass__issuer__faculty__name_dutch',
-                'badgeclass__issuer__faculty__faculty_type',
-                'badgeclass__issuer__faculty__institution__institution_type',
+                "direct_award_expired_count",
+                "badgeclass_id",
+                "badgeclass__name",
+                "badgeclass__archived",
+                "badgeclass__issuer__id",
+                "badgeclass__badge_class_type",
+                "badgeclass__issuer__name_dutch",
+                "badgeclass__issuer__name_english",
+                "badgeclass__issuer__faculty_id",
+                "badgeclass__issuer__faculty__name_english",
+                "badgeclass__issuer__faculty__name_dutch",
+                "badgeclass__issuer__faculty__faculty_type",
+                "badgeclass__issuer__faculty__institution__institution_type",
             )
-            .annotate(year=ExtractYear('created_at'))
-            .annotate(month=ExtractMonth('created_at'))
-            .annotate(nbr=Count('month'))
+            .annotate(year=ExtractYear("created_at"))
+            .annotate(month=ExtractMonth("created_at"))
+            .annotate(nbr=Count("month"))
             .values(
-                'month',
-                'year',
-                'nbr',
-                'direct_award_expired_count',
-                'badgeclass_id',
-                'badgeclass__name',
-                'badgeclass__archived',
-                'badgeclass__issuer__id',
-                'badgeclass__badge_class_type',
-                'badgeclass__issuer__name_dutch',
-                'badgeclass__issuer__name_english',
-                'badgeclass__issuer__faculty_id',
-                'badgeclass__issuer__faculty__name_dutch',
-                'badgeclass__issuer__faculty__name_english',
-                'badgeclass__issuer__faculty__faculty_type',
-                'badgeclass__issuer__faculty__institution__institution_type',
+                "month",
+                "year",
+                "nbr",
+                "direct_award_expired_count",
+                "badgeclass_id",
+                "badgeclass__name",
+                "badgeclass__archived",
+                "badgeclass__issuer__id",
+                "badgeclass__badge_class_type",
+                "badgeclass__issuer__name_dutch",
+                "badgeclass__issuer__name_english",
+                "badgeclass__issuer__faculty_id",
+                "badgeclass__issuer__faculty__name_dutch",
+                "badgeclass__issuer__faculty__name_english",
+                "badgeclass__issuer__faculty__faculty_type",
+                "badgeclass__issuer__faculty__institution__institution_type",
             )
-            .order_by('year', 'month')
+            .order_by("year", "month")
             .exclude(direct_award_expired_count=0)
         )
 
@@ -198,40 +196,40 @@ class InsightsView(APIView):
         enrollments_query_set = (
             StudentsEnrolled.objects.filter(Q(badge_instance_id__isnull=True) | Q(denied=True))
             .values(
-                'denied',
-                'badge_class_id',
-                'badge_class__name',
-                'badge_class__issuer__id',
-                'badge_class__issuer__name_dutch',
-                'badge_class__issuer__name_english',
-                'badge_class__issuer__faculty_id',
-                'badge_class__badge_class_type',
-                'badge_class__issuer__faculty__name_dutch',
-                'badge_class__issuer__faculty__name_english',
-                'badge_class__issuer__faculty__faculty_type',
-                'badge_class__issuer__faculty__institution__institution_type',
+                "denied",
+                "badge_class_id",
+                "badge_class__name",
+                "badge_class__issuer__id",
+                "badge_class__issuer__name_dutch",
+                "badge_class__issuer__name_english",
+                "badge_class__issuer__faculty_id",
+                "badge_class__badge_class_type",
+                "badge_class__issuer__faculty__name_dutch",
+                "badge_class__issuer__faculty__name_english",
+                "badge_class__issuer__faculty__faculty_type",
+                "badge_class__issuer__faculty__institution__institution_type",
             )
-            .annotate(year=ExtractYear('date_created'))
-            .annotate(month=ExtractMonth('date_created'))
-            .annotate(nbr=Count('month'))
+            .annotate(year=ExtractYear("date_created"))
+            .annotate(month=ExtractMonth("date_created"))
+            .annotate(nbr=Count("month"))
             .values(
-                'month',
-                'year',
-                'nbr',
-                'denied',
-                'badge_class_id',
-                'badge_class__name',
-                'badge_class__issuer__id',
-                'badge_class__badge_class_type',
-                'badge_class__issuer__name_dutch',
-                'badge_class__issuer__name_english',
-                'badge_class__issuer__faculty_id',
-                'badge_class__issuer__faculty__name_dutch',
-                'badge_class__issuer__faculty__name_english',
-                'badge_class__issuer__faculty__faculty_type',
-                'badge_class__issuer__faculty__institution__institution_type',
+                "month",
+                "year",
+                "nbr",
+                "denied",
+                "badge_class_id",
+                "badge_class__name",
+                "badge_class__issuer__id",
+                "badge_class__badge_class_type",
+                "badge_class__issuer__name_dutch",
+                "badge_class__issuer__name_english",
+                "badge_class__issuer__faculty_id",
+                "badge_class__issuer__faculty__name_dutch",
+                "badge_class__issuer__faculty__name_english",
+                "badge_class__issuer__faculty__faculty_type",
+                "badge_class__issuer__faculty__institution__institution_type",
             )
-            .order_by('year', 'month')
+            .order_by("year", "month")
         )
 
         if filter_by_institution:
@@ -282,15 +280,15 @@ class InsightsView(APIView):
         backpack_count = backpack_query.count()
 
         res = {
-            'assertions': assertions,
-            'direct_awards': direct_awards,
-            'enrollments': enrollments,
-            'direct_award_bundles': direct_award_bundles,
-            'users_count': users_count,
-            'faculties_count': faculties_count,
-            'issuers_count': issuer_count,
-            'badge_class_count': badge_class_count,
-            'backpack_count': backpack_count,
+            "assertions": assertions,
+            "direct_awards": direct_awards,
+            "enrollments": enrollments,
+            "direct_award_bundles": direct_award_bundles,
+            "users_count": users_count,
+            "faculties_count": faculties_count,
+            "issuers_count": issuer_count,
+            "badge_class_count": badge_class_count,
+            "backpack_count": backpack_count,
         }
         return Response(res, status=status.HTTP_200_OK)
 
@@ -301,11 +299,11 @@ class InstitutionAdminsView(APIView):
     def get(self, request, **kwargs):
         query_set = (
             InstitutionStaff.objects.values(
-                'institution__name_english',
-                'institution__name_dutch',
-                'user__first_name',
-                'user__last_name',
-                'user__email',
+                "institution__name_english",
+                "institution__name_dutch",
+                "user__first_name",
+                "user__last_name",
+                "user__email",
             )
             .filter(
                 may_create=True,
@@ -327,14 +325,14 @@ class InstitutionBadgesView(APIView):
     def get(self, request, **kwargs):
         query_set = (
             BadgeInstance.objects.values(
-                'award_type',
-                'revoked',
-                'badgeclass__name',
-                'badgeclass__issuer__faculty__name_english',
-                'badgeclass__issuer__faculty__institution__name_english',
+                "award_type",
+                "revoked",
+                "badgeclass__name",
+                "badgeclass__issuer__faculty__name_english",
+                "badgeclass__issuer__faculty__institution__name_english",
             )
-            .annotate(count=Count('id'))
-            .order_by('count')
+            .annotate(count=Count("id"))
+            .order_by("count")
             .all()
         )
         institution_badges = list(query_set)
@@ -347,12 +345,12 @@ class InstitutionMicroCredentials(APIView):
     def get(self, request, **kwargs):
         query_set = (
             BadgeInstance.objects.values(
-                'badgeclass__issuer__faculty__institution__name_english',
-                'badgeclass__issuer__faculty__institution__identifier',
+                "badgeclass__issuer__faculty__institution__name_english",
+                "badgeclass__issuer__faculty__institution__identifier",
             )
-            .annotate(count=Count('id'))
-            .filter(badgeclass__badge_class_type='micro_credential')
-            .order_by('count')
+            .annotate(count=Count("id"))
+            .filter(badgeclass__badge_class_type="micro_credential")
+            .order_by("count")
             .all()
         )
         institution_badges = list(query_set)
@@ -417,7 +415,7 @@ class InstitutionBadgesOverview(APIView):
     permission_classes = (TeachPermission,)
 
     def get(self, request, **kwargs):
-        is_super_user = hasattr(request.user, 'is_superuser') and request.user.is_superuser
+        is_super_user = hasattr(request.user, "is_superuser") and request.user.is_superuser
         institution_id = None if is_super_user else request.user.institution.id
 
         with connection.cursor() as cursor:
@@ -455,7 +453,7 @@ class InstitutionBadgesOverview(APIView):
                   and ((ins.id = %(ins_id)s and not %(ins_id)s is null) or %(ins_id)s is null)
                 group by b.id, bi.award_type, bi.public, bi.revoked;
                 """,
-                {'ins_id': institution_id},
+                {"ins_id": institution_id},
             )
             badge_overview = dict_fetch_all(cursor)
 
@@ -485,11 +483,11 @@ class InstitutionBadgesOverview(APIView):
 
             # Now group by badgeclass_id and create final reporting dict
             def key_func(k):
-                return str(k['badge_class_id'])
+                return str(k["badge_class_id"])
 
             def claim_rate(total_direct_award_count, direct_award_accepted):
                 if total_direct_award_count == 0:
-                    return 'N/A'
+                    return "N/A"
                 return round((direct_award_accepted / total_direct_award_count) * 100)
 
             # Known caveat is to forget sorting before groupby
@@ -500,49 +498,49 @@ class InstitutionBadgesOverview(APIView):
                 values = list(val)
                 badge_instance = values[0]
                 direct_awards_accepted = sum(
-                    [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and not b['revoked']]
+                    [b["backpack_count"] for b in values if b["award_type"] == "direct_award" and not b["revoked"]]
                 )
                 direct_awards_assertions_revoked = sum(
-                    [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and b['revoked']]
+                    [b["backpack_count"] for b in values if b["award_type"] == "direct_award" and b["revoked"]]
                 )
                 direct_awards_rejected_or_unaccepted = sum(
-                    [da['da_count'] for da in da_overview if str(da['badgeclass_id']) == str(key)]
+                    [da["da_count"] for da in da_overview if str(da["badgeclass_id"]) == str(key)]
                 )
                 direct_awards_expired = sum(
-                    [da['expired_count'] for da in da_expired if str(da['badgeclass_id']) == str(key)]
+                    [da["expired_count"] for da in da_expired if str(da["badgeclass_id"]) == str(key)]
                 )
                 total_da_count = (
                         direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked + direct_awards_expired
                 )
                 results.append(
                     {
-                        'Institution name': badge_instance['institution_name'],
-                        'Sector': badge_instance['institution_type'],
-                        'Issuergroup name': badge_instance['issuergroup_name'],
-                        'Issuer name': badge_instance['issuer_name'],
-                        'BadgecClass name': badge_instance['badge_name'],
-                        'Type': badge_instance['badge_class_type'],
-                        'Total edubadges in backpack': sum([b['backpack_count'] for b in values if not b['revoked']]),
-                        'DA claimed': direct_awards_accepted,
-                        'Requested accepted': sum(
-                            [b['backpack_count'] for b in values if b['award_type'] == 'requested' and not b['revoked']]
+                        "Institution name": badge_instance["institution_name"],
+                        "Sector": badge_instance["institution_type"],
+                        "Issuergroup name": badge_instance["issuergroup_name"],
+                        "Issuer name": badge_instance["issuer_name"],
+                        "BadgecClass name": badge_instance["badge_name"],
+                        "Type": badge_instance["badge_class_type"],
+                        "Total edubadges in backpack": sum([b["backpack_count"] for b in values if not b["revoked"]]),
+                        "DA claimed": direct_awards_accepted,
+                        "Requested accepted": sum(
+                            [b["backpack_count"] for b in values if b["award_type"] == "requested" and not b["revoked"]]
                         ),
-                        'DA revoked': direct_awards_assertions_revoked,
-                        'Requested revoked': sum(
-                            [b['backpack_count'] for b in values if b['award_type'] == 'requested' and b['revoked']]
+                        "DA revoked": direct_awards_assertions_revoked,
+                        "Requested revoked": sum(
+                            [b["backpack_count"] for b in values if b["award_type"] == "requested" and b["revoked"]]
                         ),
-                        'Public': sum([b['backpack_count'] for b in values if b['public_badge']]),
-                        'Claim-rate': claim_rate(
+                        "Public": sum([b["backpack_count"] for b in values if b["public_badge"]]),
+                        "Claim-rate": claim_rate(
                             (total_da_count - direct_awards_assertions_revoked), direct_awards_accepted
                         ),
-                        'Total DA send': total_da_count,
-                        'Expired DA': direct_awards_expired,
-                        'Awarded via UI': badge_instance['awarded_via_ui'],
-                        'Awarded via SIS': badge_instance['awarded_via_sis'],
+                        "Total DA send": total_da_count,
+                        "Expired DA": direct_awards_expired,
+                        "Awarded via UI": badge_instance["awarded_via_ui"],
+                        "Awarded via SIS": badge_instance["awarded_via_sis"],
                     }
                 )
 
-            sorted_results = sorted(results, key=lambda a: (a['Institution name'], a['BadgecClass name']))
+            sorted_results = sorted(results, key=lambda a: (a["Institution name"], a["BadgecClass name"]))
             return Response(sorted_results, status=status.HTTP_200_OK)
 
 
@@ -606,11 +604,11 @@ class SectorBadgesOverview(APIView):
 
             # Now group by institution_id and create final reporting dict
             def key_func(k):
-                return str(k['institution_id'])
+                return str(k["institution_id"])
 
             def claim_rate(total_direct_award_count, direct_award_accepted):
                 if total_direct_award_count == 0:
-                    return 'N/A'
+                    return "N/A"
                 return round((direct_award_accepted / total_direct_award_count) * 100)
 
             # Known caveat is to forget sorting before groupby
@@ -621,32 +619,32 @@ class SectorBadgesOverview(APIView):
                 values = list(val)
                 institution = values[0]
                 direct_awards_accepted = sum(
-                    [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and not b['revoked']]
+                    [b["backpack_count"] for b in values if b["award_type"] == "direct_award" and not b["revoked"]]
                 )
                 direct_awards_assertions_revoked = sum(
-                    [b['backpack_count'] for b in values if b['award_type'] == 'direct_award' and b['revoked']]
+                    [b["backpack_count"] for b in values if b["award_type"] == "direct_award" and b["revoked"]]
                 )
                 direct_awards_rejected_or_unaccepted = sum(
-                    [da['da_count'] for da in da_overview if str(da['institution_id']) == str(key)]
+                    [da["da_count"] for da in da_overview if str(da["institution_id"]) == str(key)]
                 )
                 direct_awards_expired = sum(
-                    [da['expired_count'] for da in da_expired if str(da['institution_id']) == str(key)]
+                    [da["expired_count"] for da in da_expired if str(da["institution_id"]) == str(key)]
                 )
                 total_da_count = (
                         direct_awards_accepted + direct_awards_rejected_or_unaccepted + direct_awards_assertions_revoked + direct_awards_expired
                 )
                 results.append(
                     {
-                        'Institution name': institution['institution_name'],
-                        'Sector': institution['institution_type'],
-                        'Type': institution['badge_class_type'],
-                        'Total edubadges in backpack': sum([b['backpack_count'] for b in values if not b['revoked']]),
-                        'Claim-rate': claim_rate(
+                        "Institution name": institution["institution_name"],
+                        "Sector": institution["institution_type"],
+                        "Type": institution["badge_class_type"],
+                        "Total edubadges in backpack": sum([b["backpack_count"] for b in values if not b["revoked"]]),
+                        "Claim-rate": claim_rate(
                             (total_da_count - direct_awards_assertions_revoked), direct_awards_accepted
                         )
                     }
                 )
-            sorted_results = sorted(results, key=lambda a: (a['Institution name'] or ''))
+            sorted_results = sorted(results, key=lambda a: (a["Institution name"] or ""))
             return Response(sorted_results, status=status.HTTP_200_OK)
 
 

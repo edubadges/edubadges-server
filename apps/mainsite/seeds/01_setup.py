@@ -1,34 +1,34 @@
 import json
 
 from allauth.socialaccount.models import SocialApp
+from badgeuser.models import BadgeUser, Terms, TermsUrl
 from django.conf import settings
 from django.contrib.sites.models import Site
-
-from badgeuser.models import Terms, BadgeUser, TermsUrl
-from institution.models import Institution, Faculty
-from issuer.models import Issuer, BadgeClass, BadgeClassExtension
+from institution.models import Faculty, Institution
+from issuer.models import BadgeClass, BadgeClassExtension, Issuer
 from mainsite.models import BadgrApp
+
 # BadgrApp
-from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, EDU_BADGES_ISSUER_NAME
+from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, EDU_BADGES_ISSUER_NAME, SURF_INSTITUTION_NAME
+
 from .util import add_terms_institution
 
-
-setattr(settings, 'SUPPRESS_EMAILS', 1)
-badgr_app_id = getattr(settings, 'BADGR_APP_ID')
+settings.SUPPRESS_EMAILS = 1
+badgr_app_id = settings.BADGR_APP_ID
 
 
 main_badgr_app, _ = BadgrApp.objects.get_or_create(
     id=badgr_app_id,
     is_active=1,
     cors=settings.UI_URL,
-    email_confirmation_redirect="{}/login/".format(settings.UI_URL),
-    forgot_password_redirect="{}/change-password/".format(settings.UI_URL),
-    signup_redirect="{}/signup/".format(settings.UI_URL),
-    ui_login_redirect="{}/auth/login/".format(settings.UI_URL),
-    ui_signup_success_redirect="{}/signup/success/".format(settings.UI_URL),
-    ui_connect_success_redirect="{}/profile/".format(settings.UI_URL),
-    public_pages_redirect="{}/public/".format(settings.UI_URL),
-    oauth_authorization_redirect="{}/oauth/".format(settings.UI_URL),
+    email_confirmation_redirect=f"{settings.UI_URL}/login/",
+    forgot_password_redirect=f"{settings.UI_URL}/change-password/",
+    signup_redirect=f"{settings.UI_URL}/signup/",
+    ui_login_redirect=f"{settings.UI_URL}/auth/login/",
+    ui_signup_success_redirect=f"{settings.UI_URL}/signup/success/",
+    ui_connect_success_redirect=f"{settings.UI_URL}/profile/",
+    public_pages_redirect=f"{settings.UI_URL}/public/",
+    oauth_authorization_redirect=f"{settings.UI_URL}/oauth/",
     use_auth_code_exchange=0,
     is_demo_environment=True
 )

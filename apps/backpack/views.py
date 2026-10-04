@@ -7,7 +7,7 @@ class LegacyBadgeShareRedirectView(RedirectView):
     permanent = True
 
     def get_redirect_url(self, *args, **kwargs):
-        entity_id = kwargs.get('entity_id', None)
+        entity_id = kwargs.get("entity_id")
         if not entity_id:
             raise Http404
         try:

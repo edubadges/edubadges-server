@@ -1,5 +1,7 @@
 import os
-from django.core.checks import register, Warning
+
+from django.core.checks import Warning, register
+
 
 @register()
 def check_firebase_json_file(app_configs, **kwargs):

@@ -2,7 +2,7 @@ from badgeuser.models import CachedEmailAddress
 from django.conf import settings
 from mainsite.celery import app
 
-email_task_queue_name = getattr(settings, 'BACKGROUND_TASK_QUEUE_NAME', 'default')
+email_task_queue_name = getattr(settings, "BACKGROUND_TASK_QUEUE_NAME", "default")
 
 
 @app.task(bind=True, queue=email_task_queue_name)

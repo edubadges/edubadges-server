@@ -1,4 +1,3 @@
-# encoding: utf-8
 
 from backpack.models import BackpackBadgeShare
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
@@ -240,7 +239,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
         """Update acceptance of an Assertion in the user's Backpack and make public / private"""
         fields_whitelist = ("acceptance", "public", "include_evidence", "include_grade_achieved")
         data = {k: v for k, v in list(request.data.items()) if k in fields_whitelist}
-        return super(BackpackAssertionDetail, self).put(request, data=data, **kwargs)
+        return super().put(request, data=data, **kwargs)
 
 
 class BackpackAssertionDetailImage(ImagePropertyDetailView, BadgrOAuthTokenHasScope):
@@ -289,5 +288,4 @@ class ShareBackpackAssertion(BaseEntityDetailView):
         if redirect:
             headers = {"Location": share_url}
             return Response(status=HTTP_302_FOUND, headers=headers)
-        else:
-            return Response({"url": share_url})
+        return Response({"url": share_url})

@@ -1,9 +1,8 @@
 import graphene
+from badgeuser.models import UserProvisionment
 from django.contrib.contenttypes.models import ContentType
 from graphene.types.json import JSONString
 from graphene_django.types import DjangoObjectType
-
-from badgeuser.models import UserProvisionment
 from mainsite.exceptions import GraphQLException
 from staff.schema import PermissionType
 
@@ -14,10 +13,10 @@ def resolver_blocker_for_students(f):
     def wrapper(*args, **kwargs):
         info = args[1]
         user = info.context.user
-        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
-            raise GraphQLException('Authentication required to retrieve {} of {}'.format(info.field_name, info.parent_type))
-        if not hasattr(user, 'is_teacher') or not getattr(user, 'is_teacher'):
-            raise GraphQLException('Student may not retrieve {} of {}'.format(info.field_name, info.parent_type))
+        if not hasattr(user, "is_authenticated") or not user.is_authenticated:
+            raise GraphQLException(f"Authentication required to retrieve {info.field_name} of {info.parent_type}")
+        if not hasattr(user, "is_teacher") or not user.is_teacher:
+            raise GraphQLException(f"Student may not retrieve {info.field_name} of {info.parent_type}")
         return f(*args, **kwargs)
 
     return wrapper
@@ -30,12 +29,12 @@ def resolver_blocker_only_for_current_user(f):
         instance = args[0]
         info = args[1]
         user = info.context.user
-        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
-            raise GraphQLException('Authentication required for this call')
+        if not hasattr(user, "is_authenticated") or not user.is_authenticated:
+            raise GraphQLException("Authentication required for this call")
         if user == instance or (
-                hasattr(instance, 'user') and getattr(instance, 'user') == user):
+                hasattr(instance, "user") and instance.user == user):
             return f(*args)
-        raise GraphQLException('This call is only for the current user')
+        raise GraphQLException("This call is only for the current user")
 
     return wrapper
 
@@ -46,10 +45,10 @@ def resolver_blocker_for_super_user(f):
     def wrapper(*args, **kwargs):
         info = args[1]
         user = info.context.user
-        if not hasattr(user, 'is_authenticated') or not user.is_authenticated:
-            raise GraphQLException('Authentication required to retrieve {} of {}'.format(info.field_name, info.parent_type))
-        if not getattr(user, 'is_superuser', False):
-            raise GraphQLException('Only super users may retrieve {} of {}'.format(info.field_name, info.parent_type))
+        if not hasattr(user, "is_authenticated") or not user.is_authenticated:
+            raise GraphQLException(f"Authentication required to retrieve {info.field_name} of {info.parent_type}")
+        if not getattr(user, "is_superuser", False):
+            raise GraphQLException(f"Only super users may retrieve {info.field_name} of {info.parent_type}")
         return f(*args, **kwargs)
 
     return wrapper
@@ -64,33 +63,33 @@ class JSONType(JSONString):
 class ContentTypeType(DjangoObjectType):
     class Meta:
         model = ContentType
-        fields = ('id',)
+        fields = ("id",)
 
 
 class UserProvisionmentType(DjangoObjectType):
     class Meta:
         model = UserProvisionment
-        fields = ('email', 'entity_id', 'content_type', 'object_id', 'data', 'for_teacher', 'rejected', 'created_at')
+        fields = ("email", "entity_id", "content_type", "object_id", "data", "for_teacher", "rejected", "created_at")
 
     content_type = graphene.Field(ContentTypeType)
     data = graphene.Field(JSONType)
 
 
-class UserProvisionmentResolverMixin(object):
+class UserProvisionmentResolverMixin:
     userprovisionments = graphene.List(UserProvisionmentType)
 
     def resolve_userprovisionments(self, info):
         return self.cached_userprovisionments()
 
 
-class ContentTypeIdResolverMixin(object):
+class ContentTypeIdResolverMixin:
     content_type_id = graphene.Field(graphene.Int)
 
     def resolve_content_type_id(self, info):
         return ContentType.objects.get_for_model(self).pk
 
 
-class PermissionsResolverMixin(object):
+class PermissionsResolverMixin:
     """
     Schema mixin to resolve entity permissions
     """
@@ -102,7 +101,7 @@ class PermissionsResolverMixin(object):
         return self.get_permissions(info.context.user)
 
 
-class DefaultLanguageResolverMixin(object):
+class DefaultLanguageResolverMixin:
     """
     Schema mixin to resolve default language
     """
@@ -114,7 +113,7 @@ class DefaultLanguageResolverMixin(object):
         return self.default_language
 
 
-class ImageResolverMixin(object):
+class ImageResolverMixin:
     """
     Schema mixin to resolve image property
     """
@@ -123,11 +122,10 @@ class ImageResolverMixin(object):
         return self.image_url()
 
 
-class StaffResolverMixin(object):
+class StaffResolverMixin:
 
     @resolver_blocker_for_students
     def resolve_staff(self, info):
-        if self.has_permissions(info.context.user, ['may_read']):
+        if self.has_permissions(info.context.user, ["may_read"]):
             return self.staff_items
-        else:
-            return []
+        return []

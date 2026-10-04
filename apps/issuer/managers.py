@@ -1,9 +1,7 @@
-# encoding: utf-8
 import io
 import json
 import os
 import urllib.parse
-from json import dumps as json_dumps
 
 import dateutil.parser
 from django.core.files.base import ContentFile
@@ -27,7 +25,7 @@ class BaseOpenBadgeObjectManager(models.Manager):
         match = resolve_source_url_referencing_local_object(source_url)
         if match:
             try:
-                return self.get(entity_id=match.kwargs.get('entity_id'))
+                return self.get(entity_id=match.kwargs.get("entity_id"))
             except self.model.DoesNotExist:
                 return None
 
@@ -35,25 +33,25 @@ class BaseOpenBadgeObjectManager(models.Manager):
 class IssuerManager(BaseOpenBadgeObjectManager):
     @transaction.atomic
     def get_or_create_from_ob2(self, issuer_obo, source=None, original_json=None):
-        source_url = issuer_obo.get('id')
+        source_url = issuer_obo.get("id")
         local_object = self.get_local_object(source_url)
         if local_object:
             return local_object, False
 
-        image_url = issuer_obo.get('image', None)
+        image_url = issuer_obo.get("image", None)
         image = None
         if image_url:
             if isinstance(image_url, dict):
-                image_url = image_url.get('id')
-            image = _fetch_image_and_get_file(image_url, upload_to='remote/issuer')
+                image_url = image_url.get("id")
+            image = _fetch_image_and_get_file(image_url, upload_to="remote/issuer")
         return self.get_or_create(
             source_url=source_url,
             defaults=dict(
-                source=source if source is not None else 'local',
-                name=issuer_obo.get('name'),
-                description=issuer_obo.get('description', None),
-                url=issuer_obo.get('url', None),
-                email=issuer_obo.get('email', None),
+                source=source if source is not None else "local",
+                name=issuer_obo.get("name"),
+                description=issuer_obo.get("description", None),
+                url=issuer_obo.get("url", None),
+                email=issuer_obo.get("email", None),
                 image=image,
                 original_json=original_json,
             ),
@@ -63,39 +61,39 @@ class IssuerManager(BaseOpenBadgeObjectManager):
 class BadgeClassManager(BaseOpenBadgeObjectManager):
     @transaction.atomic
     def create(self, **kwargs):
-        new_kwargs = {key: value for (key, value) in kwargs.items() if key != 'award_allowed_institutions'}
+        new_kwargs = {key: value for (key, value) in kwargs.items() if key != "award_allowed_institutions"}
         obj = self.model(**new_kwargs)
         obj.save()
-        obj.award_allowed_institutions.set(kwargs.get('award_allowed_institutions', []))
+        obj.award_allowed_institutions.set(kwargs.get("award_allowed_institutions", []))
         obj.save()
         return obj
 
     @transaction.atomic
     def get_or_create_from_ob2(self, issuer, badgeclass_obo, source=None, original_json=None):
-        source_url = badgeclass_obo.get('id')
+        source_url = badgeclass_obo.get("id")
         local_object = self.get_local_object(source_url)
         if local_object:
             return local_object, False
 
         criteria_text = None
-        criteria = badgeclass_obo.get('criteria', None)
+        criteria = badgeclass_obo.get("criteria", None)
         if isinstance(criteria, str):
             criteria_text = criteria
-        elif criteria.get('type', 'Criteria') == 'Criteria':
-            criteria_text = criteria.get('narrative', None)
+        elif criteria.get("type", "Criteria") == "Criteria":
+            criteria_text = criteria.get("narrative", None)
 
-        image_url = badgeclass_obo.get('image')
+        image_url = badgeclass_obo.get("image")
         if isinstance(image_url, dict):
-            image_url = image_url.get('id')
-        image = _fetch_image_and_get_file(image_url, upload_to='remote/badgeclass')
+            image_url = image_url.get("id")
+        image = _fetch_image_and_get_file(image_url, upload_to="remote/badgeclass")
 
         return self.get_or_create(
             source_url=source_url,
             defaults=dict(
                 issuer=issuer,
-                source=source if source is not None else 'local',
-                name=badgeclass_obo.get('name'),
-                description=badgeclass_obo.get('description', None),
+                source=source if source is not None else "local",
+                name=badgeclass_obo.get("name"),
+                description=badgeclass_obo.get("description", None),
                 image=image,
                 criteria_text=criteria_text,
                 original_json=original_json,
@@ -103,7 +101,7 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
         )
 
 
-def _fetch_image_and_get_file(url, upload_to=''):
+def _fetch_image_and_get_file(url, upload_to=""):
     status_code, storage_name = fetch_remote_file_to_storage(url, upload_to=upload_to)
     if status_code == 200:
         image = DefaultStorage().open(storage_name)
@@ -114,41 +112,41 @@ def _fetch_image_and_get_file(url, upload_to=''):
 class BadgeInstanceManager(BaseOpenBadgeObjectManager):
     @transaction.atomic
     def get_or_create_from_ob2(self, badgeclass, assertion_obo, recipient_identifier, source=None, original_json=None):
-        source_url = assertion_obo.get('id')
+        source_url = assertion_obo.get("id")
         local_object = self.get_local_object(source_url)
         if local_object:
             return local_object, False
 
-        image_url = assertion_obo.get('image', None)
+        image_url = assertion_obo.get("image", None)
         image = None
         if image_url is None:
             image = badgeclass.image.file
         else:
             if isinstance(image_url, dict):
-                image_url = image_url.get('id')
-            image = _fetch_image_and_get_file(image_url, upload_to='remote/assertion')
+                image_url = image_url.get("id")
+            image = _fetch_image_and_get_file(image_url, upload_to="remote/assertion")
 
         issued_on = None
-        if 'issuedOn' in assertion_obo:
-            issued_on = dateutil.parser.parse(assertion_obo.get('issuedOn'))
+        if "issuedOn" in assertion_obo:
+            issued_on = dateutil.parser.parse(assertion_obo.get("issuedOn"))
 
         badgeinstance, created = self.get_or_create(
-            source_url=assertion_obo.get('id'),
+            source_url=assertion_obo.get("id"),
             defaults=dict(
                 recipient_identifier=recipient_identifier,
-                hashed=assertion_obo.get('recipient', {}).get('hashed', True),
-                source=source if source is not None else 'local',
+                hashed=assertion_obo.get("recipient", {}).get("hashed", True),
+                source=source if source is not None else "local",
                 original_json=original_json,
                 badgeclass=badgeclass,
                 issuer=badgeclass.cached_issuer,
                 image=image,
                 acceptance=self.model.ACCEPTANCE_ACCEPTED,
-                narrative=assertion_obo.get('narrative', None),
+                narrative=assertion_obo.get("narrative", None),
                 issued_on=issued_on,
             ),
         )
         if created:
-            evidence = list_of(assertion_obo.get('evidence', None))
+            evidence = list_of(assertion_obo.get("evidence", None))
             if evidence:
                 from issuer.models import BadgeInstanceEvidence
 
@@ -164,11 +162,11 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         :type badgeclass: BadgeClass
         :type issuer: Issuer
         """
-        recipient_identifier = kwargs.pop('recipient_identifier')
+        recipient_identifier = kwargs.pop("recipient_identifier")
         recipient_identifier = recipient_identifier if allow_uppercase else recipient_identifier.lower()
 
-        badgeclass = kwargs.pop('badgeclass', None)
-        issuer = kwargs.pop('issuer', badgeclass.issuer)
+        badgeclass = kwargs.pop("badgeclass", None)
+        issuer = kwargs.pop("issuer", badgeclass.issuer)
 
         # self.model would be a BadgeInstance
         new_instance = self.model(
@@ -181,7 +179,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
             badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)
             new_image = io.BytesIO()
             new_instance.image.save(
-                name='assertion-{id}{ext}'.format(id=new_instance.entity_id, ext=ext),
+                name=f"assertion-{new_instance.entity_id}{ext}",
                 content=ContentFile(new_image.read()),
                 save=False,
             )
@@ -193,10 +191,10 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
                 for evidence_obj in evidence:
                     BadgeInstanceEvidence.objects.create(
                         badgeinstance=new_instance,
-                        evidence_url=evidence_obj.get('evidence_url'),
-                        narrative=evidence_obj.get('narrative'),
-                        name=evidence_obj.get('name'),
-                        description=evidence_obj.get('description'),
+                        evidence_url=evidence_obj.get("evidence_url"),
+                        narrative=evidence_obj.get("narrative"),
+                        name=evidence_obj.get("name"),
+                        description=evidence_obj.get("description"),
                     )
             if extensions is not None:
                 for name, ext in list(extensions.items()):
@@ -210,9 +208,9 @@ class BadgeInstanceEvidenceManager(models.Manager):
     def create_from_ob2(self, badgeinstance, evidence_obo):
         return self.create(
             badgeinstance=badgeinstance,
-            evidence_url=evidence_obo.get('id', None),
-            narrative=evidence_obo.get('narrative', None),
-            name=evidence_obo.get('name', None),
-            description=evidence_obo.get('description', None),
+            evidence_url=evidence_obo.get("id", None),
+            narrative=evidence_obo.get("narrative", None),
+            name=evidence_obo.get("name", None),
+            description=evidence_obo.get("description", None),
             original_json=json.dumps(evidence_obo),
         )

@@ -2,16 +2,16 @@ import logging
 
 from graphene_django.views import GraphQLView
 
-logger = logging.getLogger('Badgr.Debug')
+logger = logging.getLogger("Badgr.Debug")
 
 
 class IntrospectionDisabledException(Exception):
     pass
 
 
-class DisableIntrospectionMiddleware(object):
+class DisableIntrospectionMiddleware:
     def resolve(self, next, root, info, **kwargs):
-        if info.field_name.lower() in ['__schema', '__introspection']:
+        if info.field_name.lower() in ["__schema", "__introspection"]:
             raise IntrospectionDisabledException
         return next(root, info, **kwargs)
 
