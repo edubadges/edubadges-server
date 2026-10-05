@@ -1,4 +1,5 @@
 import graphene
+
 from graphene_django.types import DjangoObjectType
 from staff.models import BadgeClassStaff, FacultyStaff, InstitutionStaff, IssuerStaff
 

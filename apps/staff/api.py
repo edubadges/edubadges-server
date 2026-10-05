@@ -1,4 +1,5 @@
 import badgrlog
+
 from entity.api import BaseEntityDetailView, BaseEntityListView, VersionedObjectMixin
 from institution.models import Faculty, Institution
 from issuer.models import BadgeClass, Issuer

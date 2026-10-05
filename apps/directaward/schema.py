@@ -1,4 +1,5 @@
 import graphene
+
 from directaward.models import DirectAward, DirectAwardBundle
 from graphene_django.types import DjangoObjectType
 

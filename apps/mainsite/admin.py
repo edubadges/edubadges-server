@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 import badgrlog
+
 from allauth.socialaccount.models import SocialAccount, SocialToken
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
 from django.contrib import admin

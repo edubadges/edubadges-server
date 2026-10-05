@@ -2,9 +2,11 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
+
 from http import HTTPStatus
 
 import requests
+
 from badgeuser.models import BadgeUser
 from django.conf import settings
 from django.core.exceptions import BadRequest

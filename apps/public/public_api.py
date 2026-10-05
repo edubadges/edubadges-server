@@ -1,11 +1,13 @@
 import io
 import os
 import re
+
 from urllib.parse import urljoin
 
 import badgrlog
 import cairosvg
 import requests
+
 from django.conf import settings
 from django.core.files.storage import DefaultStorage
 from django.http import Http404, HttpResponseRedirect

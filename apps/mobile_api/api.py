@@ -1,6 +1,7 @@
 import logging
 
 import requests
+
 from badgeuser.models import StudentAffiliation, TermsAgreement
 from directaward.models import DirectAward, DirectAwardBundle
 from django.db.models import Q, Subquery

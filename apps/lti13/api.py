@@ -1,4 +1,5 @@
 import badgrlog
+
 from entity.api import BaseEntityDetailView, BaseEntityListView
 from lti13.models import LtiCourse
 from lti13.serializers import LtiCourseSerializer

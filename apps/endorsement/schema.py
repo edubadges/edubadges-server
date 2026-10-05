@@ -1,4 +1,5 @@
 import graphene
+
 from endorsement.models import Endorsement
 from graphene_django.types import DjangoObjectType
 

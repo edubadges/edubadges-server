@@ -1,6 +1,7 @@
 import logging
 
 import oauth2_provider
+
 from rest_framework import permissions
 
 logger = logging.getLogger("Badgr.Debug")

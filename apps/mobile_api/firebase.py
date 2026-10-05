@@ -2,6 +2,7 @@ import logging
 import os
 
 import firebase_admin
+
 from django.conf import settings
 from firebase_admin import credentials
 

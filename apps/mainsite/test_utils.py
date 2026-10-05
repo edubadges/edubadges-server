@@ -1,6 +1,7 @@
 import hashlib
 import io
 import unittest
+
 from unittest.mock import Mock, patch
 
 from django.core.files.uploadedfile import InMemoryUploadedFile

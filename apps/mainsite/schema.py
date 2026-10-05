@@ -8,6 +8,7 @@ import issuer.schema
 import lti13.schema
 import lti_edu.schema
 import notifications.schema
+
 from graphene_django.types import DjangoObjectType
 from mainsite.models import SystemNotification
 

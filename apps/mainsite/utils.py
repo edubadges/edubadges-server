@@ -14,12 +14,14 @@ import tempfile
 import urllib.parse
 import uuid
 import webbrowser
+
 from http import HTTPStatus
 from io import BytesIO
 from xml.etree import ElementTree as ET
 
 import cairosvg
 import requests
+
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core import mail

@@ -1,4 +1,5 @@
 import json
+
 from urllib.parse import urlencode, urljoin
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl

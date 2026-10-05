@@ -1,6 +1,7 @@
 import base64
 import datetime
 import re
+
 from itertools import chain
 
 from allauth.account.models import EmailAddress, EmailConfirmation

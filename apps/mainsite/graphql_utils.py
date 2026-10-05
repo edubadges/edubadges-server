@@ -1,4 +1,5 @@
 import graphene
+
 from badgeuser.models import UserProvisionment
 from django.contrib.contenttypes.models import ContentType
 from graphene.types.json import JSONString

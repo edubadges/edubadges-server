@@ -1,4 +1,5 @@
 import json
+
 from unittest.mock import Mock, patch
 
 from mainsite.tests import BadgrTestCase

@@ -1,4 +1,5 @@
 import uuid
+
 from collections.abc import MutableMapping
 
 from django.core.cache import cache

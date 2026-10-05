@@ -1,4 +1,5 @@
 import badgrlog
+
 from auditlog.mixins import LogAccessMixin
 from django.db.models import ProtectedError
 from django.http import Http404

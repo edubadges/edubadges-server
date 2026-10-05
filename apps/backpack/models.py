@@ -1,6 +1,7 @@
 from urllib.parse import urljoin
 
 import requests
+
 from backpack.sharing import SharingManager
 from basic_models.models import CreatedUpdatedAt
 from cachemodel.models import CacheModel

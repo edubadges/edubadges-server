@@ -1,7 +1,9 @@
 import json
+
 from http import HTTPStatus
 
 import requests
+
 from django.conf import settings
 from signing import utils
 from signing.models import PrivateKey, PublicKey, SymmetricKey

@@ -1,4 +1,5 @@
 import json
+
 from subprocess import PIPE, STDOUT, Popen
 
 from signing.utils import hash_string

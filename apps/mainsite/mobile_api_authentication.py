@@ -2,9 +2,11 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
+
 from http import HTTPStatus
 
 import requests
+
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from mainsite.exceptions import TermsNotAcceptedException

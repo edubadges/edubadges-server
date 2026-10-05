@@ -1,4 +1,5 @@
 import graphene
+
 from graphene_django.types import DjangoObjectType
 from issuer.models import Issuer
 from issuer.schema import IssuerType

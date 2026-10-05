@@ -1,8 +1,10 @@
 import logging
+
 from http import HTTPStatus
 from typing import Any
 
 import requests
+
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from django.http import Http404
 from mainsite.permissions import AuthenticatedWithVerifiedEmail

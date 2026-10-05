@@ -1,4 +1,5 @@
 import re
+
 from collections import OrderedDict
 
 from auditlog.registry import auditlog

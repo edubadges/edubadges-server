@@ -1,4 +1,5 @@
 import urllib.parse
+
 from urllib.parse import parse_qs, urlparse
 
 from allauth.account.utils import perform_login

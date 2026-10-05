@@ -66,3 +66,6 @@ ignore = [
 "apps/mobile_api/api.py" = [
     "E501",  # Endpoint schemas with large examples
 ]
+
+[lint.isort]
+lines-between-types = 1

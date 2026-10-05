@@ -1,4 +1,5 @@
 import badgrlog
+
 from badgeuser.serializers import UserSlugRelatedField
 from institution.serializers import FacultySlugRelatedField, InstitutionSlugRelatedField
 from issuer.serializers import BadgeClassSlugRelatedField, IssuerSlugRelatedField

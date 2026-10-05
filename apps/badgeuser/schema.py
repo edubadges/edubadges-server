@@ -1,4 +1,5 @@
 import graphene
+
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAwardBundle
 from directaward.schema import DirectAwardType

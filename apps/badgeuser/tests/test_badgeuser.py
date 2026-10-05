@@ -1,4 +1,5 @@
 import json
+
 from http import HTTPStatus
 
 from badgeuser.models import UserProvisionment

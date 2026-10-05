@@ -4,9 +4,11 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
+
 from http import HTTPStatus
 
 import requests
+
 from allauth.account.adapter import get_adapter as get_account_adapter
 from allauth.socialaccount.helpers import (
     complete_social_login,

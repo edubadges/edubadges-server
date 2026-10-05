@@ -1,4 +1,5 @@
 import django_filters as filters
+
 from issuer.models import BadgeClass
 
 INSTITUTION_TYPE_FILTER_CHOICES = [

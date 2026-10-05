@@ -1,4 +1,5 @@
 import datetime
+
 from itertools import groupby
 
 from badgeuser.models import BadgeUser, StudentAffiliation

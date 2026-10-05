@@ -3,6 +3,7 @@ import json
 
 import cryptography.fernet
 import dateutil
+
 from badgeuser.models import BadgrAccessToken
 from django.conf import settings
 from django.utils import timezone

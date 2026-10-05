@@ -1,6 +1,7 @@
 import logging
 
 import django.dispatch
+
 from directaward.models import DirectAward
 from django.dispatch import receiver
 from issuer.models import BadgeClass

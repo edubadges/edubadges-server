@@ -1,5 +1,6 @@
 import collections
 import json
+
 from http import HTTPStatus
 
 from mainsite.tests import BadgrTestCase
