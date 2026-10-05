@@ -9,15 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 with open(os.path.join(os.path.dirname(__file__), "README.md")) as readme:
     README = readme.read()
 
-# execute version.py in the local namespace, but dont import the module.
-exec(  # noqa: S102
-    compile(
-        open(os.path.join(os.path.dirname(__file__), "apps/mainsite/version.py"), "rb").read(),  # noqa: SIM115
-        os.path.join(os.path.dirname(__file__), "apps/mainsite/version.py"),
-        "exec",
-    )
-)
-version = ".".join(map(str, VERSION))  # noqa: F821
+version = "2.14.1"
 
 
 def _clean_version_tag(tag):
