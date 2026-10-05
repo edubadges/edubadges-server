@@ -1,9 +1,10 @@
 import json
+
 from unittest.mock import Mock, patch
 
 from mainsite.tests import BadgrTestCase
 
-FAKE_ACCESS_TOKEN = "test-access-token"
+FAKE_ACCESS_TOKEN = "test-access-token"  # noqa: S105
 AUTH_HEADER = {"HTTP_AUTHORIZATION": f"Bearer {FAKE_ACCESS_TOKEN}"}
 
 

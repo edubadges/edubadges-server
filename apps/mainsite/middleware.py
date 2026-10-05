@@ -1,25 +1,24 @@
 import json
 import logging
-import sys
 import traceback
+
+from json.decoder import JSONDecodeError
 
 from django import http
 from django.http.response import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
-from json.decoder import JSONDecodeError
 from mainsite import settings
 from rest_framework.exceptions import APIException
 
-
-logger = logging.getLogger('Badgr.Debug')
+logger = logging.getLogger("Badgr.Debug")
 
 
 class MaintenanceMiddleware(MiddlewareMixin):
     """Serve a temporary redirect to a maintenance url in maintenance mode"""
 
     def process_request(self, request):
-        if request.method == 'POST':
-            if getattr(settings, 'MAINTENANCE_MODE', False) is True and hasattr(settings, 'MAINTENANCE_URL'):
+        if request.method == "POST":
+            if getattr(settings, "MAINTENANCE_MODE", False) is True and hasattr(settings, "MAINTENANCE_URL"):
                 return http.HttpResponseRedirect(settings.MAINTENANCE_URL)
             return None
 
@@ -27,18 +26,16 @@ class MaintenanceMiddleware(MiddlewareMixin):
 class TrailingSlashMiddleware(MiddlewareMixin):
     def process_request(self, request):
         """Removes the slash from urls, or adds a slash for the admin urls"""
-        exceptions = ['/staff', '/__debug__']
+        exceptions = ["/staff", "/__debug__"]
         if list(filter(request.path.startswith, exceptions)):
-            if request.path[-1] != '/':
+            if request.path[-1] != "/":
                 return http.HttpResponsePermanentRedirect(request.path + "/")
-        else:
-            if request.path != '/' and request.path[-1] == '/':
-                return http.HttpResponsePermanentRedirect(request.path[:-1])
+        elif request.path != "/" and request.path[-1] == "/":
+            return http.HttpResponsePermanentRedirect(request.path[:-1])
         return None
 
 
-class ExceptionHandlerMiddleware(object):
-
+class ExceptionHandlerMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -46,7 +43,7 @@ class ExceptionHandlerMiddleware(object):
         return self.get_response(request)
 
     def process_exception(self, request, exception):
-        logger.exception(exception, exc_info=True)
+        logger.exception(exception, exc_info=True)  # noqa: LOG004, LOG014
         traceback.print_exc()
         # APIException are handled by various other handlers, and we don't want to swallow those
         if "json" in request.content_type and not isinstance(exception, APIException):
@@ -57,42 +54,40 @@ class ExceptionHandlerMiddleware(object):
 
 
 class RequestResponseLoggerMiddleware(MiddlewareMixin):
-
     def process_request(self, request):
-        if request.method in ['POST', 'PUT', 'PATCH']:
+        if request.method in ["POST", "PUT", "PATCH"]:
             request.req_body = request.body  # for later retrieval
 
-    def process_response(self, request, response):
+    def process_response(self, request, response):  # noqa: C901
         # don't log static files or media files requests
-        if not request.path.startswith('/static') and not request.path.startswith('/media'):
+        if not request.path.startswith("/static") and not request.path.startswith("/media"):
             request_log = {
-                'method': request.method,
-                'path': request.path,
-                'scheme': request.scheme,
-                'user': request.user,
+                "method": request.method,
+                "path": request.path,
+                "scheme": request.scheme,
+                "user": request.user,
             }
-            response_log = {'status_code': response.status_code}
-            if request.method == 'GET':
-                request_log['GET'] = request.GET
-            elif request.method in ['POST', 'PUT']:
-                if request.path.startswith('/graphql'):
-                    request_log['body'] = request.req_body
+            response_log = {"status_code": response.status_code}
+            if request.method == "GET":
+                request_log["GET"] = request.GET
+            elif request.method in ["POST", "PUT"]:
+                if request.path.startswith("/graphql"):
+                    request_log["body"] = request.req_body
                 else:
-                    response_log['content'] = response.content
-                    if not hasattr(request, 'sensitive_post_parameters'):
+                    response_log["content"] = response.content
+                    if not hasattr(request, "sensitive_post_parameters"):
                         body = request.req_body
-                        if body.startswith(b'------WebKitFormBoundary'):
-                            body = 'Multipart message, removed from logging'
-                        else:
-                            if body:
-                                try:
-                                    body = json.loads(body)
-                                    if dict == type(body):
-                                        image = body.get('image', None)
-                                        if image and image.startswith('data:image'):
-                                            body['image'] = 'Image string removed for logging purposes'
-                                except JSONDecodeError:
-                                    pass  # is not json, copy the entire string
-                        request_log['body'] = body
-            logger.info({'Request/Response Cycle': {'request': request_log, 'response': response_log}})
+                        if body.startswith(b"------WebKitFormBoundary"):
+                            body = "Multipart message, removed from logging"
+                        elif body:
+                            try:
+                                body = json.loads(body)
+                                if dict == type(body):  # noqa: E721
+                                    image = body.get("image", None)
+                                    if image and image.startswith("data:image"):
+                                        body["image"] = "Image string removed for logging purposes"
+                            except JSONDecodeError:
+                                pass  # is not json, copy the entire string
+                        request_log["body"] = body
+            logger.info({"Request/Response Cycle": {"request": request_log, "response": response_log}})
         return response

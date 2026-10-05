@@ -4,11 +4,11 @@ from pythonjsonlogger import jsonlogger
 
 
 class JsonFormatter(jsonlogger.JsonFormatter):
-    default_time_format = '%Y-%m-%dT%H:%M:%S.%f%z'
+    default_time_format = "%Y-%m-%dT%H:%M:%S.%f%z"
 
     def converter(self, timestamp):
-        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
 
-    def formatTime(self, record, datefmt=None):
+    def formatTime(self, record, datefmt=None):  # noqa: N802
         dt = self.converter(record.created)
-        return dt.strftime(datefmt if datefmt else self.default_time_format)
+        return dt.strftime(datefmt or self.default_time_format)

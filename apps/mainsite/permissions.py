@@ -2,13 +2,14 @@ import logging
 
 from rest_framework import permissions
 
-logger = logging.getLogger('Badgr.Debug')
+logger = logging.getLogger("Badgr.Debug")
 
 
 class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
     """
     Allows access only to authenticated users who have verified email addresses.
     """
+
     message = "This function only available to authenticated users with confirmed email addresses."
 
     def has_permission(self, request, view):
@@ -16,9 +17,8 @@ class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
 
 
 class CannotDeleteWithChildren(permissions.BasePermission):
-
     def has_object_permission(self, request, view, obj):
-        if request.method == 'DELETE':
+        if request.method == "DELETE":  # noqa: SIM102
             if obj.children:
                 return False
         return True
@@ -30,7 +30,7 @@ class TeachPermission(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user and hasattr(request.user, 'is_teacher') and request.user.is_teacher
+        return request.user and hasattr(request.user, "is_teacher") and request.user.is_teacher
 
 
 class MobileAPIPermission(permissions.BasePermission):
@@ -39,4 +39,4 @@ class MobileAPIPermission(permissions.BasePermission):
     """
 
     def has_permission(self, request, view):
-        return hasattr(request, 'mobile_api_call') and request.mobile_api_call
+        return hasattr(request, "mobile_api_call") and request.mobile_api_call

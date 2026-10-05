@@ -1,9 +1,5 @@
-# encoding: utf-8
-
-
-from rest_framework.permissions import BasePermission
-
 from badgeuser.models import BadgeUser
+from rest_framework.permissions import BasePermission
 
 
 class BadgeUserIsAuthenticatedUser(BasePermission):
@@ -20,5 +16,9 @@ class InstitutionAdmin(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        return user and hasattr(user, 'institutionstaff_set') \
-               and user.institutionstaff_set.exists() and user.institutionstaff_set.first().may_administrate_users
+        return (
+            user
+            and hasattr(user, "institutionstaff_set")
+            and user.institutionstaff_set.exists()
+            and user.institutionstaff_set.first().may_administrate_users
+        )

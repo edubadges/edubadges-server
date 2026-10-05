@@ -1,16 +1,16 @@
 import graphene
-from graphene_django.types import DjangoObjectType
 
+from graphene_django.types import DjangoObjectType
 from notifications.models import BadgeClassUserNotification
 
 
 class BadgeClassUserNotificationType(DjangoObjectType):
     class Meta:
         model = BadgeClassUserNotification
-        fields = ('badgeclass',)
+        fields = ("badgeclass",)
 
 
-class Query(object):
+class Query:
     notifications = graphene.List(BadgeClassUserNotificationType)
 
     def resolve_notifications(self, info, **kwargs):

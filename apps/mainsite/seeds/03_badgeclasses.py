@@ -1,11 +1,16 @@
-import json
-from typing import List
+import json  # noqa: N999
+
 from django.conf import settings
-from institution.models import Institution, Faculty
-from issuer.models import Issuer, BadgeClass, BadgeClassExtension
-from mainsite.seeds.constants import EDU_BADGES_FACULTY_NAME, SURF_INSTITUTION_NAME, \
-    BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY, BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_PSYCHOMETRICS, \
-    BADGE_CLASS_GROUP_DYNAMICS
+from institution.models import Faculty, Institution
+from issuer.models import BadgeClass, BadgeClassExtension, Issuer
+from mainsite.seeds.constants import (
+    BADGE_CLASS_COGNITIVE_PSYCHOLOGY,
+    BADGE_CLASS_GROUP_DYNAMICS,
+    BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY,
+    BADGE_CLASS_PSYCHOMETRICS,
+    EDU_BADGES_FACULTY_NAME,
+    SURF_INSTITUTION_NAME,
+)
 
 faculties = ["Law", "Business", "Humanities", "Medicine", "Science", "Social and Behavioural Science"]
 
@@ -16,57 +21,66 @@ for ins in Institution.objects.exclude(identifier=SURF_INSTITUTION_NAME):
             name_english=fac,
             description_english=f"Description for {fac}",
             description_dutch=f"Beschrijving voor {fac}",
-            institution=ins
+            institution=ins,
         )
 
 # Issuer
-issuers = [['Notarial Law', 'Tax Law', 'Criminology'],
-           ['Economics', 'Global Affairs', 'Public Administration'],
-           ['History', 'International Relations', 'Linguistics'],
-           ['Medicine', 'Biomedical Sciences'],
-           ['Astronomy', 'Biology', 'Mathematics', 'Physics', 'Computer Science'],
-           ['Psychology', 'Sociology', 'Political Science', 'Anthropology']]
+issuers = [
+    ["Notarial Law", "Tax Law", "Criminology"],
+    ["Economics", "Global Affairs", "Public Administration"],
+    ["History", "International Relations", "Linguistics"],
+    ["Medicine", "Biomedical Sciences"],
+    ["Astronomy", "Biology", "Mathematics", "Physics", "Computer Science"],
+    ["Psychology", "Sociology", "Political Science", "Anthropology"],
+]
 
-issuers = dict(zip(faculties, issuers))
+issuers = dict(zip(faculties, issuers))  # noqa: B905
 
 for fac in Faculty.objects.exclude(name_english=EDU_BADGES_FACULTY_NAME):
-    [Issuer.objects.get_or_create(name_english=issuer,
-                                  description_english=f"Description for {issuer}",
-                                  description_dutch=f"Beschrijving voor {issuer}",
-                                  faculty=fac, old_json="{}",
-                                  url_english=f"https://issuer", email="issuer@info.nl", image_english="uploads/issuers/surf.png") for
-     issuer in issuers[fac.name]]
+    [
+        Issuer.objects.get_or_create(
+            name_english=issuer,
+            description_english=f"Description for {issuer}",
+            description_dutch=f"Beschrijving voor {issuer}",
+            faculty=fac,
+            old_json="{}",
+            url_english="https://issuer",
+            email="issuer@info.nl",
+            image_english="uploads/issuers/surf.png",
+        )
+        for issuer in issuers[fac.name]
+    ]
 
 badge_class_extensions = {
     "extensions:LanguageExtension": {
         "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/LanguageExtension/context.json",
         "type": ["Extension", "extensions:LanguageExtension"],
-        "Language": "nl_NL"
+        "Language": "nl_NL",
     },
     "extensions:ECTSExtension": {
         "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/ECTSExtension/context.json",
         "type": ["Extension", "extensions:ECTSExtension"],
-        "ECTS": 2.5
+        "ECTS": 2.5,
     },
     "extensions:EQFExtension": {
         "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/EQFExtension/context.json",
         "type": ["Extension", "extensions:EQFExtension"],
-        "EQF": 7
+        "EQF": 7,
     },
     "extensions:LearningOutcomeExtension": {
         "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/LearningOutcomeExtension/context.json",
         "type": ["Extension", "extensions:LearningOutcomeExtension"],
-        "LearningOutcome": "Will appreciate the benefits of learning a foreign language."
+        "LearningOutcome": "Will appreciate the benefits of learning a foreign language.",
     },
     "extensions:EducationProgramIdentifierExtension": {
         "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/EducationProgramIdentifierExtension/context.json",
         "type": ["Extension", "extensions:EducationProgramIdentifierExtension"],
-        "EducationProgramIdentifier": [56823]
-    }
+        "EducationProgramIdentifier": [56823],
+    },
 }
 
 # add some markdown to the description, make it multiline.
-badge_class_description = '''
+badge_class_description = """
 # Introduction to Lorem Ipsum
 Lorem ipsum dolor **sit amet**, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
@@ -83,7 +97,8 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 1. Lorem ipsum dolor sit amet
 2. Consectetur adipiscing elit
 3. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
-'''
+"""  # noqa: E501
+
 
 def create_badge_class(name, issuer):
     badge_class, _ = BadgeClass.objects.get_or_create(
@@ -97,9 +112,7 @@ def create_badge_class(name, issuer):
     )
     for key, value in badge_class_extensions.items():
         BadgeClassExtension.objects.get_or_create(
-            name=key,
-            original_json=json.dumps(value),
-            badgeclass_id=badge_class.id
+            name=key, original_json=json.dumps(value), badgeclass_id=badge_class.id
         )
     return badge_class
 
@@ -107,25 +120,57 @@ def create_badge_class(name, issuer):
 # BadgeClass
 # Faculty: Social and Behavioural Science ## Issuer: Psychology
 for iss in Issuer.objects.filter(name_english="Psychology"):
-    [create_badge_class(bc, iss) for bc in
-     [BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY, BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_PSYCHOMETRICS,
-      BADGE_CLASS_GROUP_DYNAMICS]]
+    [
+        create_badge_class(bc, iss)
+        for bc in [
+            BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY,
+            BADGE_CLASS_COGNITIVE_PSYCHOLOGY,
+            BADGE_CLASS_PSYCHOMETRICS,
+            BADGE_CLASS_GROUP_DYNAMICS,
+        ]
+    ]
 
 # Faculty: Social and Behavioural Science ## Issuer: Political Science
 for iss in Issuer.objects.filter(name_english="Political Science"):
-    [create_badge_class(bc, iss) for bc in
-     ['Introduction to Political Science', 'Law and Politics', 'History of Political Thought', 'Research Methods']]
+    [
+        create_badge_class(bc, iss)
+        for bc in [
+            "Introduction to Political Science",
+            "Law and Politics",
+            "History of Political Thought",
+            "Research Methods",
+        ]
+    ]
 
 # Faculty: Medicine ## Issuer: Medicine
 for iss in Issuer.objects.filter(name_english="Medicine"):
-    [create_badge_class(bc, iss) for bc in
-     ['Growth and Development', 'Circulation and Breathing', 'Regulation and Integration', 'Digestion and Defense']]
+    [
+        create_badge_class(bc, iss)
+        for bc in [
+            "Growth and Development",
+            "Circulation and Breathing",
+            "Regulation and Integration",
+            "Digestion and Defense",
+        ]
+    ]
 
 # Faculty Medicine ## Alignments
 for bc in BadgeClass.objects.filter(issuer__name_english="Medicine"):
     bc.alignment_items = [
-            { "target_name": "EQF", "target_url": "https://ec.europa.eu/ploteus/content/descriptors-page", "target_description": "European Qualifications Framework", "target_framework": "EQF", "target_code": "7" },
-            { "target_name": "ECTS", "target_url": "https://ec.europa.eu/education/resources-and-tools/european-credit-transfer-and-accumulation-system-ects_en", "target_description": "European Credit Transfer and Accumulation System", "target_framework": "ECTS", "target_code": "2.5" },
+        {
+            "target_name": "EQF",
+            "target_url": "https://ec.europa.eu/ploteus/content/descriptors-page",
+            "target_description": "European Qualifications Framework",
+            "target_framework": "EQF",
+            "target_code": "7",
+        },
+        {
+            "target_name": "ECTS",
+            "target_url": "https://ec.europa.eu/education/resources-and-tools/european-credit-transfer-and-accumulation-system-ects_en",
+            "target_description": "European Credit Transfer and Accumulation System",
+            "target_framework": "ECTS",
+            "target_code": "2.5",
+        },
     ]
     bc.save()
 
@@ -138,12 +183,12 @@ for bc in BadgeClass.objects.all()[::2]:
 
 # Add assessment_type to half of the badges
 iterator = 0
-assessment_types: List[str] = ["testing", "application of a skill", "portfolio", "recognition of prior learning"]
+assessment_types: list[str] = ["testing", "application of a skill", "portfolio", "recognition of prior learning"]
 n_types = len(assessment_types)
 for bc in BadgeClass.objects.all()[::2]:
     bc.assessment_type = assessment_types[iterator % n_types]
     bc.save()
-    iterator += 1
+    iterator += 1  # noqa: SIM113
 
 iterator = 0
 

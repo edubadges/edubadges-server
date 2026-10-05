@@ -1,11 +1,12 @@
 import logging
 
 import django.dispatch
+
+from directaward.models import DirectAward
 from django.dispatch import receiver
+from issuer.models import BadgeClass
 
 from .models import DirectAwardAuditTrail
-from directaward.models import DirectAward
-from issuer.models import BadgeClass
 
 # Signals doc: https://docs.djangoproject.com/en/4.2/topics/signals/
 audit_trail_signal = django.dispatch.Signal()  # creates a custom signal and specifies the args required.
@@ -15,18 +16,18 @@ logger = logging.getLogger(__name__)
 
 # helper func that gets the client ip
 def get_client_ip(request):
-    x_forwarded_for = request.headers.get('x-forwarded-for')
+    x_forwarded_for = request.headers.get("x-forwarded-for")
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(",")[0]
     else:
-        ip = request.META.get('REMOTE_ADDR')
+        ip = request.META.get("REMOTE_ADDR")
     return ip
 
 
 @receiver(audit_trail_signal)
-def direct_award_audit_trail(sender, user, request, direct_award_id, badgeclass_id, method, summary, **kwargs):
+def direct_award_audit_trail(sender, user, request, direct_award_id, badgeclass_id, method, summary, **kwargs):  # noqa: ARG001, PLR0913, PLR0917
     try:
-        user_agent_info = (request.headers.get('user-agent', '<unknown>')[:255],)
+        user_agent_info = (request.headers.get("user-agent", "<unknown>")[:255],)
 
         direct_award = None
         badgeclass = None
@@ -45,7 +46,7 @@ def direct_award_audit_trail(sender, user, request, direct_award_id, badgeclass_
             badgeclass=badgeclass,
         )
         logger.info(
-            f'direct_award_audit_trail created {audit_trail.id}  for user {audit_trail.user} and directaward {direct_award_id}'
+            f"direct_award_audit_trail created {audit_trail.id}  for user {audit_trail.user} and directaward {direct_award_id}"  # noqa: E501, G004
         )
-    except Exception as e:
-        logger.error('direct_award_audit_trail request: %s, error: %s' % (request, e))
+    except Exception as e:  # noqa: BLE001
+        logger.error("direct_award_audit_trail request: %s, error: %s" % (request, e))  # noqa: G002, TRY400, UP031

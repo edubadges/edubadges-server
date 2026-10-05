@@ -9,7 +9,7 @@ jobs:
   blast-radius:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
       - uses: FROWNINGdev/django-orm-lens@action-v1
         with:
           command: blast-radius

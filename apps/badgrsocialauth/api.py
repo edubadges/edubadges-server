@@ -1,21 +1,20 @@
 from allauth.socialaccount.adapter import get_adapter
 from allauth.socialaccount.models import SocialAccount
+from badgeuser.authcode import authcode_for_accesstoken
+from badgrsocialauth.permissions import IsSocialAccountOwner
+from badgrsocialauth.serializers import BadgrSocialAccountSerializerV1
 from django.contrib.auth import logout
 from django.core.exceptions import ValidationError
 from django.http import Http404
 from django.urls import reverse
-from oauth2_provider.models import AccessToken
-from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN
-from rest_framework.views import APIView
-
-from badgeuser.authcode import authcode_for_accesstoken
-from badgrsocialauth.permissions import IsSocialAccountOwner
-from badgrsocialauth.serializers import BadgrSocialAccountSerializerV1
-from entity.api import BaseEntityListView, BaseEntityDetailView
+from entity.api import BaseEntityDetailView, BaseEntityListView
 from issuer.permissions import BadgrOAuthTokenHasScope
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.utils import OriginSetting
+from oauth2_provider.models import AccessToken
+from rest_framework.response import Response
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from rest_framework.views import APIView
 
 
 class BadgrSocialAccountList(BaseEntityListView):
@@ -29,27 +28,27 @@ class BadgrSocialAccountList(BaseEntityListView):
         return obj
 
     def get(self, request, **kwargs):
-        return super(BadgrSocialAccountList, self).get(request, **kwargs)
+        return super().get(request, **kwargs)
 
 
 class BadgrSocialAccountConnect(APIView):
     permission_classes = (AuthenticatedWithVerifiedEmail, BadgrOAuthTokenHasScope)
-    valid_scopes = ['rw:profile']
+    valid_scopes = ["rw:profile"]
 
     def get(self, request, **kwargs):
         if not isinstance(request.auth, AccessToken):
-            raise ValidationError('Invalid credentials')
-        provider_name = self.request.GET.get('provider', None)
+            raise ValidationError("Invalid credentials")
+        provider_name = self.request.GET.get("provider", None)
         if provider_name is None:
-            raise ValidationError('No provider specified')
+            raise ValidationError("No provider specified")
 
         authcode = authcode_for_accesstoken(request.auth)
 
-        redirect_url = '{origin}{url}?provider={provider}&authCode={code}'.format(
-            origin=OriginSetting.HTTP, url=reverse('socialaccount_login'), provider=provider_name, code=authcode
+        redirect_url = "{origin}{url}?provider={provider}&authCode={code}".format(
+            origin=OriginSetting.HTTP, url=reverse("socialaccount_login"), provider=provider_name, code=authcode
         )
 
-        return Response(dict(url=redirect_url))
+        return Response(dict(url=redirect_url))  # noqa: C408
 
     def post(self, request, **kwargs):
         if request.user.is_authenticated:
@@ -66,12 +65,12 @@ class BadgrSocialAccountDetail(BaseEntityDetailView):
 
     def get_object(self, request, **kwargs):
         try:
-            return SocialAccount.objects.get(id=kwargs.get('id'))
+            return SocialAccount.objects.get(id=kwargs.get("id"))
         except SocialAccount.DoesNotExist:
-            raise Http404
+            raise Http404  # noqa: B904
 
     def get(self, request, **kwargs):
-        return super(BadgrSocialAccountDetail, self).get(request, **kwargs)
+        return super().get(request, **kwargs)
 
     def delete(self, request, **kwargs):
         social_account = self.get_object(request, **kwargs)

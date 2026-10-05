@@ -1,27 +1,26 @@
+from basic_models.actions import DeleteRequiresPermission, ToggleActive
 from django.contrib.admin import site as admin_site
 
-from basic_models.actions import ToggleActive, DeleteRequiresPermission
-from .admin import CreatedUpdatedBy, LocalPreview, AutoGroupMeta
+from .admin import AutoGroupMeta, CreatedUpdatedBy, LocalPreview
 
 
-class site(object):
-
+class site:  # noqa: N801
     @staticmethod
     def add_base(admin_class, base):
         if base not in admin_class.__bases__:
-            admin_class.__bases__ = (base,) + admin_class.__bases__
+            admin_class.__bases__ = (base,) + admin_class.__bases__  # noqa: RUF005
 
     @staticmethod
     def register(model, admin_class):
         def _list_has_all_values(superset, subset):
-            return all([value in superset for value in subset])
+            return all([value in superset for value in subset])  # noqa: C419
 
         field_names = [field.name for field in model._meta.fields]
 
-        if _list_has_all_values(field_names, ('created_by', 'updated_by')):
+        if _list_has_all_values(field_names, ("created_by", "updated_by")):
             site.add_base(admin_class, CreatedUpdatedBy)
 
-        if 'is_active' in field_names:
+        if "is_active" in field_names:
             site.add_base(admin_class, LocalPreview)
             site.add_base(admin_class, ToggleActive)
             site.add_base(admin_class, DeleteRequiresPermission)

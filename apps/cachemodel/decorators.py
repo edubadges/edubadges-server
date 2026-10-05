@@ -1,11 +1,13 @@
-from django.core.cache import cache
 from functools import wraps
 
 from cachemodel import CACHE_FOREVER_TIMEOUT
 from cachemodel.utils import generate_cache_key
+from django.core.cache import cache
 
-def cached_method(auto_publish=False):
+
+def cached_method(auto_publish=False):  # noqa: FBT002
     """A decorator for CacheModel methods."""
+
     def decorator(target):
         @wraps(target)
         def wrapper(self, *args, **kwargs):
@@ -15,18 +17,18 @@ def cached_method(auto_publish=False):
                 data = target(self, *args, **kwargs)
                 cache.set(key, data, CACHE_FOREVER_TIMEOUT)
             return data
+
         wrapper._cached_method = True
         wrapper._cached_method_auto_publish = auto_publish
         wrapper._cached_method_target = target
         return wrapper
 
     if callable(auto_publish):
-        # we were used with no parens, fixup args 
+        # we were used with no parens, fixup args
         func = auto_publish
         auto_publish = False
         return decorator(func)
-    else:
-        return decorator
+    return decorator
 
 
 def denormalized_field(field_name):
@@ -38,19 +40,22 @@ def denormalized_field(field_name):
     Arguments:
       field_name -- the name of a field on the model that will store the results of the function
     """
+
     def decorator(target):
         @wraps(target)
         def wrapper(self):
             return target(self)
+
         wrapper._denormalized_field = True
         wrapper._denormalized_field_name = field_name
         return wrapper
 
     if callable(field_name):
         # we were used without an argument
-        raise ArgumentErrror("You must pass a field name to @denormalized_field")
-        
+        raise ArgumentErrror("You must pass a field name to @denormalized_field")  # noqa: F821
+
     return decorator
+
 
 def find_fields_decorated_with(instance, property_name):
     """helper function that finds all methods decorated with property_name"""
@@ -58,4 +63,3 @@ def find_fields_decorated_with(instance, property_name):
     for m in non_field_attributes:
         if hasattr(getattr(instance.__class__, m), property_name):
             yield getattr(instance.__class__, m)
-

@@ -1,10 +1,6 @@
-# encoding: utf-8
-
 from badgrsocialauth.utils import get_privacy_content
 from django.utils import translation
 from rest_framework import serializers
-
-from .models import Theme
 
 """
 {
@@ -26,34 +22,28 @@ from .models import Theme
 			height: 48
 		}
 	}   
-"""
+"""  # noqa: E501, W291
 
 
 class ThemeSerializer(serializers.Serializer):
-
-
     def to_representation(self, instance):
         """
         :type instance: Theme
         """
         theme = {
-            'welcomeMessage': instance.welcome_message,
-            'serviceName': instance.service_name,
-            'showPoweredByBadgr': instance.show_powered_by_badgr,
-            'showApiDocsLink': instance.show_api_docs_link,
-            'termsOfServiceLink': instance.terms_of_service_link,
-            'privacyPolicyLink': instance.privacy_policy_link,
-            'logoImg': {
-                'small': instance.logo_small.url,
-                'desktop': instance.logo_desktop.url
-            },
-            'consent_apply_badge':get_privacy_content('consent_apply_badge'),
-            'consent_apply_badge_en':get_privacy_content('consent_apply_badge_en'),
-            'privacy_statement':get_privacy_content('privacy_statement'),
-            'privacy_statement_en':get_privacy_content('privacy_statement_en'),
-            'language_detected':translation.get_language().lower(),
-            'dutch_language_codes': ['nl-nl', 'nl-be', 'nl'],
-
+            "welcomeMessage": instance.welcome_message,
+            "serviceName": instance.service_name,
+            "showPoweredByBadgr": instance.show_powered_by_badgr,
+            "showApiDocsLink": instance.show_api_docs_link,
+            "termsOfServiceLink": instance.terms_of_service_link,
+            "privacyPolicyLink": instance.privacy_policy_link,
+            "logoImg": {"small": instance.logo_small.url, "desktop": instance.logo_desktop.url},
+            "consent_apply_badge": get_privacy_content("consent_apply_badge"),
+            "consent_apply_badge_en": get_privacy_content("consent_apply_badge_en"),
+            "privacy_statement": get_privacy_content("privacy_statement"),
+            "privacy_statement_en": get_privacy_content("privacy_statement_en"),
+            "language_detected": translation.get_language().lower(),
+            "dutch_language_codes": ["nl-nl", "nl-be", "nl"],
         }
 
         return theme

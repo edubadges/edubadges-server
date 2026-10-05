@@ -1,35 +1,34 @@
-# encoding: utf-8
+import badgrlog
+
 from auditlog.mixins import LogAccessMixin
 from django.db.models import ProtectedError
 from django.http import Http404
-from rest_framework.response import Response
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from rest_framework.views import APIView
-
-import badgrlog
 from entity.utils import validate_errors
 from issuer.permissions import NoUnrevokedAssertionsPermission
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND
+from rest_framework.views import APIView
 from staff.permissions import HasObjectPermission
 
 
 class BaseEntityView(APIView):
     create_event = None
     logger = None
-    permission_map = {'GET': 'may_read', 'POST': 'may_create', 'PUT': 'may_update', 'DELETE': 'may_delete'}
+    permission_map = {"GET": "may_read", "POST": "may_create", "PUT": "may_update", "DELETE": "may_delete"}
 
     def get_context_data(self, **kwargs):
         return {
-            'request': self.request,
-            'kwargs': kwargs,
+            "request": self.request,
+            "kwargs": kwargs,
         }
 
     def get_serializer_class(self):
-        if self.request.version == 'v1' and hasattr(self, 'v1_serializer_class'):
+        if self.request.version == "v1" and hasattr(self, "v1_serializer_class"):
             return self.v1_serializer_class
         # elif self.request.version == 'v2' and hasattr(self, 'v2_serializer_class'):
         #     return self.v2_serializer_class
-        return getattr(self, 'serializer_class', None)
+        return getattr(self, "serializer_class", None)
 
     def get_logger(self):
         if self.logger:
@@ -38,7 +37,7 @@ class BaseEntityView(APIView):
         return self.logger
 
     def get_create_event(self):
-        return getattr(self, 'create_event', None)
+        return getattr(self, "create_event", None)
 
     def log_create(self, instance):
         event_cls = self.get_create_event()
@@ -61,12 +60,12 @@ class BaseEntityListView(BaseEntityView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(objects, many=True, context=context)
 
-        headers = dict()
-        paginator = getattr(self, 'paginator', None)
-        if paginator and callable(getattr(paginator, 'get_link_header', None)):
+        headers = dict()  # noqa: C408
+        paginator = getattr(self, "paginator", None)
+        if paginator and callable(getattr(paginator, "get_link_header", None)):
             link_header = paginator.get_link_header()
             if link_header:
-                headers['Link'] = link_header
+                headers["Link"] = link_header
 
         return Response(serializer.data, headers=headers)
 
@@ -84,17 +83,17 @@ class BaseEntityListView(BaseEntityView):
         return Response(serializer.data, status=HTTP_201_CREATED)
 
 
-class VersionedObjectMixin(object):
+class VersionedObjectMixin:
     def has_object_permissions(self, request, obj):
-        for permission in self.get_permissions():
+        for permission in self.get_permissions():  # noqa: SIM110
             if not permission.has_object_permission(request, self, obj):
                 return False
         return True
 
     def get_object(self, request, **kwargs):
-        identifier = kwargs.get('entity_id')
+        identifier = kwargs.get("entity_id")
         try:
-            self.object = self.model.cached.get(**{'entity_id': identifier})
+            self.object = self.model.cached.get(entity_id=identifier)
         except self.model.DoesNotExist:
             pass
         else:
@@ -120,7 +119,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         serializer = serializer_class(obj, context=context)
         return Response(serializer.data)
 
-    def put(self, request, data=None, allow_partial=False, **kwargs):
+    def put(self, request, data=None, allow_partial=False, **kwargs):  # noqa: FBT002
         """
         PUT a new version of an entity
         """
@@ -153,7 +152,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
 
 class BaseArchiveView(LogAccessMixin, BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission, NoUnrevokedAssertionsPermission)
-    http_method_names = ['delete']
+    http_method_names = ["delete"]
 
     def delete(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)

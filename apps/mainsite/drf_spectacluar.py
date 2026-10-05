@@ -36,20 +36,20 @@ excluded_keywords = ["pubkey", "image"]
 
 
 def _included_endpoint(path: str):
-    for prefix in included_endpoint_prefixes:
+    for prefix in included_endpoint_prefixes:  # noqa: SIM110
         if path.startswith(prefix):
             return True
     return False
 
 
 def _contains_excluded_keywords(path):
-    for keyword in excluded_keywords:
+    for keyword in excluded_keywords:  # noqa: SIM110
         if keyword in path:
             return True
     return False
 
 
-def custom_postprocessing_hook(result, generator, request, public):
+def custom_postprocessing_hook(result, generator, request, public):  # noqa: ARG001
     result["security"] = ([{"openId": []}],)
     url_ = os.environ["EDUID_PROVIDER_URL"]
     result["components"]["securitySchemes"] = {
@@ -63,7 +63,7 @@ def custom_postprocessing_hook(result, generator, request, public):
         "required": True,
     }
     for path, details in result["paths"].items():
-        for method, conf in details.items():
+        for method, conf in details.items():  # noqa: B007, PERF102
             conf["security"] = [{"openId": ["openid"]}]
             if path.startswith("/mobile/"):
                 parameters = conf.get("parameters", [])

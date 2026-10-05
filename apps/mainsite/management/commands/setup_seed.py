@@ -1,51 +1,50 @@
-import traceback
 import sys
+import traceback
 
 from django.core.management.base import BaseCommand
 from django.db import connection
-
 from mainsite.models import BadgrApp
 
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('-c', '--clean', action="store_true")
-        parser.add_argument('-i', '--init', action="store_true")
+        parser.add_argument("-c", "--clean", action="store_true")
+        parser.add_argument("-i", "--init", action="store_true")
 
     def handle(self, *args, **options):
-        if options['clean']:
+        if options["clean"]:
             clear_data()
         run_seed = True
-        if options['init']:
+        if options["init"]:
             run_seed = BadgrApp.objects.count() == 0
 
         if run_seed:
-            print("Running setup seeds... ", end="")
+            print("Running setup seeds... ", end="")  # noqa: T201
             try:
                 __import__("mainsite.seeds.01_setup")
-                print("\033[92mdone!\033[0m")
-            except Exception as e:
+                print("\033[92mdone!\033[0m")  # noqa: T201
+            except Exception as e:  # noqa: BLE001
                 sys.stderr.write("\033[91mFAILED!\033[0m")
                 sys.stderr.write(traceback.format_exc())
-                sys.stderr.write(f"{str(e)}\n")
+                sys.stderr.write(f"{e!s}\n")
                 sys.exit(1)
         else:
-            print("Skipping setup seeds... ", end="")
+            print("Skipping setup seeds... ", end="")  # noqa: T201
 
 
 def clear_data():
     with connection.cursor() as cursor:
-        print("Wiping data... ", end="")
+        print("Wiping data... ", end="")  # noqa: T201
 
         seed_filled_tables = (
-            'badgeuser_termsversion',
-            'socialaccount_socialapp',
-            'django_site',
-            'mainsite_badgrapp',
-            'institution_institution',
-            'institution_faculty',
-            'issuer_issuer',
-            'issuer_badgeclass'
+            "badgeuser_termsversion",
+            "socialaccount_socialapp",
+            "django_site",
+            "mainsite_badgrapp",
+            "institution_institution",
+            "institution_faculty",
+            "issuer_issuer",
+            "issuer_badgeclass",
         )
 
         cursor.execute("SET FOREIGN_KEY_CHECKS=0")
@@ -54,4 +53,4 @@ def clear_data():
         finally:
             cursor.execute("SET FOREIGN_KEY_CHECKS=1")
 
-        print("\033[92mdone!\033[0m")
+        print("\033[92mdone!\033[0m")  # noqa: T201

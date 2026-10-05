@@ -5,8 +5,7 @@ from pylti1p3.exception import LtiException
 from pylti1p3.registration import Registration
 from pylti1p3.tool_config.abstract import ToolConfAbstract
 
-
-default_app_config = 'pylti1p3.contrib.django.lti1p3_tool_config.apps.PyLTI1p3ToolConfig'
+default_app_config = "pylti1p3.contrib.django.lti1p3_tool_config.apps.PyLTI1p3ToolConfig"
 
 
 class DjangoDbToolConf(ToolConfAbstract):
@@ -15,8 +14,9 @@ class DjangoDbToolConf(ToolConfAbstract):
     _keys_cls = None
 
     def __init__(self):
-        from .models import LtiTool, LtiToolKey
-        super(DjangoDbToolConf, self).__init__()
+        from .models import LtiTool, LtiToolKey  # noqa: PLC0415
+
+        super().__init__()
         self._lti_tools = {}
         self._tools_cls = LtiTool
         self._keys_cls = LtiToolKey
@@ -27,15 +27,15 @@ class DjangoDbToolConf(ToolConfAbstract):
             return lti_tool
 
         if client_id is None:
-            lti_tool = self._tools_cls.objects.filter(issuer=iss, is_active=True).order_by('use_by_default').first()
+            lti_tool = self._tools_cls.objects.filter(issuer=iss, is_active=True).order_by("use_by_default").first()
         else:
-            try:
+            try:  # noqa: SIM105
                 lti_tool = self._tools_cls.objects.get(issuer=iss, client_id=client_id, is_active=True)
             except self._tools_cls.DoesNotExist:
                 pass
 
         if lti_tool is None:
-            raise LtiException('iss %s [client_id=%s] not found in settings' % (iss, client_id))
+            raise LtiException("iss %s [client_id=%s] not found in settings" % (iss, client_id))  # noqa: UP031
 
         if client_id is None:
             self._lti_tools[iss] = lti_tool
@@ -57,22 +57,19 @@ class DjangoDbToolConf(ToolConfAbstract):
 
     def find_registration_by_params(self, iss, client_id, *args, **kwargs):
         lti_tool = self.get_lti_tool(iss, client_id)
-        auth_audience = lti_tool.auth_audience if lti_tool.auth_audience else None
+        auth_audience = lti_tool.auth_audience or None
         key_set = json.loads(lti_tool.key_set) if lti_tool.key_set else None
-        key_set_url = lti_tool.key_set_url if lti_tool.key_set_url else None
-        tool_public_key = lti_tool.tool_key.public_key if lti_tool.tool_key.public_key else None
+        key_set_url = lti_tool.key_set_url or None
+        tool_public_key = lti_tool.tool_key.public_key or None
 
         reg = Registration()
-        reg.set_auth_login_url(lti_tool.auth_login_url) \
-            .set_auth_token_url(lti_tool.auth_token_url) \
-            .set_auth_audience(auth_audience) \
-            .set_client_id(lti_tool.client_id) \
-            .set_institution_identifier(lti_tool.institution.identifier) \
-            .set_key_set(key_set) \
-            .set_key_set_url(key_set_url) \
-            .set_issuer(lti_tool.issuer) \
-            .set_tool_private_key(lti_tool.tool_key.private_key) \
-            .set_tool_public_key(tool_public_key)
+        reg.set_auth_login_url(lti_tool.auth_login_url).set_auth_token_url(lti_tool.auth_token_url).set_auth_audience(
+            auth_audience
+        ).set_client_id(lti_tool.client_id).set_institution_identifier(lti_tool.institution.identifier).set_key_set(
+            key_set
+        ).set_key_set_url(key_set_url).set_issuer(lti_tool.issuer).set_tool_private_key(
+            lti_tool.tool_key.private_key
+        ).set_tool_public_key(tool_public_key)
         return reg
 
     def find_deployment(self, iss, deployment_id):
@@ -88,12 +85,12 @@ class DjangoDbToolConf(ToolConfAbstract):
     def get_jwks(self, iss=None, client_id=None, **kwargs):
         search_kwargs = {}
         if iss:
-            search_kwargs['lti_tools__issuer'] = iss
+            search_kwargs["lti_tools__issuer"] = iss
         if client_id:
-            search_kwargs['lti_tools__client_id'] = client_id
+            search_kwargs["lti_tools__client_id"] = client_id
 
         if search_kwargs:
-            search_kwargs['lti_tools__is_active'] = True
+            search_kwargs["lti_tools__is_active"] = True
             qs = self._keys_cls.objects.filter(**search_kwargs)
         else:
             qs = self._keys_cls.objects.all()
@@ -108,6 +105,4 @@ class DjangoDbToolConf(ToolConfAbstract):
                 else:
                     jwks.append(Registration.get_jwk(key.public_key))
                 public_key_lst.append(key.public_key)
-        return {
-            'keys': jwks
-        }
+        return {"keys": jwks}

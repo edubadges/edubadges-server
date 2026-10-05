@@ -1,6 +1,7 @@
 import logging
 
 import requests
+
 from badgeuser.models import StudentAffiliation, TermsAgreement
 from directaward.models import DirectAward, DirectAwardBundle
 from django.db.models import Q, Subquery
@@ -229,7 +230,7 @@ class AcceptGeneralTerms(APIView):
         user = request.user
         user.accept_general_terms()
         user.save()
-        logger.info(f"Accepted general terms for user {user.email}")
+        logger.info(f"Accepted general terms for user {user.email}")  # noqa: G004
         return Response(data={"status": "ok"})
 
 
@@ -1347,7 +1348,6 @@ class TermsAgreementViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "create":
             return TermsAgreementCreateSerializer
-        elif self.action == "partial_update":
+        if self.action == "partial_update":
             return TermsAgreementUpdateSerializer
-        else:
-            return TermsAgreementSerializer
+        return TermsAgreementSerializer

@@ -1,7 +1,9 @@
 [run]
 source = .
+branch = true
 
 [report]
 fail_under = 50
-show_missing = True
-skip_covered = True
+show_missing = true
+skip_covered = true
+skip_empty = true

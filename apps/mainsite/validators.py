@@ -1,11 +1,9 @@
-# encoding: utf-8
-from rest_framework.exceptions import ValidationError
-
 from mainsite.extensions_validators import BaseExtensionValidator
 from mainsite.utils import verify_svg
+from rest_framework.exceptions import ValidationError
 
 
-class ValidImageValidator(object):
+class ValidImageValidator:
     """
     Verify a value is file-like and is either a PNG or a SVG
     """
@@ -13,15 +11,16 @@ class ValidImageValidator(object):
     def __call__(self, image):
         if image:
             try:
-                from PIL import Image
+                from PIL import Image  # noqa: PLC0415
+
                 img = Image.open(image)
                 img.verify()
-            except Exception as e:
+            except Exception:  # noqa: BLE001
                 if not verify_svg(image):
-                    raise ValidationError('Invalid image.')
+                    raise ValidationError("Invalid image.")  # noqa: B904
             else:
                 if img.format != "PNG":
-                    raise ValidationError('Invalid PNG')
+                    raise ValidationError("Invalid PNG")
 
 
 class ExtensionValidator:

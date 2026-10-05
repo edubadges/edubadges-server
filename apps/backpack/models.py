@@ -1,15 +1,12 @@
-# encoding: utf-8
-
-
 from urllib.parse import urljoin
 
 import requests
-from django.conf import settings
-from django.db import models
 
 from backpack.sharing import SharingManager
 from basic_models.models import CreatedUpdatedAt
 from cachemodel.models import CacheModel
+from django.conf import settings
+from django.db import models
 from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationFieldError
 from mainsite.models import BaseAuditedModel
@@ -24,7 +21,7 @@ class BaseSharedModel(CacheModel, CreatedUpdatedAt):
         abstract = True
 
     def get_share_url(self, provider, **kwargs):
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class BackpackBadgeShare(BaseSharedModel):
@@ -34,28 +31,31 @@ class BackpackBadgeShare(BaseSharedModel):
         return SharingManager.share_url(provider, self.badgeinstance, **kwargs)
 
 
-class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):
-    user = models.ForeignKey('badgeuser.BadgeUser', blank=False, null=False, on_delete=models.CASCADE)
+class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):  # noqa: DJ008
+    user = models.ForeignKey("badgeuser.BadgeUser", blank=False, null=False, on_delete=models.CASCADE)
     import_url = models.URLField(max_length=512, null=False, blank=False)
     verified = models.BooleanField(default=False)
     code = models.TextField(null=True, blank=True)
     email = models.EmailField(blank=True, null=True)
 
     def validate(self, profile_type, recipient_identifier):
-        assertion_json = requests.get(self.import_url).json()
-        data = {'profile': {profile_type: recipient_identifier}, 'data': assertion_json}
-        response = requests.post(json=data,
-                                 url=urljoin(settings.VALIDATOR_URL, 'results'),
-                                 headers={'Accept': 'application/json'})
+        assertion_json = requests.get(self.import_url, timeout=60).json()
+        data = {"profile": {profile_type: recipient_identifier}, "data": assertion_json}
+        response = requests.post(
+            json=data,
+            url=urljoin(settings.VALIDATOR_URL, "results"),
+            headers={"Accept": "application/json"},
+            timeout=60,
+        )
         return response.json()
 
     def validate_unique(self, exclude=None):
         if self.__class__.objects.filter(import_url=self.import_url, user=self.user).exclude(pk=self.pk).exists():
-            raise BadgrValidationFieldError('import_url',
-                                            "ImportedAssertion with this url already exists for this user.",
-                                            936)
-        return super(ImportedAssertion, self).validate_unique(exclude=exclude)
+            raise BadgrValidationFieldError(
+                "import_url", "ImportedAssertion with this url already exists for this user.", 936
+            )
+        return super().validate_unique(exclude=exclude)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # noqa: DJ012
         self.validate_unique()
-        return super(ImportedAssertion, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)

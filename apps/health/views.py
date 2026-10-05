@@ -3,15 +3,16 @@ HTTP endpoint for verifying the health of the Badgr API, as hosted on one server
 Thanks to edx.org for endpoint design pattern. Licensed by edX under aGPL.
 https://github.com/edx/ecommerce/blob/master/LICENSE.txt
 """
-from django.db import connection, DatabaseError
+
+from django.db import DatabaseError, connection
 from django.http import JsonResponse
 from rest_framework import status
 
-OK = 'OK'
-UNAVAILABLE = 'UNAVAILABLE'
+OK = "OK"
+UNAVAILABLE = "UNAVAILABLE"
 
 
-def health(req):
+def health(req):  # noqa: ARG001
     """
     Allows a load balancer to verify that the badges service is up and OK.
 
@@ -44,14 +45,13 @@ def health(req):
     overall_status = OK if (database_status == OK) else UNAVAILABLE
 
     data = {
-        'overall_status': overall_status,
-        'detailed_status': {
-            'database_status': database_status
+        "overall_status": overall_status,
+        "detailed_status": {
+            "database_status": database_status
             # Future: Report any other dependency statuses here.
-        }
+        },
     }
 
     if overall_status == OK:
         return JsonResponse(data)
-    else:
-        return JsonResponse(data, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    return JsonResponse(data, status=status.HTTP_503_SERVICE_UNAVAILABLE)

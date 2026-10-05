@@ -1,8 +1,8 @@
+from issuer.models import BadgeClass
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import PrimaryKeyRelatedField
 
-from issuer.models import BadgeClass
 from .models import LtiCourse, LtiTool
 
 
@@ -17,9 +17,8 @@ class LtiCourseSerializer(serializers.Serializer):
         model = LtiCourse
 
     def create(self, validated_data, **kwargs):
-        user_permissions = validated_data['badgeclass'].get_permissions(validated_data['created_by'])
-        if user_permissions['may_update']:
+        user_permissions = validated_data["badgeclass"].get_permissions(validated_data["created_by"])
+        if user_permissions["may_update"]:
             new_lti_course = LtiCourse.objects.create(**validated_data)
             return new_lti_course
-        else:
-            raise ValidationError("You don't have the necessary permissions", 100)
+        raise ValidationError("You don't have the necessary permissions", 100)

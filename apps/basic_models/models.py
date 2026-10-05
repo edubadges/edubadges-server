@@ -1,45 +1,41 @@
+from autoslug import AutoSlugField
 from django.conf import settings
 from django.db import models
-
-from autoslug import AutoSlugField
 
 try:
     from natural_key.mixins import NaturalKey
 except ImportError:
-    class NaturalKey(object):
+
+    class NaturalKey:
         pass
+
 
 from .managers import ActiveObjectsManager
 
-
-AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+AUTH_USER_MODEL = getattr(settings, "AUTH_USER_MODEL", "auth.User")
 
 
 class NameSlug(NaturalKey, models.Model):
     name = models.CharField(max_length=255)
-    slug = AutoSlugField(unique=True, populate_from='name')
+    slug = AutoSlugField(unique=True, populate_from="name")
 
     def __str__(self):
         return self.name
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         abstract = True
 
     def publish(self):
-        super(NameSlug, self).publish()
-        self.publish_by('slug')
+        super().publish()
+        self.publish_by("slug")
 
 
-NameSlug.natural_key_fields = ('slug',)
+NameSlug.natural_key_fields = ("slug",)
 
 
 class CreatedUpdatedBy(models.Model):
-    created_by = models.ForeignKey(AUTH_USER_MODEL, null=True, blank=True,
-                                   related_name='+',
-                                   on_delete=models.SET_NULL)
-    updated_by = models.ForeignKey(AUTH_USER_MODEL, null=True, blank=True,
-                                   related_name='+',
-                                   on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(AUTH_USER_MODEL, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey(AUTH_USER_MODEL, null=True, blank=True, related_name="+", on_delete=models.SET_NULL)
 
     class Meta:
         abstract = True
@@ -60,7 +56,7 @@ class TitleBody(models.Model):
     def __str__(self):
         return self.title
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         abstract = True
 
 
@@ -75,13 +71,11 @@ class IsActive(models.Model):
 
 
 class OnlyOneActive(models.Model):
-
     def save(self, *args, **kwargs):
-        super(OnlyOneActive, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         # If we were made active, deactivate all other instances
         if self.is_active:
-            self.__class__.objects.filter(is_active=True).exclude(pk=self.pk) \
-                .update(is_active=False)
+            self.__class__.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         abstract = True

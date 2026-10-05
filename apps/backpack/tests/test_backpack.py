@@ -1,5 +1,7 @@
 import json
 
+from http import HTTPStatus
+
 from mainsite.tests import BadgrTestCase
 
 
@@ -14,9 +16,9 @@ class BackpackAPITest(BadgrTestCase):
         self.assertTrue(not assertion.public)
         body = {"public": True}  # make_assertion_public_private
         response = self.client.put(
-            "/earner/badges/{}".format(assertion.entity_id), data=json.dumps(body), content_type="application/json"
+            f"/earner/badges/{assertion.entity_id}", data=json.dumps(body), content_type="application/json"
         )
-        self.assertTrue(response.status_code == 200)  # type: ignore[attr-defined]
+        self.assertTrue(response.status_code == HTTPStatus.OK)  # type: ignore[attr-defined]
         self.assertTrue(student.cached_badgeinstances()[0].public)  # instant cache update
 
     def test_reject_assertion(self):
@@ -26,7 +28,7 @@ class BackpackAPITest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         assertion = self.setup_assertion(student, badgeclass, teacher1)
-        response = self.client.delete("/earner/badges/{}".format(assertion.entity_id), content_type="application/json")
+        response = self.client.delete(f"/earner/badges/{assertion.entity_id}", content_type="application/json")
         self.assertEqual(response.status_code, 204)  # type: ignore[attr-defined]
         cached_assertion = student.cached_badgeinstances()[0]
         self.assertEqual(cached_assertion.acceptance, cached_assertion.ACCEPTANCE_REJECTED)
@@ -37,9 +39,9 @@ class BackpackAPITest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
-        ass1 = self.setup_assertion(student, badgeclass, teacher1)
-        ass2 = self.setup_assertion(student, badgeclass, teacher1)
-        ass3 = self.setup_assertion(student, badgeclass, teacher1)
+        ass1 = self.setup_assertion(student, badgeclass, teacher1)  # noqa: F841
+        ass2 = self.setup_assertion(student, badgeclass, teacher1)  # noqa: F841
+        ass3 = self.setup_assertion(student, badgeclass, teacher1)  # noqa: F841
         query = "query foo {badgeInstances {entityId}}"
         response = self.graphene_post(student, query)
         self.assertEqual(response["data"]["badgeInstances"].__len__(), 3)  # type: ignore[union-attr]
@@ -58,7 +60,7 @@ class BackpackAPITest(BadgrTestCase):
         assertion = self.setup_assertion(student, badgeclass, teacher1)
 
         response = self.client.get(
-            "/earner/awards/{}".format(assertion.entity_id),
+            f"/earner/awards/{assertion.entity_id}",
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)  # type: ignore[attr-defined]

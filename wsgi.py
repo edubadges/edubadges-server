@@ -5,12 +5,12 @@ import sys
 OUR_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # code dir is one level above us
-APPS_DIR = os.path.join(OUR_DIR, '..', 'code', 'apps')
+APPS_DIR = os.path.join(OUR_DIR, "..", "code", "apps")
 
 # the env dir is one level above us
-ENV_DIR = os.path.join(OUR_DIR, '..')
+ENV_DIR = os.path.join(OUR_DIR, "..")
 # remove virtual env
-#, 'env')
+# , 'env')
 
 # activate the virtualenv
 # activate_this = os.path.join(ENV_DIR, 'bin', 'activate_this.py')
@@ -23,7 +23,7 @@ sys.path.insert(0, APPS_DIR)
 from django.core.wsgi import get_wsgi_application
 
 # tell django to find settings entry point'
-os.environ['DJANGO_SETTINGS_MODULE'] = 'mainsite.settings'
+os.environ["DJANGO_SETTINGS_MODULE"] = "mainsite.settings"
 
 # hand off to the wsgi application
 application = get_wsgi_application()

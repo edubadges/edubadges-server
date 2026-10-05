@@ -1,22 +1,21 @@
 import json
-from urllib.parse import urlencode, urljoin
 
-from django.conf import settings
-from django.utils import timezone
-from drf_spectacular.utils import extend_schema_serializer, OpenApiExample, extend_schema_field
-from rest_framework.fields import SerializerMethodField
+from urllib.parse import urlencode, urljoin
 
 from badgeuser.models import BadgeUser, Terms, TermsAgreement, TermsUrl
 from directaward.models import DirectAward
+from django.conf import settings
+from django.utils import timezone
+from drf_spectacular.utils import OpenApiExample, extend_schema_field, extend_schema_serializer
 from institution.models import Faculty, Institution
 from issuer.models import (
     BadgeClass,
+    BadgeClassAlignment,
     BadgeClassExtension,
     BadgeInstance,
     BadgeInstanceCollection,
-    Issuer,
     BadgeInstanceEvidence,
-    BadgeClassAlignment,
+    Issuer,
 )
 from lti_edu.models import StudentsEnrolled
 from rest_framework import serializers
@@ -26,14 +25,14 @@ class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institution
         fields = [
-            'name_dutch',
-            'name_english',
-            'image_dutch',
-            'image_english',
-            'identifier',
-            'alternative_identifier',
-            'grondslag_formeel',
-            'grondslag_informeel',
+            "name_dutch",
+            "name_english",
+            "image_dutch",
+            "image_english",
+            "identifier",
+            "alternative_identifier",
+            "grondslag_formeel",
+            "grondslag_informeel",
         ]
 
 
@@ -41,9 +40,9 @@ class InstitutionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institution
         fields = [
-            'entity_id',
-            'name_dutch',
-            'name_english',
+            "entity_id",
+            "name_dutch",
+            "name_english",
         ]
 
 
@@ -53,14 +52,14 @@ class FacultySerializer(serializers.ModelSerializer):
     class Meta:
         model = Faculty
         fields = [
-            'name_dutch',
-            'name_english',
-            'image_dutch',
-            'image_english',
-            'on_behalf_of',
-            'on_behalf_of_display_name',
-            'on_behalf_of_url',
-            'institution',
+            "name_dutch",
+            "name_english",
+            "image_dutch",
+            "image_english",
+            "on_behalf_of",
+            "on_behalf_of_display_name",
+            "on_behalf_of_url",
+            "institution",
         ]
 
 
@@ -69,7 +68,7 @@ class IssuerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issuer
-        fields = ['name_dutch', 'name_english', 'image_dutch', 'image_english', 'faculty']
+        fields = ["name_dutch", "name_english", "image_dutch", "image_english", "faculty"]
 
 
 class BadgeClassExtensionSerializer(serializers.ModelSerializer):
@@ -77,12 +76,12 @@ class BadgeClassExtensionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeClassExtension
-        fields = ['name', 'value']
+        fields = ["name", "value"]
 
     def get_value(self, obj):
         json_dict = json.loads(obj.original_json)
         # Consistent naming convention enables to parse "type": ["Extension", "extensions:ECTSExtension"], "ECTS": 2.5}
-        extension_key = json_dict['type'][1].split(':')[1].removesuffix('Extension')
+        extension_key = json_dict["type"][1].split(":")[1].removesuffix("Extension")
         return json_dict[extension_key]
 
 
@@ -91,18 +90,18 @@ class BadgeClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BadgeClass
-        fields = ['id', 'name', 'entity_id', 'image', 'issuer']
+        fields = ["id", "name", "entity_id", "image", "issuer"]
 
 
 class BadgeClassAlignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeClassAlignment
         fields = [
-            'target_name',
-            'target_url',
-            'target_description',
-            'target_framework',
-            'target_code',
+            "target_name",
+            "target_url",
+            "target_description",
+            "target_framework",
+            "target_code",
         ]
 
 
@@ -113,36 +112,36 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
     user_may_enroll = serializers.SerializerMethodField()
     required_terms = serializers.SerializerMethodField()
     user_has_accepted_terms = serializers.SerializerMethodField()
-    alignments = BadgeClassAlignmentSerializer(source='badgeclassalignment_set', many=True, read_only=True)
+    alignments = BadgeClassAlignmentSerializer(source="badgeclassalignment_set", many=True, read_only=True)
 
     class Meta:
         model = BadgeClass
         fields = [
-            'id',
-            'name',
-            'entity_id',
-            'image',
-            'description',
-            'formal',
-            'badge_class_type',
-            'expiration_period',
-            'participation',
-            'assessment_type',
-            'assessment_id_verified',
-            'assessment_supervised',
-            'quality_assurance_name',
-            'quality_assurance_url',
-            'quality_assurance_description',
-            'stackable',
-            'criteria_text',
-            'self_enrollment_enabled',
-            'user_may_enroll',
-            'required_terms',
-            'user_has_accepted_terms',
-            'eqf_nlqf_level_verified',
-            'alignments',
-            'badgeclassextension_set',
-            'issuer',
+            "id",
+            "name",
+            "entity_id",
+            "image",
+            "description",
+            "formal",
+            "badge_class_type",
+            "expiration_period",
+            "participation",
+            "assessment_type",
+            "assessment_id_verified",
+            "assessment_supervised",
+            "quality_assurance_name",
+            "quality_assurance_url",
+            "quality_assurance_description",
+            "stackable",
+            "criteria_text",
+            "self_enrollment_enabled",
+            "user_may_enroll",
+            "required_terms",
+            "user_has_accepted_terms",
+            "eqf_nlqf_level_verified",
+            "alignments",
+            "badgeclassextension_set",
+            "issuer",
         ]
 
     @extend_schema_field(serializers.BooleanField)
@@ -151,7 +150,7 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.BooleanField)
     def get_user_may_enroll(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return False
         user = request.user
@@ -166,7 +165,7 @@ class BadgeClassDetailSerializer(serializers.ModelSerializer):
         return TermsSerializer(terms, context=self.context).data
 
     def get_user_has_accepted_terms(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return False
         return obj.terms_accepted(request.user)
@@ -178,18 +177,18 @@ class BadgeInstanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeInstance
         fields = [
-            'id',
-            'created_at',
-            'entity_id',
-            'issued_on',
-            'award_type',
-            'revoked',
-            'expires_at',
-            'acceptance',
-            'public',
-            'badgeclass',
-            'grade_achieved',
-            'include_grade_achieved',
+            "id",
+            "created_at",
+            "entity_id",
+            "issued_on",
+            "award_type",
+            "revoked",
+            "expires_at",
+            "acceptance",
+            "public",
+            "badgeclass",
+            "grade_achieved",
+            "include_grade_achieved",
         ]
 
 
@@ -197,71 +196,71 @@ class BadgeInstanceEvidenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeInstanceEvidence
         fields = [
-            'evidence_url',
-            'narrative',
-            'name',
-            'description',
+            "evidence_url",
+            "narrative",
+            "name",
+            "description",
         ]
 
 
 class BadgeInstanceDetailSerializer(serializers.ModelSerializer):
     badgeclass = BadgeClassDetailSerializer()
     linkedin_url = serializers.SerializerMethodField()
-    evidences = BadgeInstanceEvidenceSerializer(source='badgeinstanceevidence_set', many=True, read_only=True)
+    evidences = BadgeInstanceEvidenceSerializer(source="badgeinstanceevidence_set", many=True, read_only=True)
 
     class Meta:
         model = BadgeInstance
         fields = [
-            'id',
-            'created_at',
-            'entity_id',
-            'issued_on',
-            'award_type',
-            'revoked',
-            'expires_at',
-            'acceptance',
-            'public',
-            'linkedin_url',
-            'include_grade_achieved',
-            'grade_achieved',
-            'include_evidence',
-            'evidences',
-            'badgeclass',
+            "id",
+            "created_at",
+            "entity_id",
+            "issued_on",
+            "award_type",
+            "revoked",
+            "expires_at",
+            "acceptance",
+            "public",
+            "linkedin_url",
+            "include_grade_achieved",
+            "grade_achieved",
+            "include_evidence",
+            "evidences",
+            "badgeclass",
         ]
 
     def _get_linkedin_org_id(self, badgeclass):
         faculty = badgeclass.issuer.faculty
 
-        if getattr(faculty, 'linkedin_org_identifier', None):
+        if getattr(faculty, "linkedin_org_identifier", None):
             return faculty.linkedin_org_identifier
 
-        institution = getattr(faculty, 'institution', None)
-        if getattr(institution, 'linkedin_org_identifier', None):
+        institution = getattr(faculty, "institution", None)
+        if getattr(institution, "linkedin_org_identifier", None):
             return institution.linkedin_org_identifier
 
         return 206815
 
     def get_linkedin_url(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if not request or not obj.issued_on:
             return None
 
         organization_id = self._get_linkedin_org_id(obj.badgeclass)
 
-        cert_url = urljoin(settings.UI_URL, f'/public/assertions/{obj.entity_id}')
+        cert_url = urljoin(settings.UI_URL, f"/public/assertions/{obj.entity_id}")
 
         params = {
-            'startTask': 'CERTIFICATION_NAME',
-            'name': obj.badgeclass.name,
-            'organizationId': organization_id,
-            'issueYear': obj.issued_on.year,
-            'issueMonth': obj.issued_on.month,
-            'certUrl': cert_url,
-            'certId': obj.entity_id,
-            'original_referer': settings.UI_URL,
+            "startTask": "CERTIFICATION_NAME",
+            "name": obj.badgeclass.name,
+            "organizationId": organization_id,
+            "issueYear": obj.issued_on.year,
+            "issueMonth": obj.issued_on.month,
+            "certUrl": cert_url,
+            "certId": obj.entity_id,
+            "original_referer": settings.UI_URL,
         }
 
-        return f'https://www.linkedin.com/profile/add?{urlencode(params)}'
+        return f"https://www.linkedin.com/profile/add?{urlencode(params)}"
 
     def get_narrative(self, obj):
         evidence = obj.badgeinstanceevidence_set.first()
@@ -273,7 +272,7 @@ class DirectAwardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectAward
-        fields = ['id', 'created_at', 'entity_id', 'badgeclass']
+        fields = ["id", "created_at", "entity_id", "badgeclass"]
 
 
 class DirectAwardDetailSerializer(serializers.ModelSerializer):
@@ -284,18 +283,18 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = DirectAward
         fields = [
-            'id',
-            'created_at',
-            'status',
-            'entity_id',
-            'badgeclass',
-            'required_terms',
-            'user_has_accepted_terms',
-            'grade_achieved',
-            'eppn',
-            'recipient_email',
-            'recipient_first_name',
-            'recipient_surname',
+            "id",
+            "created_at",
+            "status",
+            "entity_id",
+            "badgeclass",
+            "required_terms",
+            "user_has_accepted_terms",
+            "grade_achieved",
+            "eppn",
+            "recipient_email",
+            "recipient_first_name",
+            "recipient_surname",
         ]
 
     def get_required_terms(self, obj):
@@ -307,7 +306,7 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
         return TermsSerializer(terms, context=self.context).data
 
     def get_user_has_accepted_terms(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return False
 
@@ -315,39 +314,39 @@ class DirectAwardDetailSerializer(serializers.ModelSerializer):
         return obj.badgeclass.terms_accepted(user)
 
 
-STATUS_MAP = {True: 'Rejected', False: 'Unaccepted'}
+STATUS_MAP = {True: "Rejected", False: "Unaccepted"}
 
 
 class StudentsEnrolledSerializer(serializers.ModelSerializer):
-    badgeclass = BadgeClassSerializer(source='badge_class')
-    created_at = serializers.DateTimeField(source='date_created', read_only=True)
-    issued_on = serializers.DateTimeField(source='date_awarded', read_only=True)
+    badgeclass = BadgeClassSerializer(source="badge_class")
+    created_at = serializers.DateTimeField(source="date_created", read_only=True)
+    issued_on = serializers.DateTimeField(source="date_awarded", read_only=True)
     acceptance = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentsEnrolled
-        fields = ['id', 'entity_id', 'created_at', 'denied', 'acceptance', 'issued_on', 'badgeclass']
+        fields = ["id", "entity_id", "created_at", "denied", "acceptance", "issued_on", "badgeclass"]
 
     def get_acceptance(self, obj):
         return STATUS_MAP[obj.denied]
 
 
 class StudentsEnrolledDetailSerializer(StudentsEnrolledSerializer):
-    badgeclass = BadgeClassDetailSerializer(source='badge_class')
+    badgeclass = BadgeClassDetailSerializer(source="badge_class")
 
 
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
-            'BadgeCollection',
+            "BadgeCollection",
             value={
-                'entity_id': 'EallxIUARlebkDxox3jYTw',
-                'name': 'My certificates',
-                'description': 'Stuff I’m proud of',
-                'public': False,
-                'badge_instances': [
-                    'JtNF5yC1QriHtbN5Ufro5A',
-                    'kstvuQ0rTDuoXp7PdgSo4A',
+                "entity_id": "EallxIUARlebkDxox3jYTw",
+                "name": "My certificates",
+                "description": "Stuff I’m proud of",  # noqa: RUF001
+                "public": False,
+                "badge_instances": [
+                    "JtNF5yC1QriHtbN5Ufro5A",
+                    "kstvuQ0rTDuoXp7PdgSo4A",
                 ],
             },
             response_only=False,
@@ -357,39 +356,39 @@ class StudentsEnrolledDetailSerializer(StudentsEnrolledSerializer):
 class BadgeCollectionSerializer(serializers.ModelSerializer):
     badge_instances = serializers.SlugRelatedField(
         many=True,
-        slug_field='entity_id',
+        slug_field="entity_id",
         queryset=BadgeInstance.objects.all(),
         required=False,
-        help_text='List of BadgeInstance entity_ids belonging to the current user',
+        help_text="List of BadgeInstance entity_ids belonging to the current user",
     )
 
     class Meta:
         model = BadgeInstanceCollection
         fields = [
-            'id',
-            'created_at',
-            'entity_id',
-            'name',
-            'description',
-            'public',
-            'badge_instances',
+            "id",
+            "created_at",
+            "entity_id",
+            "name",
+            "description",
+            "public",
+            "badge_instances",
         ]
-        read_only_fields = ['id', 'created_at', 'entity_id']
+        read_only_fields = ["id", "created_at", "entity_id"]
 
     def validate_badge_instances(self, badge_instances):
-        user = self.context['request'].user
+        user = self.context["request"].user
 
         for badge in badge_instances:
             if badge.user_id != user.id:
-                raise serializers.ValidationError('All badge_instances must belong to the current user.')
+                raise serializers.ValidationError("All badge_instances must belong to the current user.")
 
         return badge_instances
 
     def create(self, validated_data):
-        badges = validated_data.pop('badge_instances', [])
+        badges = validated_data.pop("badge_instances", [])
 
         collection = BadgeInstanceCollection.objects.create(
-            user=self.context['request'].user,
+            user=self.context["request"].user,
             **validated_data,
         )
 
@@ -399,10 +398,10 @@ class BadgeCollectionSerializer(serializers.ModelSerializer):
         return collection
 
     def update(self, instance, validated_data):
-        badges = validated_data.pop('badge_instances', None)
+        badges = validated_data.pop("badge_instances", None)
 
         if badges == []:
-            raise serializers.ValidationError('badge_instances cannot be empty when explicitly provided.')
+            raise serializers.ValidationError("badge_instances cannot be empty when explicitly provided.")
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -419,7 +418,7 @@ class BadgeCollectionSerializer(serializers.ModelSerializer):
 class TermsUrlSerializer(serializers.ModelSerializer):
     class Meta:
         model = TermsUrl
-        fields = ['url', 'language', 'excerpt']
+        fields = ["url", "language", "excerpt"]
 
 
 class TermsSerializer(serializers.ModelSerializer):
@@ -428,7 +427,7 @@ class TermsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Terms
-        fields = ['entity_id', 'terms_type', 'institution', 'terms_urls']
+        fields = ["entity_id", "terms_type", "institution", "terms_urls"]
 
 
 class TermsAgreementSerializer(serializers.ModelSerializer):
@@ -436,40 +435,40 @@ class TermsAgreementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TermsAgreement
-        fields = ['entity_id', 'agreed', 'agreed_version', 'agreed_at', 'terms']
+        fields = ["entity_id", "agreed", "agreed_version", "agreed_at", "terms"]
 
 
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
-            'Accept Terms Example',
-            summary='Accept a term',
-            description='User accepts a specific term by entity_id',
-            value={'terms': 't1t2t3t4'},
+            "Accept Terms Example",
+            summary="Accept a term",
+            description="User accepts a specific term by entity_id",
+            value={"terms": "t1t2t3t4"},
         ),
     ]
 )
 class TermsAgreementCreateSerializer(serializers.ModelSerializer):
-    terms = serializers.SlugRelatedField(queryset=Terms.objects.all(), slug_field='entity_id')
+    terms = serializers.SlugRelatedField(queryset=Terms.objects.all(), slug_field="entity_id")
 
     class Meta:
         model = TermsAgreement
-        fields = ['terms']
+        fields = ["terms"]
 
     def create(self, validated_data):
-        user = self.context['request'].user
-        terms = validated_data['terms']
+        user = self.context["request"].user
+        terms = validated_data["terms"]
         return terms.accept(user)
 
 
 @extend_schema_serializer(
     examples=[
         OpenApiExample(
-            'Update a Terms Agreement',
-            summary='Update a terms agreement',
-            description='Toggle agreed state of a Terms Agreement',
+            "Update a Terms Agreement",
+            summary="Update a terms agreement",
+            description="Toggle agreed state of a Terms Agreement",
             value={
-                'agreed': False,
+                "agreed": False,
             },
         ),
     ]
@@ -477,15 +476,15 @@ class TermsAgreementCreateSerializer(serializers.ModelSerializer):
 class TermsAgreementUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TermsAgreement
-        fields = ['agreed']
-        read_only_fields = ['agreed_version', 'agreed_at', 'terms']
+        fields = ["agreed"]
+        read_only_fields = ["agreed_version", "agreed_at", "terms"]
 
     def update(self, instance, validated_data):
-        instance.agreed = validated_data['agreed']
+        instance.agreed = validated_data["agreed"]
         if instance.agreed and not instance.agreed_at:
             instance.agreed_at = timezone.now()
         instance.save()
-        instance.user.remove_cached_data(['cached_terms_agreements'])
+        instance.user.remove_cached_data(["cached_terms_agreements"])
         return instance
 
 
@@ -496,37 +495,37 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeUser
         fields = [
-            'id',
-            'email',
-            'last_name',
-            'first_name',
-            'validated_name',
-            'schac_homes',
-            'terms_agreed',
-            'termsagreement_set',
+            "id",
+            "email",
+            "last_name",
+            "first_name",
+            "validated_name",
+            "schac_homes",
+            "terms_agreed",
+            "termsagreement_set",
         ]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    institution = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    institution = serializers.SlugRelatedField(slug_field="name", read_only=True)
     termsagreement_set = serializers.SerializerMethodField()
     terms_agreed = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = BadgeUser
         fields = [
-            'entity_id',
-            'first_name',
-            'last_name',
-            'email',
-            'date_joined',
-            'institution',
-            'marketing_opt_in',
-            'is_superuser',
-            'validated_name',
-            'schac_homes',
-            'terms_agreed',
-            'termsagreement_set',
+            "entity_id",
+            "first_name",
+            "last_name",
+            "email",
+            "date_joined",
+            "institution",
+            "marketing_opt_in",
+            "is_superuser",
+            "validated_name",
+            "schac_homes",
+            "terms_agreed",
+            "termsagreement_set",
         ]
 
     def get_termsagreement_set(self, obj):
@@ -546,31 +545,31 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     badge_class_type = serializers.CharField()
 
     # Issuer fields
-    issuer_name_english = serializers.CharField(source='issuer.name_english', read_only=True)
-    issuer_name_dutch = serializers.CharField(source='issuer.name_dutch', read_only=True)
-    issuer_entity_id = serializers.CharField(source='issuer.entity_id', read_only=True)
-    issuer_image_dutch = serializers.CharField(source='issuer.image_dutch', read_only=True)
-    issuer_image_english = serializers.CharField(source='issuer.image_english', read_only=True)
+    issuer_name_english = serializers.CharField(source="issuer.name_english", read_only=True)
+    issuer_name_dutch = serializers.CharField(source="issuer.name_dutch", read_only=True)
+    issuer_entity_id = serializers.CharField(source="issuer.entity_id", read_only=True)
+    issuer_image_dutch = serializers.CharField(source="issuer.image_dutch", read_only=True)
+    issuer_image_english = serializers.CharField(source="issuer.image_english", read_only=True)
 
     # Faculty fields
-    faculty_name_english = serializers.CharField(source='issuer.faculty.name_english', read_only=True)
-    faculty_name_dutch = serializers.CharField(source='issuer.faculty.name_dutch', read_only=True)
-    faculty_entity_id = serializers.CharField(source='issuer.faculty.entity_id', read_only=True)
-    faculty_image_dutch = serializers.CharField(source='issuer.faculty.image_dutch', read_only=True)
-    faculty_image_english = serializers.CharField(source='issuer.faculty.image_english', read_only=True)
-    faculty_on_behalf_of = serializers.BooleanField(source='issuer.faculty.on_behalf_of', read_only=True)
-    faculty_type = serializers.CharField(source='issuer.faculty.faculty_type', read_only=True)
+    faculty_name_english = serializers.CharField(source="issuer.faculty.name_english", read_only=True)
+    faculty_name_dutch = serializers.CharField(source="issuer.faculty.name_dutch", read_only=True)
+    faculty_entity_id = serializers.CharField(source="issuer.faculty.entity_id", read_only=True)
+    faculty_image_dutch = serializers.CharField(source="issuer.faculty.image_dutch", read_only=True)
+    faculty_image_english = serializers.CharField(source="issuer.faculty.image_english", read_only=True)
+    faculty_on_behalf_of = serializers.BooleanField(source="issuer.faculty.on_behalf_of", read_only=True)
+    faculty_type = serializers.CharField(source="issuer.faculty.faculty_type", read_only=True)
 
     # Institution fields
-    institution_name_english = serializers.CharField(source='issuer.faculty.institution.name_english', read_only=True)
-    institution_name_dutch = serializers.CharField(source='issuer.faculty.institution.name_dutch', read_only=True)
-    institution_entity_id = serializers.CharField(source='issuer.faculty.institution.entity_id', read_only=True)
-    institution_image_dutch = serializers.CharField(source='issuer.faculty.institution.image_dutch', read_only=True)
-    institution_image_english = serializers.CharField(source='issuer.faculty.institution.image_english', read_only=True)
-    institution_type = serializers.CharField(source='issuer.faculty.institution.institution_type', read_only=True)
+    institution_name_english = serializers.CharField(source="issuer.faculty.institution.name_english", read_only=True)
+    institution_name_dutch = serializers.CharField(source="issuer.faculty.institution.name_dutch", read_only=True)
+    institution_entity_id = serializers.CharField(source="issuer.faculty.institution.entity_id", read_only=True)
+    institution_image_dutch = serializers.CharField(source="issuer.faculty.institution.image_dutch", read_only=True)
+    institution_image_english = serializers.CharField(source="issuer.faculty.institution.image_english", read_only=True)
+    institution_type = serializers.CharField(source="issuer.faculty.institution.institution_type", read_only=True)
 
     # Necessary for backward compatibility with the mobile app
-    # TODO: remove later
+    # TODO: remove later  # noqa: FIX002, TD002, TD003
     self_requested_assertions_count = serializers.SerializerMethodField()
     direct_awarded_assertions_count = serializers.SerializerMethodField()
     user_has_accepted_terms = serializers.SerializerMethodField()
@@ -581,66 +580,66 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = BadgeClass
         fields = [
-            'created_at',
-            'name',
-            'image',
-            'archived',
-            'entity_id',
-            'is_private',
-            'is_micro_credentials',
-            'badge_class_type',
-            'issuer_name_english',
-            'issuer_name_dutch',
-            'issuer_entity_id',
-            'issuer_image_dutch',
-            'issuer_image_english',
-            'faculty_name_english',
-            'faculty_name_dutch',
-            'faculty_entity_id',
-            'faculty_image_dutch',
-            'faculty_image_english',
-            'faculty_on_behalf_of',
-            'faculty_type',
-            'institution_name_english',
-            'institution_name_dutch',
-            'institution_entity_id',
-            'institution_image_dutch',
-            'institution_image_english',
-            'institution_type',
-            'required_terms',
-            'user_has_accepted_terms',
-            'self_enrollment_enabled',
-            'user_may_enroll',
-            'self_requested_assertions_count',
-            'direct_awarded_assertions_count',
+            "created_at",
+            "name",
+            "image",
+            "archived",
+            "entity_id",
+            "is_private",
+            "is_micro_credentials",
+            "badge_class_type",
+            "issuer_name_english",
+            "issuer_name_dutch",
+            "issuer_entity_id",
+            "issuer_image_dutch",
+            "issuer_image_english",
+            "faculty_name_english",
+            "faculty_name_dutch",
+            "faculty_entity_id",
+            "faculty_image_dutch",
+            "faculty_image_english",
+            "faculty_on_behalf_of",
+            "faculty_type",
+            "institution_name_english",
+            "institution_name_dutch",
+            "institution_entity_id",
+            "institution_image_dutch",
+            "institution_image_english",
+            "institution_type",
+            "required_terms",
+            "user_has_accepted_terms",
+            "self_enrollment_enabled",
+            "user_may_enroll",
+            "self_requested_assertions_count",
+            "direct_awarded_assertions_count",
         ]
 
     @staticmethod
-    def get_required_terms(obj):
+    def get_required_terms(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return None
 
     @staticmethod
-    def get_user_has_accepted_terms(obj):
+    def get_user_has_accepted_terms(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return False
 
     @staticmethod
-    def get_self_enrollment_enabled(obj):
+    def get_self_enrollment_enabled(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return False
 
     @staticmethod
-    def get_user_may_enroll(obj):
+    def get_user_may_enroll(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return False
 
     @staticmethod
-    def get_self_requested_assertions_count(obj):
+    def get_self_requested_assertions_count(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return 0
 
     @staticmethod
-    def get_direct_awarded_assertions_count(obj):
+    def get_direct_awarded_assertions_count(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return 0
