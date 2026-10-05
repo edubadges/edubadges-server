@@ -9,6 +9,6 @@ class JsonFormatter(jsonlogger.JsonFormatter):
     def converter(self, timestamp):
         return datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
 
-    def formatTime(self, record, datefmt=None):
+    def formatTime(self, record, datefmt=None):  # noqa: N802
         dt = self.converter(record.created)
         return dt.strftime(datefmt or self.default_time_format)

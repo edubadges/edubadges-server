@@ -9,7 +9,7 @@ class Clone:
     actions = ["clone"]
 
     def clone(self, request, queryset):
-        def _clone(instance, save=True):
+        def _clone(instance, save=True):  # noqa: FBT002
             new_instance = deepcopy(instance)
             new_instance.id = None
             if save:
@@ -54,10 +54,10 @@ class ToggleActive:
         )
 
     def is_active_true(self, *args):
-        self._set_is_active(True, *args)
+        self._set_is_active(True, *args)  # noqa: FBT003
 
     def is_active_false(self, *args):
-        self._set_is_active(False, *args)
+        self._set_is_active(False, *args)  # noqa: FBT003
 
     is_active_true.short_description = "Activate selected %(verbose_name_plural)s"
     is_active_false.short_description = "De-activate selected %(verbose_name_plural)s"
@@ -78,7 +78,7 @@ class DeleteRequiresPermission:
     def get_actions(self, request):
         actions = super().get_actions(request)
         if not self.has_delete_permission(request):
-            try:
+            try:  # noqa: SIM105
                 del actions["delete_selected"]
             except KeyError:
                 pass

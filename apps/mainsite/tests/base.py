@@ -23,8 +23,8 @@ class GrapheneMockContext:
         self.user = user
 
 
-def string_randomiser(name, prefix=False):
-    s = "".join(random.choices(string.ascii_lowercase, k=10))
+def string_randomiser(name, prefix=False):  # noqa: FBT002
+    s = "".join(random.choices(string.ascii_lowercase, k=10))  # noqa: S311
     if not prefix:
         return name + "_" + s
     return s + "_" + name
@@ -45,7 +45,7 @@ class SetupHelper:
         return os.path.join(self.get_testfiles_path(), "too_large_test_image.png")
 
     def add_eduid_socialaccount(self, user):
-        random_eduid = f"urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{random.randint(1, 99999)}c14-b952-4d7e-85fd-{random.randint(1, 9999)}ac5c6f18"
+        random_eduid = f"urn:mace:eduid.nl:1.0:d57b4355-c7c6-4924-a944-6172e31e9bbc:{random.randint(1, 99999)}c14-b952-4d7e-85fd-{random.randint(1, 9999)}ac5c6f18"  # noqa: E501, S311
         extra_data = {
             "family_name": user.last_name,
             "sub": random_eduid,
@@ -73,7 +73,7 @@ class SetupHelper:
 
     def get_image_data(self, path):
         with open(path, "rb") as file:
-            return "data:image/jpg;base64,%s" % base64.b64encode(file.read()).decode()
+            return "data:image/jpg;base64,%s" % base64.b64encode(file.read()).decode()  # noqa: UP031
 
     def _make_email_primary(self, user):
         email = user.cached_emails()[0]
@@ -81,9 +81,9 @@ class SetupHelper:
         email.primary = True
         email.save()
 
-    def setup_user(self, first_name="firsty", last_name="lastington", authenticate=False, institution=None, email=None):
+    def setup_user(self, first_name="firsty", last_name="lastington", authenticate=False, institution=None, email=None):  # noqa: FBT002
         if not email:
-            email = f"setup_user_{random.random()}@email.test"
+            email = f"setup_user_{random.random()}@email.test"  # noqa: S311
         if not institution:
             institution = self.setup_institution()
         user = BadgeUser.objects.create(email=email, first_name=first_name, last_name=last_name)
@@ -99,7 +99,7 @@ class SetupHelper:
         self.client.logout()
         return self.client._login(user, backend="oauth2_provider.backends.OAuth2Backend")
 
-    def setup_teacher(self, first_name="", last_name="", authenticate=False, institution=None, email=None):
+    def setup_teacher(self, first_name="", last_name="", authenticate=False, institution=None, email=None):  # noqa: FBT002
         if not first_name:
             first_name = string_randomiser("FirstName")
         if not last_name:
@@ -110,9 +110,9 @@ class SetupHelper:
         user.save()
         return user
 
-    def setup_student(self, first_name="", last_name="", authenticate=False, affiliated_institutions=[], email=None):
-        first_name = string_randomiser("student_first_name") if not first_name else first_name
-        last_name = string_randomiser("student_last_name") if not last_name else last_name
+    def setup_student(self, first_name="", last_name="", authenticate=False, affiliated_institutions=[], email=None):  # noqa: B006, FBT002
+        first_name = string_randomiser("student_first_name") if not first_name else first_name  # noqa: SIM212
+        last_name = string_randomiser("student_last_name") if not last_name else last_name  # noqa: SIM212
         user = self.setup_user(first_name, last_name, authenticate, institution=None, email=email)
         self.add_eduid_socialaccount(user)
         affiliations = [
@@ -121,7 +121,7 @@ class SetupHelper:
         user.add_affiliations(affiliations)
         return user
 
-    def setup_direct_award_bundle(self, badgeclass, direct_awards=[], **kwargs):
+    def setup_direct_award_bundle(self, badgeclass, direct_awards=[], **kwargs):  # noqa: B006
         dab = DirectAwardBundle.objects.create(badgeclass=badgeclass, initial_total=len(direct_awards), **kwargs)
         for direct_award in direct_awards:
             direct_award.bundle = dab
@@ -264,7 +264,7 @@ class SetupHelper:
             kwargs["faculty"] = self.setup_faculty(institution=created_by.institution)
         if not kwargs.get("name_english", False):
             kwargs["name_english"] = (string_randomiser("Test Issuer"),)
-        image_english = resize_image(open(self.get_test_image_path()))
+        image_english = resize_image(open(self.get_test_image_path()))  # noqa: SIM115
         return Issuer.objects.create(
             description_english="description",
             description_dutch="description",
@@ -275,9 +275,9 @@ class SetupHelper:
 
     def setup_badgeclass(self, issuer, **kwargs):
         if not kwargs.get("name", False):
-            kwargs["name"] = f"Test Badgeclass #{random.random()}"
+            kwargs["name"] = f"Test Badgeclass #{random.random()}"  # noqa: S311
         if not kwargs.get("image", False):
-            kwargs["image"] = resize_image(open(self.get_test_image_path()))
+            kwargs["image"] = resize_image(open(self.get_test_image_path()))  # noqa: SIM115
         return BadgeClass.objects.create(
             issuer=issuer,
             formal=kwargs.pop("formal", False),
@@ -289,17 +289,17 @@ class SetupHelper:
     def setup_assertion(self, recipient, badgeclass, created_by, **kwargs):
         return badgeclass.issue(recipient=recipient, created_by=created_by, **kwargs)
 
-    def setup_staff_membership(
+    def setup_staff_membership(  # noqa: PLR0913, PLR0917
         self,
         user,
-        object,
-        may_create=False,
-        may_read=False,
-        may_update=False,
-        may_delete=False,
-        may_award=False,
-        may_sign=False,
-        may_administrate_users=False,
+        object,  # noqa: A002
+        may_create=False,  # noqa: FBT002
+        may_read=False,  # noqa: FBT002
+        may_update=False,  # noqa: FBT002
+        may_delete=False,  # noqa: FBT002
+        may_award=False,  # noqa: FBT002
+        may_sign=False,  # noqa: FBT002
+        may_administrate_users=False,  # noqa: FBT002
     ):
         if object.__class__.__name__ == "Institution":
             staff = InstitutionStaff(institution=object)
@@ -325,7 +325,7 @@ class SetupHelper:
     def instance_is_removed(self, instance):
         try:
             instance.__class__.objects.get(pk=instance.pk)
-            return False
+            return False  # noqa: TRY300
         except instance.__class__.DoesNotExist:
             return True
 
@@ -337,7 +337,7 @@ class BadgrTestCase(SetupHelper, APITransactionTestCase):
     def setUp(self):
         super().setUp()
 
-        from django.conf import settings
+        from django.conf import settings  # noqa: PLC0415
 
         badgr_app_id = settings.BADGR_APP_ID
         self.badgr_app = BadgrApp.objects.get_or_create(pk=badgr_app_id)[0]

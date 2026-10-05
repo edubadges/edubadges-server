@@ -7,7 +7,7 @@ from django.utils import timezone
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        from directaward.models import DirectAward, DirectAwardBundle
+        from directaward.models import DirectAward, DirectAwardBundle  # noqa: PLC0415
 
         # Prevent MySQLdb._exceptions.OperationalError: (2006, 'MySQL server has gone away')
         connections.close_all()
@@ -37,4 +37,4 @@ class Command(BaseCommand):
 
             bundle.remove_cached_data(["cached_direct_awards"])
 
-        logger.info(f"Finished {len(direct_award_bundles)} award_scheduled_direct_awards")
+        logger.info(f"Finished {len(direct_award_bundles)} award_scheduled_direct_awards")  # noqa: G004

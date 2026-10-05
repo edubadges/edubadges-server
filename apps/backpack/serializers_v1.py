@@ -98,9 +98,9 @@ class BadgePotentiallyEmptyField(serializers.Field):
     def get_attribute(self, instance):
         value = serializers.Field.get_attribute(self, instance)
 
-        if value == "" or value is None or value == {}:
+        if value == "" or value is None or value == {}:  # noqa: SIM102
             if not self.required or not self.allow_blank:
-                raise SkipField()
+                raise SkipField
         return value
 
     def validate_empty_values(self, data):
@@ -113,7 +113,7 @@ class BadgePotentiallyEmptyField(serializers.Field):
         if is_empty_value or data == "":
             if self.required:
                 self.fail("required")
-            raise SkipField()
+            raise SkipField
 
         return (False, data)
 
@@ -128,7 +128,7 @@ class VerifierBadgeDateTimeField(BadgePotentiallyEmptyField, serializers.Field):
     def to_internal_value(self, value):
         if isinstance(value, str):
             try:
-                return datetime.datetime.utcfromtimestamp(float(value))
+                return datetime.datetime.utcfromtimestamp(float(value))  # noqa: DTZ004
             except ValueError:
                 pass
 
@@ -141,7 +141,7 @@ class VerifierBadgeDateTimeField(BadgePotentiallyEmptyField, serializers.Field):
             return result
         if isinstance(value, (int, float)):
             try:
-                return datetime.datetime.utcfromtimestamp(value)
+                return datetime.datetime.utcfromtimestamp(value)  # noqa: DTZ004
             except ValueError:
                 self.fail("bad_int")
         else:
@@ -232,7 +232,7 @@ class V1InstanceSerializer(serializers.Serializer):
     uid = BadgeStringField(required=False)
     recipient = BadgeEmailField()
     badge = V1BadgeClassSerializer()
-    issuedOn = BadgeDateTimeField(required=False)  # missing in some translated v0.5.0
+    issuedOn = BadgeDateTimeField(required=False)  # missing in some translated v0.5.0  # noqa: N815
     expires = BadgeDateTimeField(required=False)
     image = BadgeImageURLField(required=False)
 

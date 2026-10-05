@@ -31,7 +31,7 @@ class Query(
     system_notifications = graphene.List(SystemNotificationType)
 
     def resolve_system_notifications(self, info, **kwargs):
-        today = datetime.utcnow()
+        today = datetime.utcnow()  # noqa: DTZ003
         valid_notifications = (
             SystemNotification.objects.filter(display_start__lt=today).filter(display_end__gte=today).all()
         )

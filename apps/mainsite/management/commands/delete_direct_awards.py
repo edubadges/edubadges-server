@@ -16,7 +16,7 @@ class Command(BaseCommand):
     """A command to delete direct awards with the status Deleted."""
 
     def handle(self, *args, **kwargs):
-        from directaward.models import DirectAward
+        from directaward.models import DirectAward  # noqa: PLC0415
 
         # Prevent MySQLdb._exceptions.OperationalError: (2006, 'MySQL server has gone away')
         connections.close_all()
@@ -34,4 +34,4 @@ class Command(BaseCommand):
             bundle.save()
             direct_award.delete()
 
-        logger.info(f"Deleted {len(direct_awards)} direct_awards")
+        logger.info(f"Deleted {len(direct_awards)} direct_awards")  # noqa: G004

@@ -7,6 +7,6 @@ def generate_cache_key(prefix, *args, **kwargs):
     arg_str = ":".join(smart_bytes(a) for a in args)
     kwarg_str = ":".join(f"{smart_bytes(k)}={smart_bytes(v)}" for k, v in list(kwargs.items()))
     key_str = f"{arg_str}::{kwarg_str}"
-    argkwarg_str = md5(smart_bytes(key_str)).hexdigest()
+    argkwarg_str = md5(smart_bytes(key_str)).hexdigest()  # noqa: S324
     prefix = "_".join(str(a) for a in prefix)
     return f"{prefix}__{argkwarg_str}"

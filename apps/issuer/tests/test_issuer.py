@@ -188,7 +188,7 @@ class IssuerAPITest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
-        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
+        assertion = self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)  # noqa: F841
         response = self.client.delete(
             f"/issuer/badgeclasses/delete/{badgeclass.entity_id}", content_type="application/json"
         )
@@ -225,7 +225,7 @@ class IssuerAPITest(BadgrTestCase):
         enroll_body = {"badgeclass_slug": badgeclass.entity_id}
         terms = badgeclass._get_terms()
         accept_terms_body = [{"terms_entity_id": terms.entity_id, "accepted": True}]
-        terms_accept_response = self.client.post(
+        terms_accept_response = self.client.post(  # noqa: F841
             "/user/terms/accept", json.dumps(accept_terms_body), content_type="application/json"
         )
         enrollment_response = self.client.post(
@@ -343,38 +343,38 @@ class IssuerPublicAPITest(BadgrTestCase):
 
 # class IssuerExtensionsTest(BadgrTestCase):
 #
-#     TODO: this test cannot run, because you cannot verify extensions as their @context is hosted on the same machine
+#     TODO: this test cannot run, because you cannot verify extensions as their @context is hosted on the same machine  # noqa: E501, FIX002, TD002, TD003
 #     def test_create_edit_remove_issuer_extensions(self):
 #         teacher1 = self.setup_teacher(authenticate=True)
-#         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True, may_read=True, may_update=True)
+#         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True, may_read=True, may_update=True)  # noqa: E501
 #         faculty = self.setup_faculty(institution=teacher1.institution)
 #         issuer_json['faculty'] = faculty.entity_id
-#         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')
+#         response = self.client.post('/issuer/create', json.dumps(issuer_json), content_type='application/json')  # noqa: E501
 #         issuer = Issuer.objects.get(entity_id=response.data['entity_id'])
 #         self.assertEqual(issuer.extension_items.__len__(), 1)
 #         extensions = issuer_json.pop('extensions')
 #         issuer_json['extensions'] = {}
-#         response = self.client.put('/issuer/edit/{}'.format(issuer.entity_id), json.dumps(issuer_json), content_type='application/json')
+#         response = self.client.put('/issuer/edit/{}'.format(issuer.entity_id), json.dumps(issuer_json), content_type='application/json')  # noqa: E501
 #         self.assertEqual(issuer.extension_items.__len__(), 0)
 #         issuer_json['extensions'] = extensions
-#         response = self.client.put('/issuer/edit/{}'.format(issuer.entity_id), json.dumps(issuer_json), content_type='application/json')
+#         response = self.client.put('/issuer/edit/{}'.format(issuer.entity_id), json.dumps(issuer_json), content_type='application/json')  # noqa: E501
 #         self.assertEqual(issuer.extension_items.__len__(), 1)
 #
-#     TODO: this test cannot run, because you cannot verify extensions as their @context is hosted on the same machine
+#     TODO: this test cannot run, because you cannot verify extensions as their @context is hosted on the same machine  # noqa: E501, FIX002, TD002, TD003
 #     def test_create_edit_remove_badgeclass_extensions(self):
 #         teacher1 = self.setup_teacher(authenticate=True)
-#         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True, may_read=True, may_update=True)
+#         self.setup_staff_membership(teacher1, teacher1.institution, may_create=True, may_read=True, may_update=True)  # noqa: E501
 #         faculty = self.setup_faculty(institution=teacher1.institution)
 #         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
 #         badgeclass_json['issuer'] = issuer.entity_id
-#         response = self.client.post('/issuer/badgeclasses/create', json.dumps(badgeclass_json), content_type='application/json')
+#         response = self.client.post('/issuer/badgeclasses/create', json.dumps(badgeclass_json), content_type='application/json')  # noqa: E501
 #         badgeclass = BadgeClass.objects.get(entity_id=response.data['entity_id'])
 #         self.assertEqual(badgeclass.extension_items.__len__(), 2)
 #         ects_extension = badgeclass_json['extensions'].pop('extensions:ECTSExtension')
-#         response = self.client.put('/issuer/badgeclasses/edit/{}'.format(badgeclass.entity_id), json.dumps(badgeclass_json), content_type='application/json')
+#         response = self.client.put('/issuer/badgeclasses/edit/{}'.format(badgeclass.entity_id), json.dumps(badgeclass_json), content_type='application/json')  # noqa: E501
 #         self.assertEqual(badgeclass.extension_items.__len__(), 1)
 #         badgeclass_json['extensions']['extensions:ECTSExtension'] = ects_extension
-#         response = self.client.put('/issuer/badgeclasses/edit/{}'.format(badgeclass.entity_id), json.dumps(badgeclass_json), content_type='application/json')
+#         response = self.client.put('/issuer/badgeclasses/edit/{}'.format(badgeclass.entity_id), json.dumps(badgeclass_json), content_type='application/json')  # noqa: E501
 #         self.assertEqual(badgeclass.extension_items.__len__(), 2)
 #
 #     def test_institution_vars_end_up_in_issuer_json_as_extensions(self):
@@ -387,7 +387,7 @@ class IssuerModelsTest(BadgrTestCase):
         teacher1 = self.setup_teacher(authenticate=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         setup_issuer_kwargs = {"created_by": teacher1, "faculty": faculty, "name_english": "EN", "name_dutch": "NL"}
-        issuer = self.setup_issuer(**setup_issuer_kwargs)
+        issuer = self.setup_issuer(**setup_issuer_kwargs)  # noqa: F841
         self.assertRaises(BadgrValidationMultipleFieldError, self.setup_issuer, **setup_issuer_kwargs)
         del setup_issuer_kwargs["name_english"]
         self.assertRaises(BadgrValidationFieldError, self.setup_issuer, **setup_issuer_kwargs)
@@ -526,10 +526,10 @@ class IssuerModelsTest(BadgrTestCase):
 
     def _create_badge_and_student(
         self,
-        self_enrollment_disabled=False,
-        formal=False,
-        same_institution=False,
-        schac_home_match_in_allowed_institutions=False,
+        self_enrollment_disabled=False,  # noqa: FBT002
+        formal=False,  # noqa: FBT002
+        same_institution=False,  # noqa: FBT002
+        schac_home_match_in_allowed_institutions=False,  # noqa: FBT002
     ):
         """Helper to create a badgeclass and test users"""
         teacher = self.setup_teacher()
@@ -652,7 +652,7 @@ class IssuerSchemaTest(BadgrTestCase):
         issuer = self.setup_issuer(teacher1, faculty=faculty)
         badgeclass = self.setup_badgeclass(issuer)
         self.setup_direct_award(badgeclass)
-        query = "query foo {badgeClasses {entityId contentTypeId directAwards {entityId badgeclass {entityId} } terms {entityId termsUrl {url excerpt language}}}}"
+        query = "query foo {badgeClasses {entityId contentTypeId directAwards {entityId badgeclass {entityId} } terms {entityId termsUrl {url excerpt language}}}}"  # noqa: E501
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response["data"]["badgeClasses"][0]["contentTypeId"]))
         self.assertTrue(bool(response["data"]["badgeClasses"][0]["entityId"]))

@@ -11,13 +11,13 @@ class ValidImageValidator:
     def __call__(self, image):
         if image:
             try:
-                from PIL import Image
+                from PIL import Image  # noqa: PLC0415
 
                 img = Image.open(image)
                 img.verify()
-            except Exception:
+            except Exception:  # noqa: BLE001
                 if not verify_svg(image):
-                    raise ValidationError("Invalid image.")
+                    raise ValidationError("Invalid image.")  # noqa: B904
             else:
                 if img.format != "PNG":
                     raise ValidationError("Invalid PNG")

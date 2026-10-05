@@ -76,8 +76,8 @@ def delete_selected(modeladmin, request, queryset):
         request,
         modeladmin.delete_selected_confirmation_template
         or [
-            "admin/%s/%s/delete_selected_confirmation.html" % (app_label, opts.model_name),
-            "admin/%s/delete_selected_confirmation.html" % app_label,
+            "admin/%s/%s/delete_selected_confirmation.html" % (app_label, opts.model_name),  # noqa: UP031
+            "admin/%s/delete_selected_confirmation.html" % app_label,  # noqa: UP031
             "admin/delete_selected_confirmation.html",
         ],
         context,
@@ -93,6 +93,6 @@ def clear_cache():
 
 
 def send_application_report():
-    from django.core.management import call_command
+    from django.core.management import call_command  # noqa: PLC0415
 
     call_command("send_app_report")

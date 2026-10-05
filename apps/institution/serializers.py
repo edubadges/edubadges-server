@@ -86,7 +86,7 @@ class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Seriali
                     tag_db.archived = tag["status"] == "archived"
                     tag_db.save()
                 else:
-                    from issuer.models import BadgeClass
+                    from issuer.models import BadgeClass  # noqa: PLC0415
 
                     # Now remove all the cached tags on badgeClasses
                     badge_classes = (
@@ -198,6 +198,6 @@ class FacultySerializer(InternalValueErrorOverrideMixin, serializers.Serializer)
             try:
                 new_faculty.save()
             except IntegrityError:
-                raise serializers.ValidationError("Faculty name already exists")
+                raise serializers.ValidationError("Faculty name already exists")  # noqa: B904
             return new_faculty
         BadgrValidationError("You don't have the necessary permissions", 100)

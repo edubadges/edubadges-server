@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin  # noqa: EXE002
 from lti_edu.models import StudentsEnrolled
 from mainsite.admin import badgr_admin
 from mainsite.utils import admin_list_linkify

@@ -12,7 +12,7 @@ def get_form_error_code(error_type):
         return 904
     if isinstance(error_type, int):
         return error_type
-    print(f"no error_code for {error_type}")
+    print(f"no error_code for {error_type}")  # noqa: T201
     return 999
 
 

@@ -65,10 +65,10 @@ class EndorsementDetail(BaseEntityDetailView):
         if new_status == Endorsement.STATUS_REVOKED:
             endorsement.revocation_reason = request.data["revocation_reason"]
         elif new_status == Endorsement.STATUS_ACCEPTED:
-            EmailMessageMaker.reject_approve_endorsement_mail(request.user, endorsement, True)
+            EmailMessageMaker.reject_approve_endorsement_mail(request.user, endorsement, True)  # noqa: FBT003
         elif new_status == Endorsement.STATUS_REJECTED:
             endorsement.rejection_reason = request.data["rejection_reason"]
-            EmailMessageMaker.reject_approve_endorsement_mail(request.user, endorsement, False)
+            EmailMessageMaker.reject_approve_endorsement_mail(request.user, endorsement, False)  # noqa: FBT003
         endorsement.save()
         endorsement.clear_endorsement_cache()
         return Response({}, status=status.HTTP_200_OK)

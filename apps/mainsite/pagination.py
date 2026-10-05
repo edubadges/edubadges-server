@@ -188,13 +188,13 @@ class EncryptedCursorPagination(BasePagination):
         Partition padded page into (page, next_element). padded_page must be reversed if partitioning a page with an
         upper limit.
         """
-        assert len(padded_page) <= self.page_size + 1
+        assert len(padded_page) <= self.page_size + 1  # noqa: S101
 
         iterator = iter(padded_page)
         page = more_itertools.take(self.page_size, iterator)
 
         extra_elem = None
-        try:
+        try:  # noqa: SIM105
             extra_elem = next(iterator)
         except StopIteration:
             pass
@@ -212,7 +212,7 @@ class EncryptedCursorPagination(BasePagination):
 
         lower_limit, upper_limit = self._get_cursor_limits(cursor)
 
-        assert not (lower_limit and upper_limit), "Invalid state"
+        assert not (lower_limit and upper_limit), "Invalid state"  # noqa: S101
 
         if lower_limit is not None:
             with transaction.atomic():

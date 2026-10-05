@@ -5,8 +5,8 @@ from signing.utils import hash_string
 
 
 def run_chp_command(command):
-    proc = Popen(command, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
-    outputs_raw, errs = proc.communicate()
+    proc = Popen(command, stdin=PIPE, stdout=PIPE, stderr=STDOUT)  # noqa: S603
+    outputs_raw, errs = proc.communicate()  # noqa: RUF059
     return outputs_raw.decode()
 
 
@@ -28,11 +28,11 @@ def submit_hash(hash256):
     :return: a list of node_hash_ids
     """
     node_hash_ids = []
-    outputs_raw = outputs_raw = run_chp_command(["chp", "submit", hash256])
+    outputs_raw = outputs_raw = run_chp_command(["chp", "submit", hash256])  # noqa: PLW0127, PLW0128
     outputs = outputs_raw.split("\n")
     for output in outputs:
         try:
-            node_hash_id, hash_as_string, action = output.split(" | ")
+            node_hash_id, hash_as_string, action = output.split(" | ")  # noqa: RUF059
             if action == "submitted":
                 node_hash_ids.append(node_hash_id)
         except ValueError:
@@ -49,7 +49,7 @@ def retrieve_proof(node_hash_id):
     try:
         return json.loads(shown_proof)
     except ValueError:
-        raise ValueError("Returned proof invalid")
+        raise ValueError("Returned proof invalid")  # noqa: B904
 
 
 def verify_proof(node_hash_id):

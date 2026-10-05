@@ -129,7 +129,7 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
 
     @property
     def cached_user(self):
-        from badgeuser.models import BadgeUser
+        from badgeuser.models import BadgeUser  # noqa: PLC0415
 
         return BadgeUser.cached.get(pk=self.user_id)
 
@@ -206,7 +206,7 @@ class IssuerStaff(PermissionedRelationshipBase):
 
     @property
     def may_become_signer(self):
-        # return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()
+        # return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()  # noqa: E501
         return SymmetricKey.objects.filter(user=self.user, current=True).exists()
 
     @property

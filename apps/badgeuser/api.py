@@ -46,7 +46,7 @@ class BadgeUserDetail(BaseEntityDetailView):
         try:
             obj.delete()
         except ProtectedError as e:
-            raise BadgrApiException400(error_message=e.args[0], error_code=999)
+            raise BadgrApiException400(error_message=e.args[0], error_code=999)  # noqa: B904
         return Response(status=HTTP_204_NO_CONTENT)
 
 

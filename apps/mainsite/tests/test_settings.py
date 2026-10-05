@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 
-from ..settings import legacy_boolean_parsing
+from ..settings import legacy_boolean_parsing  # noqa: TID252
 
 
 class TestLegacyBooleanParsing(TestCase):

@@ -143,7 +143,7 @@ class Institution(
                 if not (self.eppn_reg_exp_format.startswith(".*") or self.eppn_reg_exp_format.startswith("(.*")):
                     raise ValidationError("Eppn reg exp format must start with '.*' or (.*)")
             except re.error as e:
-                raise ValidationError(f"Invalid Eppn reg exp format: {e}")
+                raise ValidationError(f"Invalid Eppn reg exp format: {e}")  # noqa: B904
 
     def get_report(self):
         total_assertions_formal = 0
@@ -291,14 +291,14 @@ class Institution(
     def create_staff_membership(self, user, permissions):
         try:
             staff = InstitutionStaff.objects.get(user=user)
-            for key in permissions.keys():
+            for key in permissions.keys():  # noqa: SIM118
                 value = permissions[key]
                 setattr(staff, key, value)
             staff.save()
         except InstitutionStaff.DoesNotExist:
             return InstitutionStaff.objects.create(user=user, institution=self, **permissions)
 
-    def get_json(self, obi_version, expand_awards=False):
+    def get_json(self, obi_version, expand_awards=False):  # noqa: FBT002
         json = OrderedDict()
 
         image_url = OriginSetting.HTTP + reverse("institution_image", kwargs={"entity_id": self.entity_id})
@@ -329,7 +329,7 @@ class Institution(
         return json
 
 
-class BadgeClassTag(models.Model):
+class BadgeClassTag(models.Model):  # noqa: DJ008
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     name = models.CharField(max_length=254)
     archived = models.BooleanField(default=False, help_text="Set to true to disable this tag from being selectable")

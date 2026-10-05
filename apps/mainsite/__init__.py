@@ -8,7 +8,7 @@ __all__ = ["APPS_DIR", "TOP_DIR", "get_version"]
 
 def get_version(version=None):
     if version is None:
-        from .version import VERSION
+        from .version import VERSION  # noqa: PLC0415
 
         version = VERSION
     return semver.format_version(*version)
@@ -23,4 +23,4 @@ if APPS_DIR not in sys.path:
 TOP_DIR = os.path.dirname(APPS_DIR)
 
 # import the celery app so INSTALLED_APPS gets autodiscovered
-from .celery import app as celery_app
+from .celery import app as celery_app  # noqa: F401

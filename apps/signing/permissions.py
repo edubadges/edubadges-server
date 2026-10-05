@@ -2,7 +2,7 @@ from rest_framework import permissions
 
 
 class MaySignAssertions(permissions.BasePermission):
-    def has_permission(selfs, request, view):
+    def has_permission(selfs, request, view):  # noqa: N805
         pass
 
 

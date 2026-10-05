@@ -4,6 +4,7 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
+from http import HTTPStatus
 
 import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
@@ -44,7 +45,7 @@ def login(request):
     badgr_app_pk = request.session.get("badgr_app_pk", None)
     try:
         badgr_app_pk = int(badgr_app_pk)
-    except:
+    except:  # noqa: E722
         badgr_app_pk = settings.BADGR_APP_ID
     state = json.dumps(
         [
@@ -72,7 +73,7 @@ def login(request):
 
 
 @csrf_exempt
-def callback(request):
+def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
     """
         Callback page, after user returns from "Where are you from" page.
 
@@ -119,14 +120,14 @@ def callback(request):
         "Content-Type": "application/x-www-form-urlencoded",
         "Cache-Control": "no-cache",
     }
-    response = requests.post(
+    response = requests.post(  # noqa: S113
         f"{settings.SURFCONEXT_DOMAIN_URL}/token",
         data=urllib.parse.urlencode(payload),
         headers=headers,
     )
 
-    if response.status_code != 200:
-        error = "Server error: Token endpoint error (http %s) try alternative login methods" % response.status_code
+    if response.status_code != HTTPStatus.OK:
+        error = "Server error: Token endpoint error (http %s) try alternative login methods" % response.status_code  # noqa: UP031
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
     data = response.json()
@@ -175,7 +176,7 @@ def callback(request):
                 try:
                     provisionments = request.user.match_provisionments()
                     if not provisionments:
-                        raise UserProvisionment.DoesNotExist()
+                        raise UserProvisionment.DoesNotExist  # noqa: TRY301
                     request.user.save()
                     for provisionment in provisionments:
                         provisionment.match_user(request.user)
@@ -196,7 +197,7 @@ def callback(request):
                     error = "Sorry, you can not register without an invite."
                     extra_context["code"] = AuthErrorCode.REGISTER_WITHOUT_INVITE
                     if (
-                        request.user.date_joined.today().date() == datetime.datetime.today().date()
+                        request.user.date_joined.today().date() == datetime.datetime.today().date()  # noqa: DTZ002
                     ):  # extra protection before deletion
                         request.user.delete()
                     return render_authentication_error(

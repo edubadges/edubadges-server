@@ -27,7 +27,7 @@ class BadgrRequestValidator(OAuth2Validator):
     def validate_scopes(self, client_id, scopes, client, request, *args, **kwargs):
         available_scopes = get_scopes_backend().get_available_scopes(application=client, request=request)
 
-        for scope in scopes:
+        for scope in scopes:  # noqa: SIM110
             if not self.is_scope_valid(scope, available_scopes):
                 return False
 

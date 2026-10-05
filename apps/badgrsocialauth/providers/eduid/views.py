@@ -4,6 +4,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from base64 import b64encode
+from http import HTTPStatus
 
 import requests
 from allauth.account.adapter import get_adapter as get_account_adapter
@@ -39,8 +40,8 @@ def encode(username, password):  # client_id, secret
             "source": "eduID login encoding",
         }
         logger.error(message)
-        raise Exception(message)
-    username_password = "%s:%s" % (username, password)
+        raise Exception(message)  # noqa: TRY002
+    username_password = "%s:%s" % (username, password)  # noqa: UP031
     return "Basic " + b64encode(username_password.encode()).decode()
 
 
@@ -48,7 +49,7 @@ def login(request):
     badgr_app_pk = request.session.get("badgr_app_pk", None)
     try:
         badgr_app_pk = int(badgr_app_pk)
-    except:
+    except:  # noqa: E722
         badgr_app_pk = settings.BADGR_APP_ID
 
     state = json.dumps([badgr_app_pk])
@@ -92,7 +93,7 @@ def callback(request):
     # 1. Exchange callback Token for access token
     payload = {
         "grant_type": "authorization_code",
-        "redirect_uri": "%s/account/eduid/login/callback/" % settings.HTTP_ORIGIN,
+        "redirect_uri": "%s/account/eduid/login/callback/" % settings.HTTP_ORIGIN,  # noqa: UP031
         "code": code,
         "client_id": settings.EDU_ID_CLIENT,
         "client_secret": settings.EDU_ID_SECRET,
@@ -108,8 +109,8 @@ def callback(request):
         headers=headers,
         timeout=60,
     )
-    if response.status_code != 200:
-        error = "Server error: User info endpoint error (http %s). Try alternative login methods" % response.status_code
+    if response.status_code != HTTPStatus.OK:
+        error = "Server error: User info endpoint error (http %s). Try alternative login methods" % response.status_code  # noqa: UP031
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
 
@@ -139,7 +140,7 @@ def callback(request):
         }
         eduid_url = f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links"
         response = requests.get(eduid_url, headers=headers, timeout=60)
-        if response.status_code != 200:
+        if response.status_code != HTTPStatus.OK:
             error = f"Server error: eduID eppn endpoint error ({response.status_code})"
             logger.debug(error)
             return render_authentication_error(request, EduIDProvider.id, error=error)
@@ -147,7 +148,7 @@ def callback(request):
         keyword_arguments["validated_name"] = bool(
             [info["validated_name"] for info in eppn_json if "validated_name" in info]
         )
-        keyword_arguments["re_sign"] = False if not social_account else True
+        keyword_arguments["re_sign"] = False if not social_account else True  # noqa: SIM211
         signup_redirect = badgr_app.signup_redirect
         args = urllib.parse.urlencode(keyword_arguments)
         return HttpResponseRedirect(f"{signup_redirect}?{args}")
@@ -155,14 +156,14 @@ def callback(request):
     return after_terms_agreement(request, **keyword_arguments)
 
 
-def after_terms_agreement(request, **kwargs):
+def after_terms_agreement(request, **kwargs):  # noqa: C901, PLR0912, PLR0915
     """
     this is the second part of the callback, after consent has been given, or is user already exists
     """
     badgr_app_pk, _login_type = json.loads(kwargs["state"])
     try:
         badgr_app_pk = int(badgr_app_pk)
-    except:
+    except:  # noqa: E722
         badgr_app_pk = settings.BADGR_APP_ID
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
@@ -174,7 +175,7 @@ def after_terms_agreement(request, **kwargs):
         return render_authentication_error(request, EduIDProvider.id, error)
     payload = jwt.get_unverified_claims(id_token)
 
-    logger.info(f"Using payload attribute {settings.EDUID_IDENTIFIER} for unique identifier")
+    logger.info(f"Using payload attribute {settings.EDUID_IDENTIFIER} for unique identifier")  # noqa: G004
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
     if not social_account:  # user does not exist
@@ -200,11 +201,11 @@ def after_terms_agreement(request, **kwargs):
 
     request.user.accept_general_terms()
 
-    logger.info(f"payload from surfconext {json.dumps(payload)}")
+    logger.info(f"payload from surfconext {json.dumps(payload)}")  # noqa: G004
 
     if "acr" in payload and payload["acr"] == "https://eduid.nl/trust/validate-names":
         request.user.validated_name = f"{payload['given_name']} {payload['family_name']}"
-        logger.info(f"Stored validated name {payload['given_name']} {payload['family_name']}")
+        logger.info(f"Stored validated name {payload['given_name']} {payload['family_name']}")  # noqa: G004
 
     access_token = kwargs.get("access_token")
     headers = {
@@ -212,7 +213,7 @@ def after_terms_agreement(request, **kwargs):
         "Authorization": f"Bearer {access_token}",
     }
     response = requests.get(f"{settings.EDUID_API_BASE_URL}/myconext/api/eduid/links", headers=headers, timeout=60)
-    if response.status_code != 200:
+    if response.status_code != HTTPStatus.OK:
         error = f"Server error: eduID eppn endpoint error ({response.status_code})"
         logger.debug(error)
         return render_authentication_error(request, EduIDProvider.id, error=error)
@@ -228,7 +229,7 @@ def after_terms_agreement(request, **kwargs):
                     }
                 ]
             )
-            logger.info(f"Stored affiliations {info['eppn']} {info['schac_home_organization']}")
+            logger.info(f"Stored affiliations {info['eppn']} {info['schac_home_organization']}")  # noqa: G004
     validated_names = [info["validated_name"] for info in eppn_json if "validated_name" in info]
     if request.user.validated_name and len(validated_names) == 0:
         ret = HttpResponseRedirect(ret.url + "&revalidate-name=true")
@@ -272,12 +273,12 @@ def after_terms_agreement(request, **kwargs):
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 
 
-def print_logout_message(sender, user, request, **kwargs):
-    print("user logged out")
+def print_logout_message(sender, user, request, **kwargs):  # noqa: ARG001
+    print("user logged out")  # noqa: T201
 
 
-def print_login_message(sender, user, request, **kwargs):
-    print("user logged in")
+def print_login_message(sender, user, request, **kwargs):  # noqa: ARG001
+    print("user logged in")  # noqa: T201
 
 
 if not getattr(settings, "DISABLE_AUTH_SIGNALS", False):

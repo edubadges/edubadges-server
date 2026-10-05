@@ -1,11 +1,11 @@
-from mainsite.settings import *
+from mainsite.settings import *  # noqa: F403
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "badgr",
         "OPTIONS": {
-            # "init_command": "SET storage_engine=InnoDB",  # Uncomment when using MySQL to ensure consistency across servers
+            # "init_command": "SET storage_engine=InnoDB",  # Uncomment when using MySQL to ensure consistency across servers  # noqa: E501
         },
     }
 }
@@ -23,7 +23,7 @@ CACHES = {
 # django test speedups
 PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 DEBUG = False
-logging.disable(logging.CRITICAL)
+logging.disable(logging.CRITICAL)  # noqa: F405
 
 # EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 

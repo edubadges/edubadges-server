@@ -165,7 +165,7 @@ The experimental space runs for a period of two years from 1 May 2025 to 30 Apri
 
 [3] Accreditation-worthy offerings is used as a working term to indicate that the offerings that comply to this quality framework meet the European ESG standards for quality assurance but still fall outside existing external quality assurance instruments.
 
-""",
+""",  # noqa: RUF001
 }
 
 micro_credentials_framework_mbo = {

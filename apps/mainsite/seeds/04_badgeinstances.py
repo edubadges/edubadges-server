@@ -1,4 +1,4 @@
-from badgeuser.models import BadgeUser
+from badgeuser.models import BadgeUser  # noqa: N999
 from django.conf import settings
 from issuer.models import BadgeClass, BadgeInstance
 from lti_edu.models import StudentsEnrolled
@@ -30,7 +30,7 @@ def create_badge_instance(user, badge_class, revoked, acceptance="Unaccepted"):
     )
 
 
-def create_enrollments_badge_instances(user, bc_names, revoked, acceptance="Unaccepted", include_badge_instances=True):
+def create_enrollments_badge_instances(user, bc_names, revoked, acceptance="Unaccepted", include_badge_instances=True):  # noqa: FBT002
     for bc_name in bc_names:
         for bc in BadgeClass.objects.filter(name=bc_name):
             StudentsEnrolled.objects.get_or_create(badge_class=bc, user=user)
@@ -43,24 +43,24 @@ demo_user = BadgeUser.objects.filter(email=DEMO_STUDENT_EMAIL).first()
 create_enrollments_badge_instances(
     demo_user,
     [BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY],
-    False,
+    False,  # noqa: FBT003
     acceptance="Accepted",
     include_badge_instances=True,
 )
 create_enrollments_badge_instances(
     demo_user,
     [BADGE_CLASS_GROUP_DYNAMICS, BADGE_CLASS_PSYCHOMETRICS],
-    False,
+    False,  # noqa: FBT003
     acceptance="Unaccepted",
     include_badge_instances=True,
 )
-create_badge_instance(demo_user, BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME), False, "Unaccepted")
+create_badge_instance(demo_user, BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME), False, "Unaccepted")  # noqa: FBT003
 
 enrolled_user = BadgeUser.objects.get(email=ENROLLED_STUDENT_EMAIL)
 create_enrollments_badge_instances(
     enrolled_user,
     [BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY, BADGE_CLASS_GROUP_DYNAMICS],
-    False,
+    False,  # noqa: FBT003
     include_badge_instances=False,
 )
 
@@ -68,7 +68,7 @@ revoked_user = BadgeUser.objects.get(email=REVOKED_STUDENT_EMAIL)
 create_enrollments_badge_instances(
     revoked_user,
     [BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_PSYCHOMETRICS, BADGE_CLASS_GROUP_DYNAMICS],
-    True,
+    True,  # noqa: FBT003
     acceptance="Rejected",
 )
 
@@ -76,6 +76,6 @@ awarded_user = BadgeUser.objects.get(email=AWARDED_STUDENT_EMAIL)
 create_enrollments_badge_instances(
     awarded_user,
     [BADGE_CLASS_COGNITIVE_PSYCHOLOGY, BADGE_CLASS_INTRODUCTION_TO_PSYCHOLOGY, BADGE_CLASS_GROUP_DYNAMICS],
-    False,
+    False,  # noqa: FBT003
     acceptance="Accepted",
 )

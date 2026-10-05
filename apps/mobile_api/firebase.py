@@ -22,5 +22,5 @@ def initialize_firebase():
             cred = credentials.Certificate(firebase_json)
             firebase_admin.initialize_app(cred)
             logger.info("Firebase initialized")
-    except Exception as e:
-        logger.error(f"Failed to initialize Firebase: {e}")
+    except Exception as e:  # noqa: BLE001
+        logger.error(f"Failed to initialize Firebase: {e}")  # noqa: G004, TRY400

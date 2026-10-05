@@ -341,7 +341,7 @@ class StudentsEnrolledDetailSerializer(StudentsEnrolledSerializer):
             value={
                 "entity_id": "EallxIUARlebkDxox3jYTw",
                 "name": "My certificates",
-                "description": "Stuff I’m proud of",
+                "description": "Stuff I’m proud of",  # noqa: RUF001
                 "public": False,
                 "badge_instances": [
                     "JtNF5yC1QriHtbN5Ufro5A",
@@ -568,7 +568,7 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     institution_type = serializers.CharField(source="issuer.faculty.institution.institution_type", read_only=True)
 
     # Necessary for backward compatibility with the mobile app
-    # TODO: remove later
+    # TODO: remove later  # noqa: FIX002, TD002, TD003
     self_requested_assertions_count = serializers.SerializerMethodField()
     direct_awarded_assertions_count = serializers.SerializerMethodField()
     user_has_accepted_terms = serializers.SerializerMethodField()
@@ -614,31 +614,31 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
         ]
 
     @staticmethod
-    def get_required_terms(obj):
+    def get_required_terms(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return None
 
     @staticmethod
-    def get_user_has_accepted_terms(obj):
+    def get_user_has_accepted_terms(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return False
 
     @staticmethod
-    def get_self_enrollment_enabled(obj):
+    def get_self_enrollment_enabled(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return False
 
     @staticmethod
-    def get_user_may_enroll(obj):
+    def get_user_may_enroll(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return False
 
     @staticmethod
-    def get_self_requested_assertions_count(obj):
+    def get_self_requested_assertions_count(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return 0
 
     @staticmethod
-    def get_direct_awarded_assertions_count(obj):
+    def get_direct_awarded_assertions_count(obj):  # noqa: ARG004
         # Necessary for backward compatibility with the mobile app
         return 0

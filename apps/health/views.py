@@ -12,7 +12,7 @@ OK = "OK"
 UNAVAILABLE = "UNAVAILABLE"
 
 
-def health(req):
+def health(req):  # noqa: ARG001
     """
     Allows a load balancer to verify that the badges service is up and OK.
 

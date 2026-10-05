@@ -53,7 +53,7 @@ class BadgeUserEmailView(APIView):
 class BadgeUserEmailDetail(BadgeUserEmailView):
     model = CachedEmailAddress
 
-    def get(self, request, id, **kwargs):
+    def get(self, request, id, **kwargs):  # noqa: A002
         email_address = self.get_email(pk=id)
         if email_address is None or email_address.user_id != self.request.user.id:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -61,7 +61,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         serializer = EmailSerializer(email_address, context={"request": request})
         return Response(serializer.data)
 
-    def delete(self, request, id, **kwargs):
+    def delete(self, request, id, **kwargs):  # noqa: A002
         email_address = self.get_email(pk=id)
         if email_address is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -77,7 +77,7 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         email_address.delete()
         return Response(status.HTTP_200_OK)
 
-    def put(self, request, id, **kwargs):
+    def put(self, request, id, **kwargs):  # noqa: A002
         email_address = self.get_email(pk=id)
         if email_address is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -90,11 +90,11 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
                 email_address.publish()
         elif request.data.get("resend"):
             send_confirmation = False
-            current_time = datetime.datetime.now()
+            current_time = datetime.datetime.now()  # noqa: DTZ005
             last_request_time = email_address.get_last_verification_sent_time()
 
             if last_request_time is None:
-                email_address.set_last_verification_sent_time(datetime.datetime.now())
+                email_address.set_last_verification_sent_time(datetime.datetime.now())  # noqa: DTZ005
                 send_confirmation = True
             else:
                 time_delta = current_time - last_request_time
@@ -103,15 +103,15 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
 
             if send_confirmation:
                 email_address.send_confirmation(request=request)
-                email_address.set_last_verification_sent_time(datetime.datetime.now())
+                email_address.set_last_verification_sent_time(datetime.datetime.now())  # noqa: DTZ005
             else:
-                remaining_time_obj = RATE_LIMIT_DELTA - (datetime.datetime.now() - last_request_time)
+                remaining_time_obj = RATE_LIMIT_DELTA - (datetime.datetime.now() - last_request_time)  # noqa: DTZ005
                 remaining_min = (remaining_time_obj.seconds // 60) % 60
                 remaining_sec = remaining_time_obj.seconds % 60
                 remaining_time_rep = f"{remaining_min} minutes and {remaining_sec} seconds"
 
                 return Response(
-                    "Will be able to re-send verification email in %s." % (str(remaining_time_rep)),
+                    "Will be able to re-send verification email in %s." % (str(remaining_time_rep)),  # noqa: UP031
                     status=status.HTTP_429_TOO_MANY_REQUESTS,
                 )
         else:

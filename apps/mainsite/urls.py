@@ -30,12 +30,14 @@ urlpatterns = [
     ),
     # Backup URLs in case the server isn't serving these directly
     re_path(
-        r"^favicon\.png[/]?$", RedirectView.as_view(url="%simages/favicon.png" % settings.STATIC_URL, permanent=True)
+        r"^favicon\.png[/]?$",
+        RedirectView.as_view(url="%simages/favicon.png" % settings.STATIC_URL, permanent=True),  # noqa: UP031
     ),
     re_path(
-        r"^favicon\.ico[/]?$", RedirectView.as_view(url="%simages/favicon.png" % settings.STATIC_URL, permanent=True)
+        r"^favicon\.ico[/]?$",
+        RedirectView.as_view(url="%simages/favicon.png" % settings.STATIC_URL, permanent=True),  # noqa: UP031
     ),
-    re_path(r"^robots\.txt$", RedirectView.as_view(url="%srobots.txt" % settings.STATIC_URL, permanent=True)),
+    re_path(r"^robots\.txt$", RedirectView.as_view(url="%srobots.txt" % settings.STATIC_URL, permanent=True)),  # noqa: UP031
     # legacy logo url redirect
     re_path(
         r"^static/images/header-logo-120.png$",
@@ -99,7 +101,7 @@ urlpatterns = [
 
 # Test URLs to allow you to see these pages while DEBUG is True
 if getattr(settings, "DEBUG_ERRORS", False):
-    urlpatterns = [
+    urlpatterns = [  # noqa: RUF005
         path("error/404/", error404, name="404"),
         path("error/500/", error500, name="500"),
     ] + urlpatterns
@@ -109,7 +111,7 @@ if getattr(settings, "DEBUG_MEDIA", True):
     from django.views.static import serve as static_serve
 
     media_url = getattr(settings, "HTTP_ORIGIN_MEDIA", "/media/").lstrip("/")
-    urlpatterns = [
+    urlpatterns = [  # noqa: RUF005
         re_path(r"^media/(?P<path>.*)$", static_serve, {"document_root": settings.MEDIA_ROOT}),
     ] + urlpatterns
 
@@ -120,9 +122,9 @@ if getattr(settings, "DEBUG_STATIC", True):
     static_url = getattr(settings, "STATIC_URL", "/static/")
     static_url = static_url.replace(getattr(settings, "HTTP_ORIGIN_MEDIA", "http://localhost:8000"), "")
     static_url = static_url.lstrip("/")
-    urlpatterns = [
+    urlpatterns = [  # noqa: RUF005
         re_path(
-            r"^%s(?P<path>.*)" % (static_url,),
+            r"^%s(?P<path>.*)" % (static_url,),  # noqa: UP031
             staticfiles_serve,
             kwargs={
                 "insecure": True,
@@ -132,7 +134,7 @@ if getattr(settings, "DEBUG_STATIC", True):
 
 # Serve pattern library view only in debug mode or if explicitly declared
 if getattr(settings, "DEBUG", True) or getattr(settings, "SERVE_PATTERN_LIBRARY", False):
-    urlpatterns = [
+    urlpatterns = [  # noqa: RUF005
         path(
             "component-library", TemplateView.as_view(template_name="component-library.html"), name="component-library"
         )
@@ -143,7 +145,7 @@ if settings.DEBUG and apps.is_installed("debug_toolbar"):
     try:
         import debug_toolbar
 
-        urlpatterns = urlpatterns + [
+        urlpatterns = urlpatterns + [  # noqa: RUF005
             path("__debug__/", include(debug_toolbar.urls)),
         ]
     except ImportError:

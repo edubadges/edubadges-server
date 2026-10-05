@@ -10,9 +10,9 @@ class BadgrRunner(DiscoverRunner):
     def setup_test_environment(self, **kwargs):
         super().setup_test_environment(**kwargs)
 
-        import logging
+        import logging  # noqa: PLC0415
 
-        import cssutils
+        import cssutils  # noqa: PLC0415
 
         # Silence cssutils completely
         cssutils.log.setLevel(logging.CRITICAL)

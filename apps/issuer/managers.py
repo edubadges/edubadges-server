@@ -2,6 +2,7 @@ import io
 import json
 import os
 import urllib.parse
+from http import HTTPStatus
 
 import dateutil.parser
 from django.core.files.base import ContentFile
@@ -15,7 +16,7 @@ def resolve_source_url_referencing_local_object(source_url):
     if source_url.startswith(OriginSetting.HTTP):
         try:
             match = resolve(urllib.parse.urlparse(source_url).path)
-            return match
+            return match  # noqa: TRY300
         except Resolver404:
             pass
 
@@ -46,7 +47,7 @@ class IssuerManager(BaseOpenBadgeObjectManager):
             image = _fetch_image_and_get_file(image_url, upload_to="remote/issuer")
         return self.get_or_create(
             source_url=source_url,
-            defaults=dict(
+            defaults=dict(  # noqa: C408
                 source=source if source is not None else "local",
                 name=issuer_obo.get("name"),
                 description=issuer_obo.get("description", None),
@@ -89,7 +90,7 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
 
         return self.get_or_create(
             source_url=source_url,
-            defaults=dict(
+            defaults=dict(  # noqa: C408
                 issuer=issuer,
                 source=source if source is not None else "local",
                 name=badgeclass_obo.get("name"),
@@ -103,7 +104,7 @@ class BadgeClassManager(BaseOpenBadgeObjectManager):
 
 def _fetch_image_and_get_file(url, upload_to=""):
     status_code, storage_name = fetch_remote_file_to_storage(url, upload_to=upload_to)
-    if status_code == 200:
+    if status_code == HTTPStatus.OK:
         image = DefaultStorage().open(storage_name)
         image.name = storage_name
         return image
@@ -132,7 +133,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
 
         badgeinstance, created = self.get_or_create(
             source_url=assertion_obo.get("id"),
-            defaults=dict(
+            defaults=dict(  # noqa: C408
                 recipient_identifier=recipient_identifier,
                 hashed=assertion_obo.get("recipient", {}).get("hashed", True),
                 source=source if source is not None else "local",
@@ -148,14 +149,14 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         if created:
             evidence = list_of(assertion_obo.get("evidence", None))
             if evidence:
-                from issuer.models import BadgeInstanceEvidence
+                from issuer.models import BadgeInstanceEvidence  # noqa: PLC0415
 
                 for evidence_item in evidence:
                     BadgeInstanceEvidence.objects.create_from_ob2(badgeinstance, evidence_item)
 
         return badgeinstance, created
 
-    def create(self, evidence=None, extensions=None, allow_uppercase=False, **kwargs):
+    def create(self, evidence=None, extensions=None, allow_uppercase=False, **kwargs):  # noqa: FBT002
         """
         Convenience method to award a badge to a recipient_id
         :param allow_uppercase: bool
@@ -176,7 +177,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
         with transaction.atomic():
             new_instance.save()
 
-            badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)
+            badgeclass_name, ext = os.path.splitext(new_instance.badgeclass.image.file.name)  # noqa: RUF059
             new_image = io.BytesIO()
             new_instance.image.save(
                 name=f"assertion-{new_instance.entity_id}{ext}",
@@ -186,7 +187,7 @@ class BadgeInstanceManager(BaseOpenBadgeObjectManager):
             new_instance.save()
 
             if evidence is not None:
-                from issuer.models import BadgeInstanceEvidence
+                from issuer.models import BadgeInstanceEvidence  # noqa: PLC0415
 
                 for evidence_obj in evidence:
                     BadgeInstanceEvidence.objects.create(

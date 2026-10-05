@@ -48,7 +48,7 @@ class BadgrSocialAccountConnect(APIView):
             origin=OriginSetting.HTTP, url=reverse("socialaccount_login"), provider=provider_name, code=authcode
         )
 
-        return Response(dict(url=redirect_url))
+        return Response(dict(url=redirect_url))  # noqa: C408
 
     def post(self, request, **kwargs):
         if request.user.is_authenticated:
@@ -67,7 +67,7 @@ class BadgrSocialAccountDetail(BaseEntityDetailView):
         try:
             return SocialAccount.objects.get(id=kwargs.get("id"))
         except SocialAccount.DoesNotExist:
-            raise Http404
+            raise Http404  # noqa: B904
 
     def get(self, request, **kwargs):
         return super().get(request, **kwargs)

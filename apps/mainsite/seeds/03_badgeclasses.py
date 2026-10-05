@@ -1,4 +1,4 @@
-import json
+import json  # noqa: N999
 
 from django.conf import settings
 from institution.models import Faculty, Institution
@@ -34,7 +34,7 @@ issuers = [
     ["Psychology", "Sociology", "Political Science", "Anthropology"],
 ]
 
-issuers = dict(zip(faculties, issuers))
+issuers = dict(zip(faculties, issuers))  # noqa: B905
 
 for fac in Faculty.objects.exclude(name_english=EDU_BADGES_FACULTY_NAME):
     [
@@ -97,7 +97,7 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 1. Lorem ipsum dolor sit amet
 2. Consectetur adipiscing elit
 3. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua
-"""
+"""  # noqa: E501
 
 
 def create_badge_class(name, issuer):
@@ -188,7 +188,7 @@ n_types = len(assessment_types)
 for bc in BadgeClass.objects.all()[::2]:
     bc.assessment_type = assessment_types[iterator % n_types]
     bc.save()
-    iterator += 1
+    iterator += 1  # noqa: SIM113
 
 iterator = 0
 

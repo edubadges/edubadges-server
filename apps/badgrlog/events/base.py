@@ -18,7 +18,7 @@ class BaseBadgrEvent:
                 "@context": self.get_context(),
                 "type": "Action",
                 "actionType": self.get_type(),
-                "timestamp": datetime.datetime.now().isoformat(),
+                "timestamp": datetime.datetime.now().isoformat(),  # noqa: DTZ005
             }
         )
         return data

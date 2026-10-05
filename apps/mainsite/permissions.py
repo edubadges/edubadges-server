@@ -18,7 +18,7 @@ class AuthenticatedWithVerifiedEmail(permissions.BasePermission):
 
 class CannotDeleteWithChildren(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.method == "DELETE":
+        if request.method == "DELETE":  # noqa: SIM102
             if obj.children:
                 return False
         return True

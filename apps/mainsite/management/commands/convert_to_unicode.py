@@ -44,9 +44,9 @@ class Command(BaseCommand):
                     CLOSE all_tables;
 
                 END
-            """)
+            """)  # noqa: E501
 
             cursor.execute("CALL convert_to_unicode('{}')".format(settings.DATABASES["default"]["NAME"]))
 
             for row in cursor.fetchall():
-                print(row)
+                print(row)  # noqa: T201

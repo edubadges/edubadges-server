@@ -1,4 +1,4 @@
-import random
+import random  # noqa: EXE002
 
 from django.db import models
 from django.utils import timezone
@@ -7,7 +7,7 @@ from issuer.models import BadgeClass
 
 
 def get_uuid():
-    return "".join(random.choice("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") for i in range(25))
+    return "".join(random.choice("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") for i in range(25))  # noqa: S311
 
 
 class StudentsEnrolled(BaseVersionedEntity, models.Model):

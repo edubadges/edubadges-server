@@ -16,7 +16,7 @@ class Command(BaseCommand):
         for log_file in log_files:
             filename = os.path.join(settings.LOGS_DIR, log_file)
             timestamp = os.path.getmtime(filename)
-            date_created = datetime.fromtimestamp(timestamp)
-            timedelta_difference = datetime.today() - date_created
+            date_created = datetime.fromtimestamp(timestamp)  # noqa: DTZ006
+            timedelta_difference = datetime.today() - date_created  # noqa: DTZ002
             if timedelta_difference.days >= settings.LOG_STORAGE_DURATION:
                 os.remove(filename)

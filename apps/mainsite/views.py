@@ -24,7 +24,7 @@ from mainsite.models import EmailBlacklist
 
 
 @xframe_options_exempt
-def error404(request, exception):
+def error404(request, exception):  # noqa: ARG001
     try:
         template = loader.get_template("error/404.html")
     except TemplateDoesNotExist:
@@ -39,7 +39,7 @@ def error404(request, exception):
 
 
 @xframe_options_exempt
-def error500(request):
+def error500(request):  # noqa: ARG001
     try:
         template = loader.get_template("error/500.html")
     except TemplateDoesNotExist:
@@ -53,7 +53,7 @@ def error500(request):
     )
 
 
-def email_unsubscribe(request, *args, **kwargs):
+def email_unsubscribe(request, *args, **kwargs):  # noqa: ARG001
     if time.time() > int(kwargs["expiration"]):
         return HttpResponse("Your unsubscription link has expired.")
 
@@ -66,7 +66,7 @@ def email_unsubscribe(request, *args, **kwargs):
         return HttpResponse("Invalid unsubscribe link.")
 
     blacklist_instance = EmailBlacklist(email=email)
-    try:
+    try:  # noqa: SIM105
         blacklist_instance.save()
     except IntegrityError:
         pass
@@ -121,7 +121,7 @@ def serve_protected_document(request, path, document_root):
         assertion = BadgeInstance.objects.get(image=path)
         if assertion.public:
             return serve(request, path, document_root)
-        if request.user.is_authenticated:
+        if request.user.is_authenticated:  # noqa: SIM102
             if request.user is assertion.user or request.user.get_permissions(assertion)["may_read"]:
                 return serve(request, path, document_root)
         return HttpResponseForbidden()

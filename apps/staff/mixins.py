@@ -5,8 +5,9 @@ from staff.models import PermissionedRelationshipBase
 
 class PermissionedModelMixin:
     """
-    Abstract class used for inheritance by all the Models (Badgeclass, Issuer, Faculty & Institution) that have a related
-    Staff model. Used for retrieving permissions and staff members. And instant caching when changes happen.
+    Abstract class used for inheritance by all the Models (Badgeclass, Issuer, Faculty & Institution) that
+    have a related Staff model. Used for retrieving permissions and staff members. And instant caching when
+    changes happen.
     """
 
     def _get_local_permissions(self, user):
@@ -35,7 +36,7 @@ class PermissionedModelMixin:
             return perm_count == len(required_permissions)
         return False
 
-    def get_all_staff_memberships_in_current_branch(self, user, check_parents=True, check_children=True):
+    def get_all_staff_memberships_in_current_branch(self, user, check_parents=True, check_children=True):  # noqa: FBT002
         """
         returns all staff memberships beloning to this user in the branch that this entity is part of
         :param user: BadgeUser
@@ -51,7 +52,7 @@ class PermissionedModelMixin:
             all_staff_memberships_in_my_branch += entity.cached_staff()
         return [staff for staff in all_staff_memberships_in_my_branch if staff.user == user]
 
-    def get_all_entities_in_branch(self, check_parents=True, check_children=True):
+    def get_all_entities_in_branch(self, check_parents=True, check_children=True):  # noqa: FBT002
         """
         Recursively walks the tree up and down to get all the entities of the current branch (where self is a node).
         returns self, all the parents and all the children
@@ -83,7 +84,7 @@ class PermissionedModelMixin:
             combined_perms = {}
             for key in local_perms:
                 combined_perms[key] = max(parent_perms[key], local_perms[key])
-            return combined_perms
+            return combined_perms  # noqa: TRY300
         except AttributeError:  # recursive base case (reached root of permission tree, i.e. the Institution)
             perms = self._get_local_permissions(user)
             if (
@@ -125,7 +126,7 @@ class PermissionedModelMixin:
                 has_perms = []
                 for perm in permissions:
                     if staff.permissions[perm]:
-                        has_perms.append(perm)
+                        has_perms.append(perm)  # noqa: PERF401
                 if len(has_perms) == len(permissions):
                     result.append(staff)
             return result
@@ -148,7 +149,7 @@ class PermissionedModelMixin:
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        try:
+        try:  # noqa: SIM105
             self.parent.publish()
         except AttributeError:
             pass
@@ -159,7 +160,8 @@ class PermissionedModelMixin:
         Recursive delete function that
             - deletes all children
             - only publishes the parent of the initially deleted entity
-            - removes all associated staff memberships without publishing the associated object (the one that is deleted)
+            - removes all associated staff memberships without publishing the associated object (the one that
+              is deleted)
         """
         publish_parent = kwargs.pop("publish_parent", True)
         if self.assertions:
@@ -176,7 +178,7 @@ class PermissionedModelMixin:
             membership.delete(publish_object=False)
         ret = super().delete(*args, **kwargs)
         if publish_parent:
-            try:
+            try:  # noqa: SIM105
                 self.parent.publish()
             except AttributeError:  # no parent
                 pass
@@ -192,7 +194,7 @@ class PermissionedModelMixin:
         if institution.default_language == institution.DEFAULT_LANGUAGE_ENGLISH:
             if attribute_english:
                 return attribute_english
-        elif institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:
+        elif institution.default_language == institution.DEFAULT_LANGUAGE_DUTCH:  # noqa: SIM102
             if attribute_dutch:
                 return attribute_dutch
         return attribute_english or attribute_dutch

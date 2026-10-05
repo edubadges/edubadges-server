@@ -10,14 +10,14 @@ with open(os.path.join(os.path.dirname(__file__), "README.md")) as readme:
     README = readme.read()
 
 # execute version.py in the local namespace, but dont import the module.
-exec(
+exec(  # noqa: S102
     compile(
-        open(os.path.join(os.path.dirname(__file__), "apps/mainsite/version.py"), "rb").read(),
+        open(os.path.join(os.path.dirname(__file__), "apps/mainsite/version.py"), "rb").read(),  # noqa: SIM115
         os.path.join(os.path.dirname(__file__), "apps/mainsite/version.py"),
         "exec",
     )
 )
-version = ".".join(map(str, VERSION))
+version = ".".join(map(str, VERSION))  # noqa: F821
 
 
 def _clean_version_tag(tag):
@@ -32,8 +32,8 @@ def dependencies_from_requirements(requirements_filename):
     dependency_links = []
     with open(requirements_filename) as fh:
         for line in fh.read().split("\n"):
-            line = line.strip()
-            if len(line) < 1 or line.startswith("#") or line.startswith("--"):
+            line = line.strip()  # noqa: PLW2901
+            if len(line) < 1 or line.startswith("#") or line.startswith("--"):  # noqa: PIE810
                 continue
             matches = re.match(r"git\+(?P<path>.+/)(?P<package_name>.+)\.git@(?P<version>.+)$", line)
             if matches:

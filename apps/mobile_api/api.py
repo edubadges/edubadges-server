@@ -229,7 +229,7 @@ class AcceptGeneralTerms(APIView):
         user = request.user
         user.accept_general_terms()
         user.save()
-        logger.info(f"Accepted general terms for user {user.email}")
+        logger.info(f"Accepted general terms for user {user.email}")  # noqa: G004
         return Response(data={"status": "ok"})
 
 

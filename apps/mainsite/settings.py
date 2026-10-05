@@ -211,8 +211,8 @@ EDUID_IDENTIFIER = os.environ.get("EDUID_IDENTIFIER", "eduid")
 EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS = str(
     os.environ.get("EXPIRY_DIRECT_AWARDS_REMINDER_THRESHOLD_DAYS", "42, 62")
 )
-EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get("EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS", 82))
-DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get("DIRECT_AWARDS_DELETION_THRESHOLD_DAYS", 30))
+EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get("EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS", 82))  # noqa: PLW1508
+DIRECT_AWARDS_DELETION_THRESHOLD_DAYS = int(os.environ.get("DIRECT_AWARDS_DELETION_THRESHOLD_DAYS", 30))  # noqa: PLW1508
 
 EC_ISSUER_URL = os.environ.get("EC_ISSUER_URL", "")
 
@@ -321,7 +321,7 @@ SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
 LOKI_URL = os.environ.get("LOKI_API_URL", "https://localhost")
 
 # Only ACC and PROD are connected to our central logging and monitoring server
-if DOMAIN.startswith("acc") or DOMAIN.startswith("www"):
+if DOMAIN.startswith("acc") or DOMAIN.startswith("www"):  # noqa: PIE810
     handlers = handlers | {
         "badgr_debug_loki": {
             "level": "DEBUG",
@@ -470,8 +470,8 @@ USE_I18N = True
 USE_L10N = False
 USE_TZ = True
 
-SITE_ID = int(os.environ.get("SITE_ID", 1))
-BADGR_APP_ID = int(os.environ.get("BADGR_APP_ID", 1))
+SITE_ID = int(os.environ.get("SITE_ID", 1))  # noqa: PLW1508
+BADGR_APP_ID = int(os.environ.get("BADGR_APP_ID", 1))  # noqa: PLW1508
 
 TIME_ZONE = "Europe/Amsterdam"
 LANGUAGE_CODE = "en-us"
@@ -522,7 +522,7 @@ OAUTH2_PROVIDER = {
     "ACCESS_TOKEN_EXPIRE_SECONDS": 28800,  # 28800 seconds = 8 hours
 }
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
-OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"  # noqa: S105
 
 OAUTH2_TOKEN_SESSION_TIMEOUT_SECONDS = OAUTH2_PROVIDER["ACCESS_TOKEN_EXPIRE_SECONDS"]
 
@@ -577,7 +577,7 @@ DATABASES = {
         "USER": os.environ["BADGR_DB_USER"],
         "PASSWORD": os.environ["BADGR_DB_PASSWORD"],
         "HOST": os.environ.get("BADGR_DB_HOST", "localhost"),
-        "PORT": os.environ.get("BADGR_DB_PORT", 3306),
+        "PORT": os.environ.get("BADGR_DB_PORT", 3306),  # noqa: PLW1508
         "TEST": {
             "CHARSET": "utf8",
         },
@@ -589,7 +589,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 EMAIL_USE_TLS = legacy_boolean_parsing("EMAIL_USE_TLS", "1")
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = os.environ["EMAIL_HOST"]
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 25))
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 25))  # noqa: PLW1508
 DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]
 
 # Seeds
@@ -620,7 +620,7 @@ LOCAL_DEVELOPMENT_MODE = legacy_boolean_parsing("LOCAL_DEVELOPMENT_MODE", "0")
 SUPERUSER_LOGIN_WITH_SURFCONEXT = legacy_boolean_parsing("SUPERUSER_LOGIN_WITH_SURFCONEXT", "0")
 
 VALIDATOR_URL = os.environ.get("VALIDATOR_URL", "http://localhost:5000")
-VALIDATOR_ENABLED = os.environ.get("VALIDATOR_ENABLED", False)
+VALIDATOR_ENABLED = os.environ.get("VALIDATOR_ENABLED", False)  # noqa: PLW1508
 EXTENSIONS_ROOT_URL = os.environ.get("EXTENSIONS_ROOT_URL", "http://127.0.0.1:8000/static")
 
 MAX_IMAGE_UPLOAD_SIZE = 256000  # 256Kb
@@ -632,7 +632,7 @@ REPORT_RECEIVER_EMAIL = os.environ.get("REPORT_RECEIVER_EMAIL", "")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "eduBadges API",
-    "DESCRIPTION": "Edubadges are digital certificates which show that the owner has acquired certain skills or knowledge",
+    "DESCRIPTION": "Edubadges are digital certificates which show that the owner has acquired certain skills or knowledge",  # noqa: E501
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead

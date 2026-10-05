@@ -22,7 +22,7 @@ class BaseStaffSerializer(serializers.Serializer):
 class StaffUpdateSerializer(BaseStaffSerializer):
     def update(self, instance, validated_data):
         original_perms = instance.permissions
-        for permission in original_perms.keys():
+        for permission in original_perms.keys():  # noqa: SIM118
             new_value = bool(int(validated_data[permission]))
             original_value = original_perms[permission]
             if original_value != new_value:  # this permission is changed
@@ -34,7 +34,7 @@ class StaffUpdateSerializer(BaseStaffSerializer):
             )
         )
         html_message = EmailMessageMaker.create_staff_rights_changed_email(instance)
-        subject = f"You role has changed for you staff membership for the {instance.object.__class__.__name__.lower()} {instance.object.name}"
+        subject = f"You role has changed for you staff membership for the {instance.object.__class__.__name__.lower()} {instance.object.name}"  # noqa: E501
         instance.user.email_user(subject=subject, html_message=html_message)
         return instance
 

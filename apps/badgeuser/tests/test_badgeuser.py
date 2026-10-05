@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 from badgeuser.models import UserProvisionment
 from django.contrib.contenttypes.models import ContentType
@@ -92,7 +93,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
             "data": {"may_sign": True},
             "type": UserProvisionment.TYPE_INVITATION,
         }
-        response = self.client.post(
+        response = self.client.post(  # noqa: F841
             "/user/provision/create", json.dumps([invitation_json]), content_type="application/json"
         )
         query = "query foo {currentUser {entityId userprovisionments {entityId}}}"
@@ -124,7 +125,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
             "data": {"may_sign": True},
             "type": UserProvisionment.TYPE_INVITATION,
         }
-        response = self.client.post(
+        response = self.client.post(  # noqa: F841
             "/user/provision/create", json.dumps([invitation_json]), content_type="application/json"
         )
         query = "query foo {currentUser {entityId userprovisionments {entityId}}}"
@@ -185,7 +186,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
             "data": {"may_sign": True},
             "type": UserProvisionment.TYPE_INVITATION,
         }
-        response = self.client.post(
+        response = self.client.post(  # noqa: F841
             "/user/provision/create", json.dumps([invitation_json]), content_type="application/json"
         )
         query = "query foo {currentUser {entityId userprovisionments {entityId}}}"
@@ -252,7 +253,7 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         email = "eenof@anderemail6.adres"
         self.setup_staff_membership(teacher1, institution, may_read=True, may_administrate_users=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
-        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
+        issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)  # noqa: F841
         invitation_json = {
             "content_type": ContentType.objects.get_for_model(institution).pk,
             "object_id": institution.entity_id,
@@ -306,9 +307,9 @@ class BadgeuserProvisionmentTest(BadgrTestCase):
         )
         try:
             failing_provisionment.match_user(new_non_colleague)
-            self.assertTrue(False)
+            self.assertTrue(False)  # noqa: FBT003
         except BadgrValidationError:
-            self.assertTrue(True)
+            self.assertTrue(True)  # noqa: FBT003
         # test sending invite for own institution, but accepted by someone outside
         teacher2 = self.setup_teacher()
         other_insitution = teacher2.institution
@@ -509,11 +510,11 @@ class BadgeuserTermsTest(BadgrTestCase):
 
     def test_public_terms_view(self):
         response = terms_accept_response = self.client.get("/user/terms/teacher")
-        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.status_code == HTTPStatus.OK)
         response = terms_accept_response = self.client.get("/user/terms/student")
-        self.assertTrue(response.status_code == 200)
-        response = terms_accept_response = self.client.get("/user/terms/makes_no_sense")
-        self.assertTrue(response.status_code == 404)
+        self.assertTrue(response.status_code == HTTPStatus.OK)
+        response = terms_accept_response = self.client.get("/user/terms/makes_no_sense")  # noqa: F841
+        self.assertTrue(response.status_code == HTTPStatus.NOT_FOUND)
 
 
 class BadgeuserGraphqlTest(BadgrTestCase):

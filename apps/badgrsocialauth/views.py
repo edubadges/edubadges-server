@@ -54,7 +54,7 @@ class BadgrSocialLogin(RedirectView):
         try:
             redirect_url = reverse("{}_login".format(self.request.GET.get("provider")))
         except NoReverseMatch:
-            raise ValidationError(f"No {provider_name} provider found")
+            raise ValidationError(f"No {provider_name} provider found")  # noqa: B904
         authcode = self.request.GET.get("authCode", None)
         if authcode is not None:
             set_session_authcode(self.request, authcode)
@@ -108,7 +108,7 @@ class ImpersonateUser(APIView):
         user = BadgeUser.objects.get(pk=kwargs["id"])
         social_account = user.get_social_account()
         get_adapter(self.request).logout(self.request)
-        sociallogin = SocialLogin(account=social_account, email_addresses=[email for email in user.email_items])
+        sociallogin = SocialLogin(account=social_account, email_addresses=[email for email in user.email_items])  # noqa: C416
         sociallogin.user = user
         badgr_app = BadgrApp.objects.filter(pk=user.badgrapp_id).first()
         if not badgr_app:

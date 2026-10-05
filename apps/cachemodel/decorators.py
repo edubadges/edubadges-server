@@ -5,7 +5,7 @@ from cachemodel.utils import generate_cache_key
 from django.core.cache import cache
 
 
-def cached_method(auto_publish=False):
+def cached_method(auto_publish=False):  # noqa: FBT002
     """A decorator for CacheModel methods."""
 
     def decorator(target):
@@ -52,7 +52,7 @@ def denormalized_field(field_name):
 
     if callable(field_name):
         # we were used without an argument
-        raise ArgumentErrror("You must pass a field name to @denormalized_field")
+        raise ArgumentErrror("You must pass a field name to @denormalized_field")  # noqa: F821
 
     return decorator
 

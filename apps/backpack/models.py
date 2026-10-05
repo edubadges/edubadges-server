@@ -30,7 +30,7 @@ class BackpackBadgeShare(BaseSharedModel):
         return SharingManager.share_url(provider, self.badgeinstance, **kwargs)
 
 
-class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):
+class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):  # noqa: DJ008
     user = models.ForeignKey("badgeuser.BadgeUser", blank=False, null=False, on_delete=models.CASCADE)
     import_url = models.URLField(max_length=512, null=False, blank=False)
     verified = models.BooleanField(default=False)
@@ -38,9 +38,9 @@ class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):
     email = models.EmailField(blank=True, null=True)
 
     def validate(self, profile_type, recipient_identifier):
-        assertion_json = requests.get(self.import_url).json()
+        assertion_json = requests.get(self.import_url).json()  # noqa: S113
         data = {"profile": {profile_type: recipient_identifier}, "data": assertion_json}
-        response = requests.post(
+        response = requests.post(  # noqa: S113
             json=data, url=urljoin(settings.VALIDATOR_URL, "results"), headers={"Accept": "application/json"}
         )
         return response.json()
@@ -52,6 +52,6 @@ class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):
             )
         return super().validate_unique(exclude=exclude)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # noqa: DJ012
         self.validate_unique()
         return super().save(*args, **kwargs)

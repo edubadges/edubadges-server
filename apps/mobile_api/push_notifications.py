@@ -14,7 +14,7 @@ def send_push_notification(user, title, body, data, badge_count):
         return None
     devices = FCMDevice.objects.filter(user=user, active=True)
     if not devices:
-        logger.info(f"No FCM devices found for user {user.id} ({user.entity_id})")
+        logger.info(f"No FCM devices found for user {user.id} ({user.entity_id})")  # noqa: G004
         return None
 
     # Make sure only str data is added to the Message
@@ -40,23 +40,23 @@ def send_push_notification(user, title, body, data, badge_count):
         ),
     )
 
-    logger.info(f"Sending push to {devices.count()} devices for user {user.id} ({user.entity_id})")
+    logger.info(f"Sending push to {devices.count()} devices for user {user.id} ({user.entity_id})")  # noqa: G004
     try:
         firebase_response = devices.send_message(message=message)
     except DefaultCredentialsError as e:
-        logger.error(f"Cannot send FCM push: credentials file missing or unreadable. {e}")
+        logger.error(f"Cannot send FCM push: credentials file missing or unreadable. {e}")  # noqa: G004, TRY400
         return None
-    except Exception as e:
-        logger.error(f"Failed to send push: {e}")
+    except Exception as e:  # noqa: BLE001
+        logger.error(f"Failed to send push: {e}")  # noqa: G004, TRY400
         return None
     else:
         batch_response = firebase_response.response
         if batch_response.failure_count > 0:
             logger.warning(
-                f"{batch_response.failure_count} push notifications failed. "
+                f"{batch_response.failure_count} push notifications failed. "  # noqa: G004
                 f"Deactivated devices: {firebase_response.deactivated_registration_ids}"
             )
         else:
-            logger.info(f"All {batch_response.success_count} push notifications sent successfully")
+            logger.info(f"All {batch_response.success_count} push notifications sent successfully")  # noqa: G004
 
         return firebase_response

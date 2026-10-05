@@ -38,9 +38,9 @@ class StudentEnrollmentList(BaseEntityListView):
         try:
             enrollment = StudentsEnrolled.objects.get(entity_id=request.data["enrollmentID"])
         except ValueError:
-            raise BadgrApiException400("Invalid enrollment id", 204)
+            raise BadgrApiException400("Invalid enrollment id", 204)  # noqa: B904
         except StudentsEnrolled.DoesNotExist:
-            raise BadgrApiException400("Enrollment not found", 205)
+            raise BadgrApiException400("Enrollment not found", 205)  # noqa: B904
         else:
             if enrollment.date_awarded:
                 raise BadgrApiException400("Awarded enrollments cannot be withdrawn", 206)

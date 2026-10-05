@@ -19,22 +19,22 @@ class Command(BaseCommand):
             run_seed = BadgrApp.objects.count() == 0
 
         if run_seed:
-            print("Running setup seeds... ", end="")
+            print("Running setup seeds... ", end="")  # noqa: T201
             try:
                 __import__("mainsite.seeds.01_setup")
-                print("\033[92mdone!\033[0m")
-            except Exception as e:
+                print("\033[92mdone!\033[0m")  # noqa: T201
+            except Exception as e:  # noqa: BLE001
                 sys.stderr.write("\033[91mFAILED!\033[0m")
                 sys.stderr.write(traceback.format_exc())
                 sys.stderr.write(f"{e!s}\n")
                 sys.exit(1)
         else:
-            print("Skipping setup seeds... ", end="")
+            print("Skipping setup seeds... ", end="")  # noqa: T201
 
 
 def clear_data():
     with connection.cursor() as cursor:
-        print("Wiping data... ", end="")
+        print("Wiping data... ", end="")  # noqa: T201
 
         seed_filled_tables = (
             "badgeuser_termsversion",
@@ -53,4 +53,4 @@ def clear_data():
         finally:
             cursor.execute("SET FOREIGN_KEY_CHECKS=1")
 
-        print("\033[92mdone!\033[0m")
+        print("\033[92mdone!\033[0m")  # noqa: T201

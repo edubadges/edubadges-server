@@ -30,7 +30,7 @@ permissions_query = """
 def dict_fetch_all(cursor):
     desc = cursor.description
     rows = cursor.fetchall()
-    res = [dict(zip([col[0] for col in desc], row)) for row in rows]
+    res = [dict(zip([col[0] for col in desc], row)) for row in rows]  # noqa: B905
     return res
 
 
@@ -121,7 +121,7 @@ inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
 where ins.id = %(ins_id)s and da.status in %(status)s and {permissions_query} ;
-""",
+""",  # noqa: S608, W291
                 {"ins_id": request.user.institution.id, "u_id": request.user.id, "status": status_param},
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -251,7 +251,7 @@ inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
 where ins.id = %(ins_id)s ;
-            """,
+            """,  # noqa: W291
                 {"ins_id": request.user.institution.id, "u_id": request.user.id},
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -325,7 +325,7 @@ class CurrentInstitution(APIView):
     left join staff_institutionstaff sta_ins on sta_ins.institution_id = ins.id
     left join users u on u.id =  sta_ins.user_id           
     where ins.id = %(ins_id)s order by ins.id
-                """,
+                """,  # noqa: W291
                 {"ins_id": request.user.institution.id if request.user.institution else None},
             )
             records = dict_fetch_all(cursor)
@@ -346,7 +346,7 @@ class CurrentInstitution(APIView):
                 left join users u on u.id = sta_ins.user_id
                 left join staff_facultystaff facst on facst.user_id = u.id
             where u.id = %(user_id)s 
-                        """,
+                        """,  # noqa: W291
                     {"user_id": request.user.id, "insitution_id": request.user.institution.id},
                 )
             institution_permissions = dict_fetch_all(cursor)
@@ -462,7 +462,7 @@ inner join issuer_issuer i on i.id = bc.issuer_id
 inner join institution_faculty f on f.id = i.faculty_id
 inner join institution_institution ins on ins.id = f.institution_id
 where  bc.is_private = 0 and f.archived = 0 and i.archived = 0 and (f.visibility_type <> 'TEST' OR f.visibility_type IS NULL);
-            """,
+            """,  # noqa: W291
                 {},
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -541,7 +541,7 @@ where ins.id = %(ins_id)s and
     or
     (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
 )
-""",
+""",  # noqa: W291
                 {"ins_id": request.user.institution.id, "u_id": request.user.id},
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -632,7 +632,7 @@ where ins.id = %(ins_id)s and
     or
     (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
 )
-""",
+""",  # noqa: W291
                 {"ins_id": request.user.institution.id, "u_id": request.user.id},
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -713,7 +713,7 @@ where ins.id = %(ins_id)s and
     or
     (exists (select 1 from users us where us.id = %(u_id)s and us.is_superuser = 1))
 )
-""",
+""",  # noqa: W291
                 {"ins_id": request.user.institution.id, "u_id": request.user.id},
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -749,7 +749,7 @@ def parse_unit(row, source_prefix, unit_prefix, use_prefix):
     }
 
 
-def permissions(row, use_prefix=True):
+def permissions(row, use_prefix=True):  # noqa: FBT002
     all_permissions = []
     for category in user_categories:
         prefix = category["prefix"]
@@ -773,7 +773,7 @@ def permissions(row, use_prefix=True):
                         if prefix != "i":
                             permission_["badge_class"] = parse_unit(row, prefix, "bc", use_prefix)
             else:
-                permission_[permission_type] = parse_unit(row, None, prefix, False)
+                permission_[permission_type] = parse_unit(row, None, prefix, False)  # noqa: FBT003
             all_permissions.append(permission_)
     return all_permissions
 
@@ -944,7 +944,7 @@ SELECT u.id, u.email, u.first_name, u.last_name, u.entity_id,
             INNER JOIN issuer_issuer iss_iss ON iss_iss.id = ib.issuer_id 
             INNER JOIN institution_faculty fac ON iss_iss.faculty_id = fac.id
             INNER JOIN institution_institution ins ON fac.institution_id = ins.id
-    ) bc ON (u.id = bc.user_id) where u.institution_id = IFNULL(%(ins_id)s, u.institution_id)"""
+    ) bc ON (u.id = bc.user_id) where u.institution_id = IFNULL(%(ins_id)s, u.institution_id)"""  # noqa: W291
             cursor.execute(query_, {"ins_id": request.user.institution.id if filter_by_institution else None})
             users = dict_fetch_all(cursor)
 
@@ -1120,12 +1120,12 @@ LEFT JOIN staff_facultystaff st_fa ON st_fa.faculty_id = f.id AND st_fa.user_id 
 LEFT JOIN staff_issuerstaff st_is ON st_is.issuer_id = i.id and st_is.user_id = %(u_id)s
 LEFT JOIN staff_badgeclassstaff st_bc ON st_bc.badgeclass_id = bc.id AND st_bc.user_id = %(u_id)s
 where ins.id = %(ins_id)s and bc.archived = 0 and {permissions_query} 
-"""
+"""  # noqa: S608, W291
             cursor.execute(query_, {"u_id": request.user.id, "ins_id": request.user.institution.id})
             notifications = dict_fetch_all(cursor)
 
             for r in notifications:
-                user_permissions = permissions(r, False)
+                user_permissions = permissions(r, False)  # noqa: FBT003
                 if user_permissions:
                     r["permissions"] = user_permissions
                     remove_duplicate_permissions(r)
@@ -1193,7 +1193,7 @@ class EndorsementBadgeClasses(APIView):
             inner join institution_faculty f on f.id = i.faculty_id
             inner join institution_institution ins on ins.id = f.institution_id
             where ins.id = %(ins_id)s and bc.archived = 0 and {permissions_query} 
-"""
+"""  # noqa: S608, W291
             cursor.execute(query_, {"u_id": request.user.id, "ins_id": request.user.institution.id})
             badge_classes = dict_fetch_all(cursor)
 

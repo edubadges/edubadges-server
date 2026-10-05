@@ -27,7 +27,7 @@ class StaffListViewBase(VersionedObjectMixin, BaseEntityListView):
         """
         create a new staff membership
         """
-        object = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check on the model instance
+        self.get_object(request, **kwargs)  # trigger a has_object_permissions() check on the model instance
         return super().post(request, **kwargs)
 
 
@@ -43,7 +43,7 @@ class StaffDetailViewBase(BaseEntityDetailView):
     serializer_class = StaffUpdateSerializer
 
     def put(self, request, **kwargs):
-        object = self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
+        self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
         return super().put(request, **kwargs)
 
     def delete(self, request, **kwargs):

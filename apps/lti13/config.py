@@ -14,7 +14,7 @@ class DjangoDbToolConf(ToolConfAbstract):
     _keys_cls = None
 
     def __init__(self):
-        from .models import LtiTool, LtiToolKey
+        from .models import LtiTool, LtiToolKey  # noqa: PLC0415
 
         super().__init__()
         self._lti_tools = {}
@@ -29,13 +29,13 @@ class DjangoDbToolConf(ToolConfAbstract):
         if client_id is None:
             lti_tool = self._tools_cls.objects.filter(issuer=iss, is_active=True).order_by("use_by_default").first()
         else:
-            try:
+            try:  # noqa: SIM105
                 lti_tool = self._tools_cls.objects.get(issuer=iss, client_id=client_id, is_active=True)
             except self._tools_cls.DoesNotExist:
                 pass
 
         if lti_tool is None:
-            raise LtiException("iss %s [client_id=%s] not found in settings" % (iss, client_id))
+            raise LtiException("iss %s [client_id=%s] not found in settings" % (iss, client_id))  # noqa: UP031
 
         if client_id is None:
             self._lti_tools[iss] = lti_tool

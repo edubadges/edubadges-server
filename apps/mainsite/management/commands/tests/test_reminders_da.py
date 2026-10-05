@@ -17,7 +17,7 @@ class TestDirectAwardsReminderHandler(BadgrTestCase):
         self.handler.stdout.write = Mock()
 
         # Mock the actual handle method
-        from apps.mainsite.management.commands.reminders_direct_awards import Command
+        from apps.mainsite.management.commands.reminders_direct_awards import Command  # noqa: PLC0415
 
         self.command_instance = Command()
         captured_output = StringIO()
@@ -52,17 +52,17 @@ class TestDirectAwardsReminderHandler(BadgrTestCase):
         issuer = self.setup_issuer(teacher1)
         badgeclass = self.setup_badgeclass(issuer)
 
-        da1 = self.setup_direct_award(
+        da1 = self.setup_direct_award(  # noqa: F841
             badgeclass=badgeclass, created_by=teacher1, eppn="some_eppn", expiration_date=now + timedelta(days=40)
         )
-        da2 = self.setup_direct_award(
+        da2 = self.setup_direct_award(  # noqa: F841
             badgeclass=badgeclass,
             created_by=teacher1,
             eppn="some_eppn_2",
             expiration_date=now + timedelta(days=12),
             reminders=1,
         )
-        da3 = self.setup_direct_award(
+        da3 = self.setup_direct_award(  # noqa: F841
             badgeclass=badgeclass,
             created_by=teacher1,
             eppn="some_eppn_3",

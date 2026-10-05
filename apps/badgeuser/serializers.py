@@ -79,7 +79,7 @@ class EmailSerializer(BadgrBaseModelSerializer):
 
         if validated_data.get("variants"):
             for variant in validated_data.get("variants"):
-                try:
+                try:  # noqa: SIM105
                     email.add_variant(variant)
                 except serializers.ValidationError:
                     pass

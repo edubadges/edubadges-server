@@ -381,7 +381,7 @@ class DirectAwardAccept(BaseEntityDetailView):
                     badgeclass_id=direct_award.badgeclass_id,
                     summary="Cannot award as eppn does not match or not member of institution",
                 )
-                raise err
+                raise err  # noqa: TRY201
             direct_award_remove_cache(direct_award)
             direct_award.delete()
             audit_trail_signal.send(
@@ -498,7 +498,7 @@ class DirectAwardDelete(BaseEntityDetailView):
             try:
                 direct_award_db = DirectAward.objects.get(entity_id=direct_award["entity_id"])
                 if not direct_award_db.get_permissions(request.user)["may_award"]:
-                    raise BadgrValidationError("No permissions", 100)
+                    raise BadgrValidationError("No permissions", 100)  # noqa: TRY301
                 if direct_award_db.status == DirectAward.STATUS_DELETED:
                     un_successful_direct_awards.append(
                         {
@@ -530,7 +530,7 @@ class DirectAwardDelete(BaseEntityDetailView):
                         badgeclass_id=direct_award_db.badgeclass_id,
                         summary=f"Awarded eduBadge has been deleted with reason {revocation_reason}",
                     )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 audit_trail_signal.send(
                     sender=request.user.__class__,
                     request=request,

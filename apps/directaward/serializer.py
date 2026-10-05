@@ -68,7 +68,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
 
     notify_recipients = serializers.BooleanField(write_only=True)
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # noqa: C901, PLR0912, PLR0915
         badgeclass = validated_data["badgeclass"]
         if badgeclass.direct_awarding_disabled:
             raise BadRequest(f"Direct awarding disabled for {badgeclass.name}")
@@ -83,7 +83,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 raise serializers.ValidationError({"scheduled_at": "Scheduled time must be in the future."})
             validated_data["status"] = DirectAwardBundle.STATUS_SCHEDULED
 
-        batch_mode = validated_data.pop("batch_mode")
+        batch_mode = validated_data.pop("batch_mode")  # noqa: F841
         notify_recipients = validated_data.pop("notify_recipients")
         direct_awards = validated_data.pop("direct_awards")
         user_permissions = badgeclass.get_permissions(validated_data["created_by"])
@@ -130,7 +130,7 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                             direct_award_id=da_created.entity_id,
                             badgeclass_id=da_created.badgeclass_id,
                         )
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001
                         un_successful_direct_awards.append(
                             {"error": str(e), "eppn": direct_award["eppn"], "email": direct_award["recipient_email"]}
                         )

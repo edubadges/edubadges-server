@@ -1,4 +1,4 @@
-from issuer.models import BadgeClass, Issuer
+from issuer.models import BadgeClass, Issuer  # noqa: EXE002
 from lti_edu.models import StudentsEnrolled
 from mainsite.serializers import BadgrBaseModelSerializer
 from rest_framework import serializers

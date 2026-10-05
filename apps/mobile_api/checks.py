@@ -1,10 +1,10 @@
 import os
 
-from django.core.checks import Warning, register
+from django.core.checks import Warning, register  # noqa: A004
 
 
 @register()
-def check_firebase_json_file(app_configs, **kwargs):
+def check_firebase_json_file(app_configs, **kwargs):  # noqa: ARG001
     """
     Check that the Firebase service account JSON file exists.
     """

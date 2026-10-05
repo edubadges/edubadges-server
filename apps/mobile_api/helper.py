@@ -2,7 +2,7 @@ from badgrsocialauth.providers.eduid.provider import EduIDProvider
 from rest_framework.exceptions import AuthenticationFailed
 
 
-def sync_user_with_eduid(user, eduid_data, logger):
+def sync_user_with_eduid(user, eduid_data, logger):  # noqa: ARG001
     validated_names = []
     preferred_name = None
 

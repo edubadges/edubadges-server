@@ -22,7 +22,7 @@ class NameSlug(NaturalKey, models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         abstract = True
 
     def publish(self):
@@ -56,7 +56,7 @@ class TitleBody(models.Model):
     def __str__(self):
         return self.title
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         abstract = True
 
 
@@ -77,5 +77,5 @@ class OnlyOneActive(models.Model):
         if self.is_active:
             self.__class__.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         abstract = True

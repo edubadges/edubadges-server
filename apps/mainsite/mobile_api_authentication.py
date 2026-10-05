@@ -2,6 +2,7 @@ import logging
 import urllib.error
 import urllib.parse
 import urllib.request
+from http import HTTPStatus
 
 import requests
 from allauth.socialaccount.models import SocialAccount
@@ -23,7 +24,7 @@ class TemporaryUser:
 
 
 class MobileAPIAuthentication(BaseAuthentication):
-    def authenticate(self, request):
+    def authenticate(self, request):  # noqa: C901, PLR0911, PLR0912, PLR0915
         """
         Returns two-tuple of (user, token) if authentication succeeds,
         or None otherwise.
@@ -34,7 +35,7 @@ class MobileAPIAuthentication(BaseAuthentication):
             logger.info("Skipping MobileAPIAuthentication as HTTP_X_REQUESTED_WITH is NOT mobile")
             return None
 
-        logger.info(f"MobileAPIAuthentication {request.META}")
+        logger.info(f"MobileAPIAuthentication {request.META}")  # noqa: G004
         authorization = request.environ.get("HTTP_AUTHORIZATION")
         if not authorization:
             logger.info("MobileAPIAuthentication: raise AuthenticationFailed as no authorization header")
@@ -56,31 +57,31 @@ class MobileAPIAuthentication(BaseAuthentication):
         response = requests.post(
             url, data=urllib.parse.urlencode({"token": bearer_token}), auth=auth, headers=headers, timeout=60
         )
-        if response.status_code != 200:
-            logger.info(f"MobileAPIAuthentication bad response from oidcng: {response.status_code} {response.json()}")
+        if response.status_code != HTTPStatus.OK:
+            logger.info(f"MobileAPIAuthentication bad response from oidcng: {response.status_code} {response.json()}")  # noqa: G004
             raise AuthenticationFailed("Invalid authentication credentials.")
 
         introspect_json = response.json()
-        logger.info(f"MobileAPIAuthentication introspect {introspect_json}")
+        logger.info(f"MobileAPIAuthentication introspect {introspect_json}")  # noqa: G004
 
         if not introspect_json["active"]:
-            logger.info(f"MobileAPIAuthentication inactive introspect_json {introspect_json}")
+            logger.info(f"MobileAPIAuthentication inactive introspect_json {introspect_json}")  # noqa: G004
             raise AuthenticationFailed("Invalid authentication credentials.")
         if settings.EDUID_IDENTIFIER not in introspect_json:
             logger.info(
-                f"MobileAPIAuthentication raise AuthenticationFailed as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}"
+                f"MobileAPIAuthentication raise AuthenticationFailed as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}"  # noqa: E501, G004
             )
             raise AuthenticationFailed("Invalid authentication credentials.")
 
         introspect_json = response.json()
-        logger.info(f"MobileAPIAuthentication introspect {introspect_json}")
+        logger.info(f"MobileAPIAuthentication introspect {introspect_json}")  # noqa: G004
 
         if not introspect_json["active"]:
-            logger.info(f"MobileAPIAuthentication inactive introspect_json {introspect_json}")
+            logger.info(f"MobileAPIAuthentication inactive introspect_json {introspect_json}")  # noqa: G004
             return None
         if settings.EDUID_IDENTIFIER not in introspect_json:
             logger.info(
-                f"MobileAPIAuthentication return None as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}"
+                f"MobileAPIAuthentication return None as no {settings.EDUID_IDENTIFIER} in introspect_json {introspect_json}"  # noqa: E501, G004
             )
             return None
 
@@ -91,11 +92,11 @@ class MobileAPIAuthentication(BaseAuthentication):
             if login_endpoint:
                 # further logic is dealt with in /mobile/api/login
                 request.mobile_api_call = True
-                logger.info(f"MobileAPIAuthentication created TemporaryUser {introspect_json['email']} for login")
+                logger.info(f"MobileAPIAuthentication created TemporaryUser {introspect_json['email']} for login")  # noqa: G004
                 return TemporaryUser(introspect_json, bearer_token), bearer_token
             # If not heading to login-endpoint, we raise AuthenticationFailed resulting in 401
             logger.info(
-                f"MobileAPIAuthentication TemporaryUser {introspect_json['email']} not allowed to access {request.path}"
+                f"MobileAPIAuthentication TemporaryUser {introspect_json['email']} not allowed to access {request.path}"  # noqa: G004
             )
             raise AuthenticationFailed("Authentication credentials were not provided.")
         # SocialAccount always has a User
@@ -104,18 +105,18 @@ class MobileAPIAuthentication(BaseAuthentication):
         profile_endpoint = request.path == PROFILE_PATH
         if login_endpoint or agree_terms_endpoint or profile_endpoint:
             # further logic is dealt with in /mobile/api/login
-            logger.info(f"MobileAPIAuthentication User {user.email} allowed to access {request.path}")
+            logger.info(f"MobileAPIAuthentication User {user.email} allowed to access {request.path}")  # noqa: G004
             request.mobile_api_call = True
             return user, bearer_token
         if not user.general_terms_accepted():
             # If not heading to login-endpoint or agree-terms, we raise TermsNotAccepted resulting in 403
             # The mobile app depends on the detail of the error message, so it should not be changed without notifying.
             logger.info(
-                f"MobileAPIAuthentication User {user.email} has not accepted the general terms. "
+                f"MobileAPIAuthentication User {user.email} has not accepted the general terms. "  # noqa: G004
                 f"Not allowed to access {request.path}"
             )
             raise TermsNotAcceptedException
 
-        logger.info(f"MobileAPIAuthentication forwarding User {user.email} to {request.path}")
+        logger.info(f"MobileAPIAuthentication forwarding User {user.email} to {request.path}")  # noqa: G004
         request.mobile_api_call = True
         return user, bearer_token

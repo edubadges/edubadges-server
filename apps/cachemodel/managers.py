@@ -59,7 +59,7 @@ class CachedTableManager(models.Manager):
         if len(list(kwargs.keys())) > 1:
             raise NotImplementedError("Multiple indices are not supported on CachedTable.")
 
-        field, value = list(kwargs.items())[0]
+        field, value = list(kwargs.items())[0]  # noqa: RUF015
         if field == "pk":
             field = self._pk_field_name()
         table = self._fetch_index(field)

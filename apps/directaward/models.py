@@ -86,7 +86,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     def award(self, recipient):
         """Accept the direct award and make an assertion out of it"""
-        from issuer.models import BadgeInstance
+        from issuer.models import BadgeInstance  # noqa: PLC0415
 
         if self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EPPN:
             if self.eppn not in recipient.eppns:
@@ -95,7 +95,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
                     999,
                 )
 
-        elif self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL:
+        elif self.bundle.identifier_type == DirectAwardBundle.IDENTIFIER_EMAIL:  # noqa: SIM102
             if self.recipient_email != recipient.email:
                 raise BadgrValidationError(
                     "Cannot award, email does not match",
@@ -115,11 +115,11 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         expires_at = None
         if self.badgeclass.expiration_period:
             expires_at = (
-                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)  # noqa: DTZ005
                 + self.badgeclass.expiration_period
             )
 
-        # The recipient name filled in for the direct award (available only with awarding via email) should take precedence over the validated name
+        # The recipient name filled in for the direct award (available only with awarding via email) should take precedence over the validated name  # noqa: E501
         recipient_name = self.get_recipient_name()
 
         if not recipient_name and recipient.validated_name:
@@ -153,7 +153,7 @@ class DirectAward(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return self.badgeclass.get_permissions(user)
 
     def notify_recipient(self):
-        from badgeuser.models import BadgeUser
+        from badgeuser.models import BadgeUser  # noqa: PLC0415
 
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
@@ -213,7 +213,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     @property
     def assertion_count(self):
-        from issuer.models import BadgeInstance
+        from issuer.models import BadgeInstance  # noqa: PLC0415
 
         return BadgeInstance.objects.filter(direct_award_bundle=self, revoked=False).count()
 
@@ -235,7 +235,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     @property
     def direct_award_revoked_count(self):
-        from issuer.models import BadgeInstance
+        from issuer.models import BadgeInstance  # noqa: PLC0415
 
         revoked_count = BadgeInstance.objects.filter(direct_award_bundle=self, revoked=True).count()
         return revoked_count + DirectAward.objects.filter(bundle=self, status="Revoked").count()
@@ -256,7 +256,7 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         return [da.recipient_email for da in self.cached_direct_awards()]
 
     def notify_recipients(self):
-        from badgeuser.models import BadgeUser
+        from badgeuser.models import BadgeUser  # noqa: PLC0415
 
         html_message = EmailMessageMaker.create_direct_award_student_mail(self)
         plain_text = strip_tags(html_message)
@@ -300,10 +300,10 @@ class DirectAwardBundle(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         )
 
 
-class DirectAwardAuditTrail(models.Model):
+class DirectAwardAuditTrail(models.Model):  # noqa: DJ008
     pkid = models.BigAutoField(primary_key=True, editable=False)
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    login_IP = models.GenericIPAddressField(null=True, blank=True)
+    login_IP = models.GenericIPAddressField(null=True, blank=True)  # noqa: N815
     action_datetime = models.DateTimeField(auto_now=True)
     user = models.CharField(max_length=254, blank=True)
     user_agent_info = models.CharField(max_length=255, blank=True)

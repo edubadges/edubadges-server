@@ -10,7 +10,7 @@ class Command(BaseCommand):
     args = ""
     help = "Ensures users have the proper EmailAddress objects created for their accounts"
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: C901
         users_processed = 0
         primaries_set = 0
         email_errors = 0
@@ -24,13 +24,13 @@ class Command(BaseCommand):
                 # handle users who don't have an EmailAddress record
                 if emails.count() < 1:
                     try:
-                        existing_email = CachedEmailAddress.objects.get(email=user.email)
+                        existing_email = CachedEmailAddress.objects.get(email=user.email)  # noqa: F841
                     except CachedEmailAddress.DoesNotExist:
                         new_primary = CachedEmailAddress(user=user, email=user.email, verified=False, primary=True)
                         new_primary.save()
                         new_primary.send_confirmation(signup="canvas")
                     else:
-                        user.delete()  # User record has no email addresses and email address has been added under another account
+                        user.delete()  # User record has no email addresses and email address has been added under another account  # noqa: E501
                         continue
 
                     emails = CachedEmailAddress.objects.filter(user=user)
@@ -48,9 +48,9 @@ class Command(BaseCommand):
                         try:
                             new_primary.send_confirmation(signup="canvas")
                         except SMTPException as e:
-                            raise e
-                        except Exception as e:
-                            raise SMTPException(f"Error sending mail to {new_primary.email} -- {e.message}")
+                            raise e  # noqa: TRY201
+                        except Exception as e:  # noqa: BLE001
+                            raise SMTPException(f"Error sending mail to {new_primary.email} -- {e.message}")  # noqa: B904
             except IntegrityError as e:
                 user_errors += 1
                 self.stdout.write(f"Error in user {user.pk} record: {e.message}")
@@ -60,5 +60,5 @@ class Command(BaseCommand):
                 self.stdout.write(f"Could not send mail: {e.message}")
 
         self.stdout.write(
-            f"Done cleaning email: {users_processed} users, {primaries_set} updated primaries, {user_errors} user errors, {email_errors} email errors."
+            f"Done cleaning email: {users_processed} users, {primaries_set} updated primaries, {user_errors} user errors, {email_errors} email errors."  # noqa: E501
         )

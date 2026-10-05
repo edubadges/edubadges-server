@@ -1,6 +1,7 @@
 import urllib.error
 import urllib.parse
 import urllib.request
+from http import HTTPStatus
 
 import requests
 from django.conf import settings
@@ -18,26 +19,26 @@ class BadgeConnectView(APIView):
     def get(self, request, **kwargs):
         authorization = request.environ.get("HTTP_AUTHORIZATION")
         if not authorization:
-            raise PermissionDenied()
+            raise PermissionDenied
         bearer_token = authorization[len("bearer ") :]
         if not bearer_token:
-            raise PermissionDenied()
+            raise PermissionDenied
 
         payload = {"token": bearer_token}
         headers = {"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"}
         url = f"{settings.EDUID_PROVIDER_URL}/introspect"
-        response = requests.post(
+        response = requests.post(  # noqa: S113
             url,
             data=urllib.parse.urlencode(payload),
             auth=(settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET),
             headers=headers,
         )
-        if response.status_code != 200:
-            raise PermissionDenied()
+        if response.status_code != HTTPStatus.OK:
+            raise PermissionDenied
 
         introspect_json = response.json()
         if not introspect_json["active"]:
-            raise PermissionDenied()
+            raise PermissionDenied
         email = introspect_json["email"]
         badge_instance = BadgeInstance.objects.get(user__email=email, entity_id=kwargs.get("entity_id"))
         if not badge_instance.public or badge_instance.revoked:

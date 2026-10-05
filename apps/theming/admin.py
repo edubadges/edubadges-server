@@ -8,7 +8,7 @@ from .models import Theme, get_current_templates
 class ThemeForm(forms.ModelForm):
     class Meta:
         model = Theme
-        fields = "__all__"
+        fields = "__all__"  # noqa: DJ007
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

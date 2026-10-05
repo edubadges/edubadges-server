@@ -1,4 +1,4 @@
-import json
+import json  # noqa: N999
 import uuid
 
 from allauth.account.models import EmailAddress
@@ -90,7 +90,7 @@ no_perms = {
 }
 
 
-def create_admin(username, email, first_name, last_name, institution_name, uid, perms=all_perms):
+def create_admin(username, email, first_name, last_name, institution_name, uid, perms=all_perms):  # noqa: PLR0913, PLR0917
     user, _ = BadgeUser.objects.get_or_create(
         username=username,
         email=email,
@@ -111,7 +111,7 @@ def create_admin(username, email, first_name, last_name, institution_name, uid, 
     InstitutionStaff.objects.get_or_create(user=user, institution=institution, **perms)
 
 
-def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=no_perms):
+def create_teacher(username, email, first_name, last_name, institution_name, uid, perms=no_perms):  # noqa: ARG001, PLR0913, PLR0917
     user, _ = BadgeUser.objects.get_or_create(
         username=username, email=email, last_name=last_name, first_name=first_name, is_teacher=True, invited=True
     )

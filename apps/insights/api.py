@@ -21,14 +21,14 @@ from staff.models import InstitutionStaff
 def dict_fetch_all(cursor):
     desc = cursor.description
     rows = cursor.fetchall()
-    res = [dict(zip([col[0] for col in desc], row)) for row in rows]
+    res = [dict(zip([col[0] for col in desc], row)) for row in rows]  # noqa: B905
     return res
 
 
 class InsightsView(APIView):
     permission_classes = (TeachPermission,)
 
-    def post(self, request, **kwargs):
+    def post(self, request, **kwargs):  # noqa: C901, PLR0912, PLR0915
         surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
         # Superusers may select an institution
         institution_id = request.data.get("institution_id")
@@ -405,7 +405,7 @@ class MicroCredentialsBadgeOverview(APIView):
                     inner join institution_faculty f on f.id = i.faculty_id
                     inner join institution_institution ins on ins.id = f.institution_id
                 where b.badge_class_type = 'micro_credential' and ins.institution_type is not null;
-                """,
+                """,  # noqa: E501
                 [],
             )
             return Response(dict_fetch_all(cursor), status=status.HTTP_200_OK)
@@ -657,7 +657,7 @@ class SectorBadgesOverview(APIView):
 class IssuerMembers(APIView):
     permission_classes = (TeachPermission,)
 
-    def get(self, request, **kwargs):
+    def get(self, request, **kwargs):  # noqa: C901, PLR0912
         user = request.user
         is_super_user = user.is_superuser
 

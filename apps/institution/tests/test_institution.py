@@ -36,7 +36,7 @@ class InstitutionTest(BadgrTestCase):
 
     def test_check_institutions_validity(self):
         teacher1 = self.setup_teacher()
-        teacher1.institution.identifier
+        teacher1.institution.identifier  # noqa: B018
         response = self.client.post(
             "/institution/check", data=json.dumps([teacher1.institution.identifier]), content_type="application/json"
         )
@@ -90,7 +90,7 @@ class InstitutionModelsTest(BadgrTestCase):
 class TestInstitutionSchema(BadgrTestCase):
     def test_institution_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        query = "query foo {institutions {entityId grondslagFormeel grondslagInformeel identifier contentTypeId, defaultLanguage}}"
+        query = "query foo {institutions {entityId grondslagFormeel grondslagInformeel identifier contentTypeId, defaultLanguage}}"  # noqa: E501
         self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response["data"]["institutions"][0]["contentTypeId"]))

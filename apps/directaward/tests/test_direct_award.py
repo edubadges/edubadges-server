@@ -156,14 +156,14 @@ class DirectAwardSchemaTest(BadgrTestCase):
         issuer = self.setup_issuer(created_by=teacher1, faculty=faculty)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         direct_award_bundle = self.setup_direct_award_bundle(badgeclass=badgeclass)
-        direct_awards = [self.setup_direct_award(badgeclass=badgeclass, bundle=direct_award_bundle) for i in range(4)]
+        direct_awards = [self.setup_direct_award(badgeclass=badgeclass, bundle=direct_award_bundle) for i in range(4)]  # noqa: F841
         self.setup_assertion(
             recipient=self.setup_student(),
             created_by=teacher1,
             badgeclass=badgeclass,
             direct_award_bundle=direct_award_bundle,
         )
-        query = "query foo {badgeClasses {entityId directAwards {entityId} directAwardBundles {entityId initialTotal assertionCount directAwardCount directAwards {entityId} }}}"
+        query = "query foo {badgeClasses {entityId directAwards {entityId} directAwardBundles {entityId initialTotal assertionCount directAwardCount directAwards {entityId} }}}"  # noqa: E501
         response = self.graphene_post(teacher1, query)
         self.assertTrue(bool(response["data"]["badgeClasses"][0]["directAwardBundles"]))
         self.assertTrue(bool(response["data"]["badgeClasses"][0]["directAwardBundles"][0]["assertionCount"]))

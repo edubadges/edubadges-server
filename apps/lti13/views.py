@@ -8,7 +8,7 @@ from badgeuser.models import BadgeUser
 from badgrsocialauth.utils import set_session_badgr_app
 from django.conf import settings
 from django.contrib.auth import logout
-from django.core.cache import caches  # type: ignore
+from django.core.cache import caches  # type: ignore  # noqa: PGH003
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
@@ -46,7 +46,7 @@ def get_launch_data_storage():
 def get_launch_url(request):
     target_link_uri = request.POST.get("target_link_uri", request.GET.get("target_link_uri"))
     if not target_link_uri:
-        raise Exception('Missing "target_link_uri" param')
+        raise Exception('Missing "target_link_uri" param')  # noqa: TRY002
     return target_link_uri
 
 
@@ -91,7 +91,7 @@ def launch(request):
         return redirect(f"{settings.UI_URL}/launch/lti?{urllib.parse.urlencode(args)}")
 
     social_account = user.get_social_account()
-    social_login = SocialLogin(account=social_account, email_addresses=[email for email in user.email_items])
+    social_login = SocialLogin(account=social_account, email_addresses=[email for email in user.email_items])  # noqa: C416
     social_login.user = user
     badgr_app = BadgrApp.objects.all().first()
     set_session_badgr_app(request, badgr_app)
@@ -107,7 +107,7 @@ def launch(request):
     return redirect(f"{settings.UI_URL}/launch/lti?{urllib.parse.urlencode(args)}")
 
 
-def get_jwks(request):
+def get_jwks(request):  # noqa: ARG001
     tool_conf = get_tool_conf()
     return JsonResponse(tool_conf.get_jwks(), safe=False)
 

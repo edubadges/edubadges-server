@@ -76,7 +76,7 @@ class BadgeInstanceEvidenceType(DjangoObjectType):
 
 
 def schema_badge_class_type():
-    from issuer.schema import BadgeClassType
+    from issuer.schema import BadgeClassType  # noqa: PLC0415
 
     return BadgeClassType
 
@@ -164,20 +164,20 @@ class IssuerType(
         return self.cached_pending_enrollments().__len__()
 
     def resolve_has_unrevoked_assertions(self, info):
-        return any([assertion.revoked is False for assertion in self.assertions])
+        return any([assertion.revoked is False for assertion in self.assertions])  # noqa: C419
 
     def resolve_has_assertions(self, info):
         return bool(self.assertions)
 
 
 def badge_user_type():
-    from badgeuser.schema import BadgeUserType
+    from badgeuser.schema import BadgeUserType  # noqa: PLC0415
 
     return BadgeUserType
 
 
 def terms_type():
-    from badgeuser.schema import TermsType
+    from badgeuser.schema import TermsType  # noqa: PLC0415
 
     return TermsType
 
@@ -240,7 +240,7 @@ class BadgeInstanceConnection(Connection):
 
 
 def schema_badge_class_tag_type():
-    from institution.schema import BadgeClassTagType
+    from institution.schema import BadgeClassTagType  # noqa: PLC0415
 
     return BadgeClassTagType
 
@@ -414,14 +414,14 @@ class Query:
         return [issuer for issuer in Issuer.objects.all() if issuer.has_permissions(info.context.user, ["may_read"])]
 
     def resolve_issuer(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             issuer = Issuer.objects.get(entity_id=id)
             if issuer.has_permissions(info.context.user, ["may_read"]):
                 return issuer
 
     def resolve_public_issuer(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             issuer = Issuer.objects.get(entity_id=id, archived=False)
             return issuer
@@ -440,7 +440,7 @@ class Query:
 
     def resolve_enrollments_to_award(self, info, **kwargs):
         user = info.context.user
-        from lti_edu.models import StudentsEnrolled
+        from lti_edu.models import StudentsEnrolled  # noqa: PLC0415
 
         enrollments = [
             se
@@ -452,15 +452,15 @@ class Query:
         return enrollments
 
     def resolve_public_badge_classes(self, info, **kwargs):
-        return [bc for bc in BadgeClass.objects.filter(is_private=False)]
+        return [bc for bc in BadgeClass.objects.filter(is_private=False)]  # noqa: C416
 
     def resolve_badge_class(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             bc = BadgeClass.objects.get(entity_id=id)
             # Students who are logged in need to access this to start the enrollment and copy public data is allowed
             user = info.context.user
-            if hasattr(user, "is_authenticated") and user.is_authenticated:
+            if hasattr(user, "is_authenticated") and user.is_authenticated:  # noqa: SIM102
                 if (hasattr(user, "is_student") and user.is_student) or (
                     hasattr(user, "is_teacher") and user.is_teacher
                 ):
@@ -468,7 +468,7 @@ class Query:
         return None
 
     def resolve_badge_instance(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             bc = BadgeInstance.objects.get(entity_id=id)
             user = info.context.user
@@ -477,7 +477,7 @@ class Query:
         return None
 
     def resolve_badge_instance_collection(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             bc = BadgeInstanceCollection.objects.get(entity_id=id)
             # Called anonymous in public collection page
@@ -502,11 +502,11 @@ class Query:
         user = info.context.user
         if not hasattr(user, "is_authenticated") or not user.is_authenticated:
             return []
-        return list(filter(lambda bi: bi.revoked == True, user.cached_badgeinstances()))
+        return list(filter(lambda bi: bi.revoked == True, user.cached_badgeinstances()))  # noqa: E712
 
     def resolve_badge_instances_count(self, info):
         surf_institution = BadgeClass.objects.get(name=settings.EDUID_BADGE_CLASS_NAME).issuer.faculty.institution
-        today = datetime.utcnow()
+        today = datetime.utcnow()  # noqa: DTZ003
         query = BadgeInstance.objects.exclude(badgeclass__issuer__faculty__institution=surf_institution).exclude(
             expires_at__lte=today
         )

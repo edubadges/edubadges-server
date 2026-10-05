@@ -22,7 +22,7 @@ from rest_framework import serializers
 			height: 48
 		}
 	}   
-"""
+"""  # noqa: E501, W291
 
 
 class ThemeSerializer(serializers.Serializer):

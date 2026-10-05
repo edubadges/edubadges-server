@@ -14,6 +14,7 @@ import tempfile
 import urllib.parse
 import uuid
 import webbrowser
+from http import HTTPStatus
 from io import BytesIO
 from xml.etree import ElementTree as ET
 
@@ -52,12 +53,12 @@ class OriginSettingsObject:
     DefaultOrigin = "http://localhost:8000"
 
     @property
-    def DEFAULT_HTTP_PROTOCOL(self):
+    def DEFAULT_HTTP_PROTOCOL(self):  # noqa: N802
         parsed = urllib.parse.urlparse(self.HTTP)
         return parsed.scheme
 
     @property
-    def HTTP(self):
+    def HTTP(self):  # noqa: N802
         return getattr(settings, "HTTP_ORIGIN", OriginSettingsObject.DefaultOrigin)
 
 
@@ -70,9 +71,9 @@ Cache Utilities
 
 def filter_cache_key(key, key_prefix, version):
     generated_key = ":".join([key_prefix, str(version), key])
-    if len(generated_key) > 250:
+    if len(generated_key) > 250:  # noqa: PLR2004
         encoded_string = generated_key.encode("utf-8")
-        return hashlib.md5(encoded_string).hexdigest()
+        return hashlib.md5(encoded_string).hexdigest()  # noqa: S324
     return generated_key
 
 
@@ -84,7 +85,7 @@ def verify_svg(fileobj):
     fileobj.seek(0)
     tag = None
     try:
-        for event, el in ET.iterparse(fileobj, events=(b"start",)):
+        for event, el in ET.iterparse(fileobj, events=(b"start",)):  # noqa: B007, S314
             tag = el.tag
             break
     except ET.ParseError:
@@ -98,9 +99,9 @@ def fetch_remote_file_to_storage(remote_url, upload_to=""):
     :return: (status_code, new_storage_name)
     """
     store = DefaultStorage()
-    r = requests.get(remote_url, stream=True)
-    if r.status_code == 200:
-        name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
+    r = requests.get(remote_url, stream=True)  # noqa: S113
+    if r.status_code == HTTPStatus.OK:
+        name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)  # noqa: RUF059
         storage_name = f"{upload_to}/cached/{hashlib.md5(remote_url.encode(), usedforsecurity=False).hexdigest()}{ext}"
         if not store.exists(storage_name):
             buf = io.BytesIO(r.content)
@@ -135,9 +136,9 @@ def list_of(value):
 
 
 def open_mail_in_browser(html):
-    tmp = tempfile.NamedTemporaryFile(delete=False)
+    tmp = tempfile.NamedTemporaryFile(delete=False)  # noqa: SIM115
     path = tmp.name + ".html"
-    f = open(path, "w")
+    f = open(path, "w")  # noqa: SIM115
     f.write(html)
     f.close()
     webbrowser.open("file://" + path)
@@ -497,7 +498,7 @@ def add_watermark(uploaded_image, is_svg):
 
 def resize_image(uploaded_image):
     try:
-        f = open(uploaded_image.name, "rb")
+        f = open(uploaded_image.name, "rb")  # noqa: SIM115
         image = Image.open(f)
         if _decompression_bomb_check(image):
             raise ValidationError("Invalid image")
@@ -517,12 +518,12 @@ def resize_image(uploaded_image):
 
 
 def scrub_svg_image(uploaded_image):
-    MALICIOUS_SVG_TAGS = ["script"]
-    MALICIOUS_SVG_ATTRIBUTES = ["onload"]
-    SVG_NAMESPACE = "http://www.w3.org/2000/svg"
+    MALICIOUS_SVG_TAGS = ["script"]  # noqa: N806
+    MALICIOUS_SVG_ATTRIBUTES = ["onload"]  # noqa: N806
+    SVG_NAMESPACE = "http://www.w3.org/2000/svg"  # noqa: N806
     uploaded_image.file.seek(0)
     ET.register_namespace("", SVG_NAMESPACE)
-    tree = ET.parse(uploaded_image.file)
+    tree = ET.parse(uploaded_image.file)  # noqa: S314
     root = tree.getroot()
 
     # strip malicious tags

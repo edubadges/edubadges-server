@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import badgrlog
 from allauth.socialaccount.models import SocialAccount, SocialToken
 from badgeuser.models import CachedEmailAddress, ProxyEmailConfirmation
@@ -39,9 +41,9 @@ class BadgrAdminSite(OTPAdminSite):
 
     def login(self, request, extra_context=None):
         response = super().login(request, extra_context)
-        if request.method == "POST":
+        if request.method == "POST":  # noqa: SIM102
             # form submission
-            if response.status_code != 302:
+            if response.status_code != HTTPStatus.FOUND:
                 # failed /staff login
                 username = request.POST.get("username", None)
                 badgrlogger.event(badgrlog.FailedLoginAttempt(request, username, endpoint="/staff/login"))

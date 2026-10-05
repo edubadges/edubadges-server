@@ -120,7 +120,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
 
     # @property
     # def acceptance_link(self):
-    #     return OriginSetting.HTTP + reverse('user_provision_accept', kwargs={'entity_id': self.entity_id})
+    #     return OriginSetting.HTTP + reverse('user_provision_accept', kwargs={'entity_id': self.entity_id})  # noqa: E501
 
     def send_email(self):
         """Send the invitation email to the recipient"""
@@ -129,7 +129,7 @@ class UserProvisionment(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         except EmailBlacklist.DoesNotExist:
             login_link = BadgrApp.objects.get(pk=1).email_confirmation_redirect
             html_message = EmailMessageMaker.create_user_invited_email(provisionment=self, login_link=login_link)
-            subject = f"You have been invited to accept a new role for the {self.entity.__class__.__name__.lower()} {self.entity.name}"
+            subject = f"You have been invited to accept a new role for the {self.entity.__class__.__name__.lower()} {self.entity.name}"  # noqa: E501
             if not self.user:
                 plain_text = strip_tags(html_message)
                 send_mail(subject, message=plain_text, recipient_list=[self.email], html_message=html_message)
@@ -214,7 +214,7 @@ class CachedEmailAddress(EmailAddress, CacheModel):
         super().delete(*args, **kwargs)
         user.publish()
 
-    def set_as_primary(self, conditional=False):
+    def set_as_primary(self, conditional=False):  # noqa: FBT002
         # shadow parent function, but use CachedEmailAddress manager to ensure cache gets updated
         old_primary = CachedEmailAddress.objects.get_primary(self.user)
         if old_primary:
@@ -248,7 +248,7 @@ class ProxyEmailConfirmation(EmailConfirmation):
         verbose_name_plural = _("email confirmations")
 
 
-class EmailAddressVariant(models.Model):
+class EmailAddressVariant(models.Model):  # noqa: DJ008
     email = models.EmailField(blank=False)
     canonical_email = models.ForeignKey(CachedEmailAddress, on_delete=models.CASCADE, blank=False)
 
@@ -258,14 +258,14 @@ class EmailAddressVariant(models.Model):
         super().save(*args, **kwargs)
         self.canonical_email.save()
 
-    def __unicode__(self):
+    def __unicode__(self):  # noqa: DJ012
         return self.email
 
     @property
     def verified(self):
         return self.canonical_email.verified
 
-    def is_valid(self, raise_exception=False):
+    def is_valid(self, raise_exception=False):  # noqa: FBT002
         def fail(message):
             if raise_exception:
                 raise ValidationError(message)
@@ -278,7 +278,7 @@ class EmailAddressVariant(models.Model):
             except CachedEmailAddress.DoesNotExist:
                 fail("Canonical Email Address not found")
 
-        if not self.canonical_email.email.lower() == self.email.lower():
+        if not self.canonical_email.email.lower() == self.email.lower():  # noqa: SIM201
             fail("New EmailAddressVariant does not match stored email address.")
 
         return True
@@ -289,7 +289,7 @@ class UserCachedObjectGetterMixin:
     Base class to group all cached object-getter functionality of user, purely for readability
     """
 
-    def _get_objects_with_permissions(self, permissions, type=None):
+    def _get_objects_with_permissions(self, permissions, type=None):  # noqa: A002
         """
         :param permission: list of strings representing permissions
         :param type: string that represent class.__name__ ('Institution', 'Faculty', 'Issuer', 'BadgeClass' or None)
@@ -297,7 +297,7 @@ class UserCachedObjectGetterMixin:
         """
         permissioned_objects = []
 
-        def object_tree_walker(obj, permissions, looking_for=type, override_permissions=False):
+        def object_tree_walker(obj, permissions, looking_for=type, override_permissions=False):  # noqa: FBT002
             """
             Recursively walks the object tree to find objects of which the user has all the given permissions for.
             """
@@ -335,8 +335,8 @@ class UserCachedObjectGetterMixin:
         return StudentsEnrolled.objects.filter(user=self, badge_instance=None)
 
     # @cached_method(auto_publish=True)
-    # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails.
-    # This results in api calls responding with a 403 after the failure of the AuthenticatedWithVerifiedEmail permission check.
+    # turned it off, because if user logs in for FIRST time, this caching will result in the user having no verified emails.  # noqa: E501
+    # This results in api calls responding with a 403 after the failure of the AuthenticatedWithVerifiedEmail permission check.  # noqa: E501
     # Which will logout the user automatically with the error: Token expired.
     def cached_emails(self):
         return CachedEmailAddress.objects.filter(user=self)
@@ -346,7 +346,7 @@ class UserCachedObjectGetterMixin:
 
     @cached_method(auto_publish=True)
     def cached_token(self):
-        user_token, created = Token.objects.get_or_create(user=self)
+        user_token, created = Token.objects.get_or_create(user=self)  # noqa: RUF059
         return user_token.key
 
     @cached_method(auto_publish=True)
@@ -415,14 +415,14 @@ class UserPermissionsMixin:
         return obj.get_permissions(self)
 
     @property
-    def may_sign_assertion(self, badgeinstance):
+    def may_sign_assertion(self, badgeinstance):  # noqa: PLR0206
         """
         Method to check if user may sign the assertion
         """
         perms = badgeinstance.badgeclass.get_permissions(self)
         return perms["may_sign"]
 
-    def may_enroll(self, badge_class, raise_exception=False):
+    def may_enroll(self, badge_class, raise_exception=False):  # noqa: C901, FBT002
         """
         Checks to see if user may enroll
             no enrollments: May enroll
@@ -587,7 +587,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def get_full_name(self):
         if self.first_name and self.last_name:
-            return "%s %s" % (self.first_name, self.last_name)
+            return "%s %s" % (self.first_name, self.last_name)  # noqa: UP031
         return ""
 
     def clear_affiliations(self):
@@ -652,7 +652,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         except CachedEmailAddress.DoesNotExist:
             return False
 
-        if (
+        if (  # noqa: SIM103
             email != canonical_email.email
             and email not in [e.email for e in canonical_email.cached_variants()]
             and EmailAddressVariant(email=email, canonical_email=canonical_email).is_valid()
@@ -676,7 +676,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         if self.is_superuser:
             return True
 
-        if len(self.verified_emails) > 0:
+        if len(self.verified_emails) > 0:  # noqa: SIM103
             return True
 
         return False
@@ -686,20 +686,20 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         return [self.get_recipient_identifier()]
 
     def get_recipient_identifier(self):
-        from allauth.socialaccount.models import SocialAccount
+        from allauth.socialaccount.models import SocialAccount  # noqa: PLC0415
 
         try:
             account = SocialAccount.objects.get(user=self.pk)
-            return account.uid
+            return account.uid  # noqa: TRY300
         except SocialAccount.DoesNotExist:
             return None
 
     def get_social_account(self):
-        from allauth.socialaccount.models import SocialAccount
+        from allauth.socialaccount.models import SocialAccount  # noqa: PLC0415
 
         try:
             account = SocialAccount.objects.get(user=self.pk)
-            return account
+            return account  # noqa: TRY300
         except SocialAccount.DoesNotExist:
             return None
 
@@ -709,7 +709,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
     def get_assertions_ready_for_signing(self):
         assertion_timestamps = AssertionTimeStamp.objects.filter(signer=self).exclude(proof="")
-        return [ts.badge_instance for ts in assertion_timestamps if ts.badge_instance.signature == None]
+        return [ts.badge_instance for ts in assertion_timestamps if ts.badge_instance.signature == None]  # noqa: E711
 
     def replace_token(self):
         Token.objects.filter(user=self).delete()
@@ -722,7 +722,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
         if not self.username:
             self.username = generate_badgr_username(self.email)
 
-        if getattr(settings, "BADGEUSER_SKIP_LAST_LOGIN_TIME", True):
+        if getattr(settings, "BADGEUSER_SKIP_LAST_LOGIN_TIME", True):  # noqa: SIM102
             # skip saving last_login to the database
             if (
                 "update_fields" in kwargs
@@ -737,7 +737,7 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
 
 
 class BadgrAccessTokenManager(models.Manager):
-    def generate_new_token_for_user(self, user, scope="r:profile", application=None, expires=None, refresh_token=False):
+    def generate_new_token_for_user(self, user, scope="r:profile", application=None, expires=None, refresh_token=False):  # noqa: FBT002
         with transaction.atomic():
             if application is None:
                 application, created = Application.objects.get_or_create(
@@ -766,7 +766,7 @@ class BadgrAccessTokenManager(models.Manager):
         if padding > 0:
             entity_id = "{}{}".format(entity_id, (4 - padding) * "=")
         decoded = base64.urlsafe_b64decode(entity_id.encode("utf-8"))
-        id = re.sub(rf"^{self.model.fake_entity_id_prefix}", "", decoded)
+        id = re.sub(rf"^{self.model.fake_entity_id_prefix}", "", decoded)  # noqa: A001
         try:
             pk = int(id)
         except ValueError:
@@ -872,9 +872,9 @@ class Terms(BaseAuditedModel, BaseVersionedEntity, CacheModel):
         """make user accept terms
         returns: TermsAgreement"""
         # must work for updating increment and for accepting the first time
-        terms_agreement, created = TermsAgreement.objects.get_or_create(user=user, terms=self)
+        terms_agreement, created = TermsAgreement.objects.get_or_create(user=user, terms=self)  # noqa: RUF059
 
-        # Only set the agreed_at date if the terms_agreement wasn't agreed yet (for newly created ones and older ones that have agreed false)
+        # Only set the agreed_at date if the terms_agreement wasn't agreed yet (for newly created ones and older ones that have agreed false)  # noqa: E501
         if not terms_agreement.agreed:
             terms_agreement.agreed_at = timezone.now()
 
@@ -898,7 +898,7 @@ class TermsAgreement(BaseAuditedModel, BaseVersionedEntity, CacheModel):
     agreed_at = models.DateTimeField(null=True, blank=True)
 
 
-class StudentAffiliation(models.Model):
+class StudentAffiliation(models.Model):  # noqa: DJ008
     user = models.ForeignKey("badgeuser.BadgeUser", on_delete=models.CASCADE)
     schac_home = models.CharField(max_length=254)
     eppn = models.CharField(max_length=254)

@@ -51,7 +51,7 @@ class CacheModel(models.Model):
         for method in find_fields_decorated_with(self, "_cached_method"):
             if not getattr(method, "_cached_method_auto_publish", False):
                 continue
-            try:
+            try:  # noqa: SIM105
                 # run the cached method and store it in cache
                 self.publish_method(method.__name__)
             except TypeError:

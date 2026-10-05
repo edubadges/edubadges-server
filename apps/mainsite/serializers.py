@@ -13,16 +13,16 @@ class BaseSlugRelatedField(SlugRelatedField):
 
 
 class HumanReadableBooleanField(serializers.BooleanField):
-    TRUE_VALUES = serializers.BooleanField.TRUE_VALUES | set(("on", "On", "ON"))
-    FALSE_VALUES = serializers.BooleanField.FALSE_VALUES | set(("off", "Off", "OFF"))
+    TRUE_VALUES = serializers.BooleanField.TRUE_VALUES | set(("on", "On", "ON"))  # noqa: C405
+    FALSE_VALUES = serializers.BooleanField.FALSE_VALUES | set(("off", "Off", "OFF"))  # noqa: C405
 
 
 class BadgrBaseModelSerializer(serializers.ModelSerializer):
-    def is_valid(self, raise_exception=False):
+    def is_valid(self, raise_exception=False):  # noqa: FBT002
         try:
             return super().is_valid(raise_exception)
         except ValidationError as e:
-            raise BadgrValidationError(error_message=e.detail, error_code=999)
+            raise BadgrValidationError(error_message=e.detail, error_code=999)  # noqa: B904
 
 
 class LinkedDataEntitySerializer(serializers.Serializer):
@@ -30,7 +30,7 @@ class LinkedDataEntitySerializer(serializers.Serializer):
         representation = super().to_representation(instance)
         representation["@id"] = instance.jsonld_id
 
-        try:
+        try:  # noqa: SIM105
             representation["@type"] = self.jsonld_type
         except AttributeError:
             pass
@@ -44,7 +44,7 @@ class JSONDictField(serializers.DictField):
     """
 
     def to_internal_value(self, data):
-        try:
+        try:  # noqa: SIM105
             data = json.loads(data)
         except TypeError:
             pass

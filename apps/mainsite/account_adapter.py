@@ -39,9 +39,9 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
 
                 if badgr_app.use_auth_code_exchange:
                     authcode = authcode_for_accesstoken(accesstoken)
-                    params = dict(authCode=authcode)
+                    params = dict(authCode=authcode)  # noqa: C408
                 else:
-                    params = dict(authToken=accesstoken.token)
+                    params = dict(authToken=accesstoken.token)  # noqa: C408
 
                 return set_url_query_params(badgr_app.ui_login_redirect, **params)
         else:

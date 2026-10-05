@@ -122,7 +122,7 @@ class BackpackAwardDetail(APIView):
                                     "name_dutch": "SURF Edubadges",
                                     "name_english": "SURF Edubadges",
                                     "image_dutch": "null",
-                                    "image_english": "/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png",
+                                    "image_english": "/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png",  # noqa: E501
                                     "faculty": {
                                         "name_dutch": "SURF",
                                         "name_english": "SURF",
@@ -134,10 +134,10 @@ class BackpackAwardDetail(APIView):
                                         "institution": {
                                             "name_dutch": "University Voorbeeld",
                                             "name_english": "University Example",
-                                            "image_dutch": "/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png",
-                                            "image_english": "/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png",
+                                            "image_dutch": "/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png",  # noqa: E501
+                                            "image_english": "/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png",  # noqa: E501
                                             "identifier": "university-example.org",
-                                            "alternative_identifier": "university-example.org.tempguestidp.edubadges.nl",
+                                            "alternative_identifier": "university-example.org.tempguestidp.edubadges.nl",  # noqa: E501
                                             "grondslag_formeel": "gerechtvaardigd_belang",
                                             "grondslag_informeel": "gerechtvaardigd_belang",
                                         },
@@ -234,7 +234,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
             },
         ),
     )
-    def put(self, request, data=None, allow_partial=False, **kwargs):
+    def put(self, request, data=None, allow_partial=False, **kwargs):  # noqa: FBT002
         """Update acceptance of an Assertion in the user's Backpack and make public / private"""
         fields_whitelist = ("acceptance", "public", "include_evidence", "include_grade_achieved")
         data = {k: v for k, v in list(request.data.items()) if k in fields_whitelist}

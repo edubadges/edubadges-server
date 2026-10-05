@@ -24,7 +24,7 @@ def get_client_ip(request):
 
 
 @receiver(audit_trail_signal)
-def direct_award_audit_trail(sender, user, request, direct_award_id, badgeclass_id, method, summary, **kwargs):
+def direct_award_audit_trail(sender, user, request, direct_award_id, badgeclass_id, method, summary, **kwargs):  # noqa: ARG001, PLR0913, PLR0917
     try:
         user_agent_info = (request.headers.get("user-agent", "<unknown>")[:255],)
 
@@ -45,7 +45,7 @@ def direct_award_audit_trail(sender, user, request, direct_award_id, badgeclass_
             badgeclass=badgeclass,
         )
         logger.info(
-            f"direct_award_audit_trail created {audit_trail.id}  for user {audit_trail.user} and directaward {direct_award_id}"
+            f"direct_award_audit_trail created {audit_trail.id}  for user {audit_trail.user} and directaward {direct_award_id}"  # noqa: E501, G004
         )
-    except Exception as e:
-        logger.error("direct_award_audit_trail request: %s, error: %s" % (request, e))
+    except Exception as e:  # noqa: BLE001
+        logger.error("direct_award_audit_trail request: %s, error: %s" % (request, e))  # noqa: G002, TRY400, UP031

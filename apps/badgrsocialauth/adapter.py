@@ -20,7 +20,7 @@ from rest_framework.exceptions import AuthenticationFailed
 
 
 class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
-    def authentication_error(self, request, provider_id, error=None, exception=None, extra_context={}):
+    def authentication_error(self, request, provider_id, error=None, exception=None, extra_context={}):  # noqa: B006
         badgr_app = get_session_badgr_app(self.request)
         if badgr_app is None:
             raise Http404
@@ -67,7 +67,7 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
                     )
                     raise ImmediateHttpResponse(HttpResponseRedirect(redirect_to=redirect_url))
         except AuthenticationFailed as e:
-            raise ImmediateHttpResponse(HttpResponseForbidden(e.detail))
+            raise ImmediateHttpResponse(HttpResponseForbidden(e.detail))  # noqa: B904
 
     def is_auto_signup_allowed(self, request, sociallogin):
         # If email is specified, check for duplicate and if so, no auto signup.
@@ -76,7 +76,7 @@ class BadgrSocialAccountAdapter(DefaultSocialAccountAdapter):
             email = user_email(sociallogin.user)
             # Let's check if auto_signup is really possible...
             if email:
-                if settings.ACCOUNT_UNIQUE_EMAIL:
+                if settings.ACCOUNT_UNIQUE_EMAIL:  # noqa: SIM102
                     # Change: in Badge always check for email
                     if email_address_exists(email):
                         # Oops, another user already has this address.

@@ -100,7 +100,7 @@ class IssuerSerializer(
     extensions = serializers.DictField(source="extension_items", required=False, validators=[BadgeExtensionValidator()])
 
     def _validate_image(self, image):
-        img_name, img_ext = os.path.splitext(image.name)
+        img_name, img_ext = os.path.splitext(image.name)  # noqa: RUF059
         image.name = "issuer_logo_" + str(uuid.uuid4()) + img_ext
         image = resize_image(image)
         app = BadgrApp.objects.get_current(self.context.get("request", None))
@@ -198,7 +198,7 @@ class AlignmentItemSerializer(serializers.Serializer):
         apispec_definition = ("BadgeClassAlignment", {})
 
     def validate_target_url(self, target_url):
-        if not self.root.initial_data.get("isMicroCredentials", True):
+        if not self.root.initial_data.get("isMicroCredentials", True):  # noqa: SIM102
             if not target_url or len(target_url.strip()) == 0:
                 raise ValidationError(detail="This field may not be blank.", code="blank")
         return target_url
@@ -249,7 +249,7 @@ class BadgeClassSerializer(
     award_allowed_institutions = PrimaryKeyRelatedField(many=True, queryset=Institution.objects.all(), required=False)
     tags = PrimaryKeyRelatedField(many=True, queryset=BadgeClassTag.objects.all(), required=False)
 
-    def validate(self, data):
+    def validate(self, data):  # noqa: C901
         """
         For each type of badge there are different required fields
         """
@@ -310,7 +310,7 @@ class BadgeClassSerializer(
 
     def validate_image(self, image):
         if image is not None:
-            img_name, img_ext = os.path.splitext(image.name)
+            img_name, img_ext = os.path.splitext(image.name)  # noqa: RUF059
             image.name = "issuer_badgeclass_" + str(uuid.uuid4()) + img_ext
             image = resize_image(image)
             app = BadgrApp.objects.get_current(self.context.get("request", None))
@@ -337,7 +337,7 @@ class BadgeClassSerializer(
             # Skip JSON-LD validation entirely in tests
             return extensions
         if extensions:
-            for ext_name, ext in extensions.items():
+            for ext_name, ext in extensions.items():  # noqa: B007, PERF102
                 if "@context" in ext and not ext["@context"].startswith(settings.EXTENSIONS_ROOT_URL):
                     raise BadgrValidationError(
                         error_code=999, error_message=f"extensions @context invalid {ext['@context']}"
@@ -453,7 +453,7 @@ class BadgeClassSerializer(
                 )
             if not validated_data["formal"] and not institution.grondslag_informeel and not is_micro_micro_credential:
                 raise BadgrValidationError(
-                    "Cannot create an informal badgeclass for an institution without the judicial basis for informal badges",
+                    "Cannot create an informal badgeclass for an institution without the judicial basis for informal badges",  # noqa: E501
                     216,
                 )
             tags = validated_data.get("tags", [])
@@ -540,8 +540,8 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
 
         if apps.is_installed("badgebook"):
             try:
-                from badgebook.models import BadgeObjectiveAward
-                from badgebook.serializers import BadgeObjectiveAwardSerializer
+                from badgebook.models import BadgeObjectiveAward  # noqa: PLC0415
+                from badgebook.serializers import BadgeObjectiveAwardSerializer  # noqa: PLC0415
 
                 try:
                     award = BadgeObjectiveAward.cached.get(badge_instance_id=instance.id)
@@ -561,12 +561,12 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
         """
         badgeclass = self.context["request"].data.get("badgeclass")
         enrollment = StudentsEnrolled.objects.get(entity_id=validated_data.get("enrollment_entity_id"))
-        da = badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns)
+        da = badgeclass.cached_pending_direct_awards().filter(eppn__in=enrollment.user.eppns)  # noqa: F841
 
         expires_at = None
         if badgeclass.expiration_period:
             expires_at = (
-                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)
+                datetime.datetime.now().replace(microsecond=0, second=0, minute=0, hour=0)  # noqa: DTZ005
                 + badgeclass.expiration_period
             )
         if enrollment.badge_instance:
@@ -582,7 +582,7 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
                 identifier=uuid.uuid4().urn,
                 signer=validated_data.get("created_by"),
                 issued_on=enrollment.date_created,
-                # evidence=validated_data.get('evidence_items', None)  # Dont forget this one when you re-implement signing
+                # evidence=validated_data.get('evidence_items', None)  # Dont forget this one when you re-implement signing  # noqa: E501
                 # narrative=validated_data.get('narrative', None)  # idem
             )
         else:

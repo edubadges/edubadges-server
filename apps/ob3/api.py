@@ -1,4 +1,5 @@
 import logging
+from http import HTTPStatus
 from typing import Any
 
 import requests
@@ -52,8 +53,8 @@ class CredentialsView(APIView):
             raise Http404("Badge instance not found")
 
         offer_uri = self._create_offer(request, badge_entity_id)
-        logger.info(f"Issued credential offer for badge {badge_entity_id}")
-        logger.debug(f"Offer: {offer_uri}")
+        logger.info(f"Issued credential offer for badge {badge_entity_id}")  # noqa: G004
+        logger.debug(f"Offer: {offer_uri}")  # noqa: G004
 
         return Response({"offer": offer_uri}, status=status.HTTP_201_CREATED)
 
@@ -63,7 +64,7 @@ class CredentialsView(APIView):
         user is the recipient.  Returns None when the badge does not exist
         or does not belong to the user.
         """
-        from issuer.models import BadgeInstance
+        from issuer.models import BadgeInstance  # noqa: PLC0415
 
         try:
             return BadgeInstance.objects.get(entity_id=entity_id, user=user)
@@ -84,11 +85,11 @@ class CredentialsView(APIView):
             "award_id": badge_entity_id,
         }
 
-        logger.debug(f"Requesting offer creation: {url} {payload['award_id']}")
+        logger.debug(f"Requesting offer creation: {url} {payload['award_id']}")  # noqa: G004
         resp = requests.post(timeout=5, url=url, json=payload, headers=headers)
-        logger.debug(f"Response: {resp.status_code} {resp.text}")
+        logger.debug(f"Response: {resp.status_code} {resp.text}")  # noqa: G004
 
-        if resp.status_code >= 400:
+        if resp.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"Failed to create offer:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
             raise BadRequest(msg)
 

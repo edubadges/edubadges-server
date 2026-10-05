@@ -11,7 +11,7 @@ from .models import Faculty, Institution
 class InstitutionForm(ModelForm):
     class Meta:
         model = Institution
-        exclude = ()
+        exclude = ()  # noqa: DJ006
 
     def clean(self):
         sis_integration_enabled = self.cleaned_data.get("sis_integration_enabled", False)

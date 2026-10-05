@@ -58,7 +58,7 @@ class BadgrValidationMultipleFieldError(BadgrValidationError):
         super().__init__(error_messages, 999)
 
 
-class GraphQLException(Exception):
+class GraphQLException(Exception):  # noqa: N818
     pass
 
 

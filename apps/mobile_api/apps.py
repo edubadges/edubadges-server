@@ -9,6 +9,6 @@ class MobileApiConfig(AppConfig):
         # Import your checks module so Django sees it
 
         # Initialize firebase app
-        from .firebase import initialize_firebase
+        from .firebase import initialize_firebase  # noqa: PLC0415
 
         initialize_firebase()

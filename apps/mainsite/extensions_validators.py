@@ -36,7 +36,7 @@ class BaseExtensionValidator:
 
 
 class ECTSExtensionValidator(BaseExtensionValidator):
-    """An extension that allows you to add an ECTS - European Credit Transfer and Accumulation System - number to a badgeclass object."""
+    """An extension that allows you to add an ECTS - European Credit Transfer and Accumulation System - number to a badgeclass object."""  # noqa: E501
 
     extension_key = "extensions:ECTSExtension"
 
@@ -144,7 +144,7 @@ class InstitutionNameExtensionValidator(BaseExtensionValidator):
 
 
 class LanguageExtensionValidator(BaseExtensionValidator):
-    """An extension that allows you to add a single string Language to a badgeclass object that represents the language of the course."""
+    """An extension that allows you to add a single string Language to a badgeclass object that represents the language of the course."""  # noqa: E501
 
     extension_key = "extensions:LanguageExtension"
 
@@ -198,7 +198,7 @@ class StudyLoadExtensionValidator(BaseExtensionValidator):
 
 
 class TimeInvestmentExtensionValidator(BaseExtensionValidator):
-    """An extension that allows you to add the time investment, expressed in hours needed to earn that badgeclass object."""
+    """An extension that allows you to add the time investment, expressed in hours needed to earn that badgeclass object."""  # noqa: E501
 
     extension_key = "extensions:TimeInvestmentExtension"
 

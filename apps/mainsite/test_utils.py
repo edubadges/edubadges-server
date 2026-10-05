@@ -68,7 +68,7 @@ class TestFilterCacheKey(TestCase):
         version = 1
         result = filter_cache_key(key, prefix, version)
         generated_key = f"prefix:1:{key}"
-        expected = hashlib.md5(generated_key.encode()).hexdigest()
+        expected = hashlib.md5(generated_key.encode()).hexdigest()  # noqa: S324
         self.assertEqual(result, expected)
 
 
@@ -285,7 +285,7 @@ class TestEmailMessageMaker(TestCase):
         mock_user.full_name = "John Doe"
         message = "Test feedback"
 
-        with patch("apps.mainsite.utils.render_to_string") as mock_render:
+        with patch("apps.mainsite.utils.render_to_string") as mock_render:  # noqa: SIM117
             with patch("apps.mainsite.utils.settings") as mock_settings:
                 mock_settings.DOMAIN = "example.com"
                 mock_render.return_value = "rendered feedback"

@@ -59,7 +59,7 @@ class BaseEntityListView(BaseEntityView):
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(objects, many=True, context=context)
 
-        headers = dict()
+        headers = dict()  # noqa: C408
         paginator = getattr(self, "paginator", None)
         if paginator and callable(getattr(paginator, "get_link_header", None)):
             link_header = paginator.get_link_header()
@@ -84,7 +84,7 @@ class BaseEntityListView(BaseEntityView):
 
 class VersionedObjectMixin:
     def has_object_permissions(self, request, obj):
-        for permission in self.get_permissions():
+        for permission in self.get_permissions():  # noqa: SIM110
             if not permission.has_object_permission(request, self, obj):
                 return False
         return True
@@ -118,7 +118,7 @@ class BaseEntityDetailView(BaseEntityView, VersionedObjectMixin):
         serializer = serializer_class(obj, context=context)
         return Response(serializer.data)
 
-    def put(self, request, data=None, allow_partial=False, **kwargs):
+    def put(self, request, data=None, allow_partial=False, **kwargs):  # noqa: FBT002
         """
         PUT a new version of an entity
         """

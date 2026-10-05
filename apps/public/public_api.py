@@ -48,7 +48,7 @@ class AssertionValidate(BaseEntityDetailView):
 
 
 class SlugToEntityIdRedirectMixin:
-    slugToEntityIdRedirect = False
+    slugToEntityIdRedirect = False  # noqa: N815
 
     def get_entity_id_by_slug(self, slug):
         """
@@ -61,11 +61,11 @@ class SlugToEntityIdRedirectMixin:
             # Check if the model has a slug field before attempting the query
             if not hasattr(self.model, "_meta") or "slug" not in [f.name for f in self.model._meta.get_fields()]:
                 return None
-            object = self.model.cached.get(slug=slug)
-            return getattr(object, "entity_id", None)
+            object_ = self.model.cached.get(slug=slug)
+            return getattr(object_, "entity_id", None)
         except self.model.DoesNotExist:
             return None
-        except Exception:
+        except Exception:  # noqa: BLE001
             # Catch any other exceptions (like FieldError) and return None
             return None
 
@@ -138,7 +138,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         """
         bot_useragents = getattr(settings, "BADGR_PUBLIC_BOT_USERAGENTS", ["LinkedInBot"])
         user_agent = self.request.headers.get("user-agent", "")
-        if any(a in user_agent for a in bot_useragents):
+        if any(a in user_agent for a in bot_useragents):  # noqa: SIM103
             return True
         return False
 
@@ -148,7 +148,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
         """
         bot_useragents = getattr(settings, "BADGR_PUBLIC_BOT_USERAGENTS_WIDE", ["LinkedInBot"])
         user_agent = self.request.headers.get("user-agent", "")
-        if any(a in user_agent for a in bot_useragents):
+        if any(a in user_agent for a in bot_useragents):  # noqa: SIM103
             return True
         return False
 
@@ -160,7 +160,7 @@ class JSONComponentView(VersionedObjectMixin, APIView, SlugToEntityIdRedirectMix
 
         http_accept = self.request.headers.get("accept", "application/json")
 
-        if self.is_bot() or any(a in http_accept for a in html_accepts):
+        if self.is_bot() or any(a in http_accept for a in html_accepts):  # noqa: SIM103
             return True
 
         return False
@@ -201,7 +201,7 @@ class ImagePropertyDetailView(APIView, SlugToEntityIdRedirectMixin):
         else:
             return current_object
 
-    def get(self, request, **kwargs):
+    def get(self, request, **kwargs):  # noqa: C901, PLR0912, PLR0915
         entity_id = kwargs.get("entity_id")
         current_object = self.get_object(entity_id)
         if current_object is None and self.slugToEntityIdRedirect and getattr(request, "version", "v1") == "v2":
@@ -290,7 +290,7 @@ class InstitutionJson(JSONComponentView):
         if self.is_wide_bot():
             image_url = f"{image_url}&fmt=wide"
 
-        return dict(
+        return dict(  # noqa: C408
             title=self.current_object.name,
             image_url=image_url,
         )
@@ -343,7 +343,7 @@ class IssuerJson(JSONComponentView):
         if self.is_wide_bot():
             image_url = f"{image_url}&fmt=wide"
 
-        return dict(
+        return dict(  # noqa: C408
             title=self.current_object.name,
             description=self.current_object.description,
             public_url=self.current_object.public_url,
@@ -490,7 +490,7 @@ class BadgeClassJson(JSONComponentView):
         )
         if self.is_wide_bot():
             image_url = f"{image_url}&fmt=wide"
-        return dict(
+        return dict(  # noqa: C408
             title=self.current_object.name,
             description=self.current_object.description,
             public_url=self.current_object.public_url,
@@ -537,7 +537,7 @@ class BadgeInstanceJson(JSONComponentView):
     """
     ## You might see this screen because the badge you are looking for is <span style="color:red">*set to private*</span>.
     ## Ask the recipient to set the badge to public, then try again.
-    """
+    """  # noqa: E501
 
     permission_classes = (permissions.AllowAny,)
     model = BadgeInstance
@@ -562,7 +562,7 @@ class BadgeInstanceJson(JSONComponentView):
         )
         if self.is_wide_bot():
             image_url = f"{image_url}&fmt=wide"
-        return dict(
+        return dict(  # noqa: C408
             title=self.current_object.cached_badgeclass.name,
             description=self.current_object.cached_badgeclass.description,
             public_url=self.current_object.public_url,
@@ -594,11 +594,11 @@ class AssertionRecipientName(APIView):
         if not identity or not salt:
             raise BadgrApiException400("Cannot query name: salt and identity needed", 0)
         instance = BadgeInstance.objects.get(salt=salt)
-        if instance.public:
+        if instance.public:  # noqa: SIM102
             if identity == instance.get_hashed_identity():
                 return Response(
                     {
-                        "name": instance.get_recipient_name(),  # TODO: for backward compatibility, remove once frontend is updated.
+                        "name": instance.get_recipient_name(),  # TODO: for backward compatibility, remove once frontend is updated.  # noqa: E501, FIX002, TD002, TD003
                         "validated_name": instance.get_validated_name(),
                         "recipient_name": instance.get_recipient_name(),
                     }
@@ -612,5 +612,5 @@ class ValidatorVersion(APIView):
 
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
-        response = requests.get(headers={"Accept": "application/json"}, url=urljoin(settings.VALIDATOR_URL, "git.info"))
+        response = requests.get(headers={"Accept": "application/json"}, url=urljoin(settings.VALIDATOR_URL, "git.info"))  # noqa: S113
         return Response(response.json(), status=status.HTTP_200_OK)

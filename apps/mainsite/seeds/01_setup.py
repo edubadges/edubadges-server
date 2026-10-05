@@ -1,4 +1,4 @@
-import json
+import json  # noqa: N999
 
 from allauth.socialaccount.models import SocialApp
 from badgeuser.models import BadgeUser, Terms, TermsUrl

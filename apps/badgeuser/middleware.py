@@ -18,7 +18,7 @@ class InactiveUserMiddleware:
             )
         if (
             request.user.is_authenticated
-            and request.user.is_active == False
+            and request.user.is_active == False  # noqa: E712
             and request.path != reverse("account_enabled")
         ):
             return HttpResponseRedirect(reverse("account_enabled"))

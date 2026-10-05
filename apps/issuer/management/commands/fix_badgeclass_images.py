@@ -1,5 +1,6 @@
 import json
 import os
+from http import HTTPStatus
 
 from django.core.files.storage import DefaultStorage
 from django.core.management import BaseCommand
@@ -48,10 +49,10 @@ class Command(BaseCommand):
                         self.stdout.write(f"IOError fetching '{remote_image_url}': {e!s}")
                         report["ioerrors"].append((remote_image_url, str(e)))
                     else:
-                        report["status_codes"][status_code] = report["status_codes"].get(status_code, []) + [
+                        report["status_codes"][status_code] = report["status_codes"].get(status_code, []) + [  # noqa: RUF005
                             remote_image_url
                         ]
-                        if status_code == 200:
+                        if status_code == HTTPStatus.OK:
                             badgeclass.image = image
                             badgeclass.save()
                             report["saved"] += 1

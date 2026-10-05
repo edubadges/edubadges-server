@@ -10,7 +10,7 @@ from mainsite.models import BadgrApp
  Theming supplies themes for different sub domains
  A them contains a privacy policy , term and condition , welcome message 
  Css is skipped for now but could in the future be added
-"""
+"""  # noqa: W291
 
 """
 get templates in directory
@@ -20,7 +20,7 @@ get templates in directory
 def get_current_templates():
     templates = []
     for template in os.listdir(os.path.join(settings.TOP_DIR, "apps", "mainsite", "templates", "terms_of_service")):
-        templates.append((os.path.join("terms_of_service", template), os.path.join("terms_of_service", template)))
+        templates.append((os.path.join("terms_of_service", template), os.path.join("terms_of_service", template)))  # noqa: PERF401
 
     return tuple(templates)
 

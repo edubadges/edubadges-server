@@ -4,7 +4,7 @@ from rest_framework import serializers
 class BadgrSocialAccountSerializerV1(serializers.Serializer):
     id = serializers.CharField()
     provider = serializers.CharField()
-    dateAdded = serializers.DateTimeField(source="date_joined")
+    dateAdded = serializers.DateTimeField(source="date_joined")  # noqa: N815
     uid = serializers.CharField()
 
     def to_representation(self, instance):

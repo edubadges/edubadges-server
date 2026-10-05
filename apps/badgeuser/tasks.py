@@ -6,8 +6,8 @@ email_task_queue_name = getattr(settings, "BACKGROUND_TASK_QUEUE_NAME", "default
 
 
 @app.task(bind=True, queue=email_task_queue_name)
-def process_email_verification(self, email_address_id):
-    from issuer.models import BadgeInstance
+def process_email_verification(self, email_address_id):  # noqa: ARG001
+    from issuer.models import BadgeInstance  # noqa: PLC0415
 
     try:
         email_address = CachedEmailAddress.cached.get(id=email_address_id)

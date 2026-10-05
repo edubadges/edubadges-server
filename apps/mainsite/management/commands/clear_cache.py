@@ -9,6 +9,6 @@ class Command(BaseCommand):
     help = "Fully clear your site-wide cache."
 
     def handle(self, *args, **kwargs):
-        assert settings.CACHES, "The CACHES setting is not configured!"
+        assert settings.CACHES, "The CACHES setting is not configured!"  # noqa: S101
         cache.clear()
         self.stdout.write("Your cache has been cleared!\n")

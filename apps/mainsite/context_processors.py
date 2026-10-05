@@ -1,7 +1,7 @@
 from django.conf import settings
 
 
-def extra_settings(request):
+def extra_settings(request):  # noqa: ARG001
     return {
         "HELP_EMAIL": getattr(settings, "HELP_EMAIL", "help@badgr.io"),
         "PINGDOM_MONITORING_ID": getattr(settings, "PINGDOM_MONITORING_ID", None),

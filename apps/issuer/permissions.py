@@ -20,7 +20,7 @@ class NoUnrevokedAssertionsPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if not obj.assertions:
             return True
-        return all([assertion.revoked for assertion in obj.assertions])
+        return all([assertion.revoked for assertion in obj.assertions])  # noqa: C419
 
 
 class RecipientIdentifiersMatch(permissions.BasePermission):
@@ -54,7 +54,7 @@ class BadgrOAuthTokenHasScope(permissions.BasePermission):
 
             # fallback scopes for authenticated users
             if request.user and request.user.is_authenticated:
-                default_auth_scopes = set(["rw:profile", "rw:issuer", "rw:backpack"])
+                default_auth_scopes = set(["rw:profile", "rw:issuer", "rw:backpack"])  # noqa: C405
                 if len(set(valid_scopes) & default_auth_scopes) > 0:
                     return True
 

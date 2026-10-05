@@ -42,7 +42,7 @@ class ExceptionHandlerMiddleware:
         return self.get_response(request)
 
     def process_exception(self, request, exception):
-        logger.exception(exception, exc_info=True)
+        logger.exception(exception, exc_info=True)  # noqa: LOG004, LOG014
         traceback.print_exc()
         # APIException are handled by various other handlers, and we don't want to swallow those
         if "json" in request.content_type and not isinstance(exception, APIException):
@@ -57,7 +57,7 @@ class RequestResponseLoggerMiddleware(MiddlewareMixin):
         if request.method in ["POST", "PUT", "PATCH"]:
             request.req_body = request.body  # for later retrieval
 
-    def process_response(self, request, response):
+    def process_response(self, request, response):  # noqa: C901
         # don't log static files or media files requests
         if not request.path.startswith("/static") and not request.path.startswith("/media"):
             request_log = {
@@ -81,7 +81,7 @@ class RequestResponseLoggerMiddleware(MiddlewareMixin):
                         elif body:
                             try:
                                 body = json.loads(body)
-                                if dict == type(body):
+                                if dict == type(body):  # noqa: E721
                                     image = body.get("image", None)
                                     if image and image.startswith("data:image"):
                                         body["image"] = "Image string removed for logging purposes"

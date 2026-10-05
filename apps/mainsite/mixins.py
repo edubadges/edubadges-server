@@ -41,9 +41,9 @@ class InternalValueErrorOverrideMixin:
         if errors:
             try:
                 super().to_internal_value(data)
-                raise serializers.ValidationError(detail=errors)
+                raise serializers.ValidationError(detail=errors)  # noqa: TRY301
             except serializers.ValidationError as e:
                 e.detail = OrderedDict(chain(e.detail.items(), errors.items()))
-                raise e
+                raise e  # noqa: TRY201
         else:
             return super().to_internal_value(data)

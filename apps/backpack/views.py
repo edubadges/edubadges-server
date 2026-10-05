@@ -12,6 +12,6 @@ class LegacyBadgeShareRedirectView(RedirectView):
             raise Http404
         try:
             badgeinstance = BadgeInstance.objects.get(entity_id=entity_id)
-            return badgeinstance.public_url
         except BadgeInstance.DoesNotExist:
-            raise Http404
+            raise Http404  # noqa: B904
+        return badgeinstance.public_url

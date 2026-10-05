@@ -34,12 +34,12 @@ class BaseAuditedModel(CacheModel):
 
     @property
     def cached_creator(self):
-        from badgeuser.models import BadgeUser
+        from badgeuser.models import BadgeUser  # noqa: PLC0415
 
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
-class EmailBlacklist(models.Model):
+class EmailBlacklist(models.Model):  # noqa: DJ008
     email = models.EmailField(unique=True)
 
     class Meta:
@@ -50,8 +50,8 @@ class EmailBlacklist(models.Model):
     def generate_email_signature(email):
         secret_key = settings.UNSUBSCRIBE_SECRET_KEY
 
-        expiration = datetime.utcnow() + timedelta(days=7)  # In one week.
-        timestamp = int((expiration - datetime(1970, 1, 1)).total_seconds())
+        expiration = datetime.utcnow() + timedelta(days=7)  # In one week.  # noqa: DTZ003
+        timestamp = int((expiration - datetime(1970, 1, 1)).total_seconds())  # noqa: DTZ001
 
         email_encoded = base64.b64encode(email.encode("utf-8"))
         hashed = hmac.new(secret_key.encode("utf-8"), email_encoded + bytes(str(timestamp), "utf-8"), sha1)
@@ -74,7 +74,7 @@ class EmailBlacklist(models.Model):
 
 
 class BadgrAppManager(Manager):
-    def get_current(self, request=None, raise_exception=True):
+    def get_current(self, request=None, raise_exception=True):  # noqa: FBT002
         origin = None
         existing_session_app_id = None
 
@@ -125,13 +125,13 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, CacheModel):
 
 
 @deconstructible
-class DefinedScopesValidator:
+class DefinedScopesValidator:  # noqa: PLW1641
     message = "Does not match defined scopes"
     code = "invalid"
 
     def __call__(self, value):
         defined_scopes = set(getattr(settings, "OAUTH2_PROVIDER", {}).get("SCOPES", {}).keys())
-        provided_scopes = set(s.strip() for s in re.split(r"[\s\n]+", value))
+        provided_scopes = set(s.strip() for s in re.split(r"[\s\n]+", value))  # noqa: C401
         if provided_scopes - defined_scopes:
             raise ValidationError(self.message, code=self.code)
 
@@ -207,7 +207,7 @@ class ArchiveMixin(CacheModel):
     def may_archive(self):
         if not self.assertions:
             return True
-        return all([assertion.revoked for assertion in self.assertions])
+        return all([assertion.revoked for assertion in self.assertions])  # noqa: C419
 
     @transaction.atomic
     def archive(self, **kwargs):
@@ -216,7 +216,7 @@ class ArchiveMixin(CacheModel):
             - archives all children
             - only publishes the parent of the initially archived entity
             - removes all associated staff memberships without publishing the associated object (the one that is archived)
-        """
+        """  # noqa: E501
         publish_parent = kwargs.pop("publish_parent", True)
         if not self.may_archive:
             raise ProtectedError(
@@ -230,13 +230,13 @@ class ArchiveMixin(CacheModel):
         self.archived = True
         self.save()
         if publish_parent:
-            try:
+            try:  # noqa: SIM105
                 self.parent.publish()
             except AttributeError:  # no parent
                 pass
 
 
-class SystemNotification(models.Model):
+class SystemNotification(models.Model):  # noqa: DJ008
     title = models.CharField(max_length=255, blank=False, null=False, default=None)
     notification_en = models.TextField(blank=False, null=False, default=None)
     notification_nl = models.TextField(blank=False, null=False, default=None)

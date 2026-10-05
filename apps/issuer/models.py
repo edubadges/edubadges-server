@@ -93,8 +93,9 @@ class BaseOpenBadgeObjectModel(OriginalJsonMixin, CacheModel):
             # add new
             for ext_name, ext in list(value.items()):
                 ext_json = json_dumps(ext)
-                ext, ext_created = self.get_extensions_manager().get_or_create(
-                    name=ext_name, defaults=dict(original_json=ext_json)
+                ext, ext_created = self.get_extensions_manager().get_or_create(  # noqa: PLW2901
+                    name=ext_name,
+                    defaults=dict(original_json=ext_json),  # noqa: C408
                 )
                 if not ext_created:
                     ext.original_json = ext_json
@@ -118,7 +119,7 @@ class BaseOpenBadgeExtension(CacheModel):
         abstract = True
 
 
-class Issuer(
+class Issuer(  # noqa: DJ008
     EntityUserProvisionmentMixin,
     ArchiveMixin,
     PermissionedModelMixin,
@@ -145,7 +146,7 @@ class Issuer(
     old_json = JSONField()
     objects = IssuerManager()
     cached = CacheModelManager()
-    faculty = models.ForeignKey("institution.Faculty", on_delete=models.CASCADE, blank=False, null=False)
+    faculty = models.ForeignKey("institution.Faculty", on_delete=models.CASCADE, blank=False, null=False)  # noqa: DJ012
 
     @property
     def description(self):
@@ -249,7 +250,7 @@ class Issuer(
                     )
         return super().validate_unique(exclude=exclude)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # noqa: DJ012
         if not self.name_english and not self.name_dutch:
             raise BadgrValidationError("Either English or Dutch name must be supplied", 999)
         self.validate_unique()
@@ -305,7 +306,7 @@ class Issuer(
             r += bc.cached_pending_enrollments()
         return r
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):  # noqa: DJ012
         return reverse("issuer_json", kwargs={"entity_id": self.entity_id})
 
     def get_url_with_public_key(self, public_key_issuer):
@@ -359,22 +360,22 @@ class Issuer(
         symmetric_key.validate_password(password)
         return tsob.create_new_private_key(password, symmetric_key)
 
-    def get_json(
+    def get_json(  # noqa: C901, PLR0912, PLR0913, PLR0915, PLR0917
         self,
         obi_version=CURRENT_OBI_VERSION,
-        include_extra=True,
-        use_canonical_id=False,
-        signed=False,
+        include_extra=True,  # noqa: FBT002
+        use_canonical_id=False,  # noqa: FBT002
+        signed=False,  # noqa: FBT002
         public_key_issuer=None,
-        expand_public_key=False,
-        expand_institution=False,
-        expand_awards=False,
+        expand_public_key=False,  # noqa: FBT002
+        expand_institution=False,  # noqa: FBT002
+        expand_awards=False,  # noqa: FBT002
     ):
         if signed and not public_key_issuer:
             raise ValueError(
                 "Cannot return signed issuer json without knowing which public key address is going to be used."
             )
-        if public_key_issuer:
+        if public_key_issuer:  # noqa: SIM102
             if public_key_issuer.issuer != self:
                 raise ValueError("Public key issuer does not belong to this issuer.")
         obi_version, context_iri = get_obi_context(obi_version)
@@ -432,7 +433,7 @@ class Issuer(
         if self.faculty:
             if self.faculty.institution.brin:
                 json["extensions:InstitutionIdentifierExtension"] = {
-                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionIdentifierExtension/context.json",
+                    "@context": f"{settings.EXTENSIONS_ROOT_URL}/extensions/InstitutionIdentifierExtension/context.json",  # noqa: E501
                     "type": ["Extension", "extensions:InstitutionIdentifierExtension"],
                     "InstitutionIdentifier": self.faculty.institution.brin,
                 }
@@ -508,14 +509,14 @@ class Issuer(
 
     @property
     def cached_badgrapp(self):
-        id = self.badgrapp_id or getattr(settings, "BADGR_APP_ID", 1)
+        id = self.badgrapp_id or getattr(settings, "BADGR_APP_ID", 1)  # noqa: A001
         return BadgrApp.cached.get(id=id)
 
-    def __unicode__(self):
+    def __unicode__(self):  # noqa: DJ012
         return self.name
 
 
-class BadgeClass(
+class BadgeClass(  # noqa: DJ008
     EntityUserProvisionmentMixin,
     ArchiveMixin,
     PermissionedModelMixin,
@@ -568,7 +569,7 @@ class BadgeClass(
     old_json = JSONField()
     objects = BadgeClassManager()
     cached = CacheModelManager()
-    staff = models.ManyToManyField("badgeuser.BadgeUser", through="staff.BadgeClassStaff")
+    staff = models.ManyToManyField("badgeuser.BadgeUser", through="staff.BadgeClassStaff")  # noqa: DJ012
     expiration_period = models.DurationField(null=True)
     award_allowed_institutions = models.ManyToManyField(
         "institution.Institution", blank=True, help_text="Allow awards to this institutions"
@@ -609,7 +610,7 @@ class BadgeClass(
     def validate_unique(self, exclude=None):
         return super().validate_unique(exclude=exclude)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # noqa: DJ012
         self.validate_unique()
         return super().save(*args, **kwargs)
 
@@ -696,7 +697,7 @@ class BadgeClass(
         terms = self._get_terms()
         return terms.accept(user)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):  # noqa: DJ012
         return reverse("badgeclass_json", kwargs={"entity_id": self.entity_id})
 
     def get_url_with_public_key(self, public_key_issuer):
@@ -735,19 +736,19 @@ class BadgeClass(
 
     @cached_method(auto_publish=True)
     def cached_enrollments(self):
-        from lti_edu.models import StudentsEnrolled
+        from lti_edu.models import StudentsEnrolled  # noqa: PLC0415
 
         return StudentsEnrolled.objects.filter(badge_class=self)
 
     @cached_method(auto_publish=True)
     def cached_pending_enrollments_including_denied(self):
-        from lti_edu.models import StudentsEnrolled
+        from lti_edu.models import StudentsEnrolled  # noqa: PLC0415
 
         return StudentsEnrolled.objects.filter(badge_class=self, badge_instance=None)
 
     @cached_method(auto_publish=True)
     def cached_pending_enrollments(self):
-        from lti_edu.models import StudentsEnrolled
+        from lti_edu.models import StudentsEnrolled  # noqa: PLC0415
 
         return StudentsEnrolled.objects.filter(badge_class=self, badge_instance=None, denied=False)
 
@@ -839,14 +840,14 @@ class BadgeClass(
     def get_extensions_manager(self):
         return self.badgeclassextension_set
 
-    def issue(
+    def issue(  # noqa: PLR0913, PLR0917
         self,
         recipient,
         created_by=None,
-        allow_uppercase=False,
+        allow_uppercase=False,  # noqa: FBT002
         extensions=None,
-        enforce_validated_name=True,
-        include_evidence=True,
+        enforce_validated_name=True,  # noqa: FBT002
+        include_evidence=True,  # noqa: FBT002
         **kwargs,
     ):
 
@@ -865,7 +866,7 @@ class BadgeClass(
 
         return assertion
 
-    def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):
+    def issue_signed(self, recipient, created_by=None, allow_uppercase=False, signer=None, extensions=None, **kwargs):  # noqa: FBT002
         perms = self.get_permissions(signer)
         if not perms["may_sign"]:
             raise serializers.ValidationError("You do not have permission to sign badges for this badgeclass.")
@@ -881,12 +882,12 @@ class BadgeClass(
         assertion.submit_for_timestamping(signer=signer)
         return assertion
 
-    def get_json(
+    def get_json(  # noqa: C901, PLR0912
         self,
         obi_version=CURRENT_OBI_VERSION,
-        include_extra=True,
-        use_canonical_id=False,
-        signed=False,
+        include_extra=True,  # noqa: FBT002
+        use_canonical_id=False,  # noqa: FBT002
+        signed=False,  # noqa: FBT002
         public_key_issuer=None,
     ):
         if not public_key_issuer and signed:
@@ -943,7 +944,7 @@ class BadgeClass(
         # alignment / tags
         if obi_version == "2_0":
             json["alignment"] = [a.get_json(obi_version=obi_version) for a in self.cached_alignments()]
-            json["tags"] = list(t.name for t in self.cached_tags())
+            json["tags"] = list(t.name for t in self.cached_tags())  # noqa: C400
 
         # extensions
         if len(self.cached_extensions()) > 0:
@@ -985,7 +986,7 @@ class BadgeClass(
         return False
 
 
-class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, BaseOpenBadgeObjectModel):
+class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, BaseOpenBadgeObjectModel):  # noqa: DJ008
     entity_class_name = "Assertion"
 
     issued_on = models.DateTimeField(blank=False, null=False, default=timezone.now)
@@ -1091,7 +1092,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     @property
     def share_url(self):
         return self.public_url
-        # return OriginSetting.HTTP+reverse('backpack_shared_assertion', kwargs={'share_hash': self.entity_id})
+        # return OriginSetting.HTTP+reverse('backpack_shared_assertion', kwargs={'share_hash': self.entity_id})  # noqa: E501
 
     @property
     def cached_issuer(self):
@@ -1105,7 +1106,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     def cached_evidence(self):
         return self.badgeinstanceevidence_set.all()
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):  # noqa: DJ012
         return reverse("badgeinstance_json", kwargs={"entity_id": self.entity_id})
 
     @property
@@ -1156,10 +1157,10 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
             return self.user.primary_email
         return None
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # noqa: DJ012
         if self.pk is None:
             self.salt = uuid.uuid4().hex
-            self.created_at = datetime.datetime.now()
+            self.created_at = datetime.datetime.now()  # noqa: DTZ005
 
             # do this now instead of in AbstractVersionedEntity.save() so we can use it for image name
             if self.entity_id is None:
@@ -1212,7 +1213,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
         # remove BadgeObjectiveAwards from badgebook if needed
         if apps.is_installed("badgebook"):
             try:
-                from badgebook.models import BadgeObjectiveAward
+                from badgebook.models import BadgeObjectiveAward  # noqa: PLC0415
 
                 try:
                     award = BadgeObjectiveAward.cached.get(badge_instance_id=self.id)
@@ -1229,15 +1230,15 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     def get_hashed_identity(self):
         return generate_sha256_hashstring(self.recipient_identifier.lower(), self.salt)
 
-    def get_json(
+    def get_json(  # noqa: C901, PLR0912, PLR0913, PLR0915, PLR0917
         self,
         obi_version=CURRENT_OBI_VERSION,
-        expand_badgeclass=False,
-        expand_issuer=False,
-        expand_user=False,
-        include_extra=True,
-        use_canonical_id=False,
-        signed=False,
+        expand_badgeclass=False,  # noqa: FBT002
+        expand_issuer=False,  # noqa: FBT002
+        expand_user=False,  # noqa: FBT002
+        include_extra=True,  # noqa: FBT002
+        use_canonical_id=False,  # noqa: FBT002
+        signed=False,  # noqa: FBT002
         public_key_issuer=None,
     ):
         if signed:
@@ -1299,7 +1300,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
 
             if expand_user:
                 json["badge"]["user"] = self.user.get_full_name()
-                from public.public_api import BadgeClassJson
+                from public.public_api import BadgeClassJson  # noqa: PLC0415
 
                 json["badge"]["endorsements"] = [
                     BadgeClassJson.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()
@@ -1406,7 +1407,7 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
         return self.cached_issuer.cached_badgrapp
 
 
-class BadgeInstanceEvidence(OriginalJsonMixin, CacheModel):
+class BadgeInstanceEvidence(OriginalJsonMixin, CacheModel):  # noqa: DJ008
     badgeinstance = models.ForeignKey("issuer.BadgeInstance", on_delete=models.CASCADE)
     evidence_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
     narrative = models.TextField(blank=True, null=True, default=None)
@@ -1419,7 +1420,7 @@ class BadgeInstanceEvidence(OriginalJsonMixin, CacheModel):
         super().publish()
         self.badgeinstance.publish()
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):  # noqa: FBT002
         json = OrderedDict()
         if include_context:
             obi_version, context_iri = get_obi_context(obi_version)
@@ -1437,7 +1438,7 @@ class BadgeInstanceEvidence(OriginalJsonMixin, CacheModel):
         return json
 
 
-class BadgeClassAlignment(OriginalJsonMixin, CacheModel):
+class BadgeClassAlignment(OriginalJsonMixin, CacheModel):  # noqa: DJ008
     badgeclass = models.ForeignKey("issuer.BadgeClass", on_delete=models.CASCADE)
     target_name = models.TextField()
     target_url = models.CharField(max_length=2083, blank=True, null=True, default=None)
@@ -1453,7 +1454,7 @@ class BadgeClassAlignment(OriginalJsonMixin, CacheModel):
         super().delete(*args, **kwargs)
         self.badgeclass.publish()
 
-    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):
+    def get_json(self, obi_version=CURRENT_OBI_VERSION, include_context=False):  # noqa: FBT002
         json = OrderedDict()
         if include_context:
             obi_version, context_iri = get_obi_context(obi_version)

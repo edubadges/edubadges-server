@@ -9,7 +9,7 @@ class MainGrapheneTest(BadgrTestCase):
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
         student = self.setup_student(affiliated_institutions=[teacher1.institution])
-        for x in range(8):
+        for x in range(8):  # noqa: B007
             self.setup_assertion(recipient=student, badgeclass=badgeclass, created_by=teacher1)
         query = (
             "query foo{"

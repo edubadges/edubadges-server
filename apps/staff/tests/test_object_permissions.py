@@ -1,5 +1,6 @@
 import collections
 import json
+from http import HTTPStatus
 
 from mainsite.tests import BadgrTestCase
 
@@ -7,7 +8,7 @@ from mainsite.tests import BadgrTestCase
 class ObjectPermissionTests(BadgrTestCase):
     def test_may_not_escalate_your_own_perms(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        faculty = self.setup_faculty(institution=teacher1.institution)
+        faculty = self.setup_faculty(institution=teacher1.institution)  # noqa: F841
         staff = self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_administrate_users=False)
         data = json.dumps(
             {
@@ -225,11 +226,11 @@ class ObjectPermissionTests(BadgrTestCase):
         outside_teacher = self.setup_teacher()
         outside_faculty = self.setup_faculty(institution=outside_teacher.institution)
         outside_issuer = self.setup_issuer(faculty=outside_faculty, created_by=outside_teacher)
-        outside_badgeclass = self.setup_badgeclass(issuer=outside_issuer)
+        outside_badgeclass = self.setup_badgeclass(issuer=outside_issuer)  # noqa: F841
         # create entities inside  branch
         teacher1 = self.setup_teacher(authenticate=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
-        issuer0 = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        issuer0 = self.setup_issuer(faculty=faculty, created_by=teacher1)  # noqa: F841
         issuer1 = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer1)
         badgeclass1 = self.setup_badgeclass(issuer=issuer1)
@@ -278,7 +279,7 @@ class ObjectPermissionTests(BadgrTestCase):
         response = self.client.delete(
             f"/staff-membership/faculty/change/{staff.entity_id}", content_type="application/json"
         )
-        self.assertTrue(response.status_code == 204)
+        self.assertTrue(response.status_code == HTTPStatus.NO_CONTENT)
         self.assertEqual(faculty1.staff_items.__len__(), 0)
 
     def test_may_not_remove_last_institution_staff_membership(self):
@@ -287,7 +288,7 @@ class ObjectPermissionTests(BadgrTestCase):
         response = self.client.delete(
             f"/staff-membership/institution/change/{staff.entity_id}", content_type="application/json"
         )
-        self.assertTrue(response.status_code == 400)
+        self.assertTrue(response.status_code == HTTPStatus.BAD_REQUEST)
         self.assertEqual(
             response.data["fields"]["error_message"].__str__(),
             "Cannot remove the last staff membership of this institution.",
@@ -301,7 +302,7 @@ class ObjectPermissionTests(BadgrTestCase):
         response = self.client.delete(
             f"/staff-membership/faculty/change/{staff.entity_id}", content_type="application/json"
         )
-        self.assertTrue(response.status_code == 404)
+        self.assertTrue(response.status_code == HTTPStatus.NOT_FOUND)
 
     def test_all_teachers_in_institution_may_read(self):
         teacher1 = self.setup_teacher(authenticate=True)

@@ -30,7 +30,7 @@ class Query:
         return StudentsEnrolled.objects.filter(user=info.context.user)
 
     def resolve_enrollment(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         badge_class_id = kwargs.get("badge_class_id")
         if badge_class_id:
             return StudentsEnrolled.objects.filter(

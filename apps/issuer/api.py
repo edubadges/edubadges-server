@@ -58,7 +58,7 @@ class IssuerArchiveView(BaseEntityDetailView):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
             return Response(status=HTTP_404_NOT_FOUND)
-        obj.archived = False if request.data["archive"] else True
+        obj.archived = False if request.data["archive"] else True  # noqa: SIM211
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT, data={})
 
@@ -73,7 +73,7 @@ class BadgeClassArchiveView(BaseEntityDetailView):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
             return Response(status=HTTP_404_NOT_FOUND)
-        obj.archived = False if request.data["archive"] else True
+        obj.archived = False if request.data["archive"] else True  # noqa: SIM211
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT, data={})
 

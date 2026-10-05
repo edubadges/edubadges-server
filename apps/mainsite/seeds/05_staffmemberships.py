@@ -1,4 +1,4 @@
-from allauth.account.models import EmailAddress
+from allauth.account.models import EmailAddress  # noqa: N999
 from allauth.socialaccount.models import SocialAccount
 from badgeuser.models import BadgeUser, TermsAgreement
 from institution.models import Faculty, FacultyStaff, Institution
@@ -36,7 +36,7 @@ award_perms = {
 }
 
 
-def create_facultystaff(username, email, first_name, last_name, institution_name, faculty_name, uid, perms=all_perms):
+def create_facultystaff(username, email, first_name, last_name, institution_name, faculty_name, uid, perms=all_perms):  # noqa: PLR0913, PLR0917
     user, _ = BadgeUser.objects.get_or_create(
         username=username,
         email=email,
@@ -61,7 +61,7 @@ def create_facultystaff(username, email, first_name, last_name, institution_name
     FacultyStaff.objects.get_or_create(user=user, faculty=faculty, **perms)
 
 
-def create_issuerstaff(
+def create_issuerstaff(  # noqa: PLR0913, PLR0917
     username, email, first_name, last_name, institution_name, faculty_name, issuer_name, uid, perms=all_perms
 ):
     user, _ = BadgeUser.objects.get_or_create(
@@ -83,7 +83,7 @@ def create_issuerstaff(
     IssuerStaff.objects.get_or_create(user=user, issuer=issuer, **perms)
 
 
-def create_badgeclassstaff(
+def create_badgeclassstaff(  # noqa: PLR0913, PLR0917
     username,
     email,
     first_name,

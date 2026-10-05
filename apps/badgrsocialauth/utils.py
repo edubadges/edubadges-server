@@ -40,7 +40,7 @@ class BadgrSocialAuthProviderMixin:
 
     def extract_common_fields(self, data):
         # extracts data required to build user model
-        return dict(  # email=data['email'],
+        return dict(  # email=data['email'],  # noqa: C408
             email=data.get("email", None),
             first_name=data.get("given_name", None),
             last_name=data.get("family_name", None),
@@ -48,11 +48,11 @@ class BadgrSocialAuthProviderMixin:
 
 
 def get_social_account(sociallogin_identifier):
-    from allauth.socialaccount.models import SocialAccount
+    from allauth.socialaccount.models import SocialAccount  # noqa: PLC0415
 
     try:
         social_account = SocialAccount.objects.get(uid=sociallogin_identifier)
-        return social_account
+        return social_account  # noqa: TRY300
     except SocialAccount.DoesNotExist:
         return None
 

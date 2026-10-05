@@ -31,10 +31,10 @@ class LtiToolKey(models.Model):
             self.public_jwk = None
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return "<LtiToolKey id=%d, name=%s>" % (self.id, self.name)
+    def __str__(self):  # noqa: DJ012
+        return "<LtiToolKey id=%d, name=%s>" % (self.id, self.name)  # noqa: UP031
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         db_table = "lti1p3_tool_key"
         verbose_name = "lti 1.3 tool key"
         verbose_name_plural = "lti 1.3 tool keys"
@@ -121,10 +121,10 @@ class LtiTool(models.Model):
         }
         return data
 
-    def __str__(self):
-        return "<LtiTool id=%d, title=%s>" % (self.id, self.title)
+    def __str__(self):  # noqa: DJ012
+        return "<LtiTool id=%d, title=%s>" % (self.id, self.title)  # noqa: UP031
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         unique_together = [
             ["issuer", "client_id"],
         ]

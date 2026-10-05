@@ -25,6 +25,6 @@ class Query:
     endorsements = graphene.List(EndorsementType)
 
     def resolve_endorsements(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             return Endorsement.objects.filter(badge_class__entity_id=id)

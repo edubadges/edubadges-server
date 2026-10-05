@@ -59,7 +59,7 @@ class FacultyArchiveView(BaseEntityDetailView):
         obj = self.get_object(request, **kwargs)
         if not self.has_object_permissions(request, obj):
             return Response(status=HTTP_404_NOT_FOUND)
-        obj.archived = False if request.data["archive"] else True
+        obj.archived = False if request.data["archive"] else True  # noqa: SIM211
         obj.save()
         return Response(status=HTTP_204_NO_CONTENT, data={})
 
@@ -101,7 +101,7 @@ class InstitutionsTagUsage(APIView):
     def post(self, request, **kwargs):
         tag_name = request.data.get("name")
 
-        from issuer.models import BadgeClass
+        from issuer.models import BadgeClass  # noqa: PLC0415
 
         badge_classes = (
             BadgeClass.objects.filter(tags__name=tag_name)

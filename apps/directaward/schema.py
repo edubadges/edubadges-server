@@ -68,7 +68,7 @@ class Query:
         return list(user.direct_awards)
 
     def resolve_direct_award(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             da = DirectAward.objects.get(entity_id=id)
             user = info.context.user

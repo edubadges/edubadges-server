@@ -35,7 +35,7 @@ class Base64FileField(FileField):
             filesize = sys.getsizeof(ret.file)
             if filesize > settings.MAX_IMAGE_UPLOAD_SIZE:
                 raise ValidationError(f"Image too large, max file size is {settings.MAX_IMAGE_UPLOAD_SIZE_LABEL}", 999)
-            return ret
+            return ret  # noqa: TRY300
         except (ValueError, binascii.Error):
             return super().to_internal_value(data)
 
@@ -43,7 +43,7 @@ class Base64FileField(FileField):
 class ValidImageField(Base64FileField):
     default_validators = [ValidImageValidator()]
 
-    def __init__(self, skip_http=True, allow_empty_file=False, use_url=True, allow_null=True, **kwargs):
+    def __init__(self, skip_http=True, allow_empty_file=False, use_url=True, allow_null=True, **kwargs):  # noqa: FBT002
         self.skip_http = skip_http
         super().__init__(allow_empty_file=allow_empty_file, use_url=use_url, allow_null=allow_null, **kwargs)
 
@@ -55,6 +55,6 @@ class ValidImageField(Base64FileField):
             and not isinstance(data, UploadedFile)
             and urllib.parse.urlparse(data).scheme in ("http", "https")
         ):
-            raise SkipField()
+            raise SkipField
 
         return super().to_internal_value(data)

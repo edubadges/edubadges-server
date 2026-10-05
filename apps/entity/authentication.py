@@ -16,4 +16,4 @@ class ExplicitCSRFSessionAuthentication(SessionAuthentication):
         try:
             return super().enforce_csrf(request)
         except exceptions.PermissionDenied as e:
-            raise CSRFPermissionDenied(e.detail)
+            raise CSRFPermissionDenied(e.detail)  # noqa: B904

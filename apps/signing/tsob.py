@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 import requests
 from django.conf import settings
@@ -6,8 +7,8 @@ from signing import utils
 from signing.models import PrivateKey, PublicKey, SymmetricKey
 
 
-def create_new_symmetric_key(password, user, salt="salt", length=32, n=1048576, r=8, p=1):
-    symkey_json = requests.post(
+def create_new_symmetric_key(password, user, salt="salt", length=32, n=1048576, r=8, p=1):  # noqa: PLR0913, PLR0917
+    symkey_json = requests.post(  # noqa: S113
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "symmetrickey/",
         data=json.dumps({"password": password, "salt": salt, "length": length, "n": n, "r": r, "p": p}),
         headers={"content-type": "application/json"},
@@ -26,7 +27,7 @@ def create_new_symmetric_key(password, user, salt="salt", length=32, n=1048576, 
 
 
 def create_new_private_key(password, symmetric_key):
-    response = requests.post(
+    response = requests.post(  # noqa: S113
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "privatekey/",
         data=json.dumps(
             {
@@ -72,7 +73,7 @@ def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, 
     new_symmetric_key_params = new_symmetric_key.get_params()
     new_symmetric_key_params["password"] = new_password
 
-    response = requests.post(
+    response = requests.post(  # noqa: S113
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "reencrypt/",
         data=json.dumps(
             {
@@ -83,9 +84,9 @@ def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, 
         ),
         headers={"content-type": "application/json"},
     )
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         for reencrypted_private_key in response.json():
-            matching_previous_private_key = [
+            matching_previous_private_key = [  # noqa: RUF015
                 pk for pk in private_key_list if pk.public_key.public_key_pem == reencrypted_private_key["public_key"]
             ][0]
             matching_previous_private_key.symmetric_key = new_symmetric_key
@@ -108,7 +109,7 @@ def sign_badges(list_of_assertions, private_key, symmetric_key, password):
     symmetric_key_params = symmetric_key.get_params()
     symmetric_key_params["password"] = password
 
-    response = requests.post(
+    response = requests.post(  # noqa: S113
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "sign/",
         data=json.dumps(
             {
@@ -120,14 +121,14 @@ def sign_badges(list_of_assertions, private_key, symmetric_key, password):
         headers={"content-type": "application/json"},
     )
 
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         signed_badges_json = response.json()["signed_badges"]
         return signed_badges_json
     raise ValueError(response.json()["message"])
 
 
 def deep_validate(signed_badges, symmetric_key, private_key):
-    return requests.post(
+    return requests.post(  # noqa: S113
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "deepvalidate/",
         data=json.dumps({"signed_badges": signed_badges, "symmetric_key": symmetric_key, "private_key": private_key}),
         headers={"content-type": "application/json"},

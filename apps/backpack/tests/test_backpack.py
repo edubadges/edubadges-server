@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 from mainsite.tests import BadgrTestCase
 
@@ -16,7 +17,7 @@ class BackpackAPITest(BadgrTestCase):
         response = self.client.put(
             f"/earner/badges/{assertion.entity_id}", data=json.dumps(body), content_type="application/json"
         )
-        self.assertTrue(response.status_code == 200)  # type: ignore[attr-defined]
+        self.assertTrue(response.status_code == HTTPStatus.OK)  # type: ignore[attr-defined]
         self.assertTrue(student.cached_badgeinstances()[0].public)  # instant cache update
 
     def test_reject_assertion(self):
@@ -37,9 +38,9 @@ class BackpackAPITest(BadgrTestCase):
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
-        ass1 = self.setup_assertion(student, badgeclass, teacher1)
-        ass2 = self.setup_assertion(student, badgeclass, teacher1)
-        ass3 = self.setup_assertion(student, badgeclass, teacher1)
+        ass1 = self.setup_assertion(student, badgeclass, teacher1)  # noqa: F841
+        ass2 = self.setup_assertion(student, badgeclass, teacher1)  # noqa: F841
+        ass3 = self.setup_assertion(student, badgeclass, teacher1)  # noqa: F841
         query = "query foo {badgeInstances {entityId}}"
         response = self.graphene_post(student, query)
         self.assertEqual(response["data"]["badgeInstances"].__len__(), 3)  # type: ignore[union-attr]

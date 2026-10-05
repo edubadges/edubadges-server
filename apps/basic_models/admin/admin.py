@@ -30,7 +30,7 @@ class CreatedUpdatedBy(ModelAdmin):
 
 class AutoGroupMeta(ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
-        ModelForm = super().get_form(request, obj, **kwargs)
+        ModelForm = super().get_form(request, obj, **kwargs)  # noqa: N806
         return ModelForm
 
     def get_readonly_fields(self, request, obj=None):
@@ -128,19 +128,19 @@ class ActiveModelAdmin(ModelAdmin):
 
     def activate_objects(self, request, queryset):
         """Admin action to set is_active=True on objects"""
-        self._set_objects_active(request, queryset, True)
+        self._set_objects_active(request, queryset, True)  # noqa: FBT003
 
     activate_objects.short_description = "Activate selected %(verbose_name_plural)s"
 
     def deactivate_objects(self, request, queryset):
         """Admin action to set is_active=False on objects"""
-        self._set_objects_active(request, queryset, False)
+        self._set_objects_active(request, queryset, False)  # noqa: FBT003
 
     deactivate_objects.short_description = "Deactivate selected %(verbose_name_plural)s"
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if not self.has_delete_permission(request):
+        if not self.has_delete_permission(request):  # noqa: SIM102
             if "delete_selected" in actions:
                 del actions["delete_selected"]
         return actions
@@ -153,7 +153,7 @@ class TimestampedModelAdmin(ModelAdmin):
 
 
 class DefaultModelAdmin(ActiveModelAdmin, UserModelAdmin, TimestampedModelAdmin):
-    """ModelAdmin subclass that combines functionality of UserModel, ActiveModel, and TimestampedModel admins and defines a Meta fieldset"""
+    """ModelAdmin subclass that combines functionality of UserModel, ActiveModel, and TimestampedModel admins and defines a Meta fieldset"""  # noqa: E501
 
     readonly_fields = ("created_at", "created_by", "updated_at", "updated_by")
     fieldsets = (
@@ -167,7 +167,7 @@ class DefaultModelAdmin(ActiveModelAdmin, UserModelAdmin, TimestampedModelAdmin)
 class SlugModelAdmin(DefaultModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     list_display = ("name", "slug", "is_active")
-    fieldsets = ((None, {"fields": ("name", "slug")}),) + DefaultModelAdmin.fieldsets
+    fieldsets = ((None, {"fields": ("name", "slug")}),) + DefaultModelAdmin.fieldsets  # noqa: RUF005
 
 
 class OneActiveAdmin(ModelAdmin):
@@ -177,6 +177,6 @@ class OneActiveAdmin(ModelAdmin):
     actions = ["duplicate"]
 
     def duplicate(self, request, queryset):
-        for object in queryset:
+        for object in queryset:  # noqa: A001
             object.clone()
-        duplicate.short_description = gettext_lazy("Duplicate selected %(verbose_name_plural)s")
+        duplicate.short_description = gettext_lazy("Duplicate selected %(verbose_name_plural)s")  # noqa: F821

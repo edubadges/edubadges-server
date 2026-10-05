@@ -61,7 +61,7 @@ def decrypt_authcode(cipher, secret_key=None):
 
 def _marshall(payload, expires_seconds):
     expires_at = timezone.now() + datetime.timedelta(seconds=expires_seconds)
-    return json.dumps(dict(expires=expires_at.isoformat(), payload=payload))
+    return json.dumps(dict(expires=expires_at.isoformat(), payload=payload))  # noqa: C408
 
 
 def _unmarshall(digest):

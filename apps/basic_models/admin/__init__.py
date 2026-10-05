@@ -4,16 +4,16 @@ from django.contrib.admin import site as admin_site
 from .admin import AutoGroupMeta, CreatedUpdatedBy, LocalPreview
 
 
-class site:
+class site:  # noqa: N801
     @staticmethod
     def add_base(admin_class, base):
         if base not in admin_class.__bases__:
-            admin_class.__bases__ = (base,) + admin_class.__bases__
+            admin_class.__bases__ = (base,) + admin_class.__bases__  # noqa: RUF005
 
     @staticmethod
     def register(model, admin_class):
         def _list_has_all_values(superset, subset):
-            return all([value in superset for value in subset])
+            return all([value in superset for value in subset])  # noqa: C419
 
         field_names = [field.name for field in model._meta.fields]
 

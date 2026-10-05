@@ -8,12 +8,12 @@ from requests_cache.backends import BaseCache
 class DjangoCacheDict(MutableMapping):
     _keymap_cache_key = "DjangoCacheDict_keys"
 
-    def __init__(self, namespace, id=None, timeout=None):
+    def __init__(self, namespace, id=None, timeout=None):  # noqa: A002
         self.namespace = namespace
         self._timeout = timeout
 
         if id is None:
-            id = uuid.uuid4().hexdigest()
+            id = uuid.uuid4().hexdigest()  # noqa: A001
         self._id = id
         self.keymap_cache_key = self._keymap_cache_key + "_" + self._id
 

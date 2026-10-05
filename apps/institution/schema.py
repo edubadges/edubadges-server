@@ -82,7 +82,7 @@ class FacultyType(
         return self.cached_issuers()
 
     def resolve_has_unrevoked_assertions(self, info):
-        return any([assertion.revoked is False for assertion in self.assertions])
+        return any([assertion.revoked is False for assertion in self.assertions])  # noqa: C419
 
     def resolve_has_assertions(self, info):
         return bool(self.assertions)
@@ -95,7 +95,7 @@ class BadgeClassTagType(DjangoObjectType):
 
 
 def terms_type():
-    from badgeuser.schema import TermsType
+    from badgeuser.schema import TermsType  # noqa: PLC0415
 
     return TermsType
 
@@ -221,7 +221,7 @@ class Query:
         return [inst for inst in Institution.objects.all() if inst.has_permissions(user, ["may_read"]) or is_superuser]
 
     def resolve_public_institution(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             institution = Institution.objects.get(entity_id=id)
             return institution
@@ -230,7 +230,7 @@ class Query:
         return Institution.objects.filter(public_institution=True).all()
 
     def resolve_public_faculty(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             return Faculty.objects.get(entity_id=id)
 
@@ -238,7 +238,7 @@ class Query:
         return [fac for fac in Faculty.objects.all() if fac.has_permissions(info.context.user, ["may_read"])]
 
     def resolve_faculty(self, info, **kwargs):
-        id = kwargs.get("id")
+        id = kwargs.get("id")  # noqa: A001
         if id is not None:
             faculty = Faculty.objects.get(entity_id=id)
             if faculty.has_permissions(info.context.user, ["may_read"]):

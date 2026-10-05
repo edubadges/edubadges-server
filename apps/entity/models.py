@@ -69,6 +69,6 @@ class EntityUserProvisionmentMixin:
 
     @cached_method(auto_publish=True)
     def cached_userprovisionments(self):
-        from badgeuser.models import UserProvisionment
+        from badgeuser.models import UserProvisionment  # noqa: PLC0415
 
         return UserProvisionment.objects.filter(content_type=self.cached_content_type(), object_id=self.pk)

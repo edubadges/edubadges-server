@@ -18,8 +18,8 @@ class Command(BaseCommand):
     """A command to send reminders for unclaimed and open direct awards."""
 
     def handle(self, *args, **kwargs):
-        from directaward.models import DirectAward
-        from mainsite.utils import EmailMessageMaker, send_mail
+        from directaward.models import DirectAward  # noqa: PLC0415
+        from mainsite.utils import EmailMessageMaker, send_mail  # noqa: PLC0415
 
         # Prevent MySQLdb._exceptions.OperationalError: (2006, 'MySQL server has gone away')
         connections.close_all()
@@ -48,7 +48,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}\n"
             )
-            logger.info(f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}")
+            logger.info(f"Sending {len(direct_awards)} reminder emails for reminder: {index}, threshold: {days}")  # noqa: G004
 
             for direct_award in direct_awards:
                 html_message = EmailMessageMaker.direct_award_reminder_student_mail(direct_award)
@@ -64,14 +64,14 @@ class Command(BaseCommand):
                     )
                 except IntegrityError:
                     # Already exists, just skip it
-                    print(f"Skipped duplicate direct award: {direct_award}")
+                    print(f"Skipped duplicate direct award: {direct_award}")  # noqa: T201
 
-            index += 1
+            index += 1  # noqa: SIM113
 
         direct_awards = DirectAward.objects.filter(expiration_date__lt=now, status=unaccepted).all()
 
         self.stdout.write(f"Deleting {len(direct_awards)} expired direct_awards")
-        logger.info(f"Deleting {len(direct_awards)} expired direct_awards")
+        logger.info(f"Deleting {len(direct_awards)} expired direct_awards")  # noqa: G004
 
         for direct_award in direct_awards:
             html_message = EmailMessageMaker.direct_award_expired_student_mail(direct_award)
