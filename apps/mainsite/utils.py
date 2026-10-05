@@ -75,7 +75,7 @@ def filter_cache_key(key, key_prefix, version):
     generated_key = ":".join([key_prefix, str(version), key])
     if len(generated_key) > 250:  # noqa: PLR2004
         encoded_string = generated_key.encode("utf-8")
-        return hashlib.md5(encoded_string).hexdigest()  # noqa: S324
+        return hashlib.md5(encoded_string, usedforsecurity=False).hexdigest()
     return generated_key
 
 

@@ -69,7 +69,7 @@ class TestFilterCacheKey(TestCase):
         version = 1
         result = filter_cache_key(key, prefix, version)
         generated_key = f"prefix:1:{key}"
-        expected = hashlib.md5(generated_key.encode()).hexdigest()  # noqa: S324
+        expected = hashlib.md5(generated_key.encode(), usedforsecurity=False).hexdigest()
         self.assertEqual(result, expected)
 
 
