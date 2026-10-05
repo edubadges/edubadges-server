@@ -29,11 +29,12 @@ class BadgeConnectView(APIView):
         payload = {"token": bearer_token}
         headers = {"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"}
         url = f"{settings.EDUID_PROVIDER_URL}/introspect"
-        response = requests.post(  # noqa: S113
+        response = requests.post(
             url,
             data=urllib.parse.urlencode(payload),
             auth=(settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET),
             headers=headers,
+            timeout=60,
         )
         if response.status_code != HTTPStatus.OK:
             raise PermissionDenied

@@ -101,7 +101,7 @@ def fetch_remote_file_to_storage(remote_url, upload_to=""):
     :return: (status_code, new_storage_name)
     """
     store = DefaultStorage()
-    r = requests.get(remote_url, stream=True)  # noqa: S113
+    r = requests.get(remote_url, stream=True, timeout=60)
     if r.status_code == HTTPStatus.OK:
         name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)  # noqa: RUF059
         storage_name = f"{upload_to}/cached/{hashlib.md5(remote_url.encode(), usedforsecurity=False).hexdigest()}{ext}"

@@ -10,10 +10,11 @@ from signing.models import PrivateKey, PublicKey, SymmetricKey
 
 
 def create_new_symmetric_key(password, user, salt="salt", length=32, n=1048576, r=8, p=1):  # noqa: PLR0913, PLR0917
-    symkey_json = requests.post(  # noqa: S113
+    symkey_json = requests.post(
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "symmetrickey/",
         data=json.dumps({"password": password, "salt": salt, "length": length, "n": n, "r": r, "p": p}),
         headers={"content-type": "application/json"},
+        timeout=60,
     ).json()
     new_symkey = SymmetricKey.objects.create(
         password_hash=utils.hash_string(password.encode()),
@@ -29,7 +30,7 @@ def create_new_symmetric_key(password, user, salt="salt", length=32, n=1048576, 
 
 
 def create_new_private_key(password, symmetric_key):
-    response = requests.post(  # noqa: S113
+    response = requests.post(
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "privatekey/",
         data=json.dumps(
             {
@@ -42,6 +43,7 @@ def create_new_private_key(password, symmetric_key):
             }
         ),
         headers={"content-type": "application/json"},
+        timeout=60,
     ).json()
 
     public_key = PublicKey.objects.create(
@@ -75,7 +77,7 @@ def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, 
     new_symmetric_key_params = new_symmetric_key.get_params()
     new_symmetric_key_params["password"] = new_password
 
-    response = requests.post(  # noqa: S113
+    response = requests.post(
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "reencrypt/",
         data=json.dumps(
             {
@@ -85,6 +87,7 @@ def re_encrypt_private_keys(old_symmetric_key, new_symmetric_key, old_password, 
             }
         ),
         headers={"content-type": "application/json"},
+        timeout=60,
     )
     if response.status_code == HTTPStatus.OK:
         for reencrypted_private_key in response.json():
@@ -111,7 +114,7 @@ def sign_badges(list_of_assertions, private_key, symmetric_key, password):
     symmetric_key_params = symmetric_key.get_params()
     symmetric_key_params["password"] = password
 
-    response = requests.post(  # noqa: S113
+    response = requests.post(
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "sign/",
         data=json.dumps(
             {
@@ -121,6 +124,7 @@ def sign_badges(list_of_assertions, private_key, symmetric_key, password):
             }
         ),
         headers={"content-type": "application/json"},
+        timeout=60,
     )
 
     if response.status_code == HTTPStatus.OK:
@@ -130,8 +134,9 @@ def sign_badges(list_of_assertions, private_key, symmetric_key, password):
 
 
 def deep_validate(signed_badges, symmetric_key, private_key):
-    return requests.post(  # noqa: S113
+    return requests.post(
         settings.TIME_STAMPED_OPEN_BADGES_BASE_URL + "deepvalidate/",
         data=json.dumps({"signed_badges": signed_badges, "symmetric_key": symmetric_key, "private_key": private_key}),
         headers={"content-type": "application/json"},
+        timeout=60,
     )

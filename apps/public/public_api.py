@@ -614,5 +614,7 @@ class ValidatorVersion(APIView):
 
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
-        response = requests.get(headers={"Accept": "application/json"}, url=urljoin(settings.VALIDATOR_URL, "git.info"))  # noqa: S113
+        response = requests.get(
+            headers={"Accept": "application/json"}, url=urljoin(settings.VALIDATOR_URL, "git.info"), timeout=60
+        )
         return Response(response.json(), status=status.HTTP_200_OK)

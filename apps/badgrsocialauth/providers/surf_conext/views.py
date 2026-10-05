@@ -122,10 +122,11 @@ def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
         "Content-Type": "application/x-www-form-urlencoded",
         "Cache-Control": "no-cache",
     }
-    response = requests.post(  # noqa: S113
+    response = requests.post(
         f"{settings.SURFCONEXT_DOMAIN_URL}/token",
         data=urllib.parse.urlencode(payload),
         headers=headers,
+        timeout=60,
     )
 
     if response.status_code != HTTPStatus.OK:

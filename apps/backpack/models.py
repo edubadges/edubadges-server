@@ -39,10 +39,13 @@ class ImportedAssertion(BaseAuditedModel, BaseVersionedEntity, models.Model):  #
     email = models.EmailField(blank=True, null=True)
 
     def validate(self, profile_type, recipient_identifier):
-        assertion_json = requests.get(self.import_url).json()  # noqa: S113
+        assertion_json = requests.get(self.import_url, timeout=60).json()
         data = {"profile": {profile_type: recipient_identifier}, "data": assertion_json}
-        response = requests.post(  # noqa: S113
-            json=data, url=urljoin(settings.VALIDATOR_URL, "results"), headers={"Accept": "application/json"}
+        response = requests.post(
+            json=data,
+            url=urljoin(settings.VALIDATOR_URL, "results"),
+            headers={"Accept": "application/json"},
+            timeout=60,
         )
         return response.json()
 
