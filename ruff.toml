@@ -34,9 +34,17 @@ exclude = [
 select = ["ALL"]  # https://docs.astral.sh/ruff/rules/
 ignore = [
     "ANN",  # Allow missing annotations
+    "ARG002",  # Leave unused arguments, may be required by way they are called
+    "D",  # Ignore docstring errors
+    "DJ001",  # Do not change models now
+    "ERA001",  # Ignore commented code
+    "PTH",  # Allow using os.path
+    "RET503",  # Allow implicit return None
+    "RUF012",  # Allow mutable class attributes, should replace lists by tuples
+
+    # Taken from eduCredentials
     "COM812",  # Incompatible with formatter
     "CPY001",  # Do not require copyright notices
-    "D",  # Ignore docstring errors
     "E402",  # Allow imports not at top of file
     "EM",  # Allow messages directly in exceptions
     "PLR6301",  # Allow not using self in methods
@@ -45,4 +53,16 @@ ignore = [
     "SIM108",  # Allow if-else block instead of ternary
     "SLF001",  # Allow private member access
     "TRY003",  # Specific messages for common exception classes
+]
+
+[lint.per-file-ignores]
+"apps/issuer/micro_credentials_constants.py" = [
+    "E501",  # Large block of multi line text
+    "W291",  # Trailing whitespaces
+]
+"apps/queries/api.py" = [
+    "E501",  # Large queries as multi line text
+]
+"apps/mobile_api/api.py" = [
+    "E501",  # Endpoint schemas with large examples
 ]
