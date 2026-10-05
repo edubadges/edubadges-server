@@ -1,10 +1,8 @@
 name: Ruff
+
 on:
   push:
-    branches: [ "develop" ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "develop" ]
+
 jobs:
   ruff:
     runs-on: ubuntu-latest
