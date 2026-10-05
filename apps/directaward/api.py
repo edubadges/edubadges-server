@@ -541,7 +541,11 @@ class DirectAwardDelete(BaseEntityDetailView):
                     summary=f"Exception: {e}",
                 )
                 un_successful_direct_awards.append(
-                    {"error": str(e), "eppn": direct_award.get("eppn"), "email": direct_award.get("recipient_email")}
+                    {
+                        "error": "Unable to delete direct award",
+                        "eppn": direct_award.get("eppn"),
+                        "email": direct_award.get("recipient_email"),
+                    }
                 )
         if not successful_direct_awards:
             raise BadRequest(
