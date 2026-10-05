@@ -86,7 +86,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "lti13.middleware.SameSiteMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
