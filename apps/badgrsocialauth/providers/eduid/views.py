@@ -16,6 +16,7 @@ from allauth.socialaccount.helpers import (
 )
 from badgeuser.models import BadgeUser
 from badgrsocialauth.providers.eduid.signals import val_name_audit_trail_signal
+from badgrsocialauth.providers.oidc_utils import verify_id_token
 from badgrsocialauth.utils import (
     get_social_account,
     set_session_badgr_app,
@@ -24,7 +25,7 @@ from badgrsocialauth.utils import (
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
-from jose import jwt
+from jose.exceptions import JWTError
 from mainsite.models import BadgrApp
 
 from .provider import EduIDProvider
@@ -51,7 +52,7 @@ def login(request):
     badgr_app_pk = request.session.get("badgr_app_pk", None)
     try:
         badgr_app_pk = int(badgr_app_pk)
-    except:  # noqa: E722
+    except (ValueError, TypeError):
         badgr_app_pk = settings.BADGR_APP_ID
 
     state = json.dumps([badgr_app_pk])
@@ -76,7 +77,7 @@ def login(request):
     return redirect(login_url)
 
 
-def callback(request):
+def callback(request):  # noqa: PLR0911
     if request.user.is_authenticated:
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
 
@@ -85,7 +86,12 @@ def callback(request):
     if not state_param:
         error = request.GET.get("error_description", "Server error: eduID login failed")
         return render_authentication_error(request, EduIDProvider.id, error=error)
-    state = json.loads(state_param)
+    try:
+        state = json.loads(state_param)
+        badgr_app_pk = state[0]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        error = "Server error: Invalid state in callback"
+        return render_authentication_error(request, EduIDProvider.id, error=error)
     badgr_app_pk = state[0]
     code = request.GET.get("code", None)  # access codes to access user info endpoint
     if code is None:  # check if code is given
@@ -119,7 +125,11 @@ def callback(request):
     token_json = response.json()
     id_token = token_json["id_token"]
     access_token = token_json["access_token"]
-    payload = jwt.get_unverified_claims(id_token)
+    try:
+        payload = verify_id_token(id_token, settings.EDUID_PROVIDER_URL, settings.EDU_ID_CLIENT)
+    except JWTError:
+        logger.exception("eduID id_token verification failed")
+        return render_authentication_error(request, EduIDProvider.id, "Invalid identity token from provider")
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
 
@@ -162,11 +172,15 @@ def after_terms_agreement(request, **kwargs):  # noqa: C901, PLR0912, PLR0915
     """
     this is the second part of the callback, after consent has been given, or is user already exists
     """
-    badgr_app_pk, _login_type = json.loads(kwargs["state"])
     try:
-        badgr_app_pk = int(badgr_app_pk)
-    except:  # noqa: E722
-        badgr_app_pk = settings.BADGR_APP_ID
+        badgr_app_pk, _login_type = json.loads(kwargs["state"])
+        try:
+            badgr_app_pk = int(badgr_app_pk)
+        except (ValueError, TypeError):
+            badgr_app_pk = settings.BADGR_APP_ID
+    except (json.JSONDecodeError, KeyError, TypeError):
+        error = "Server error: Invalid state in callback"
+        return render_authentication_error(request, EduIDProvider.id, error)
 
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, badgr_app)
@@ -175,9 +189,13 @@ def after_terms_agreement(request, **kwargs):  # noqa: C901, PLR0912, PLR0915
     if not id_token:
         error = "Sorry, we could not find your eduID credentials."
         return render_authentication_error(request, EduIDProvider.id, error)
-    payload = jwt.get_unverified_claims(id_token)
+    try:
+        payload = verify_id_token(id_token, settings.EDUID_PROVIDER_URL, settings.EDU_ID_CLIENT)
+    except JWTError:
+        logger.exception("eduID id_token verification failed")
+        return render_authentication_error(request, EduIDProvider.id, "Invalid identity token from provider")
 
-    logger.info(f"Using payload attribute {settings.EDUID_IDENTIFIER} for unique identifier")  # noqa: G004
+    logger.info("Using payload attribute %s for unique identifier", settings.EDUID_IDENTIFIER)
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
     if not social_account:  # user does not exist
@@ -196,8 +214,8 @@ def after_terms_agreement(request, **kwargs):  # noqa: C901, PLR0912, PLR0915
     login = provider.sociallogin_from_response(request, payload)
 
     ret = complete_social_login(request, login)
-    new_url = ret.url + "&role=student"
-    ret = HttpResponseRedirect(new_url)
+    new_url = ret.url + "&role=student"  # type: ignore[attr-defined]
+    ret = HttpResponseRedirect(new_url)  # type: ignore[assignment]
 
     set_session_badgr_app(request, badgr_app)
 
@@ -264,7 +282,7 @@ def after_terms_agreement(request, **kwargs):  # noqa: C901, PLR0912, PLR0915
             user = BadgeUser.objects.filter(is_teacher=False, email=payload["email"]).exclude(id=login.user.id).first()
             if user:
                 user.delete()
-        except BadgeUser.DoesNotExist:
+        except BadgeUser.DoesNotExist:  # type: ignore[attr-defined]
             pass
 
         # We don't create welcome badges anymore
