@@ -65,24 +65,26 @@ services:
       - "8000:8000"
 
   db:
-    image: mysql:8.4
+    image: mariadb:11
     container_name: badgr_mysql_db
     environment:
-      MYSQL_ROOT_PASSWORD: ${BADGR_DB_PASSWORD}
+      innodb_temp_data_file_path: /tmp/ibtmp1:12M:autoextend
+      MARIADB_RANDOM_ROOT_PASSWORD: 1
       MYSQL_DATABASE: badgr
-      MYSQL_USER: badgr
-      MYSQL_PASSWORD: ${BADGR_DB_PASSWORD}
+      MARIADB_USER: badgr
+      MARIADB_PASSWORD: ${BADGR_DB_PASSWORD}
     ports:
       - "3306:3306"
     # Health check for MySQL
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
       interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
+      timeout: 5s
+      retries: 3
     volumes:
       - db-data:/var/lib/mysql
+      - db-tmp:/tmp
     networks:
       - edubadges-server
 
@@ -109,3 +111,5 @@ networks:
 
 volumes:
   db-data:
+  db-tmp:
+
