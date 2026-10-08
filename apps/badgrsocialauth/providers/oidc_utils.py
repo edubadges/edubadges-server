@@ -32,17 +32,17 @@ def verify_id_token(id_token: str, provider_url: str, client_id: str) -> dict:
         resp = requests.get(config_url, timeout=10)
         resp.raise_for_status()
         config = resp.json()
-    except Exception as exc:
-        logger.error("Failed to fetch OIDC config from %s: %s", config_url, exc)
-        raise JWTError("Could not retrieve signing keys from provider")
+    except Exception:
+        logger.exception("Failed to fetch OIDC config from %s", config_url)
+        raise JWTError("Could not retrieve signing keys from provider") from None
 
     try:
         resp = requests.get(config["jwks_uri"], timeout=10)
         resp.raise_for_status()
         jwks = resp.json()
-    except Exception as exc:
-        logger.error("Failed to fetch JWKS from %s: %s", config["jwks_uri"], exc)
-        raise JWTError("Could not retrieve signing keys from provider")
+    except Exception:
+        logger.exception("Failed to fetch JWKS from %s", config["jwks_uri"])
+        raise JWTError("Could not retrieve signing keys from provider") from None
 
     issuer = config.get("issuer", provider_url)
     return jwt.decode(

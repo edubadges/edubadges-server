@@ -15,6 +15,7 @@ from allauth.socialaccount.helpers import (
     render_authentication_error,
 )
 from badgeuser.models import UserProvisionment
+from badgrsocialauth.providers.oidc_utils import verify_id_token
 from badgrsocialauth.utils import (
     AuthErrorCode,
     get_session_authcode,
@@ -30,7 +31,6 @@ from jose.exceptions import JWTError
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
 
-from ..oidc_utils import verify_id_token
 from .provider import SurfConextProvider
 
 logger = logging.getLogger("Badgr.Debug")
@@ -150,8 +150,8 @@ def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
 
     try:
         payload = verify_id_token(id_token, settings.SURFCONEXT_DOMAIN_URL, settings.SURF_CONEXT_CLIENT)
-    except JWTError as exc:
-        logger.error("SURFconext id_token verification failed: %s", exc)
+    except JWTError:
+        logger.exception("SURFconext id_token verification failed")
         return render_authentication_error(request, SurfConextProvider.id, "Invalid identity token from provider")
     for attr in ["sub", "email", "schac_home_organization"]:
         if attr not in payload:
@@ -194,7 +194,7 @@ def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
                         provisionment.match_user(request.user)
                         provisionment.perform_provisioning()
                 except (  # type: ignore[misc]
-                    UserProvisionment.DoesNotExist,
+                    UserProvisionment.DoesNotExist,  # type: ignore[attr-defined]
                     BadgrValidationError,
                 ):  # there is no provisionment
                     extra_context = {}

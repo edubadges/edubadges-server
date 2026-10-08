@@ -16,6 +16,7 @@ from allauth.socialaccount.helpers import (
 )
 from badgeuser.models import BadgeUser
 from badgrsocialauth.providers.eduid.signals import val_name_audit_trail_signal
+from badgrsocialauth.providers.oidc_utils import verify_id_token
 from badgrsocialauth.utils import (
     get_social_account,
     set_session_badgr_app,
@@ -27,7 +28,6 @@ from django.shortcuts import redirect
 from jose.exceptions import JWTError
 from mainsite.models import BadgrApp
 
-from ..oidc_utils import verify_id_token
 from .provider import EduIDProvider
 
 logger = logging.getLogger("Badgr.Debug")
@@ -77,7 +77,7 @@ def login(request):
     return redirect(login_url)
 
 
-def callback(request):
+def callback(request):  # noqa: PLR0911
     if request.user.is_authenticated:
         get_account_adapter(request).logout(request)  # logging in while being authenticated breaks the login procedure
 
@@ -127,8 +127,8 @@ def callback(request):
     access_token = token_json["access_token"]
     try:
         payload = verify_id_token(id_token, settings.EDUID_PROVIDER_URL, settings.EDU_ID_CLIENT)
-    except JWTError as exc:
-        logger.error("eduID id_token verification failed: %s", exc)
+    except JWTError:
+        logger.exception("eduID id_token verification failed")
         return render_authentication_error(request, EduIDProvider.id, "Invalid identity token from provider")
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
@@ -191,11 +191,11 @@ def after_terms_agreement(request, **kwargs):  # noqa: C901, PLR0912, PLR0915
         return render_authentication_error(request, EduIDProvider.id, error)
     try:
         payload = verify_id_token(id_token, settings.EDUID_PROVIDER_URL, settings.EDU_ID_CLIENT)
-    except JWTError as exc:
-        logger.error("eduID id_token verification failed: %s", exc)
+    except JWTError:
+        logger.exception("eduID id_token verification failed")
         return render_authentication_error(request, EduIDProvider.id, "Invalid identity token from provider")
 
-    logger.info(f"Using payload attribute {settings.EDUID_IDENTIFIER} for unique identifier")  # noqa: G004
+    logger.info("Using payload attribute %s for unique identifier", settings.EDUID_IDENTIFIER)
 
     social_account = get_social_account(payload[settings.EDUID_IDENTIFIER])
     if not social_account:  # user does not exist
@@ -282,7 +282,7 @@ def after_terms_agreement(request, **kwargs):  # noqa: C901, PLR0912, PLR0915
             user = BadgeUser.objects.filter(is_teacher=False, email=payload["email"]).exclude(id=login.user.id).first()
             if user:
                 user.delete()
-        except BadgeUser.DoesNotExist:
+        except BadgeUser.DoesNotExist:  # type: ignore[attr-defined]
             pass
 
         # We don't create welcome badges anymore
