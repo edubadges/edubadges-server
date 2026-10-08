@@ -124,7 +124,7 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
 
     def get_image(self, obj):
         if obj.image:
-            return OriginSetting.HTTP + obj.image.url
+            return obj.image.url
         return None
 
     def get_id(self, obj):
