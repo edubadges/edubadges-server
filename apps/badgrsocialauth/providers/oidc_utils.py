@@ -2,8 +2,6 @@
 
 import logging
 
-from urllib.parse import urlparse
-
 import requests
 
 from jose import jwt
