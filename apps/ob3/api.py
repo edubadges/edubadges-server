@@ -1,10 +1,13 @@
 import logging
-import requests
 
 from http import HTTPStatus
 from typing import Any
+
+import requests
+
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from django.http import Http404
+from issuer.models import BadgeInstance
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from mainsite.settings import EC_ISSUER_URL
 from rest_framework import status
@@ -65,8 +68,6 @@ class CredentialsView(APIView):
         user is the recipient.  Returns None when the badge does not exist
         or does not belong to the user.
         """
-        from issuer.models import BadgeInstance
-
         try:
             return BadgeInstance.objects.get(entity_id=entity_id, user=user)
         except (ObjectDoesNotExist, ValueError):
@@ -82,7 +83,9 @@ class CredentialsView(APIView):
             "Accept": "application/json",
             "Authorization": f"Bearer {_bearer_token(request)}",
         }
-        payload: dict[str, str] = {"award_id": badge_entity_id, "credential_type": credential_type}
+        payload: dict[str, str] = {"award_id": badge_entity_id}
+        if credential_type is not None:
+            payload["credential_type"] = credential_type
 
         logger.debug("Requesting offer creation: %s %s", url, payload["award_id"])
         resp = requests.post(timeout=5, url=url, json=payload, headers=headers)
