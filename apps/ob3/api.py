@@ -5,7 +5,6 @@ from typing import Any
 
 import requests
 
-from typing import Optional
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from django.http import Http404
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -49,16 +48,16 @@ class CredentialsView(APIView):
     def post(self, request: Request, **_kwargs: Any) -> Response:
         _ = _kwargs
 
-        badge_entity_id = request.data.get("badge_entity_id")
-        credential_type = request.data.get("credential_type")
+        badge_entity_id = request.data.get("badge_entity_id")  # type: ignore[union-attr]
+        credential_type = request.data.get("credential_type")  # type: ignore[union-attr]
 
         badge_instance = self._find_badge_instance(badge_entity_id, request.user)
         if badge_instance is None:
             raise Http404("Badge instance not found")
 
         offer_uri = self._create_offer(request, badge_entity_id, credential_type)
-        logger.info(f"Issued credential offer for badge {badge_entity_id}")
-        logger.debug(f"Offer: {offer_uri}")
+        logger.info("Issued credential offer for badge %s", badge_entity_id)
+        logger.debug("Offer: %s", offer_uri)
 
         return Response({"offer": offer_uri}, status=status.HTTP_201_CREATED)
 
@@ -68,14 +67,14 @@ class CredentialsView(APIView):
         user is the recipient.  Returns None when the badge does not exist
         or does not belong to the user.
         """
-        from issuer.models import BadgeInstance  # noqa: PLC0415
+        from issuer.models import BadgeInstance
 
         try:
             return BadgeInstance.objects.get(entity_id=entity_id, user=user)
         except (ObjectDoesNotExist, ValueError):
             return None
 
-    def _create_offer(self, request: Request, badge_entity_id: str, credential_type: str) -> Optional[str]:
+    def _create_offer(self, request: Request, badge_entity_id: str, credential_type: str) -> str | None:
         """
         Ask ec-issuer to create a credential and an offer for the given
         badge instance.
@@ -85,11 +84,11 @@ class CredentialsView(APIView):
             "Accept": "application/json",
             "Authorization": f"Bearer {_bearer_token(request)}",
         }
-        payload: Dict[str, str] = {"award_id": badge_entity_id, "credential_type": credential_type}
+        payload: dict[str, str] = {"award_id": badge_entity_id, "credential_type": credential_type}
 
-        logger.debug(f"Requesting offer creation: {url} {payload['award_id']}")  # noqa: G004
+        logger.debug("Requesting offer creation: %s %s", url, payload["award_id"])
         resp = requests.post(timeout=5, url=url, json=payload, headers=headers)
-        logger.debug(f"Response: {resp.status_code} {resp.text}")  # noqa: G004
+        logger.debug("Response: %s %s", resp.status_code, resp.text)
 
         if resp.status_code >= HTTPStatus.BAD_REQUEST:
             msg = f"Failed to create offer:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"

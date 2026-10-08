@@ -14,12 +14,12 @@ from issuer.models import BadgeClass, BadgeInstance, Issuer
 from issuer.permissions import BadgrOAuthTokenHasScope, RecipientIdentifiersMatch
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from public.public_api import ImagePropertyDetailView
 from mainsite.utils import OriginSetting
+from public.public_api import ImagePropertyDetailView
 from rest_framework import permissions, serializers
 from rest_framework.response import Response
-from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_404_NOT_FOUND
 from rest_framework.reverse import reverse
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_404_NOT_FOUND
 from rest_framework.views import APIView
 
 
@@ -314,7 +314,7 @@ class BackpackAssertionDetail(BaseEntityDetailView):
             },
         ),
     )
-    def put(self, request, data=None, allow_partial=False, **kwargs):
+    def put(self, request, data=None, allow_partial=False, **kwargs):  # noqa: FBT002
         """Update acceptance of an Assertion in the user's Backpack and make public / private"""
         fields_whitelist = ("acceptance", "public", "include_evidence", "include_grade_achieved")
         data = {k: v for k, v in list(request.data.items()) if k in fields_whitelist}
