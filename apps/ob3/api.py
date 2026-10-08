@@ -5,6 +5,7 @@ from typing import Any
 
 import requests
 
+from typing import Optional
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from django.http import Http404
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -49,14 +50,15 @@ class CredentialsView(APIView):
         _ = _kwargs
 
         badge_entity_id = request.data.get("badge_entity_id")
+        credential_type = request.data.get("credential_type")
 
         badge_instance = self._find_badge_instance(badge_entity_id, request.user)
         if badge_instance is None:
             raise Http404("Badge instance not found")
 
-        offer_uri = self._create_offer(request, badge_entity_id)
-        logger.info(f"Issued credential offer for badge {badge_entity_id}")  # noqa: G004
-        logger.debug(f"Offer: {offer_uri}")  # noqa: G004
+        offer_uri = self._create_offer(request, badge_entity_id, credential_type)
+        logger.info(f"Issued credential offer for badge {badge_entity_id}")
+        logger.debug(f"Offer: {offer_uri}")
 
         return Response({"offer": offer_uri}, status=status.HTTP_201_CREATED)
 
@@ -73,7 +75,7 @@ class CredentialsView(APIView):
         except (ObjectDoesNotExist, ValueError):
             return None
 
-    def _create_offer(self, request: Request, badge_entity_id: str) -> str | None:
+    def _create_offer(self, request: Request, badge_entity_id: str, credential_type: str) -> Optional[str]:
         """
         Ask ec-issuer to create a credential and an offer for the given
         badge instance.
@@ -83,9 +85,7 @@ class CredentialsView(APIView):
             "Accept": "application/json",
             "Authorization": f"Bearer {_bearer_token(request)}",
         }
-        payload: dict[str, str] = {
-            "award_id": badge_entity_id,
-        }
+        payload: Dict[str, str] = {"award_id": badge_entity_id, "credential_type": credential_type}
 
         logger.debug(f"Requesting offer creation: {url} {payload['award_id']}")  # noqa: G004
         resp = requests.post(timeout=5, url=url, json=payload, headers=headers)
