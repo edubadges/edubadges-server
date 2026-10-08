@@ -26,10 +26,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from institution.models import Institution
-from jose import jwt
+from jose.exceptions import JWTError
 from mainsite.exceptions import BadgrValidationError
 from mainsite.models import BadgrApp
 
+from ..oidc_utils import verify_id_token
 from .provider import SurfConextProvider
 
 logger = logging.getLogger("Badgr.Debug")
@@ -47,7 +48,7 @@ def login(request):
     badgr_app_pk = request.session.get("badgr_app_pk", None)
     try:
         badgr_app_pk = int(badgr_app_pk)
-    except:  # noqa: E722
+    except (ValueError, TypeError):
         badgr_app_pk = settings.BADGR_APP_ID
     state = json.dumps(
         [
@@ -102,7 +103,11 @@ def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
         error = "Server error: No state found in callback"
         return render_authentication_error(request, SurfConextProvider.id, error=error)
 
-    process, auth_token, badgr_app_pk = json.loads(state)
+    try:
+        process, auth_token, badgr_app_pk = json.loads(state)
+    except (json.JSONDecodeError, KeyError, TypeError):
+        error = "Server error: Invalid state in callback"
+        return render_authentication_error(request, SurfConextProvider.id, error=error)
 
     code = request.GET.get("code", None)
     if code is None:
@@ -143,7 +148,11 @@ def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
     badgr_app = BadgrApp.objects.get(pk=badgr_app_pk)
     set_session_badgr_app(request, BadgrApp.objects.get(pk=badgr_app.pk))
 
-    payload = jwt.get_unverified_claims(id_token)
+    try:
+        payload = verify_id_token(id_token, settings.SURFCONEXT_DOMAIN_URL, settings.SURF_CONEXT_CLIENT)
+    except JWTError as exc:
+        logger.error("SURFconext id_token verification failed: %s", exc)
+        return render_authentication_error(request, SurfConextProvider.id, "Invalid identity token from provider")
     for attr in ["sub", "email", "schac_home_organization"]:
         if attr not in payload:
             error = f"Sorry, your account does not have a {attr} attribute. Login with SURFconext and then try again"
@@ -160,8 +169,8 @@ def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
     if process == "connect" and request.user.is_anonymous and auth_token:
         request.user = get_verified_user(auth_token=auth_token)
     ret = complete_social_login(request, login)
-    new_url = ret.url + "&role=teacher"
-    ret = HttpResponseRedirect(new_url)
+    new_url = ret.url + "&role=teacher"  # type: ignore[attr-defined]
+    ret = HttpResponseRedirect(new_url)  # type: ignore[assignment]
 
     if not request.user.is_anonymous:  # the social login succeeded
         institution_identifier = payload["schac_home_organization"]
@@ -179,12 +188,12 @@ def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
                 try:
                     provisionments = request.user.match_provisionments()
                     if not provisionments:
-                        raise UserProvisionment.DoesNotExist  # noqa: TRY301
+                        raise UserProvisionment.DoesNotExist  # noqa: TRY301 # type: ignore[attr-defined]
                     request.user.save()
                     for provisionment in provisionments:
                         provisionment.match_user(request.user)
                         provisionment.perform_provisioning()
-                except (
+                except (  # type: ignore[misc]
                     UserProvisionment.DoesNotExist,
                     BadgrValidationError,
                 ):  # there is no provisionment
@@ -210,7 +219,7 @@ def callback(request):  # noqa: C901, PLR0911, PLR0912, PLR0915
                         extra_context=extra_context,
                     )
 
-        except Institution.DoesNotExist:  # no institution yet, and therefore also first login ever
+        except Institution.DoesNotExist:  # type: ignore[attr-defined] # no institution yet, and therefore also first login ever
             error = "Sorry, your institution has not been created yet."
             return render_authentication_error(
                 request,
