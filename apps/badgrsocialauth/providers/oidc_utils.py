@@ -19,14 +19,7 @@ def verify_id_token(id_token: str, provider_url: str, client_id: str) -> dict:
     ``/.well-known/openid-configuration`` discovery document, then decodes
     using RS256 with audience and issuer validation.
     """
-    allowed_hosts = {"connect.surfconext.nl", "connect.test.surfconext.nl", "connect.eduid.nl", "connect.test.eduid.nl"}
-    parsed = urlparse(provider_url)
-    if parsed.hostname not in allowed_hosts:
-        raise JWTError(f"Disallowed provider URL: {provider_url}")
-
-    # The well-known endpoint sits at the host root (not under /oidc).
-    base = f"{parsed.scheme}://{parsed.hostname}"
-    config_url = f"{base}/.well-known/openid-configuration"
+    config_url = f"{provider_url}/.well-known/openid-configuration"
 
     try:
         resp = requests.get(config_url, timeout=10)
@@ -44,11 +37,12 @@ def verify_id_token(id_token: str, provider_url: str, client_id: str) -> dict:
         logger.exception("Failed to fetch JWKS from %s", config["jwks_uri"])
         raise JWTError("Could not retrieve signing keys from provider") from None
 
-    issuer = config.get("issuer", provider_url)
+    issuer = config["issuer"]
+    algs = config["id_token_signing_alg_values_supported"]
     return jwt.decode(
         id_token,
         jwks,
-        algorithms=["RS256"],
+        algorithms=algs,
         audience=client_id,
         issuer=issuer,
     )
