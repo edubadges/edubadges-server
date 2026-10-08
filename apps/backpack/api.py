@@ -108,6 +108,7 @@ class AwardIssuerSerializer(AwardBaseSerializer):
 
 class AwardBadgeClassSerializer(AwardBaseSerializer):
     id = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
     issuer = AwardIssuerSerializer(read_only=True)
 
     class Meta:
@@ -120,6 +121,11 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
             "image",
             "issuer",
         ]
+
+    def get_image(self, obj):
+        if obj.image:
+            return OriginSetting.HTTP + obj.image.url
+        return None
 
     def get_id(self, obj):
         return _entity_url("badgeclass_json", obj.entity_id)
@@ -178,7 +184,7 @@ class BackpackAwardDetail(APIView):
                     OpenApiExample(
                         "Badge Instance",
                         value={
-                            "@id": "https://DOMAIN/assertions/I41eovHQReGI_SG5KM6dSQ",
+                            "id": "https://DOMAIN/assertions/I41eovHQReGI_SG5KM6dSQ",
                             "created_at": "2021-04-20T16:20:30.528668+02:00",
                             "issued_on": "2021-04-20T16:20:30.521307+02:00",
                             "award_type": "requested",
@@ -190,19 +196,19 @@ class BackpackAwardDetail(APIView):
                             "family_name": "Smith",
                             "email": "john.smith@example.com",
                             "badgeclass": {
-                                "@id": "https://DOMAIN/badges/nwsL-dHyQpmvOOKBscsN_A",
+                                "id": "https://DOMAIN/badges/nwsL-dHyQpmvOOKBscsN_A",
                                 "name": "Edubadge account complete",
                                 "description": "Complete your account to start earning badges",
                                 "criteria_text": "Register and verify your email address",
                                 "image_url": "https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png",
                                 "issuer": {
-                                    "@id": "https://DOMAIN/issuers/issuer-entity-id-123",
+                                    "id": "https://DOMAIN/issuers/issuer-entity-id-123",
                                     "name_dutch": "SURF Edubadges",
                                     "name_english": "SURF Edubadges",
                                     "image_dutch": "null",
                                     "image_english": "/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png",  # noqa: E501
                                     "faculty": {
-                                        "@id": "https://DOMAIN/faculties/faculty-entity-id-456",
+                                        "id": "https://DOMAIN/faculties/faculty-entity-id-456",
                                         "name_dutch": "SURF",
                                         "name_english": "SURF",
                                         "image_dutch": "null",
@@ -211,7 +217,7 @@ class BackpackAwardDetail(APIView):
                                         "on_behalf_of_display_name": "null",
                                         "on_behalf_of_url": "null",
                                         "institution": {
-                                            "@id": "https://DOMAIN/institutions/institution-entity-id-789",
+                                            "id": "https://DOMAIN/institutions/institution-entity-id-789",
                                             "name_dutch": "University Voorbeeld",
                                             "name_english": "University Example",
                                             "image_dutch": "/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png",  # noqa: E501
