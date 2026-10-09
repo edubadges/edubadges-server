@@ -28,7 +28,7 @@ django-filter==25.1
 
 # Django Allauth
 django-allauth==0.51.0
-oauthlib==3.2.2
+oauthlib==4.0.0
 requests==2.33.0
 requests-oauthlib==1.3.1
 
@@ -96,7 +96,7 @@ git+https://github.com/edubadges/pylti1.3@master#egg=PyLTI1p3
 
 # after python3 upgrade
 social-auth-app-django==5.4.2
-urllib3==2.7.0
+urllib3==2.8.0
 
 # graphql
 graphene-django==3.2.2

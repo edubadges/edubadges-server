@@ -165,7 +165,7 @@ The experimental space runs for a period of two years from 1 May 2025 to 30 Apri
 
 [3] Accreditation-worthy offerings is used as a working term to indicate that the offerings that comply to this quality framework meet the European ESG standards for quality assurance but still fall outside existing external quality assurance instruments.
 
-"""
+""",  # noqa: RUF001
 }
 
 micro_credentials_framework_mbo = {
@@ -206,5 +206,5 @@ Onderstaand kwaliteitskader is gebaseerd op de afspraken die binnen de [Pilot va
 >
 [3] In het HO is de minimumnorm 3 ECT, met een maximum van 30. Uit de evaluatie bleek veelal gebruik gemaakt te worden van een omvang van 5 ECT. Tijdens de Pilot in het mbo zal worden onderzocht welke omvang van SBU aansluit bij de vraag. Het aantal SBU is een indicatie van het aantal uur (zelfstudie, praktijkonderwijs, onderwijs) dat een gemiddelde lerende nodig heeft om de microcredential te halen. Indien blijkt dat het passend is dat de microcredential minder van omvang is, is hiervoor binnen de Pilot ruimte om dit onderbouwd te onderzoeken.
 > 
-"""
+""",
 }

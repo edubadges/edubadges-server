@@ -1,8 +1,6 @@
-# encoding: utf-8
-
-
 import uuid
-from collections import MutableMapping
+
+from collections.abc import MutableMapping
 
 from django.core.cache import cache
 from requests_cache.backends import BaseCache
@@ -11,20 +9,18 @@ from requests_cache.backends import BaseCache
 class DjangoCacheDict(MutableMapping):
     _keymap_cache_key = "DjangoCacheDict_keys"
 
-    def __init__(self, namespace, id=None, timeout=None):
+    def __init__(self, namespace, id=None, timeout=None):  # noqa: A002
         self.namespace = namespace
         self._timeout = timeout
 
         if id is None:
-            id = uuid.uuid4().hexdigest()
+            id = uuid.uuid4().hexdigest()  # noqa: A001
         self._id = id
-        self.keymap_cache_key = self._keymap_cache_key+"_"+self._id
+        self.keymap_cache_key = self._keymap_cache_key + "_" + self._id
 
     def build_key(self, *args):
         return "{keymap_cache_key}{namespace}{key}".format(
-            keymap_cache_key=self.keymap_cache_key,
-            namespace=self.namespace,
-            key="".join(args)
+            keymap_cache_key=self.keymap_cache_key, namespace=self.namespace, key="".join(args)
         ).encode("utf-8")
 
     def timeout(self):
@@ -70,15 +66,15 @@ class DjangoCacheDict(MutableMapping):
             yield cache.get(key)
 
     def __str__(self):
-        return '<{}>'.format(self.keymap_cache_key)
+        return f"<{self.keymap_cache_key}>"
 
     def clear(self):
         self._id = uuid.uuid4().hexdigest()
-        self.keymap_cache_key = self._keymap_cache_key+"_"+self._id
+        self.keymap_cache_key = self._keymap_cache_key + "_" + self._id
 
 
 class DjangoCacheRequestsCacheBackend(BaseCache):
-    def __init__(self, namespace='requests-cache', **options):
-        super(DjangoCacheRequestsCacheBackend, self).__init__(**options)
-        self.responses = DjangoCacheDict(namespace, 'responses')
-        self.keys_map = DjangoCacheDict(namespace, 'urls')
+    def __init__(self, namespace="requests-cache", **options):
+        super().__init__(**options)
+        self.responses = DjangoCacheDict(namespace, "responses")
+        self.keys_map = DjangoCacheDict(namespace, "urls")

@@ -1,7 +1,7 @@
 import datetime
 
-class BaseBadgrEvent(object):
 
+class BaseBadgrEvent:
     def get_type(self):
         return self.__class__.__name__
 
@@ -13,10 +13,12 @@ class BaseBadgrEvent(object):
 
     def compacted(self):
         data = self.to_representation()
-        data.update({
-            '@context': self.get_context(),
-            'type': 'Action',
-            'actionType': self.get_type(),
-            'timestamp': datetime.datetime.now().isoformat()
-        })
+        data.update(
+            {
+                "@context": self.get_context(),
+                "type": "Action",
+                "actionType": self.get_type(),
+                "timestamp": datetime.datetime.now().isoformat(),  # noqa: DTZ005
+            }
+        )
         return data

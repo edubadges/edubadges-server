@@ -1,18 +1,18 @@
+import badgrlog
+
+from entity.api import BaseEntityDetailView, BaseEntityListView, VersionedObjectMixin
+from institution.models import Faculty, Institution
+from issuer.models import BadgeClass, Issuer
+from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
-
-import badgrlog
-from entity.api import BaseEntityListView, BaseEntityDetailView, VersionedObjectMixin
-from institution.models import Faculty, Institution
-from issuer.models import Issuer, BadgeClass
-from mainsite.permissions import AuthenticatedWithVerifiedEmail
-from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
+from staff.models import BadgeClassStaff, FacultyStaff, InstitutionStaff, IssuerStaff
 from staff.permissions import HasObjectPermission, StaffMembershipWithinScope
 from staff.serializers import (
     BadgeClassStaffSerializer,
-    IssuerStaffSerializer,
     FacultyStaffSerializer,
     InstitutionStaffSerializer,
+    IssuerStaffSerializer,
     StaffUpdateSerializer,
 )
 
@@ -20,16 +20,16 @@ logger = badgrlog.BadgrLogger()
 
 
 class StaffListViewBase(VersionedObjectMixin, BaseEntityListView):
-    http_method_names = ['post']
-    permission_map = {'POST': 'may_administrate_users'}
+    http_method_names = ["post"]
+    permission_map = {"POST": "may_administrate_users"}
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
 
     def post(self, request, **kwargs):
         """
         create a new staff membership
         """
-        object = self.get_object(request, **kwargs)  # trigger a has_object_permissions() check on the model instance
-        return super(StaffListViewBase, self).post(request, **kwargs)
+        self.get_object(request, **kwargs)  # trigger a has_object_permissions() check on the model instance
+        return super().post(request, **kwargs)
 
 
 class StaffDetailViewBase(BaseEntityDetailView):
@@ -38,14 +38,14 @@ class StaffDetailViewBase(BaseEntityDetailView):
     DELETE to delete staffmembership
     """
 
-    http_method_names = ['put', 'delete']
-    permission_map = {'PUT': 'may_administrate_users', 'DELETE': 'may_administrate_users'}
+    http_method_names = ["put", "delete"]
+    permission_map = {"PUT": "may_administrate_users", "DELETE": "may_administrate_users"}
     permission_classes = (AuthenticatedWithVerifiedEmail, StaffMembershipWithinScope)
     serializer_class = StaffUpdateSerializer
 
     def put(self, request, **kwargs):
-        object = self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
-        return super(StaffDetailViewBase, self).put(request, **kwargs)
+        self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
+        return super().put(request, **kwargs)
 
     def delete(self, request, **kwargs):
         """
@@ -54,7 +54,7 @@ class StaffDetailViewBase(BaseEntityDetailView):
         obj = self.get_object(request, **kwargs)  # triggers a has_object_permissions() check on the model instance
         logger.event(badgrlog.PermissionDeletedEvent(staff_instance=obj, request=request))
         obj.delete()
-        obj.object.remove_cached_data(['cached_staff'])
+        obj.object.remove_cached_data(["cached_staff"])
         return Response(status=HTTP_204_NO_CONTENT)
 
 

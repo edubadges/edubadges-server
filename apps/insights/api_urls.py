@@ -1,34 +1,34 @@
 from django.urls import path
-
 from insights.api import (
+    CountMicroCredentials,
     InsightsView,
     InstitutionAdminsView,
+    InstitutionBadgesOverview,
     InstitutionBadgesView,
     InstitutionMicroCredentials,
-    CountMicroCredentials,
+    IssuerMembers,
     MicroCredentialsBadgeOverview,
-    InstitutionBadgesOverview,
-    IssuerMembers, SectorBadgesOverview,
+    SectorBadgesOverview,
 )
 
 urlpatterns = [
-    path('insight', InsightsView.as_view(), name='api_insight'),
-    path('institution/admins', InstitutionAdminsView.as_view(), name='api_institution_admins'),
-    path('institution/badges', InstitutionBadgesView.as_view(), name='api_institution_badges'),
+    path("insight", InsightsView.as_view(), name="api_insight"),
+    path("institution/admins", InstitutionAdminsView.as_view(), name="api_institution_admins"),
+    path("institution/badges", InstitutionBadgesView.as_view(), name="api_institution_badges"),
     path(
-        'institution/micro-credentials', InstitutionMicroCredentials.as_view(), name='api_institution_micro_credentials'
+        "institution/micro-credentials", InstitutionMicroCredentials.as_view(), name="api_institution_micro_credentials"
     ),
     path(
-        'institution/micro-credentials-count',
+        "institution/micro-credentials-count",
         CountMicroCredentials.as_view(),
-        name='api_institution_micro_credentials_count',
+        name="api_institution_micro_credentials_count",
     ),
     path(
-        'institution/micro-credentials-badges',
+        "institution/micro-credentials-badges",
         MicroCredentialsBadgeOverview.as_view(),
-        name='api_institution_micro_credentials_badges',
+        name="api_institution_micro_credentials_badges",
     ),
-    path('institution/badges-overview', InstitutionBadgesOverview.as_view(), name='api_institution_badges_overview'),
-    path('institution/sector-overview', SectorBadgesOverview.as_view(), name='api_sector_badges_overview'),
-    path('institution/issuer-members', IssuerMembers.as_view(), name='api_institution_issuer_members'),
+    path("institution/badges-overview", InstitutionBadgesOverview.as_view(), name="api_institution_badges_overview"),
+    path("institution/sector-overview", SectorBadgesOverview.as_view(), name="api_sector_badges_overview"),
+    path("institution/issuer-members", IssuerMembers.as_view(), name="api_institution_issuer_members"),
 ]

@@ -7,10 +7,10 @@ from django.db import IntegrityError
 
 
 class Command(BaseCommand):
-    args = ''
-    help = 'Ensures users have the proper EmailAddress objects created for their accounts'
+    args = ""
+    help = "Ensures users have the proper EmailAddress objects created for their accounts"
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: C901
         users_processed = 0
         primaries_set = 0
         email_errors = 0
@@ -24,15 +24,13 @@ class Command(BaseCommand):
                 # handle users who don't have an EmailAddress record
                 if emails.count() < 1:
                     try:
-                        existing_email = CachedEmailAddress.objects.get(email=user.email)
+                        existing_email = CachedEmailAddress.objects.get(email=user.email)  # noqa: F841
                     except CachedEmailAddress.DoesNotExist:
-                        new_primary = CachedEmailAddress(
-                            user=user, email=user.email, verified=False, primary=True
-                        )
+                        new_primary = CachedEmailAddress(user=user, email=user.email, verified=False, primary=True)
                         new_primary.save()
                         new_primary.send_confirmation(signup="canvas")
                     else:
-                        user.delete()  # User record has no email addresses and email address has been added under another account
+                        user.delete()  # User record has no email addresses and email address has been added under another account  # noqa: E501
                         continue
 
                     emails = CachedEmailAddress.objects.filter(user=user)
@@ -41,7 +39,7 @@ class Command(BaseCommand):
                 elif len([e for e in emails if e.primary is True]) == 0:
                     new_primary = emails.first()
                     new_primary.set_as_primary(conditional=True)
-                    self.stdout.write("Set {} as primary for user {}".format(new_primary.email, user.pk))
+                    self.stdout.write(f"Set {new_primary.email} as primary for user {user.pk}")
                     primaries_set += 1
 
                     prior_confirmations = EmailConfirmation.objects.filter(email_address=new_primary)
@@ -50,21 +48,17 @@ class Command(BaseCommand):
                         try:
                             new_primary.send_confirmation(signup="canvas")
                         except SMTPException as e:
-                            raise e
-                        except Exception as e:
-                            raise SMTPException("Error sending mail to {} -- {}".format(
-                                new_primary.email, e.message
-                            ))
+                            raise e  # noqa: TRY201
+                        except Exception as e:  # noqa: BLE001
+                            raise SMTPException(f"Error sending mail to {new_primary.email} -- {e.message}")  # noqa: B904
             except IntegrityError as e:
                 user_errors += 1
-                self.stdout.write("Error in user {} record: {}".format(user.pk, e.message))
+                self.stdout.write(f"Error in user {user.pk} record: {e.message}")
                 continue
             except SMTPException as e:
                 email_errors += 1
-                self.stdout.write("Could not send mail: {}".format(e.message))
+                self.stdout.write(f"Could not send mail: {e.message}")
 
         self.stdout.write(
-            "Done cleaning email: {} users, {} updated primaries, {} user errors, {} email errors.".format(
-                users_processed, primaries_set, user_errors, email_errors
-            )
+            f"Done cleaning email: {users_processed} users, {primaries_set} updated primaries, {user_errors} user errors, {email_errors} email errors."  # noqa: E501
         )

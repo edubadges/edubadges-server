@@ -1,11 +1,9 @@
-# encoding: utf-8
-
-
 import datetime
 import json
 
 import cryptography.fernet
 import dateutil
+
 from badgeuser.models import BadgrAccessToken
 from django.conf import settings
 from django.utils import timezone
@@ -27,10 +25,10 @@ def accesstoken_for_authcode(authcode, secret_key=None):
 
 def encrypt_authcode(payload, expires_seconds=None, secret_key=None):
     if expires_seconds is None:
-        expires_seconds = getattr(settings, 'AUTHCODE_EXPIRES_SECONDS', 10)
+        expires_seconds = getattr(settings, "AUTHCODE_EXPIRES_SECONDS", 10)
 
     if secret_key is None:
-        secret_key = getattr(settings, 'AUTHCODE_SECRET_KEY', None)
+        secret_key = getattr(settings, "AUTHCODE_SECRET_KEY", None)
         if secret_key is None:
             raise ValueError("must specify a secret key")
 
@@ -41,32 +39,30 @@ def encrypt_authcode(payload, expires_seconds=None, secret_key=None):
 
 def decrypt_authcode(cipher, secret_key=None):
     if secret_key is None:
-        secret_key = getattr(settings, 'AUTHCODE_SECRET_KEY', None)
+        secret_key = getattr(settings, "AUTHCODE_SECRET_KEY", None)
         if secret_key is None:
             raise ValueError("must specify a secret key")
 
     crypto = cryptography.fernet.Fernet(secret_key)
 
     try:
-        decrypted = crypto.decrypt(cipher.encode('utf-8'))
-    except (cryptography.fernet.InvalidToken, UnicodeEncodeError, UnicodeDecodeError) as e:
+        decrypted = crypto.decrypt(cipher.encode("utf-8"))
+    except (cryptography.fernet.InvalidToken, UnicodeEncodeError, UnicodeDecodeError):
         return None
     message = _unmarshall(decrypted)
-    if message and 'expires' in message:
-        expires = dateutil.parser.parse(message.get('expires'))
+    if message and "expires" in message:
+        expires = dateutil.parser.parse(message.get("expires"))
         if expires > timezone.now():
-            payload = message.get('payload')
+            payload = message.get("payload")
             return payload
 
 
 # helper functions for {encrypt,decrypt}_authcode
 
+
 def _marshall(payload, expires_seconds):
     expires_at = timezone.now() + datetime.timedelta(seconds=expires_seconds)
-    return json.dumps(dict(
-        expires=expires_at.isoformat(),
-        payload=payload
-    ))
+    return json.dumps(dict(expires=expires_at.isoformat(), payload=payload))  # noqa: C408
 
 
 def _unmarshall(digest):

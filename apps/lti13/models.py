@@ -5,16 +5,15 @@ from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from pylti1p3.registration import Registration
-
 from entity.models import BaseVersionedEntity
 from institution.models import Institution
 from issuer.models import BadgeClass
 from mainsite.models import BaseAuditedModel
+from pylti1p3.registration import Registration
 
 
 class LtiToolKey(models.Model):
-    name = models.CharField(max_length=255, null=False, blank=False, unique=True, help_text=_('Key name'))
+    name = models.CharField(max_length=255, null=False, blank=False, unique=True, help_text=_("Key name"))
     private_key = models.TextField(
         null=False, blank=False, help_text=_("Tool's generated Private key. Keep this value in secret")
     )
@@ -30,15 +29,15 @@ class LtiToolKey(models.Model):
         else:
             self.public_key = None
             self.public_jwk = None
-        super(LtiToolKey, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
-    def __str__(self):
-        return '<LtiToolKey id=%d, name=%s>' % (self.id, self.name)
+    def __str__(self):  # noqa: DJ012
+        return "<LtiToolKey id=%d, name=%s>" % (self.id, self.name)  # noqa: UP031
 
-    class Meta(object):
-        db_table = 'lti1p3_tool_key'
-        verbose_name = 'lti 1.3 tool key'
-        verbose_name_plural = 'lti 1.3 tool keys'
+    class Meta:  # noqa: DJ012
+        db_table = "lti1p3_tool_key"
+        verbose_name = "lti 1.3 tool key"
+        verbose_name_plural = "lti 1.3 tool keys"
 
 
 class LtiTool(models.Model):
@@ -51,10 +50,10 @@ class LtiTool(models.Model):
     )
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, blank=False, null=False)
     client_id = models.CharField(
-        max_length=255, null=False, blank=False, help_text=_('Value provided by LTI 1.3 Platform')
+        max_length=255, null=False, blank=False, help_text=_("Value provided by LTI 1.3 Platform")
     )
     use_by_default = models.BooleanField(
-        default=False, help_text=_('This iss config will be used in case if client-id was not passed')
+        default=False, help_text=_("This iss config will be used in case if client-id was not passed")
     )
     auth_login_url = models.CharField(
         max_length=1024,
@@ -88,15 +87,15 @@ class LtiTool(models.Model):
         blank=True,
         help_text=_(
             "In case if platform's JWKS endpoint somehow "
-            'unavailable you may paste JWKS here. '
-            'Value provided by LTI 1.3 Platform'
+            "unavailable you may paste JWKS here. "
+            "Value provided by LTI 1.3 Platform"
         ),
     )
-    tool_key = models.ForeignKey(LtiToolKey, on_delete=models.PROTECT, related_name='lti_tools')
+    tool_key = models.ForeignKey(LtiToolKey, on_delete=models.PROTECT, related_name="lti_tools")
 
     def clean(self):
         if not self.key_set_url and not self.key_set:
-            raise ValidationError({'key_set_url': _('Even one of "key_set_url" or "key_set" should be set')})
+            raise ValidationError({"key_set_url": _('Even one of "key_set_url" or "key_set" should be set')})
 
         if self.key_set:
             key_set_valid = False
@@ -107,27 +106,27 @@ class LtiTool(models.Model):
             except ValueError:
                 pass
             if not key_set_valid:
-                raise ValidationError({'key_set': _('Should be a dict')})
+                raise ValidationError({"key_set": _("Should be a dict")})
 
     def to_dict(self):
         data = {
-            'issuer': self.issuer,
-            'client_id': self.client_id,
-            'auth_login_url': self.auth_login_url,
-            'auth_token_url': self.auth_token_url,
-            'auth_audience': self.auth_audience,
-            'key_set_url': self.key_set_url,
-            'key_set': json.loads(self.key_set) if self.key_set else None,
-            'institution': self.institution.identifier,
+            "issuer": self.issuer,
+            "client_id": self.client_id,
+            "auth_login_url": self.auth_login_url,
+            "auth_token_url": self.auth_token_url,
+            "auth_audience": self.auth_audience,
+            "key_set_url": self.key_set_url,
+            "key_set": json.loads(self.key_set) if self.key_set else None,
+            "institution": self.institution.identifier,
         }
         return data
 
-    def __str__(self):
-        return '<LtiTool id=%d, title=%s>' % (self.id, self.title)
+    def __str__(self):  # noqa: DJ012
+        return "<LtiTool id=%d, title=%s>" % (self.id, self.title)  # noqa: UP031
 
-    class Meta(object):
+    class Meta:  # noqa: DJ012
         unique_together = [
-            ['issuer', 'client_id'],
+            ["issuer", "client_id"],
         ]
 
 
@@ -136,6 +135,6 @@ class LtiCourse(BaseAuditedModel, BaseVersionedEntity):
     title = models.CharField(max_length=255, null=False, blank=False)
     label = models.CharField(max_length=255, null=False, blank=False)
     badgeclass = models.OneToOneField(
-        BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name='lti_course'
+        BadgeClass, blank=False, null=False, on_delete=models.CASCADE, related_name="lti_course"
     )
-    tool = models.ForeignKey(LtiTool, blank=False, null=False, on_delete=models.CASCADE, related_name='courses')
+    tool = models.ForeignKey(LtiTool, blank=False, null=False, on_delete=models.CASCADE, related_name="courses")

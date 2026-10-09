@@ -1,7 +1,10 @@
 import logging
-from typing import Any, Dict, Optional
+
+from http import HTTPStatus
+from typing import Any
 
 import requests
+
 from django.core.exceptions import BadRequest, ObjectDoesNotExist
 from django.http import Http404
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
@@ -52,27 +55,25 @@ class CredentialsView(APIView):
             raise Http404("Badge instance not found")
 
         offer_uri = self._create_offer(request, badge_entity_id)
-        logger.info(f"Issued credential offer for badge {badge_entity_id}")
-        logger.debug(f"Offer: {offer_uri}")
+        logger.info(f"Issued credential offer for badge {badge_entity_id}")  # noqa: G004
+        logger.debug(f"Offer: {offer_uri}")  # noqa: G004
 
         return Response({"offer": offer_uri}, status=status.HTTP_201_CREATED)
 
-    def _find_badge_instance(self, entity_id: str, user) -> Optional[Any]:
+    def _find_badge_instance(self, entity_id: str, user) -> Any | None:
         """
         Look up a BadgeInstance by its entity_id and verify the requesting
         user is the recipient.  Returns None when the badge does not exist
         or does not belong to the user.
         """
-        from issuer.models import BadgeInstance
+        from issuer.models import BadgeInstance  # noqa: PLC0415
 
         try:
             return BadgeInstance.objects.get(entity_id=entity_id, user=user)
         except (ObjectDoesNotExist, ValueError):
             return None
 
-    def _create_offer(
-        self, request: Request, badge_entity_id: str
-    ) -> Optional[str]:
+    def _create_offer(self, request: Request, badge_entity_id: str) -> str | None:
         """
         Ask ec-issuer to create a credential and an offer for the given
         badge instance.
@@ -82,20 +83,16 @@ class CredentialsView(APIView):
             "Accept": "application/json",
             "Authorization": f"Bearer {_bearer_token(request)}",
         }
-        payload: Dict[str, str] = {
+        payload: dict[str, str] = {
             "award_id": badge_entity_id,
         }
 
-        logger.debug(f"Requesting offer creation: {url} {payload['award_id']}")
+        logger.debug(f"Requesting offer creation: {url} {payload['award_id']}")  # noqa: G004
         resp = requests.post(timeout=5, url=url, json=payload, headers=headers)
-        logger.debug(f"Response: {resp.status_code} {resp.text}")
+        logger.debug(f"Response: {resp.status_code} {resp.text}")  # noqa: G004
 
-        if resp.status_code >= 400:
-            msg = (
-                f"Failed to create offer:\n"
-                f"\tcode: {resp.status_code}\n"
-                f"\tcontent:\n {resp.text}"
-            )
+        if resp.status_code >= HTTPStatus.BAD_REQUEST:
+            msg = f"Failed to create offer:\n\tcode: {resp.status_code}\n\tcontent:\n {resp.text}"
             raise BadRequest(msg)
 
         return resp.json().get("uri")

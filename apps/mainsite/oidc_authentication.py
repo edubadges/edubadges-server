@@ -3,68 +3,70 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from http import HTTPStatus
+
 import requests
-from django.conf import settings
-from django.core.exceptions import BadRequest
-from rest_framework.authentication import BaseAuthentication
 
 from badgeuser.models import BadgeUser
+from django.conf import settings
+from django.core.exceptions import BadRequest
 from institution.models import Institution
+from rest_framework.authentication import BaseAuthentication
 
 
 class OIDCAuthentication(BaseAuthentication):
-    def authenticate(self, request):
+    def authenticate(self, request):  # noqa: C901
         """
         Returns two-tuple of (user, token) if authentication succeeds,
         or None otherwise.
         """
-        logger = logging.getLogger('Badgr.Debug')
-        x_requested_with = request.headers.get('x-requested-with')
-        if x_requested_with and (x_requested_with.lower() == 'client' or x_requested_with.lower() == 'mobile'):
-            logger.info(f"Skipping OIDCAuthentication as HTTP_X_REQUESTED_WITH = {x_requested_with}")
+        logger = logging.getLogger("Badgr.Debug")
+        x_requested_with = request.headers.get("x-requested-with")
+        if x_requested_with and (x_requested_with.lower() == "client" or x_requested_with.lower() == "mobile"):
+            logger.info(f"Skipping OIDCAuthentication as HTTP_X_REQUESTED_WITH = {x_requested_with}")  # noqa: G004
             return None
 
-        logger.info(f'OIDCAuthentication {request.META}')
-        authorization = request.environ.get('HTTP_AUTHORIZATION')
+        logger.info(f"OIDCAuthentication {request.META}")  # noqa: G004
+        authorization = request.environ.get("HTTP_AUTHORIZATION")
         if not authorization:
-            logger.info('OIDCAuthentication no authorization')
+            logger.info("OIDCAuthentication no authorization")
             return None
 
-        bearer_token = authorization[len('bearer ') :]
+        bearer_token = authorization[len("bearer ") :]
         if not bearer_token:
-            logger.info('OIDCAuthentication no bearer_token')
+            logger.info("OIDCAuthentication no bearer_token")
             return None
 
-        payload = {'token': bearer_token}
-        headers = {'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded'}
-        url = f'{settings.EDUID_PROVIDER_URL}/introspect'
+        payload = {"token": bearer_token}
+        headers = {"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"}
+        url = f"{settings.EDUID_PROVIDER_URL}/introspect"
         auth = (settings.OIDC_RS_ENTITY_ID, settings.OIDC_RS_SECRET)
         response = requests.post(url, data=urllib.parse.urlencode(payload), auth=auth, headers=headers, timeout=60)
-        if response.status_code != 200:
-            logger.info(f'OIDCAuthentication bad response {response.status_code} {response.json()}')
+        if response.status_code != HTTPStatus.OK:
+            logger.info(f"OIDCAuthentication bad response {response.status_code} {response.json()}")  # noqa: G004
             return None
 
         introspect_json = response.json()
-        logger.info(f'OIDCAuthentication introspect {introspect_json}')
+        logger.info(f"OIDCAuthentication introspect {introspect_json}")  # noqa: G004
 
-        if not introspect_json['active']:
+        if not introspect_json["active"]:
             return None
         user = None
-        if 'email' in introspect_json:
-            user = BadgeUser.objects.get(email=introspect_json['email'], is_teacher=True)
-        elif 'client_id' in introspect_json:
-            client_id = introspect_json['client_id']
+        if "email" in introspect_json:
+            user = BadgeUser.objects.get(email=introspect_json["email"], is_teacher=True)
+        elif "client_id" in introspect_json:
+            client_id = introspect_json["client_id"]
             try:
                 institution = Institution.objects.get(manage_client_id=client_id)
             except Institution.DoesNotExist:
-                raise BadRequest(f'Institution with manage_client_id {client_id} does not exists')
+                raise BadRequest(f"Institution with manage_client_id {client_id} does not exists")  # noqa: B904
 
-            logger.info(f'OIDCAuthentication institution {institution} client_id {client_id}')
+            logger.info(f"OIDCAuthentication institution {institution} client_id {client_id}")  # noqa: G004
 
             if institution and institution.sis_integration_enabled:
                 user = institution.sis_default_user
             else:
-                raise BadRequest(f'Institution {institution.identifier} is not sis_integration_enabled')
+                raise BadRequest(f"Institution {institution.identifier} is not sis_integration_enabled")
 
         if user:
             request.sis_api_call = True

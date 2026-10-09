@@ -7,7 +7,7 @@ class BaseBadgeAssertionEvent(BaseBadgrEvent):
         self.request = request
 
     def to_representation(self):
-        return {'badgeInstance': self.badge_instance.json, 'referer': self.request.headers.get('referer')}
+        return {"badgeInstance": self.badge_instance.json, "referer": self.request.headers.get("referer")}
 
 
 class BadgeAssertionCheckedEvent(BaseBadgeAssertionEvent):

@@ -1,8 +1,8 @@
-from rest_framework.exceptions import AuthenticationFailed
 from badgrsocialauth.providers.eduid.provider import EduIDProvider
+from rest_framework.exceptions import AuthenticationFailed
 
 
-def sync_user_with_eduid(user, eduid_data, logger):
+def sync_user_with_eduid(user, eduid_data, logger):  # noqa: ARG001
     validated_names = []
     preferred_name = None
 
@@ -17,10 +17,14 @@ def sync_user_with_eduid(user, eduid_data, logger):
 
         # affiliations
         if "eppn" in info and "schac_home_organization" in info:
-            user.add_affiliations([{
-                "eppn": info["eppn"].lower(),
-                "schac_home": info["schac_home_organization"],
-            }])
+            user.add_affiliations(
+                [
+                    {
+                        "eppn": info["eppn"].lower(),
+                        "schac_home": info["schac_home_organization"],
+                    }
+                ]
+            )
 
     if not validated_names:
         user.validated_name = None
@@ -40,9 +44,6 @@ def extract_bearer_token(request) -> str:
 
 def provision_user_from_temporary(request, temp_user):
     provider = EduIDProvider(request)
-    social_login = provider.sociallogin_from_response(
-        request,
-        temp_user.user_payload
-    )
+    social_login = provider.sociallogin_from_response(request, temp_user.user_payload)
     social_login.save(request)
     return social_login.user

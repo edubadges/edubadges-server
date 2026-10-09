@@ -1,17 +1,16 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from badgeuser.authcode import authcode_for_accesstoken
 from badgeuser.models import BadgrAccessToken
-from badgrsocialauth.utils import set_url_query_params, get_session_badgr_app
+from badgrsocialauth.utils import get_session_badgr_app, set_url_query_params
 from django.conf import settings
 from mainsite.models import EmailBlacklist
 
 
 class BadgrAccountAdapter(DefaultAccountAdapter):
-
     def send_mail(self, template_prefix, email, context, attachment=None):
-        context['STATIC_URL'] = getattr(settings, 'STATIC_URL')
-        context['HTTP_ORIGIN'] = getattr(settings, 'HTTP_ORIGIN')
-        context['unsubscribe_url'] = getattr(settings, 'HTTP_ORIGIN') + EmailBlacklist.generate_email_signature(email)
+        context["STATIC_URL"] = settings.STATIC_URL
+        context["HTTP_ORIGIN"] = settings.HTTP_ORIGIN
+        context["unsubscribe_url"] = settings.HTTP_ORIGIN + EmailBlacklist.generate_email_signature(email)
 
         msg = self.render_mail(template_prefix, email, context)
         if attachment:
@@ -19,7 +18,7 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
         msg.send()
 
     def is_open_for_signup(self, request):
-        return getattr(settings, 'OPEN_FOR_SIGNUP', True)
+        return getattr(settings, "OPEN_FOR_SIGNUP", True)
 
     def get_signup_redirect_url(self, request):
         return self.get_login_redirect_url(request)
@@ -35,14 +34,15 @@ class BadgrAccountAdapter(DefaultAccountAdapter):
                 accesstoken = BadgrAccessToken.objects.generate_new_token_for_user(
                     request.user,
                     application=badgr_app.oauth_application if badgr_app.oauth_application_id else None,
-                    scope='rw:backpack rw:profile rw:issuer')
+                    scope="rw:backpack rw:profile rw:issuer",
+                )
 
                 if badgr_app.use_auth_code_exchange:
                     authcode = authcode_for_accesstoken(accesstoken)
-                    params = dict(authCode=authcode)
+                    params = dict(authCode=authcode)  # noqa: C408
                 else:
-                    params = dict(authToken=accesstoken.token)
+                    params = dict(authToken=accesstoken.token)  # noqa: C408
 
                 return set_url_query_params(badgr_app.ui_login_redirect, **params)
         else:
-            return '/'
+            return "/"

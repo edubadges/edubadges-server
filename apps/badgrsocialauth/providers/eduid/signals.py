@@ -2,11 +2,12 @@ import logging
 import uuid
 
 import django.dispatch
+
 from django.db import models
 from django.dispatch import receiver
 
 
-class ValidatedNameAuditTrail(models.Model):
+class ValidatedNameAuditTrail(models.Model):  # noqa: DJ008
     pkid = models.BigAutoField(primary_key=True, editable=False)
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     action_datetime = models.DateTimeField(auto_now=True)
@@ -22,9 +23,9 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(val_name_audit_trail_signal)
-def new_val_name_audit_trail(sender, user, old_validated_name, new_validated_name, **kwargs):
+def new_val_name_audit_trail(sender, user, old_validated_name, new_validated_name, **kwargs):  # noqa: ARG001
     try:
-        if not old_validated_name == new_validated_name:
+        if not old_validated_name == new_validated_name:  # noqa: SIM201
             if old_validated_name is None:
                 audit_trail = ValidatedNameAuditTrail.objects.create(
                     user=user,
@@ -41,6 +42,6 @@ def new_val_name_audit_trail(sender, user, old_validated_name, new_validated_nam
                     old_validated_name=old_validated_name,
                     new_validated_name=new_validated_name,
                 )
-            logger.info(f'val_name_audit_trail created {audit_trail.id}  for user {audit_trail.user}')
-    except Exception as e:
-        logger.error('val_name_audit_trail error: %s' % (e))
+            logger.info(f"val_name_audit_trail created {audit_trail.id}  for user {audit_trail.user}")  # noqa: G004
+    except Exception as e:  # noqa: BLE001
+        logger.error("val_name_audit_trail error: %s" % (e))  # noqa: G002, TRY400, UP031

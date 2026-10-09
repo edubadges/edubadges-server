@@ -7,12 +7,11 @@ class LegacyBadgeShareRedirectView(RedirectView):
     permanent = True
 
     def get_redirect_url(self, *args, **kwargs):
-        entity_id = kwargs.get('entity_id', None)
+        entity_id = kwargs.get("entity_id")
         if not entity_id:
             raise Http404
         try:
             badgeinstance = BadgeInstance.objects.get(entity_id=entity_id)
-            return badgeinstance.public_url
         except BadgeInstance.DoesNotExist:
-            raise Http404
-
+            raise Http404  # noqa: B904
+        return badgeinstance.public_url

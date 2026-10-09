@@ -1,13 +1,21 @@
 import graphene
+
 from graphene_django.types import DjangoObjectType
+from staff.models import BadgeClassStaff, FacultyStaff, InstitutionStaff, IssuerStaff
 
-from staff.models import InstitutionStaff, FacultyStaff, IssuerStaff, BadgeClassStaff
 
-
-class StaffTypeMeta(object):
+class StaffTypeMeta:
     class Meta:
-        fields = ('user', 'may_create', 'may_read', 'may_update', 'may_delete', 'may_award', 'may_sign',
-                  'may_administrate_users')
+        fields = (
+            "user",
+            "may_create",
+            "may_read",
+            "may_update",
+            "may_delete",
+            "may_award",
+            "may_sign",
+            "may_administrate_users",
+        )
 
 
 class InstitutionStaffType(DjangoObjectType):

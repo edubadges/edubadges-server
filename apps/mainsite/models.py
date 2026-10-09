@@ -2,9 +2,12 @@ import base64
 import hmac
 import re
 import urllib.parse
+
 from datetime import datetime, timedelta
 from hashlib import sha1
 
+from basic_models.models import CreatedUpdatedAt, CreatedUpdatedBy, IsActive
+from cachemodel.models import CacheModel
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models, transaction
@@ -14,20 +17,17 @@ from django.utils.deconstruct import deconstructible
 from oauth2_provider.models import AccessToken
 from rest_framework.authtoken.models import Token
 
-from basic_models.models import CreatedUpdatedBy, CreatedUpdatedAt, IsActive
-from cachemodel.models import CacheModel
-
-AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+AUTH_USER_MODEL = getattr(settings, "AUTH_USER_MODEL", "auth.User")
 
 
 class BaseAuditedModel(CacheModel):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
-        'badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name='+'
+        "badgeuser.BadgeUser", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
     )
     updated_at = models.DateTimeField(auto_now=True)
     updated_by = models.ForeignKey(
-        'badgeuser.BadgeUser', on_delete=models.SET_NULL, blank=True, null=True, related_name='+'
+        "badgeuser.BadgeUser", on_delete=models.SET_NULL, blank=True, null=True, related_name="+"
     )
 
     class Meta:
@@ -35,34 +35,34 @@ class BaseAuditedModel(CacheModel):
 
     @property
     def cached_creator(self):
-        from badgeuser.models import BadgeUser
+        from badgeuser.models import BadgeUser  # noqa: PLC0415
 
         return BadgeUser.cached.get(id=self.created_by_id)
 
 
-class EmailBlacklist(models.Model):
+class EmailBlacklist(models.Model):  # noqa: DJ008
     email = models.EmailField(unique=True)
 
     class Meta:
-        verbose_name = 'Blacklisted email'
-        verbose_name_plural = 'Blacklisted emails'
+        verbose_name = "Blacklisted email"
+        verbose_name_plural = "Blacklisted emails"
 
     @staticmethod
     def generate_email_signature(email):
         secret_key = settings.UNSUBSCRIBE_SECRET_KEY
 
-        expiration = datetime.utcnow() + timedelta(days=7)  # In one week.
-        timestamp = int((expiration - datetime(1970, 1, 1)).total_seconds())
+        expiration = datetime.utcnow() + timedelta(days=7)  # In one week.  # noqa: DTZ003
+        timestamp = int((expiration - datetime(1970, 1, 1)).total_seconds())  # noqa: DTZ001
 
-        email_encoded = base64.b64encode(email.encode('utf-8'))
-        hashed = hmac.new(secret_key.encode('utf-8'), email_encoded + bytes(str(timestamp), 'utf-8'), sha1)
+        email_encoded = base64.b64encode(email.encode("utf-8"))
+        hashed = hmac.new(secret_key.encode("utf-8"), email_encoded + bytes(str(timestamp), "utf-8"), sha1)
 
         return reverse(
-            'unsubscribe',
+            "unsubscribe",
             kwargs={
-                'email_encoded': email_encoded,
-                'expiration': timestamp,
-                'signature': hashed.hexdigest(),
+                "email_encoded": email_encoded,
+                "expiration": timestamp,
+                "signature": hashed.hexdigest(),
             },
         )
 
@@ -75,14 +75,14 @@ class EmailBlacklist(models.Model):
 
 
 class BadgrAppManager(Manager):
-    def get_current(self, request=None, raise_exception=True):
+    def get_current(self, request=None, raise_exception=True):  # noqa: FBT002
         origin = None
         existing_session_app_id = None
 
         if request:
-            if request.headers.get('origin'):
-                origin = request.headers.get('origin')
-            existing_session_app_id = request.session.get('badgr_app_pk', None)
+            if request.headers.get("origin"):
+                origin = request.headers.get("origin")
+            existing_session_app_id = request.session.get("badgr_app_pk", None)
 
         if origin:
             url = urllib.parse.urlparse(origin)
@@ -96,9 +96,9 @@ class BadgrAppManager(Manager):
                 return self.get(id=existing_session_app_id)
             except self.model.DoesNotExist:
                 pass
-        badgr_app_id = getattr(settings, 'BADGR_APP_ID', None)
+        badgr_app_id = getattr(settings, "BADGR_APP_ID", None)
         if raise_exception and not badgr_app_id:
-            raise ImproperlyConfigured('Must specify a BADGR_APP_ID')
+            raise ImproperlyConfigured("Must specify a BADGR_APP_ID")
         return self.get(id=badgr_app_id)
 
 
@@ -116,7 +116,7 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, CacheModel):
     use_auth_code_exchange = models.BooleanField(default=False)
     is_demo_environment = models.BooleanField(default=False, blank=True, null=True)
     oauth_application = models.ForeignKey(
-        'oauth2_provider.Application', on_delete=models.PROTECT, null=True, blank=True
+        "oauth2_provider.Application", on_delete=models.PROTECT, null=True, blank=True
     )
 
     objects = BadgrAppManager()
@@ -126,23 +126,22 @@ class BadgrApp(CreatedUpdatedBy, CreatedUpdatedAt, IsActive, CacheModel):
 
 
 @deconstructible
-class DefinedScopesValidator(object):
-    message = 'Does not match defined scopes'
-    code = 'invalid'
+class DefinedScopesValidator:  # noqa: PLW1641
+    message = "Does not match defined scopes"
+    code = "invalid"
 
     def __call__(self, value):
-        defined_scopes = set(getattr(settings, 'OAUTH2_PROVIDER', {}).get('SCOPES', {}).keys())
-        provided_scopes = set(s.strip() for s in re.split(r'[\s\n]+', value))
+        defined_scopes = set(getattr(settings, "OAUTH2_PROVIDER", {}).get("SCOPES", {}).keys())
+        provided_scopes = set(s.strip() for s in re.split(r"[\s\n]+", value))  # noqa: C401
         if provided_scopes - defined_scopes:
             raise ValidationError(self.message, code=self.code)
-        pass
 
     def __eq__(self, other):
         return isinstance(other, self.__class__)
 
 
 class ApplicationInfo(CacheModel):
-    application = models.OneToOneField('oauth2_provider.Application', on_delete=models.CASCADE)
+    application = models.OneToOneField("oauth2_provider.Application", on_delete=models.CASCADE)
     icon = models.FileField(blank=True, null=True)
     name = models.CharField(max_length=254, blank=True, null=True, default=None)
     website_url = models.URLField(blank=True, null=True, default=None)
@@ -160,14 +159,14 @@ class ApplicationInfo(CacheModel):
 
     @property
     def scope_list(self):
-        return [s for s in re.split(r'[\s\n]+', self.allowed_scopes) if s]
+        return [s for s in re.split(r"[\s\n]+", self.allowed_scopes) if s]
 
 
 class AccessTokenProxy(AccessToken):
     class Meta:
         proxy = True
-        verbose_name = 'access token'
-        verbose_name_plural = 'access tokens'
+        verbose_name = "access token"
+        verbose_name_plural = "access tokens"
 
     def __str__(self):
         return self.obscured_token
@@ -178,14 +177,14 @@ class AccessTokenProxy(AccessToken):
     @property
     def obscured_token(self):
         if self.token:
-            return '{}***'.format(self.token[:4])
+            return f"{self.token[:4]}***"
 
 
 class LegacyTokenProxy(Token):
     class Meta:
         proxy = True
-        verbose_name = 'Legacy token'
-        verbose_name_plural = 'Legacy tokens'
+        verbose_name = "Legacy token"
+        verbose_name_plural = "Legacy tokens"
 
     def __str__(self):
         return self.obscured_token
@@ -196,7 +195,7 @@ class LegacyTokenProxy(Token):
     @property
     def obscured_token(self):
         if self.key:
-            return '{}***'.format(self.key[:4])
+            return f"{self.key[:4]}***"
 
 
 class ArchiveMixin(CacheModel):
@@ -209,7 +208,7 @@ class ArchiveMixin(CacheModel):
     def may_archive(self):
         if not self.assertions:
             return True
-        return all([assertion.revoked for assertion in self.assertions])
+        return all([assertion.revoked for assertion in self.assertions])  # noqa: C419
 
     @transaction.atomic
     def archive(self, **kwargs):
@@ -218,13 +217,13 @@ class ArchiveMixin(CacheModel):
             - archives all children
             - only publishes the parent of the initially archived entity
             - removes all associated staff memberships without publishing the associated object (the one that is archived)
-        """
-        publish_parent = kwargs.pop('publish_parent', True)
+        """  # noqa: E501
+        publish_parent = kwargs.pop("publish_parent", True)
         if not self.may_archive:
             raise ProtectedError(
-                '{} may only be deleted if there are no awarded Assertions.'.format(self.__class__.__name__), self
+                f"{self.__class__.__name__} may only be deleted if there are no awarded Assertions.", self
             )
-        if hasattr(self, 'children'):
+        if hasattr(self, "children"):
             for child in self.children:
                 child.archive(publish_parent=False)
         for membership in self.staff_items:
@@ -232,24 +231,24 @@ class ArchiveMixin(CacheModel):
         self.archived = True
         self.save()
         if publish_parent:
-            try:
+            try:  # noqa: SIM105
                 self.parent.publish()
             except AttributeError:  # no parent
                 pass
 
 
-class SystemNotification(models.Model):
+class SystemNotification(models.Model):  # noqa: DJ008
     title = models.CharField(max_length=255, blank=False, null=False, default=None)
     notification_en = models.TextField(blank=False, null=False, default=None)
     notification_nl = models.TextField(blank=False, null=False, default=None)
     display_start = models.DateTimeField(blank=False, null=False)
     display_end = models.DateTimeField(blank=False, null=False)
 
-    NOTIFICATION_TYPE_WARNING = 'warning'
-    NOTIFICATION_TYPE_INFO = 'info'
+    NOTIFICATION_TYPE_WARNING = "warning"
+    NOTIFICATION_TYPE_INFO = "info"
     NOTIFICATION_TYPE_CHOICES = (
-        (NOTIFICATION_TYPE_WARNING, 'warning'),
-        (NOTIFICATION_TYPE_INFO, 'info'),
+        (NOTIFICATION_TYPE_WARNING, "warning"),
+        (NOTIFICATION_TYPE_INFO, "info"),
     )
     notification_type = models.CharField(
         max_length=254, choices=NOTIFICATION_TYPE_CHOICES, blank=False, null=False, default=NOTIFICATION_TYPE_INFO
