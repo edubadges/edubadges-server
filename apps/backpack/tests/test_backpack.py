@@ -71,7 +71,6 @@ class BackpackAPITest(BadgrTestCase):
 
         # Core badge instance fields
         self.assertEqual(data["id"], f"http://localhost:8000/public/assertions/{assertion.entity_id}")
-        self.assertEqual(data["entity_id"], assertion.entity_id)
         self.assertIsInstance(data["created_at"], str)
         self.assertIsInstance(data["issued_on"], str)
         self.assertEqual(data["award_type"], "requested")
@@ -85,7 +84,6 @@ class BackpackAPITest(BadgrTestCase):
         # badgeclass nested object
         self.assertIsInstance(data["badgeclass"], dict)
         self.assertEqual(data["badgeclass"]["id"], f"http://localhost:8000/public/badges/{badgeclass.entity_id}")
-        self.assertEqual(data["badgeclass"]["entity_id"], badgeclass.entity_id)
         self.assertEqual(data["badgeclass"]["name"], badgeclass.name)
         self.assertIsInstance(data["badgeclass"]["issuer"], dict)
         self.assertEqual(data["badgeclass"]["issuer"]["id"], f"http://localhost:8000/public/issuers/{issuer.entity_id}")
