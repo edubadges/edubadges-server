@@ -74,7 +74,7 @@ class FacultySerializer(serializers.ModelSerializer):
                 image_dutch=obj.image_dutch,
                 image_english=obj.image_english,
             )
-            return institution_data
+        return institution_data
 
 
 class IssuerSerializer(serializers.ModelSerializer):
