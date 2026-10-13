@@ -47,7 +47,7 @@ class InstitutionListSerializer(serializers.ModelSerializer):
 
 
 class FacultySerializer(serializers.ModelSerializer):
-    institution = InstitutionSerializer(read_only=True)
+    institution = serializers.SerializerMethodField()
 
     class Meta:
         model = Faculty
@@ -61,6 +61,20 @@ class FacultySerializer(serializers.ModelSerializer):
             "on_behalf_of_url",
             "institution",
         ]
+
+    def get_institution(self, obj):
+        """
+        When the `on_behalf_of` field is True, overwrite the institution with the faculty (virtual organisation) data
+        """
+        institution_data = InstitutionSerializer(obj.institution).data
+        if obj.on_behalf_of:
+            institution_data.update(
+                name_dutch=obj.name_dutch,
+                name_english=obj.name_english,
+                image_dutch=obj.image_dutch,
+                image_english=obj.image_english,
+            )
+            return institution_data
 
 
 class IssuerSerializer(serializers.ModelSerializer):
