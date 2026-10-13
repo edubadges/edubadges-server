@@ -71,8 +71,8 @@ class FacultySerializer(serializers.ModelSerializer):
             institution_data.update(
                 name_dutch=obj.name_dutch,
                 name_english=obj.name_english,
-                image_dutch=obj.image_dutch,
-                image_english=obj.image_english,
+                image_dutch=obj.image_dutch.url if obj.image_dutch else None,
+                image_english=obj.image_english.url if obj.image_english else None,
             )
         return institution_data
 
