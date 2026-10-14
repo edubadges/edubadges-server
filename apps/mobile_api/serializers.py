@@ -575,11 +575,11 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     faculty_type = serializers.CharField(source="issuer.faculty.faculty_type", read_only=True)
 
     # Institution fields
-    institution_name_english = serializers.CharField(source="issuer.faculty.institution.name_english", read_only=True)
-    institution_name_dutch = serializers.CharField(source="issuer.faculty.institution.name_dutch", read_only=True)
+    institution_name_english = serializers.SerializerMethodField()
+    institution_name_dutch = serializers.SerializerMethodField()
     institution_entity_id = serializers.CharField(source="issuer.faculty.institution.entity_id", read_only=True)
-    institution_image_dutch = serializers.CharField(source="issuer.faculty.institution.image_dutch", read_only=True)
-    institution_image_english = serializers.CharField(source="issuer.faculty.institution.image_english", read_only=True)
+    institution_image_dutch = serializers.SerializerMethodField()
+    institution_image_english = serializers.SerializerMethodField()
     institution_type = serializers.CharField(source="issuer.faculty.institution.institution_type", read_only=True)
 
     # Necessary for backward compatibility with the mobile app
@@ -627,6 +627,28 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
             "self_requested_assertions_count",
             "direct_awarded_assertions_count",
         ]
+
+    def get_institution_name_english(self, obj):
+        if obj.issuer.faculty.on_behalf_of:
+            return obj.issuer.faculty.name_english
+        return obj.issuer.faculty.institution.name_english
+
+    def get_institution_name_dutch(self, obj):
+        if obj.issuer.faculty.on_behalf_of:
+            return obj.issuer.faculty.name_dutch
+        return obj.issuer.faculty.institution.name_dutch
+
+    def get_institution_image_english(self, obj):
+        if obj.issuer.faculty.on_behalf_of:
+            return obj.issuer.faculty.image_english.url if obj.issuer.faculty.image_english else None
+        return (
+            obj.issuer.faculty.institution.image_english.url if obj.issuer.faculty.institution.image_english else None
+        )
+
+    def get_institution_image_dutch(self, obj):
+        if obj.issuer.faculty.on_behalf_of:
+            return obj.issuer.faculty.image_dutch.url if obj.issuer.faculty.image_dutch else None
+        return obj.issuer.faculty.institution.image_dutch.url if obj.issuer.faculty.institution.image_dutch else None
 
     @staticmethod
     def get_required_terms(obj):  # noqa: ARG004
