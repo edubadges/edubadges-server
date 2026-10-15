@@ -78,11 +78,23 @@ class FacultySerializer(serializers.ModelSerializer):
 
 
 class IssuerSerializer(serializers.ModelSerializer):
-    faculty = FacultySerializer(read_only=True)
+    faculty = serializers.SerializerMethodField()
 
     class Meta:
         model = Issuer
         fields = ["name_dutch", "name_english", "image_dutch", "image_english", "faculty"]
+
+    def get_faculty(self, obj):
+        """
+        When the images are not None, they should be used for the institution image
+        """
+        faculty_data = FacultySerializer(obj.faculty).data
+        if obj.image_dutch or obj.image_english:
+            faculty_data.update(
+                image_dutch=obj.image_dutch.url if obj.image_dutch else None,
+                image_english=obj.image_english.url if obj.image_english else None,
+            )
+        return faculty_data
 
 
 class BadgeClassExtensionSerializer(serializers.ModelSerializer):
@@ -641,6 +653,8 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     def get_institution_image_english(self, obj):
         if obj.issuer.faculty.on_behalf_of:
             return obj.issuer.faculty.image_english.url if obj.issuer.faculty.image_english else None
+        if obj.issuer.image_english:
+            return obj.issuer.image_english.url
         return (
             obj.issuer.faculty.institution.image_english.url if obj.issuer.faculty.institution.image_english else None
         )
@@ -648,6 +662,8 @@ class CatalogBadgeClassSerializer(serializers.ModelSerializer):
     def get_institution_image_dutch(self, obj):
         if obj.issuer.faculty.on_behalf_of:
             return obj.issuer.faculty.image_dutch.url if obj.issuer.faculty.image_dutch else None
+        if obj.issuer.image_dutch:
+            return obj.issuer.image_dutch.url
         return obj.issuer.faculty.institution.image_dutch.url if obj.issuer.faculty.institution.image_dutch else None
 
     @staticmethod
