@@ -20,7 +20,7 @@ from io import BytesIO
 from xml.etree.ElementTree import register_namespace
 
 import cairosvg
-import defusedxml.ElementTree as ET  # type: ignore[import-untyped]
+import defusedxml.ElementTree as defused_et  # noqa: N813, type: ignore[import-untyped]
 import requests
 
 from django.conf import settings
@@ -88,10 +88,10 @@ def verify_svg(fileobj):
     fileobj.seek(0)
     tag = None
     try:
-        for event, el in ET.iterparse(fileobj, events=("start",)):  # noqa: B007
+        for event, el in defused_et.iterparse(fileobj, events=("start",)):  # noqa: B007
             tag = el.tag
             break
-    except ET.ParseError:
+    except defused_et.ParseError:
         pass
     return tag == "{http://www.w3.org/2000/svg}svg"
 
@@ -104,7 +104,7 @@ def fetch_remote_file_to_storage(remote_url, upload_to=""):
     store = DefaultStorage()
     r = requests.get(remote_url, stream=True, timeout=60)
     if r.status_code == HTTPStatus.OK:
-        name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
+        _, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
         storage_name = f"{upload_to}/cached/{hashlib.md5(remote_url.encode(), usedforsecurity=False).hexdigest()}{ext}"
         if not store.exists(storage_name):
             buf = io.BytesIO(r.content)
@@ -526,7 +526,7 @@ def scrub_svg_image(uploaded_image):
     SVG_NAMESPACE = "http://www.w3.org/2000/svg"  # noqa: N806
     uploaded_image.file.seek(0)
     register_namespace("", SVG_NAMESPACE)
-    tree = ET.parse(uploaded_image.file)  # type: ignore[arg-type]
+    tree = defused_et.parse(uploaded_image.file)  # type: ignore[arg-type]
     root = tree.getroot()  # type: ignore[union-attr]
 
     # strip malicious tags
