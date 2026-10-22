@@ -1,3 +1,5 @@
+from json import loads as json_loads
+
 from backpack.models import BackpackBadgeShare
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
 from drf_spectacular.types import OpenApiTypes
@@ -9,15 +11,24 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 from entity.api import BaseEntityDetailView
+from institution.models import Faculty, Institution
 from issuer.models import BadgeClass, BadgeInstance, Issuer
 from issuer.permissions import BadgrOAuthTokenHasScope, RecipientIdentifiersMatch
 from mainsite.exceptions import BadgrApiException400
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
+from mainsite.utils import OriginSetting
 from public.public_api import ImagePropertyDetailView
 from rest_framework import permissions, serializers
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_302_FOUND, HTTP_404_NOT_FOUND
 from rest_framework.views import APIView
+
+
+def _entity_url(url_name, entity_id):
+    """Build a public API URL for an entity using its entity_id."""
+    return OriginSetting.HTTP + reverse(url_name, kwargs={"entity_id": entity_id})
+
 
 permission_denied_response = OpenApiResponse(
     response=inline_serializer(
@@ -33,31 +44,148 @@ permission_denied_response = OpenApiResponse(
 )
 
 
-class AwardIssuerSerializer(serializers.ModelSerializer):
+class AwardBaseSerializer(serializers.ModelSerializer):
+    """Base serializer for award responses."""
+
+    def _filter_none(self, data):
+        """Recursively remove keys whose value is None."""
+        if isinstance(data, dict):
+            return {k: self._filter_none(v) for k, v in data.items() if v is not None}
+        if isinstance(data, list):
+            return [self._filter_none(item) for item in data if item is not None]
+        return data
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return self._filter_none(data)
+
+
+class AwardInstitutionSerializer(AwardBaseSerializer):
+    id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Institution
+        fields = [
+            "id",
+            "name_dutch",
+            "name_english",
+            "image_dutch",
+            "image_english",
+            "identifier",
+            "alternative_identifier",
+        ]
+
+    def get_id(self, obj):
+        return _entity_url("institution_json", obj.entity_id)
+
+
+class AwardFacultySerializer(AwardBaseSerializer):
+    id = serializers.SerializerMethodField()
+    institution = AwardInstitutionSerializer(read_only=True)
+
+    class Meta:
+        model = Faculty
+        fields = [
+            "id",
+            "name_dutch",
+            "name_english",
+            "image_dutch",
+            "image_english",
+            "on_behalf_of",
+            "on_behalf_of_display_name",
+            "on_behalf_of_url",
+            "institution",
+        ]
+
+    def get_id(self, obj):
+        return OriginSetting.HTTP + f"/faculties/{obj.entity_id}"
+
+
+class AwardIssuerSerializer(AwardBaseSerializer):
+    id = serializers.SerializerMethodField()
+    faculty = AwardFacultySerializer(read_only=True)
+
     class Meta:
         model = Issuer
-        fields = ["id", "entity_id", "name_dutch", "name_english", "image_dutch", "image_english", "faculty"]
+        fields = [
+            "id",
+            "name_dutch",
+            "name_english",
+            "image_dutch",
+            "image_english",
+            "faculty",
+        ]
+
+    def get_id(self, obj):
+        return _entity_url("issuer_json", obj.entity_id)
 
 
-class AwardBadgeClassSerializer(serializers.ModelSerializer):
+class AwardBadgeClassSerializer(AwardBaseSerializer):
+    id = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+    criteria = serializers.SerializerMethodField()
+    participation = serializers.CharField(allow_null=True, read_only=True)
+    assessment_type = serializers.CharField(allow_null=True, read_only=True)
+    assessment_id_verified = serializers.BooleanField(read_only=True)
+    assessment_supervised = serializers.BooleanField(read_only=True)
+    extensions = serializers.SerializerMethodField()
     issuer = AwardIssuerSerializer(read_only=True)
 
     class Meta:
         model = BadgeClass
-        fields = ["id", "entity_id", "name", "description", "criteria_text", "image", "issuer"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "criteria",
+            "image",
+            "participation",
+            "assessment_type",
+            "assessment_id_verified",
+            "assessment_supervised",
+            "extensions",
+            "issuer",
+        ]
+
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
+
+    def get_id(self, obj):
+        return _entity_url("badgeclass_json", obj.entity_id)
+
+    def get_criteria(self, obj):
+        if obj.criteria_text:
+            return {"narrative": obj.criteria_text}
+        return None
+
+    def get_extensions(self, obj):
+        return [
+            {"name": e.name, "originalJson": json_loads(e.original_json)} for e in obj.badgeclassextension_set.all()
+        ]
 
 
-class AwardSerializer(serializers.ModelSerializer):
+class AwardEvidenceSerializer(serializers.Serializer):
+    evidence_url = serializers.URLField(allow_null=True, read_only=True)
+    narrative = serializers.CharField(allow_null=True, read_only=True)
+    name = serializers.CharField(allow_null=True, read_only=True)
+    description = serializers.CharField(allow_null=True, read_only=True)
+
+
+class AwardSerializer(AwardBaseSerializer):
+    id = serializers.SerializerMethodField()
     badgeclass = AwardBadgeClassSerializer(read_only=True)
     given_name = serializers.CharField(source="user.first_name", read_only=True, allow_null=True)
     family_name = serializers.CharField(source="user.last_name", read_only=True, allow_null=True)
     email = serializers.EmailField(source="user.primary_email", read_only=True, allow_null=True)
+    revocation_reason = serializers.CharField(allow_null=True, read_only=True)
+    evidences = AwardEvidenceSerializer(many=True, read_only=True, source="cached_evidence")
 
     class Meta:
         model = BadgeInstance
         fields = [
             "id",
-            "entity_id",
             "created_at",
             "issued_on",
             "award_type",
@@ -71,7 +199,12 @@ class AwardSerializer(serializers.ModelSerializer):
             "given_name",
             "family_name",
             "email",
+            "revocation_reason",
+            "evidences",
         ]
+
+    def get_id(self, obj):
+        return _entity_url("badgeinstance_json", obj.entity_id)
 
 
 class BackpackAwardDetail(APIView):
@@ -97,9 +230,8 @@ class BackpackAwardDetail(APIView):
                     OpenApiExample(
                         "Badge Instance",
                         value={
-                            "id": 2,
+                            "id": "https://DOMAIN/assertions/I41eovHQReGI_SG5KM6dSQ",
                             "created_at": "2021-04-20T16:20:30.528668+02:00",
-                            "entity_id": "I41eovHQReGI_SG5KM6dSQ",
                             "issued_on": "2021-04-20T16:20:30.521307+02:00",
                             "award_type": "requested",
                             "revoked": "false",
@@ -110,20 +242,26 @@ class BackpackAwardDetail(APIView):
                             "family_name": "Smith",
                             "email": "john.smith@example.com",
                             "badgeclass": {
-                                "id": 3,
+                                "id": "https://DOMAIN/badges/nwsL-dHyQpmvOOKBscsN_A",
                                 "name": "Edubadge account complete",
-                                "entity_id": "nwsL-dHyQpmvOOKBscsN_A",
                                 "description": "Complete your account to start earning badges",
-                                "criteria_text": "Register and verify your email address",
-                                "image_url": "https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png",
+                                "criteria": {
+                                    "narrative": "Register and verify your email address",
+                                },
+                                "image": "https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png",
+                                "participation": "onsite",
+                                "assessment_type": "written_exam",
+                                "assessment_id_verified": True,
+                                "assessment_supervised": True,
+                                "extensions": [],
                                 "issuer": {
-                                    "id": 1,
-                                    "entity_id": "issuer-entity-id-123",
+                                    "id": "https://DOMAIN/issuers/issuer-entity-id-123",
                                     "name_dutch": "SURF Edubadges",
                                     "name_english": "SURF Edubadges",
                                     "image_dutch": "null",
                                     "image_english": "/media/uploads/issuers/issuer_logo_ccd075bb-23cb-40b2-8780-b5a7eda9de1c.png",  # noqa: E501
                                     "faculty": {
+                                        "id": "https://DOMAIN/faculties/faculty-entity-id-456",
                                         "name_dutch": "SURF",
                                         "name_english": "SURF",
                                         "image_dutch": "null",
@@ -132,6 +270,7 @@ class BackpackAwardDetail(APIView):
                                         "on_behalf_of_display_name": "null",
                                         "on_behalf_of_url": "null",
                                         "institution": {
+                                            "id": "https://DOMAIN/institutions/institution-entity-id-789",
                                             "name_dutch": "University Voorbeeld",
                                             "name_english": "University Example",
                                             "image_dutch": "/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png",  # noqa: E501
