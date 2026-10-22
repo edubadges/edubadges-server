@@ -1,3 +1,5 @@
+from json import loads as json_loads
+
 from backpack.models import BackpackBadgeShare
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
 from drf_spectacular.types import OpenApiTypes
@@ -44,6 +46,18 @@ permission_denied_response = OpenApiResponse(
 
 class AwardBaseSerializer(serializers.ModelSerializer):
     """Base serializer for award responses."""
+
+    def _filter_none(self, data):
+        """Recursively remove keys whose value is None."""
+        if isinstance(data, dict):
+            return {k: self._filter_none(v) for k, v in data.items() if v is not None}
+        if isinstance(data, list):
+            return [self._filter_none(item) for item in data if item is not None]
+        return data
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        return self._filter_none(data)
 
 
 class AwardInstitutionSerializer(AwardBaseSerializer):
@@ -109,6 +123,12 @@ class AwardIssuerSerializer(AwardBaseSerializer):
 class AwardBadgeClassSerializer(AwardBaseSerializer):
     id = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
+    criteria = serializers.SerializerMethodField()
+    participation = serializers.CharField(allow_null=True, read_only=True)
+    assessment_type = serializers.CharField(allow_null=True, read_only=True)
+    assessment_id_verified = serializers.BooleanField(read_only=True)
+    assessment_supervised = serializers.BooleanField(read_only=True)
+    extensions = serializers.SerializerMethodField()
     issuer = AwardIssuerSerializer(read_only=True)
 
     class Meta:
@@ -117,8 +137,13 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
             "id",
             "name",
             "description",
-            "criteria_text",
+            "criteria",
             "image",
+            "participation",
+            "assessment_type",
+            "assessment_id_verified",
+            "assessment_supervised",
+            "extensions",
             "issuer",
         ]
 
@@ -130,6 +155,23 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
     def get_id(self, obj):
         return _entity_url("badgeclass_json", obj.entity_id)
 
+    def get_criteria(self, obj):
+        if obj.criteria_text:
+            return {"narrative": obj.criteria_text}
+        return None
+
+    def get_extensions(self, obj):
+        return [
+            {"name": e.name, "originalJson": json_loads(e.original_json)} for e in obj.badgeclassextension_set.all()
+        ]
+
+
+class AwardEvidenceSerializer(serializers.Serializer):
+    evidence_url = serializers.URLField(allow_null=True, read_only=True)
+    narrative = serializers.CharField(allow_null=True, read_only=True)
+    name = serializers.CharField(allow_null=True, read_only=True)
+    description = serializers.CharField(allow_null=True, read_only=True)
+
 
 class AwardSerializer(AwardBaseSerializer):
     id = serializers.SerializerMethodField()
@@ -137,6 +179,8 @@ class AwardSerializer(AwardBaseSerializer):
     given_name = serializers.CharField(source="user.first_name", read_only=True, allow_null=True)
     family_name = serializers.CharField(source="user.last_name", read_only=True, allow_null=True)
     email = serializers.EmailField(source="user.primary_email", read_only=True, allow_null=True)
+    revocation_reason = serializers.CharField(allow_null=True, read_only=True)
+    evidences = AwardEvidenceSerializer(many=True, read_only=True, source="cached_evidence")
 
     class Meta:
         model = BadgeInstance
@@ -155,6 +199,8 @@ class AwardSerializer(AwardBaseSerializer):
             "given_name",
             "family_name",
             "email",
+            "revocation_reason",
+            "evidences",
         ]
 
     def get_id(self, obj):
@@ -199,8 +245,15 @@ class BackpackAwardDetail(APIView):
                                 "id": "https://DOMAIN/badges/nwsL-dHyQpmvOOKBscsN_A",
                                 "name": "Edubadge account complete",
                                 "description": "Complete your account to start earning badges",
-                                "criteria_text": "Register and verify your email address",
-                                "image_url": "https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png",
+                                "criteria": {
+                                    "narrative": "Register and verify your email address",
+                                },
+                                "image": "https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png",
+                                "participation": "onsite",
+                                "assessment_type": "written_exam",
+                                "assessment_id_verified": True,
+                                "assessment_supervised": True,
+                                "extensions": [],
                                 "issuer": {
                                     "id": "https://DOMAIN/issuers/issuer-entity-id-123",
                                     "name_dutch": "SURF Edubadges",
