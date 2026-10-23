@@ -12,16 +12,17 @@ jobs:
 
     services:
       mysql:
-        image: mysql:8.0
+        image: mariadb:11
         env:
-          MYSQL_DATABASE: badgr
-          MYSQL_USER: badgr
-          MYSQL_PASSWORD: badgr
-          MYSQL_ROOT_PASSWORD: root
+          innodb_temp_data_file_path: /tmp/ibtmp1:12M:autoextend
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: badgr
+          MARIADB_USER: badgr
+          MARIADB_PASSWORD: badgr
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost"
+          --health-cmd="mariadb-admin ping -h localhost"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -45,10 +46,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Wait for MySQL
+      - name: Wait for MariaDB
         run: |
           until mysqladmin ping -h "127.0.0.1" --silent; do
-            echo "Waiting for MySQL..."
+            echo "Waiting for MariaDB..."
             sleep 2
           done
 
