@@ -4,7 +4,7 @@ semver==2.6.0
 pytz==2022.2.1
 
 # PIL support
-Pillow==12.3.0
+Pillow==13.0.0
 
 python-dateutil==2.8.1
 
