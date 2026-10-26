@@ -30,7 +30,7 @@ services:
       - EDU_ID_SECRET=${EDU_ID_SECRET}
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
       - EMAIL_USE_TLS=0
-      - EMAIL_HOST=mailhog
+      - EMAIL_HOST=mailpit
       - EMAIL_PORT=1025
       - FIREBASE_JSON_FILE=./secrets/serviceaccount.json
       - LTI_FRONTEND_URL=localhost
@@ -59,7 +59,7 @@ services:
         condition: service_healthy
       memcached:
         condition: service_started
-      mailhog:
+      mailpit:
         condition: service_started
     ports:
       - "8000:8000"
@@ -86,9 +86,9 @@ services:
     networks:
       - edubadges-server
 
-  mailhog:
-    image: mailhog/mailhog
-    container_name: mailhog
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
     ports:
       - "1025:1025"
       - "8025:8025"
