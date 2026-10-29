@@ -89,11 +89,11 @@ class IssuerSerializer(serializers.ModelSerializer):
         When the images are not None, they should be used for the institution image
         """
         faculty_data = FacultySerializer(obj.faculty).data
-        if obj.image_dutch or obj.image_english:
-            faculty_data.update(
-                image_dutch=obj.image_dutch.url if obj.image_dutch else None,
-                image_english=obj.image_english.url if obj.image_english else None,
-            )
+        if obj.image_dutch:
+            faculty_data["institution"]["image_dutch"] = obj.image_dutch.url
+        if obj.image_english:
+            faculty_data["institution"]["image_english"] = obj.image_english.url
+
         return faculty_data
 
 
