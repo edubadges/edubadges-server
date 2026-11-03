@@ -129,3 +129,6 @@ pyasn1-modules==0.4.2
 python_jose==3.5.0
 
 qrcode==8.2
+
+# Security: XXE-defused XML parser
+defusedxml==0.7.1

@@ -17,9 +17,10 @@ import webbrowser
 
 from http import HTTPStatus
 from io import BytesIO
-from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import register_namespace
 
 import cairosvg
+import defusedxml.ElementTree as defused_et  # noqa: N813, type: ignore[import-untyped]
 import requests
 
 from django.conf import settings
@@ -87,10 +88,10 @@ def verify_svg(fileobj):
     fileobj.seek(0)
     tag = None
     try:
-        for event, el in ET.iterparse(fileobj, events=(b"start",)):  # noqa: B007, S314
+        for event, el in defused_et.iterparse(fileobj, events=("start",)):  # noqa: B007
             tag = el.tag
             break
-    except ET.ParseError:
+    except defused_et.ParseError:
         pass
     return tag == "{http://www.w3.org/2000/svg}svg"
 
@@ -103,7 +104,7 @@ def fetch_remote_file_to_storage(remote_url, upload_to=""):
     store = DefaultStorage()
     r = requests.get(remote_url, stream=True, timeout=60)
     if r.status_code == HTTPStatus.OK:
-        name, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)  # noqa: RUF059
+        _, ext = os.path.splitext(urllib.parse.urlparse(r.url).path)
         storage_name = f"{upload_to}/cached/{hashlib.md5(remote_url.encode(), usedforsecurity=False).hexdigest()}{ext}"
         if not store.exists(storage_name):
             buf = io.BytesIO(r.content)
@@ -524,16 +525,16 @@ def scrub_svg_image(uploaded_image):
     MALICIOUS_SVG_ATTRIBUTES = ["onload"]  # noqa: N806
     SVG_NAMESPACE = "http://www.w3.org/2000/svg"  # noqa: N806
     uploaded_image.file.seek(0)
-    ET.register_namespace("", SVG_NAMESPACE)
-    tree = ET.parse(uploaded_image.file)  # noqa: S314
-    root = tree.getroot()
+    register_namespace("", SVG_NAMESPACE)
+    tree = defused_et.parse(uploaded_image.file)  # type: ignore[arg-type]
+    root = tree.getroot()  # type: ignore[union-attr]
 
     # strip malicious tags
     elements_to_strip = []
     for tag_name in MALICIOUS_SVG_TAGS:
-        elements_to_strip.extend(root.findall(f"{{{SVG_NAMESPACE}}}{tag_name}"))
+        elements_to_strip.extend(root.findall(f"{{{SVG_NAMESPACE}}}{tag_name}"))  # type: ignore[attr-defined]
     for e in elements_to_strip:
-        root.remove(e)
+        root.remove(e)  # type: ignore[attr-defined]
 
     # strip malicious attributes
     for el in tree.iter():
