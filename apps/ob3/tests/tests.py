@@ -103,7 +103,8 @@ class TestCredentialsView(Ob3TestCase):
 
         self.assertEqual(response.status_code, 400)
 
-    def test_missing_bearer_token_returns_bad_request(self):
+    @patch("ob3.api.requests.post")
+    def test_missing_bearer_token_returns_bad_request(self, mock_post):
         _, assertion = self._setup_assertion()
 
         # Authenticated (force_authenticate), but no Authorization header to forward.
@@ -112,6 +113,7 @@ class TestCredentialsView(Ob3TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
+        mock_post.assert_not_called()
 
     def test_unauthenticated_request_is_rejected(self):
         response = self.client.post(
