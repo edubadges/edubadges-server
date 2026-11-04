@@ -77,14 +77,14 @@ class BackpackAPITest(BadgrTestCase):
         self.assertIsInstance(data["issued_on"], str)
         self.assertEqual(data["award_type"], "requested")
         self.assertFalse(data["revoked"])
-        self.assertIsNone(data["expires_at"])
+        self.assertNotIn("expires_at", data)
         self.assertEqual(data["acceptance"], "Unaccepted")
         self.assertFalse(data["public"])
         self.assertFalse(data["include_grade_achieved"])
-        self.assertIsNone(data["grade_achieved"])
+        self.assertNotIn("grade_achieved", data)
 
         # Revocation and evidence fields
-        self.assertIsNone(data["revocation_reason"])
+        self.assertNotIn("revocation_reason", data)
         self.assertIsInstance(data["evidences"], list)
         self.assertEqual(data["evidences"], [])
 
@@ -100,8 +100,8 @@ class BackpackAPITest(BadgrTestCase):
         self.assertEqual(data["badgeclass"]["criteria"]["narrative"], badgeclass.criteria_text)
 
         # badgeclass: assessment & participation fields
-        self.assertIsNone(data["badgeclass"]["participation"])
-        self.assertIsNone(data["badgeclass"]["assessment_type"])
+        self.assertNotIn("participation", data["badgeclass"])
+        self.assertNotIn("assessment_type", data["badgeclass"])
         self.assertFalse(data["badgeclass"]["assessment_id_verified"])
         self.assertFalse(data["badgeclass"]["assessment_supervised"])
 
