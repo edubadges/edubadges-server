@@ -51,7 +51,7 @@ services:
       - EC_ISSUER_URL=${EC_ISSUER_URL}
       - LOKI_API_URL=http://localhost
       - EXTENSIONS_ROOT_URL=http://localhost:8000/static
-      - EC_ISSUER_URL=http://172.17.0.1:8000
+      - EC_ISSUER_URL=http://172.17.0.1:8008
     networks:
       - shared-network
       - edubadges-server

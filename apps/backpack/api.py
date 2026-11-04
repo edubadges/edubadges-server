@@ -124,8 +124,8 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
     id = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
     criteria = serializers.SerializerMethodField()
-    participation = serializers.CharField(allow_null=True, read_only=True)
-    assessment_type = serializers.CharField(allow_null=True, read_only=True)
+    participation = serializers.SerializerMethodField()
+    assessment_type = serializers.SerializerMethodField()
     assessment_id_verified = serializers.BooleanField(read_only=True)
     assessment_supervised = serializers.BooleanField(read_only=True)
     extensions = serializers.SerializerMethodField()
@@ -164,6 +164,18 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
         return [
             {"name": e.name, "originalJson": json_loads(e.original_json)} for e in obj.badgeclassextension_set.all()
         ]
+
+    def get_participation(self, obj):
+        value = obj.participation
+        if not value:
+            return None
+        return [v.strip() for v in value.split(",") if v.strip()]
+
+    def get_assessment_type(self, obj):
+        value = obj.assessment_type
+        if not value:
+            return None
+        return [v.strip() for v in value.split(",") if v.strip()]
 
 
 class AwardEvidenceSerializer(serializers.Serializer):
@@ -249,8 +261,8 @@ class BackpackAwardDetail(APIView):
                                     "narrative": "Register and verify your email address",
                                 },
                                 "image": "https://api-demo.edubadges.nl/media/uploads/badges/issuer_badgeclass_548517aa-cbab-4a7b-a971-55cdcce0e2a5.png",
-                                "participation": "onsite",
-                                "assessment_type": "written_exam",
+                                "participation": ["onsite"],
+                                "assessment_type": ["written_exam"],
                                 "assessment_id_verified": True,
                                 "assessment_supervised": True,
                                 "extensions": [],
