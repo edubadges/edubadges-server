@@ -108,7 +108,8 @@ class AwardInstitutionSerializer(AwardBaseSerializer):
             "image_dutch",
             "image_english",
             "identifier",
-            "alternative_identifier",
+            "brin",
+            "country_code",
         ]
 
     def get_id(self, obj):
@@ -157,9 +158,7 @@ class AwardIssuerSerializer(AwardBaseSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data = self._unfiltered_merge_extensions(
-            data, instance.issuerextension_set.all()
-        )
+        data = self._unfiltered_merge_extensions(data, instance.issuerextension_set.all())
         return self._filter_none(data)
 
 
@@ -203,9 +202,7 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data = self._unfiltered_merge_extensions(
-            data, instance.badgeclassextension_set.all()
-        )
+        data = self._unfiltered_merge_extensions(data, instance.badgeclassextension_set.all())
         return self._filter_none(data)
 
     def get_participation(self, obj):
@@ -331,7 +328,8 @@ class BackpackAwardDetail(APIView):
                                             "image_dutch": "/media/uploads/institution/d0273589-2c7a-4834-8c35-fef4695f176a.png",  # noqa: E501
                                             "image_english": "/media/uploads/institution/eae5465f-98b1-4849-ac2d-47d4e1cd1252.png",  # noqa: E501
                                             "identifier": "university-example.org",
-                                            "alternative_identifier": "university-example.org.tempguestidp.edubadges.nl",  # noqa: E501
+                                            "brin": "12AB",  # noqa: E501
+                                            "country_code": "nl",
                                             "grondslag_formeel": "gerechtvaardigd_belang",
                                             "grondslag_informeel": "gerechtvaardigd_belang",
                                         },
