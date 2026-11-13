@@ -2,6 +2,7 @@ import json
 
 from http import HTTPStatus
 
+from issuer.models import BadgeClassExtension, IssuerExtension
 from mainsite.tests import BadgrTestCase
 
 
@@ -77,14 +78,11 @@ class BackpackAPITest(BadgrTestCase):
         self.assertIsInstance(data["issued_on"], str)
         self.assertEqual(data["award_type"], "requested")
         self.assertFalse(data["revoked"])
-        self.assertNotIn("expires_at", data)
+        self.assertIsNone(data["expires_at"])
         self.assertEqual(data["acceptance"], "Unaccepted")
         self.assertFalse(data["public"])
         self.assertFalse(data["include_grade_achieved"])
-        self.assertNotIn("grade_achieved", data)
-
-        # Revocation and evidence fields
-        self.assertNotIn("revocation_reason", data)
+        self.assertIsNone(data["revocation_reason"])
         self.assertIsInstance(data["evidences"], list)
         self.assertEqual(data["evidences"], [])
 
@@ -100,11 +98,82 @@ class BackpackAPITest(BadgrTestCase):
         self.assertEqual(data["badgeclass"]["criteria"]["narrative"], badgeclass.criteria_text)
 
         # badgeclass: assessment & participation fields
-        self.assertNotIn("participation", data["badgeclass"])
-        self.assertNotIn("assessment_type", data["badgeclass"])
+        self.assertIsNone(data["badgeclass"]["participation"])
+        self.assertIsNone(data["badgeclass"]["assessment_type"])
         self.assertFalse(data["badgeclass"]["assessment_id_verified"])
         self.assertFalse(data["badgeclass"]["assessment_supervised"])
 
-        # badgeclass: extensions
-        self.assertIsInstance(data["badgeclass"]["extensions"], list)
-        self.assertEqual(data["badgeclass"]["extensions"], [])
+    def test_extension_flattening_with_valid_data(self):
+        """Verify badgeclass and issuer extensions are flattened as flat keys."""
+        teacher1 = self.setup_teacher()
+        student = self.setup_student(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(student, badgeclass, teacher1)
+
+        # Create a valid badgeclass extension
+        BadgeClassExtension.objects.update_or_create(
+            badgeclass=badgeclass,
+            name="EQF",
+            defaults={
+                "original_json": json.dumps({"type": ["Extension", "extensions:EQFExtension"], "EQF": 7}),
+            },
+        )
+
+        # Create a valid issuer extension
+        IssuerExtension.objects.update_or_create(
+            issuer=issuer,
+            name="Type",
+            defaults={
+                "original_json": json.dumps(
+                    {"type": ["Extension", "extensions:TypeExtension"], "Type": "organization"}
+                ),
+            },
+        )
+
+        response = self.client.get(
+            f"/earner/awards/{assertion.entity_id}",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        self.assertEqual(data["badgeclass"]["EQF"], 7)
+        self.assertEqual(data["badgeclass"]["issuer"]["Type"], "organization")
+
+    def test_extension_flattening_with_malformed_data(self):
+        """Verify malformed extensions don't crash the endpoint."""
+        teacher1 = self.setup_teacher()
+        student = self.setup_student(authenticate=True)
+        faculty = self.setup_faculty(institution=teacher1.institution)
+        issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
+        badgeclass = self.setup_badgeclass(issuer=issuer)
+        assertion = self.setup_assertion(student, badgeclass, teacher1)
+
+        # Create extensions with bad data
+        BadgeClassExtension.objects.update_or_create(
+            badgeclass=badgeclass,
+            name="BadExtension",
+            defaults={"original_json": None},
+        )
+        BadgeClassExtension.objects.update_or_create(
+            badgeclass=badgeclass,
+            name="MalformedExtension",
+            defaults={"original_json": "not json"},
+        )
+        IssuerExtension.objects.update_or_create(
+            issuer=issuer,
+            name="BadIssuerExt",
+            defaults={"original_json": ""},
+        )
+
+        response = self.client.get(
+            f"/earner/awards/{assertion.entity_id}",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        # The flat keys should NOT appear (extensions were skipped gracefully)
+        self.assertNotIn("BadExtension", data["badgeclass"])
+        self.assertNotIn("MalformedExtension", data["badgeclass"])

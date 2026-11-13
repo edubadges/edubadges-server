@@ -1,4 +1,5 @@
-from json import loads as json_loads
+import json
+import logging
 
 from backpack.models import BackpackBadgeShare
 from backpack.serializers_v1 import LocalBadgeInstanceUploadSerializerV1
@@ -44,6 +45,17 @@ permission_denied_response = OpenApiResponse(
 )
 
 
+_logger = logging.getLogger(__name__)
+
+
+def _parse_ext_key(ext_json):
+    """Extract the flat key from an extension JSON structure.
+
+    e.g. {"type": ["Extension", "extensions:EQFExtension"]} → "EQF"
+    """
+    return ext_json["type"][1].split(":")[1].removesuffix("Extension")
+
+
 class AwardBaseSerializer(serializers.ModelSerializer):
     """Base serializer for award responses."""
 
@@ -53,6 +65,30 @@ class AwardBaseSerializer(serializers.ModelSerializer):
             return {k: self._filter_none(v) for k, v in data.items() if v is not None}
         if isinstance(data, list):
             return [self._filter_none(item) for item in data if item is not None]
+        return data
+
+    def _unfiltered_merge_extensions(self, data, extension_qs):
+        """Merge extension key-value pairs into *data*, skipping malformed rows.
+
+        This merges BEFORE _filter_none runs so all None values are consistently
+        stripped regardless of source (base fields or extensions).
+        """
+        for ext in extension_qs:
+            try:
+                if not ext.original_json:
+                    continue
+                ext_json = json.loads(ext.original_json)
+                ext_key = _parse_ext_key(ext_json)
+                value = ext_json.get(ext_key)
+                if value is not None:
+                    data[ext_key] = value
+            except (json.JSONDecodeError, KeyError, IndexError, TypeError) as exc:
+                _logger.warning(
+                    "Malformed %s extension %s: %s",
+                    ext.__class__.__name__,
+                    ext.name,
+                    exc,
+                )
         return data
 
     def to_representation(self, instance):
@@ -119,6 +155,13 @@ class AwardIssuerSerializer(AwardBaseSerializer):
     def get_id(self, obj):
         return _entity_url("issuer_json", obj.entity_id)
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data = self._unfiltered_merge_extensions(
+            data, instance.issuerextension_set.all()
+        )
+        return self._filter_none(data)
+
 
 class AwardBadgeClassSerializer(AwardBaseSerializer):
     id = serializers.SerializerMethodField()
@@ -128,7 +171,6 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
     assessment_type = serializers.SerializerMethodField()
     assessment_id_verified = serializers.BooleanField(read_only=True)
     assessment_supervised = serializers.BooleanField(read_only=True)
-    extensions = serializers.SerializerMethodField()
     issuer = AwardIssuerSerializer(read_only=True)
 
     class Meta:
@@ -143,7 +185,6 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
             "assessment_type",
             "assessment_id_verified",
             "assessment_supervised",
-            "extensions",
             "issuer",
         ]
 
@@ -160,10 +201,12 @@ class AwardBadgeClassSerializer(AwardBaseSerializer):
             return {"narrative": obj.criteria_text}
         return None
 
-    def get_extensions(self, obj):
-        return [
-            {"name": e.name, "originalJson": json_loads(e.original_json)} for e in obj.badgeclassextension_set.all()
-        ]
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data = self._unfiltered_merge_extensions(
+            data, instance.badgeclassextension_set.all()
+        )
+        return self._filter_none(data)
 
     def get_participation(self, obj):
         value = obj.participation
@@ -265,7 +308,7 @@ class BackpackAwardDetail(APIView):
                                 "assessment_type": ["written_exam"],
                                 "assessment_id_verified": True,
                                 "assessment_supervised": True,
-                                "extensions": [],
+                                "EQF": 7,
                                 "issuer": {
                                     "id": "https://DOMAIN/issuers/issuer-entity-id-123",
                                     "name_dutch": "SURF Edubadges",
@@ -317,6 +360,8 @@ class BackpackAwardDetail(APIView):
     def get(self, request, entity_id, **kwargs):
         instance = (
             BadgeInstance.objects.select_related("badgeclass")
+            .prefetch_related("badgeclass__badgeclassextension_set")
+            .prefetch_related("badgeclass__issuer__issuerextension_set")
             .select_related("badgeclass__issuer")
             .select_related("badgeclass__issuer__faculty")
             .select_related("badgeclass__issuer__faculty__institution")
