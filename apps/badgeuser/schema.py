@@ -121,11 +121,12 @@ class Query:
 
     def resolve_user(self, info, **kwargs):
         current_user = info.context.user
-        if not hasattr(current_user, "is_authenticated") or not current_user.is_authenticated:
+        if not getattr(current_user, "is_authenticated", False):
             raise GraphQLException("Authentication required to query user")
         user = BadgeUser.objects.get(entity_id=kwargs.get("id"))
-        if current_user.institution != user.institution:
-            raise GraphQLException("Cannot query user outside your institution")
+        if (current_user.institution is None and current_user != user) or current_user.institution != user.institution:
+            raise GraphQLException("Cannot resolve user")
+
         return user
 
     @resolver_blocker_for_students

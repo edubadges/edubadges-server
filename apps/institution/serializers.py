@@ -28,8 +28,8 @@ class BadgeClassTagSerializer(serializers.Serializer):
 
 
 class InstitutionSerializer(InternalValueErrorOverrideMixin, serializers.Serializer):
-    description_english = StripTagsCharField(max_length=256, required=False, allow_null=True, allow_blank=True)
-    description_dutch = StripTagsCharField(max_length=256, required=False, allow_null=True, allow_blank=True)
+    description_english = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
+    description_dutch = StripTagsCharField(max_length=16384, required=False, allow_null=True, allow_blank=True)
     entity_id = StripTagsCharField(max_length=255, read_only=True)
     email = serializers.EmailField(max_length=255, required=False, allow_null=True, allow_blank=True)
     image_english = ValidImageField(required=False, allow_null=True)
