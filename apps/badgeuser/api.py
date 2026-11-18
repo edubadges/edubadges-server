@@ -114,7 +114,9 @@ class AcceptProvisionmentDetail(BaseEntityDetailView):
 
     def post(self, request, **kwargs):
         obj = self.get_object(request, **kwargs)
-        if not self.has_object_permissions(request, obj):  # checks if obj is owned by request.user
+        if (
+            not self.has_object_permissions(request, obj) or obj.user != request.user
+        ):  # checks if obj user is request.user
             return Response(status=HTTP_404_NOT_FOUND)
         if request.data.get("accept", None):
             obj.accept()
