@@ -155,9 +155,9 @@ No new utilities needed; removal only. Conventions to follow:
 - [x] 3. **UI PR:** remove all endorsement wiring in `ManageBadgeclass.svelte`, `PublicBadgeClassPage.svelte`, `BadgeClassDetails.svelte`, `EnrollmentDetails.svelte`, `BadgeDetails.svelte`; remove `features.endorsements` from `config.js`
 - [x] 4. **UI PR:** remove locale keys in `en.js`/`nl.js` (adjust `notifications.info` in en only)
 - [x] 5. **UI PR:** `npm run build` + manual smoke (see Verification); merge & **deploy UI**
-- [ ] 6. **Server PR:** remove endorsement references in `issuer` (models/schema), `public` (public_api), `queries` (api + urls), `mainsite` (utils, urls, drf_spectacluar, templates), empty `apps/endorsement/models.py`
-- [ ] 7. **Server PR:** remove signing code in `issuer`, `public`, `badgeuser`, `staff`, `mainsite`, env files, CI workflow, docker-compose; empty `apps/signing/models.py`
-- [ ] 8. **Server PR:** `python manage.py makemigrations issuer staff signing endorsement`; review generated `RemoveField`/`RemoveModel` operations and dependency ordering (field removals before table drops; add `run_before` if a cycle appears)
+- [x] 6. **Server PR:** remove endorsement references in `issuer` (models/schema), `public` (public_api), `queries` (api + urls), `mainsite` (utils, urls, drf_spectacluar, templates), keep Endorsement model in models.py (needed for migration generation)
+- [x] 7. **Server PR:** remove signing code in `issuer`, `public`, `badgeuser`, `staff`, `mainsite`, env files, CI workflow, docker-compose; empty `apps/signing/models.py`
+- [x] 8. **Server PR:** `python manage.py makemigrations issuer staff signing endorsement`; review generated `RemoveField`/`RemoveModel` operations and dependency ordering (field removals before table drops; add `run_before` if a cycle appears)
 - [ ] 9. **Server PR:** full test suite + schema generation (see Verification); merge & deploy with `migrate`
 - [ ] 10. **Follow-up PR (after `migrate` ran in prod):** remove `"endorsement"` and `"signing"` from `INSTALLED_APPS`, delete `apps/endorsement/` and `apps/signing/` directories
 - [ ] 11. (Optional, after DB check) RunSQL migration dropping legacy `issuer_issuerstaff` table if present
