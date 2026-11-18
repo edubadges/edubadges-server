@@ -7,6 +7,7 @@ from directaward.signals import audit_trail_signal
 from django.core.exceptions import BadRequest, ValidationError
 from django.db import transaction
 from django.utils import timezone
+from django.utils.html import strip_tags
 from issuer.serializers import BadgeClassSlugRelatedField
 from mainsite import settings
 from mainsite.exceptions import BadgrValidationError
@@ -106,14 +107,15 @@ class DirectAwardBundleSerializer(serializers.Serializer):
                 expiration_date = now + datetime.timedelta(days=settings.EXPIRY_DIRECT_AWARDS_DELETION_THRESHOLD_DAYS)
                 for direct_award in direct_awards:
                     # Not required and already validated
-                    direct_award["recipient_email"] = direct_award["recipient_email"].lower()
-                    direct_award["eppn"] = direct_award["eppn"].lower() if eppn_required else None
+                    direct_award["recipient_email"] = strip_tags(direct_award["recipient_email"].lower())
+                    direct_award["eppn"] = strip_tags(direct_award["eppn"].lower()) if eppn_required else None
                     status = DirectAward.STATUS_SCHEDULED if scheduled_at else DirectAward.STATUS_UNACCEPTED
                     direct_award["status"] = status
                     direct_award["created_by"] = validated_data["created_by"]
                     direct_award["expiration_date"] = expiration_date
-                    direct_award["recipient_first_name"] = direct_award.pop("first_name", None) or None
-                    direct_award["recipient_surname"] = direct_award.pop("surname", None) or None
+                    direct_award["recipient_first_name"] = strip_tags(direct_award.pop("first_name", "")) or None
+                    direct_award["recipient_surname"] = strip_tags(direct_award.pop("surname", "")) or None
+                    direct_award["grade_achieved"] = strip_tags(validated_data.get("grade_achieved", "")) or None
                     try:
                         da_created = DirectAward.objects.create(
                             bundle=direct_award_bundle,
