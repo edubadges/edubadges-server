@@ -235,7 +235,6 @@ class IssuerAPITest(BadgrTestCase):
         self.client.logout()
         self.authenticate(teacher1)
         award_body = {
-            "issue_signed": False,
             "create_notification": True,
             "enrollments": [
                 {

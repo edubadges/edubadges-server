@@ -33,7 +33,6 @@ from mainsite.utils import EmailMessageMaker, send_mail
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
 from rest_framework.authtoken.models import Token
-from signing.models import AssertionTimeStamp
 from staff.models import BadgeClassStaff, FacultyStaff, InstitutionStaff, IssuerStaff
 
 
@@ -707,10 +706,6 @@ class BadgeUser(UserCachedObjectGetterMixin, UserPermissionsMixin, AbstractUser,
     @property
     def is_student(self):
         return not self.is_teacher
-
-    def get_assertions_ready_for_signing(self):
-        assertion_timestamps = AssertionTimeStamp.objects.filter(signer=self).exclude(proof="")
-        return [ts.badge_instance for ts in assertion_timestamps if ts.badge_instance.signature == None]  # noqa: E711
 
     def replace_token(self):
         Token.objects.filter(user=self).delete()
