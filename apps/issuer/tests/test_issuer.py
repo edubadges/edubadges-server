@@ -647,7 +647,7 @@ class IssuerSchemaTest(BadgrTestCase):
 
     def test_badgeclass_schema(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_award=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(teacher1, faculty=faculty)
         badgeclass = self.setup_badgeclass(issuer)
