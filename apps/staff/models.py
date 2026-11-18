@@ -143,7 +143,7 @@ class PermissionedRelationshipBase(BaseVersionedEntity):
 
 class InstitutionStaff(PermissionedRelationshipBase):
     """
-    Many2Many realtionship between Institution and users, with permissions added to the relationship
+    Many2Many relationship between Institution and users, with permissions added to the relationship
     """
 
     institution = models.ForeignKey("institution.Institution", on_delete=models.CASCADE)
@@ -177,7 +177,7 @@ class InstitutionStaff(PermissionedRelationshipBase):
 
 class FacultyStaff(PermissionedRelationshipBase):
     """
-    Many2Many realtionship between Faculty and users, with permissions added to the relationship
+    Many2Many relationship between Faculty and users, with permissions added to the relationship
     """
 
     faculty = models.ForeignKey("institution.Faculty", on_delete=models.CASCADE)
@@ -192,7 +192,7 @@ class FacultyStaff(PermissionedRelationshipBase):
 
 class IssuerStaff(PermissionedRelationshipBase):
     """
-    Many2Many realtionship between Issuer and users, with permissions added to the relationship
+    Many2Many relationship between Issuer and users, with permissions added to the relationship
     """
 
     issuer = models.ForeignKey("issuer.Issuer", on_delete=models.CASCADE)
