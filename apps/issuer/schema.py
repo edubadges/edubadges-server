@@ -340,39 +340,79 @@ class BadgeClassType(
 
     @resolver_blocker_for_students
     def resolve_direct_awards(self, info, **kwargs):
-        return self.cached_direct_awards()
+        return [
+            direct_award
+            for direct_award in self.cached_direct_awards()
+            if direct_award.badgeclass.has_permissions(info.context.user, ["may_award"])
+        ]
 
     @resolver_blocker_for_students
     def resolve_direct_award_bundles(self, info, **kwargs):
-        return self.cached_direct_award_bundles()
+        return [
+            direct_award
+            for direct_award in self.cached_direct_award_bundles()
+            if direct_award.badgeclass.has_permissions(info.context.user, ["may_award"])
+        ]
 
     @resolver_blocker_for_students
     def resolve_enrollments(self, info, **kwargs):
-        return self.cached_enrollments()
+        return [
+            enrollment
+            for enrollment in self.cached_enrollments()
+            if enrollment.badge_class.has_permissions(info.context.user, ["may_award"])
+        ]
 
     @resolver_blocker_for_students
     def resolve_pending_enrollments(self, info, **kwargs):
-        return self.cached_pending_enrollments()
+        return [
+            enrollment
+            for enrollment in self.cached_pending_enrollments()
+            if enrollment.badge_class.has_permissions(info.context.user, ["may_award"])
+        ]
 
     @resolver_blocker_for_students
     def resolve_pending_enrollments_including_denied(self, info, **kwargs):
-        return self.cached_pending_enrollments_including_denied()
+        return [
+            enrollment
+            for enrollment in self.cached_pending_enrollments_including_denied()
+            if enrollment.badge_class.has_permissions(info.context.user, ["may_award"])
+        ]
 
     @resolver_blocker_for_students
     def resolve_pending_enrollment_count(self, info, **kwargs):
-        return self.cached_pending_enrollments().__len__()
+        return len(
+            [
+                enrollment
+                for enrollment in self.cached_pending_enrollments()
+                if enrollment.badge_class.has_permissions(info.context.user, ["may_award"])
+            ]
+        )
 
     @resolver_blocker_for_students
     def resolve_badge_assertions(self, info, **kwargs):
-        return self.assertions
+        return [
+            assertion
+            for assertion in self.assertions
+            if assertion.badgeclass.has_permissions(info.context.user, ["may_award"])
+        ]
 
     @resolver_blocker_for_students
     def resolve_assertions_paginated(self, info, **kwargs):
-        return self.assertions
+        return [
+            assertion
+            for assertion in self.assertions
+            if assertion.badgeclass.has_permissions(info.context.user, ["may_award"])
+        ]
 
     @resolver_blocker_for_students
     def resolve_assertion_count(self, info, **kwargs):
-        return self.assertions.__len__()
+        return len(
+            [
+                assertion
+                for assertion in self.assertions
+                if assertion.badgeclass.has_permissions(info.context.user, ["may_award"])
+            ]
+        )
 
     def resolve_expiration_period(self, info, **kwargs):
         if self.expiration_period:
