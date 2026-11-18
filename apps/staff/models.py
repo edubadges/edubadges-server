@@ -7,7 +7,6 @@ from django.forms.models import model_to_dict
 from entity.models import BaseVersionedEntity
 from mainsite.exceptions import BadgrValidationError
 from rest_framework import serializers
-from signing.models import SymmetricKey
 
 
 class PermissionedRelationshipBase(BaseVersionedEntity):
@@ -203,15 +202,6 @@ class IssuerStaff(PermissionedRelationshipBase):
     @property
     def object(self):
         return self.issuer
-
-    @property
-    def may_become_signer(self):
-        # return self.user.may_sign_assertions and SymmetricKey.objects.filter(user=self.user, current=True).exists()  # noqa: E501
-        return SymmetricKey.objects.filter(user=self.user, current=True).exists()
-
-    @property
-    def is_signer(self):
-        return self.may_sign
 
 
 class BadgeClassStaff(PermissionedRelationshipBase):

@@ -45,7 +45,6 @@ services:
       - SURF_CONEXT_CLIENT=test.edubadges.nl
       - SURF_CONEXT_CLIENT=www.edubadges.nl
       - SURF_CONEXT_SECRET=${SURF_CONEXT_SECRET}
-      - TIME_STAMPED_OPEN_BADGES_BASE_URL=http://0.0.0.0:8000/
       - UI_URL=http://localhost:8080
       - UNSUBSCRIBE_SECRET_KEY=secret
       - EC_ISSUER_URL=${EC_ISSUER_URL}

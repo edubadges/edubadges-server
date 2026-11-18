@@ -32,7 +32,7 @@ included_endpoint_prefixes = [
     "/queries/current-institution",
 ]
 
-excluded_keywords = ["pubkey", "image"]
+excluded_keywords = ["image"]
 
 
 def _included_endpoint(path: str):

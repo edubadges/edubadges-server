@@ -84,16 +84,12 @@ urlpatterns = [
     path("ob3/", include("ob3.api_urls")),
     # include badge_connect endpoints
     path("badge_connect/", include("badge_connect.api_urls")),
-    # include endorsement endpoints
-    path("endorsement/", include("endorsement.api_urls")),
     # include lti13 endpoints
     path("lti/", include("lti13.urls")),
     # include notifications endpoints
     path("notifications/", include("notifications.api_urls")),
     # include theming endpoints
     path("", include("theming.api_urls")),
-    #  include signing endpoints
-    path("signing/", include(("signing.api_urls", "signing"), namespace="signing_apis")),
     # include staff endpoints
     path("staff-membership/", include("staff.api_urls")),
     path("", include("django_prometheus.urls")),

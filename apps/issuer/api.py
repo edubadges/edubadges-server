@@ -17,8 +17,6 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
-from signing.models import AssertionTimeStamp
-from signing.permissions import MaySignAssertions
 from staff.permissions import HasObjectPermission
 
 logger = badgrlog.BadgrLogger()
@@ -97,26 +95,6 @@ class IssuerDetail(BaseEntityDetailView):
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     http_method_names = ["put"]
 
-
-class TimestampedBadgeInstanceList(BaseEntityListView):
-    http_method_names = ["get", "delete"]
-    permission_classes = (AuthenticatedWithVerifiedEmail, MaySignAssertions)
-    serializer_class = BadgeInstanceSerializer
-
-    def get(self, request, **kwargs):
-        return super().get(request, **kwargs)
-
-    def get_objects(self, request, **kwargs):
-        return request.user.get_assertions_ready_for_signing()
-
-    def delete(self, request, **kwargs):
-        badge_instance_slug = request.data.get("badge_instance_slug")
-        badge_instance = BadgeInstance.objects.get(entity_id=badge_instance_slug)
-        assertion_timestamp = AssertionTimeStamp.objects.get(badge_instance=badge_instance)
-        if assertion_timestamp.signer != request.user:
-            raise ValidationError("You can only delete your own timestamped badges.")
-        badge_instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):
