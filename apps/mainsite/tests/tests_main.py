@@ -4,7 +4,7 @@ from mainsite.tests import BadgrTestCase
 class MainGrapheneTest(BadgrTestCase):
     def test_pagination(self):
         teacher1 = self.setup_teacher(authenticate=True)
-        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True)
+        self.setup_staff_membership(teacher1, teacher1.institution, may_read=True, may_award=True)
         faculty = self.setup_faculty(institution=teacher1.institution)
         issuer = self.setup_issuer(faculty=faculty, created_by=teacher1)
         badgeclass = self.setup_badgeclass(issuer=issuer)
