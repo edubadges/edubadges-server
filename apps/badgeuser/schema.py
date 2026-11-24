@@ -134,7 +134,10 @@ class Query:
         return info.context.user.cached_colleagues()
 
     def resolve_current_user(self, info, **kwargs):
-        return info.context.user
+        user = info.context.user
+        if not getattr(user, "is_authenticated", False):
+            return None
+        return user
 
     @resolver_blocker_for_super_user
     def resolve_all_users(self, info, **kwargs):
