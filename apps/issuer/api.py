@@ -14,7 +14,6 @@ from issuer.serializers import (
 from mainsite.exceptions import BadgrApiException400, BadgrValidationFieldError
 from mainsite.permissions import AuthenticatedWithVerifiedEmail
 from rest_framework import serializers, status
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from staff.permissions import HasObjectPermission
@@ -94,7 +93,6 @@ class IssuerDetail(BaseEntityDetailView):
     v1_serializer_class = IssuerSerializer
     permission_classes = (AuthenticatedWithVerifiedEmail, HasObjectPermission)
     http_method_names = ["put"]
-
 
 
 class BatchAwardEnrollments(VersionedObjectMixin, BaseEntityView):

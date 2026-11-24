@@ -28,6 +28,7 @@ from rest_framework import permissions, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 logger = badgrlog.BadgrLogger()
 
 
@@ -351,7 +352,6 @@ class IssuerJson(JSONComponentView):
         )
 
 
-
 class IssuerBadgesJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
     model = Issuer
@@ -441,7 +441,6 @@ class BadgeClassJson(JSONComponentView):
         )
 
 
-
 class BadgeClassImage(ImagePropertyDetailView):
     model = BadgeClass
     prop = "image"
@@ -476,11 +475,11 @@ class BadgeInstanceJson(JSONComponentView):
     def get_json(self, request):
         expands = request.GET.getlist("expand", [])
         json = super().get_json(
-                request,
-                expand_badgeclass=("badge" in expands),
-                expand_issuer=("badge.issuer" in expands),
-                expand_user=("badge.user" in expands),
-            )
+            request,
+            expand_badgeclass=("badge" in expands),
+            expand_issuer=("badge.issuer" in expands),
+            expand_user=("badge.user" in expands),
+        )
         return json
 
     def get_context_data(self, **kwargs):

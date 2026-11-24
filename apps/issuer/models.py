@@ -338,7 +338,7 @@ class Issuer(  # noqa: DJ008
     def image_preview(self):
         return self.image
 
-    def get_json(  # noqa: C901, PLR0912, PLR0913, PLR0915, PLR0917
+    def get_json(  # noqa: C901, PLR0912
         self,
         obi_version=CURRENT_OBI_VERSION,
         include_extra=True,  # noqa: FBT002
@@ -587,7 +587,6 @@ class BadgeClass(  # noqa: DJ008
     def cached_assertions(self):
         return list(self.badgeinstances.all())
 
-
     @cached_method(auto_publish=True)
     def cached_direct_awards(self):
         return list(DirectAward.objects.filter(badgeclass=self))
@@ -648,7 +647,6 @@ class BadgeClass(  # noqa: DJ008
 
     def get_absolute_url(self):  # noqa: DJ012
         return reverse("badgeclass_json", kwargs={"entity_id": self.entity_id})
-
 
     def create_staff_membership(self, user, permissions):
         return BadgeClassStaff.objects.create(user=user, badgeclass=self, **permissions)
@@ -811,7 +809,6 @@ class BadgeClass(  # noqa: DJ008
 
         return assertion
 
-
     def get_json(  # noqa: C901, PLR0912
         self,
         obi_version=CURRENT_OBI_VERSION,
@@ -911,7 +908,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
 
     issued_on = models.DateTimeField(blank=False, null=False, default=timezone.now)
 
-
     identifier = models.CharField(max_length=255, null=True, default=None)  # the uuid used to ID signed assertions
 
     badgeclass = models.ForeignKey(
@@ -975,7 +971,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     salt = models.CharField(max_length=254, blank=True, null=True, default=None, db_index=True)
 
     old_json = JSONField()
-
 
     public = models.BooleanField(default=False)
 
@@ -1055,7 +1050,6 @@ class BadgeInstance(BaseAuditedModel, ImageUrlGetterMixin, BaseVersionedEntity, 
     @property
     def public_url(self):
         return OriginSetting.HTTP + self.get_absolute_url()
-
 
     def get_recipient_name(self):
         return self.recipient_name or self.user.get_full_name()
