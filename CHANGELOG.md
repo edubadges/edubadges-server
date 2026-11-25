@@ -5,6 +5,102 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [9.7.0] - 2026-11-23
+
+- EB-8 Update earned direct award email template with app store buttons (#374)
+- Bump cairosvg from 2.9.0 to 2.9.1 (#397)
+- Give user in test also may_award permissions
+- Improve may_award checks for badge class related objects
+- Fix typos in docstrings
+- Add strip tags to user provided direct award fields
+- Add extra object check to accept user provisionment endpoint
+- Bump oauthlib from 4.0.0 to 4.0.1
+
+## [9.6.0] - 2026-11-16
+
+- Improve user checks for users without institutions
+- Replace mailpit by mailcrab
+- EB-22: changed compose to use mariadb 11.8 instead of mysql (#385)
+- Fix update of institution image for mobile endpoint
+- Bump djangorestframework from 3.15.2 to 3.18.2
+- Bump pillow from 12.3.0 to 13.0.0
+- Replace mailhog by mailpit
+- Increase allowed institution description length
+- Update institution image if issuer specific images exist
+- Overwrite institution fields in mobile catalog endpoint for virtual orgs
+- Fix image breaking
+- Fix return statement
+- Overwrite institution data with virtual organisation data
+
+## [9.5.0] - 2026-10-09
+
+- fix: verify jwt id_token to prevent auth bypass and account takeover (#393)
+- Hardcode award delete (revocation) error
+- Hard code version in setup.py
+- Mark md5 usage as not used for security
+- Add timeouts get/post with requests
+- Enable ruff workflow for all pushes
+- Use line between types import grouping
+- Resolve or inline-ignore remaining ruff errors
+- Add additional ruff ignore rules
+- Remove unnecessary middleware
+- Apply ruff formatting
+- Apply ruff fixes
+- Update coverage settings
+- Update ruff configuration
+- Bump ruff action and also check formatting
+- Bump checkout action to 7.0.1
+- Remove unused files
+- Bump urllib3 from 2.7.0 to 2.8.0
+- Bump oauthlib from 3.2.2 to 4.0.0
+
+## [9.4.0] - 2026-09-24
+
+- Add decorator to only show own enrollments
+- Filter catalog badge classes on archived false
+- Check user when rejecting terms
+- Add IsBadgeInstanceOwner permission class for BadgeInstanceCollectionDetail
+- feat(backpack): expose user name and email in award detail response (#383)
+- Add filter to only show open requests
+
+## [9.3.0] - 2026-09-10
+
+- Create orm-schema-review.yml
+- fix(mobile): re-added Q import and catalog API response example
+- Apply suggestion from @153957
+- fix: re-added removed fields in catalog view for backwards-compatibilty
+- chore: revert removal of catalog swagger response example
+- Revert removal of annotation counts but hardcode value
+- Raise validation error when awarding with scheduled date in the past
+- Raise bad request when trying to award an archived badge class
+- Fix argument of signal sender
+- Add recipient info to serializer for direct award detail info
+- chore: remove hardcoded OpenAPI examples and unused Q import
+- perf: slim mobile catalog and move user-specific fields to detail view
+- chore: added qrcode requirement such that we see the actual QR code when adding OTP device
+- Bump sqlparse from 0.5.4 to 0.6.0
+- feat(ob3): added find_badge_instance helper, fixed failing tests.
+- chore: updated docker compose to remove ec issuer admin token
+- feat: use user's beaerer token in Authroization header instead of EC_ISSUER_ADMIN_TOKEN. The admin token is not needed
+- fix: remove TestCredentialsViewGet test case class as it is obsolete
+- feat(ob3): added Award serializers as we need other elements than the other serializers offer
+- feat(ob3): cleaned up ob3 app as now backpack returns award data via /earner/awards/ endpoint.
+- feat(ob3): forward user access token to ec-issuer; add CredentialsView GET so ec-issuer can auth + fetch award JSON for OBv3 mapping.
+- refactor(ob3): delegate credential issuance to ec-issuer service
+- Remove batch mode conditional before notifying awarders
+- Bump cairosvg from 2.7.0 to 2.9.0
+- Bump requests from 2.32.4 to 2.33.0
+- Move django-upgrade to dev dependencies and bump stub
+- Remove unnecessary (and unused) enum/ipaddress backport packages
+- Remove six and its usage
+- Bump idna from 3.10 to 3.15
+- Bump urllib3 from 2.6.3 to 2.7.0
+- Remove old apparently outdated comments
+- Bump Django to 5.2.17
+- Bump pillow from 10.3.0 to 12.3.0
+- Bump django from 5.2.13 to 5.2.15
+- Bump cryptography from 46.0.5 to 50.0.0
+
 ## [9.2.0] - 2026-07-22
 
 Frontend: https://github.com/edubadges/edubadges-ui/releases/tag/v9.2.0</br>
@@ -23,17 +119,16 @@ Backend: https://github.com/edubadges/edubadges-server/releases/tag/v9.2.0
 Frontend: https://github.com/edubadges/edubadges-ui/releases/tag/v9.1.0</br>
 Backend: https://github.com/edubadges/edubadges-server/releases/tag/v9.1.0
 
--  Remove support for and use of baked images
--  Refactor badge extension validator to remove dependency on openbadges
--  Chore/remove unused badge check helper and endpoints
--  Fix path to local serviceaccount json
--  Chore/upgrade to django 5.2 and python 3.12
--  Chore/update extension validators
--  Add dedicated exception in mobile auth backend for terms not accepted
--  Add profile endpoint to allowed urls before general terms are accepted
--  Add data migration to update historical quality assurance texts
--  Only show terms with institution in mobile terms endpoint
-
+- Remove support for and use of baked images
+- Refactor badge extension validator to remove dependency on openbadges
+- Chore/remove unused badge check helper and endpoints
+- Fix path to local serviceaccount json
+- Chore/upgrade to django 5.2 and python 3.12
+- Chore/update extension validators
+- Add dedicated exception in mobile auth backend for terms not accepted
+- Add profile endpoint to allowed urls before general terms are accepted
+- Add data migration to update historical quality assurance texts
+- Only show terms with institution in mobile terms endpoint
 
 ## [9.0.1] - 2026-05-07
 
