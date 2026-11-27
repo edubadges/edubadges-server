@@ -28,7 +28,6 @@ from rest_framework import permissions, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from signing.models import PublicKeyIssuer
 
 logger = badgrlog.BadgrLogger()
 
@@ -353,22 +352,6 @@ class IssuerJson(JSONComponentView):
         )
 
 
-class IssuerPublicKeyJson(IssuerJson):
-    def get(self, request, **kwargs):
-        self.current_object = self.get_object(request, **kwargs)
-        self.log(self.current_object)
-
-        if self.is_bot():
-            # if user agent matches a known bot, return a stub html with opengraph tags
-            return render(request, self.template_name, context=self.get_context_data())
-
-        pubkey_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get("public_key_id"))
-        issuer_json = self.get_json(
-            request=request, signed=True, public_key_issuer=pubkey_issuer, expand_public_key=False
-        )
-        return Response(issuer_json)
-
-
 class IssuerBadgesJson(JSONComponentView):
     permission_classes = (permissions.AllowAny,)
     model = Issuer
@@ -419,9 +402,6 @@ class BadgeClassJson(JSONComponentView):
             json["issuer"] = badge_class.cached_issuer.get_json(
                 obi_version=obi_version, expand_institution=True, expand_awards=expand_awards
             )
-        if "endorsements" in expands:
-            json["endorsements"] = [self.endorsement_to_json(bc) for bc in badge_class.cached_endorsements()]
-            json["endorsed"] = [endorsement.endorsee.entity_id for endorsement in badge_class.cached_endorsed()]
         if "micro" in expands:
             json["participation"] = badge_class.participation
             json["assessmentType"] = badge_class.assessment_type
@@ -447,45 +427,6 @@ class BadgeClassJson(JSONComponentView):
         if hasattr(obj, "imageDutch") and obj.image_dutch:
             container["image_dutch"] = f"{image_url}?lang=nl"
 
-    @staticmethod
-    def endorsement_to_json(endorsement):
-        endorser = endorsement.endorser
-        issuer = endorser.cached_issuer
-        faculty = issuer.faculty
-        institution = faculty.institution
-        to_json = {
-            "claim": endorsement.claim,
-            "description": endorsement.description,
-            "status": endorsement.status,
-            "endorser": {
-                "name": endorser.name,
-                "description": endorser.description,
-                "entityId": endorser.entity_id,
-                "issuer": {
-                    "nameDutch": issuer.name_dutch,
-                    "nameEnglish": issuer.name_english,
-                    "entityId": issuer.entity_id,
-                    "faculty": {
-                        "nameDutch": faculty.name_dutch,
-                        "nameEnglish": faculty.name_english,
-                        "onBehalfOf": faculty.on_behalf_of,
-                        "onBehalfOfUrl": faculty.on_behalf_of_url,
-                        "onBehalfOfDisplayName": faculty.on_behalf_of_display_name,
-                        "entityId": faculty.entity_id,
-                        "institution": {
-                            "nameDutch": institution.name_dutch,
-                            "nameEnglish": institution.name_english,
-                            "entityId": institution.entity_id,
-                        },
-                    },
-                },
-            },
-        }
-        BadgeClassJson._image_urls(issuer, "issuer", to_json["endorser"]["issuer"])
-        BadgeClassJson._image_urls(institution, "institution", to_json["endorser"]["issuer"]["faculty"]["institution"])
-        BadgeClassJson._image_urls(endorser, "badgeclass", to_json["endorser"])
-        return to_json
-
     def get_context_data(self, **kwargs):
         image_url = "{}{}?type=png".format(
             OriginSetting.HTTP, reverse("badgeclass_image", kwargs={"entity_id": self.current_object.entity_id})
@@ -498,19 +439,6 @@ class BadgeClassJson(JSONComponentView):
             public_url=self.current_object.public_url,
             image_url=image_url,
         )
-
-
-class BadgeClassPublicKeyJson(BadgeClassJson):
-    def get(self, request, **kwargs):
-        self.current_object = self.get_object(request, **kwargs)
-        self.log(self.current_object)
-        if self.is_bot():
-            # if user agent matches a known bot, return a stub html with opengraph tags
-            return render(request, self.template_name, context=self.get_context_data())
-
-        public_key_issuer = PublicKeyIssuer.objects.get(entity_id=kwargs.get("public_key_id"))
-        json = self.current_object.get_json(signed=True, public_key_issuer=public_key_issuer)
-        return Response(json)
 
 
 class BadgeClassImage(ImagePropertyDetailView):
@@ -545,16 +473,13 @@ class BadgeInstanceJson(JSONComponentView):
     model = BadgeInstance
 
     def get_json(self, request):
-        if self.object.signature:
-            json = self.object.signature  # return signature in stead of json for signed badges
-        else:
-            expands = request.GET.getlist("expand", [])
-            json = super().get_json(
-                request,
-                expand_badgeclass=("badge" in expands),
-                expand_issuer=("badge.issuer" in expands),
-                expand_user=("badge.user" in expands),
-            )
+        expands = request.GET.getlist("expand", [])
+        json = super().get_json(
+            request,
+            expand_badgeclass=("badge" in expands),
+            expand_issuer=("badge.issuer" in expands),
+            expand_user=("badge.user" in expands),
+        )
         return json
 
     def get_context_data(self, **kwargs):

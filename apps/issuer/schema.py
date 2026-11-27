@@ -4,7 +4,6 @@ import graphene
 
 from directaward.schema import DirectAwardBundleType, DirectAwardType
 from django.conf import settings
-from endorsement.schema import EndorsementType
 from graphene.relay import ConnectionField
 from graphene_django.types import Connection, DjangoObjectType
 from lti_edu.schema import StudentsEnrolledType
@@ -320,8 +319,6 @@ class BadgeClassType(
     terms = graphene.Field(terms_type())
     award_allowed_institutions = graphene.List(graphene.String)
     tags = graphene.List(schema_badge_class_tag_type)
-    endorsements = graphene.List(EndorsementType)
-    endorsed = graphene.List(EndorsementType)
 
     def resolve_terms(self, info, **kwargs):
         return self._get_terms()
@@ -331,12 +328,6 @@ class BadgeClassType(
 
     def resolve_alignments(self, info, **kwargs):
         return self.cached_alignments()
-
-    def resolve_endorsements(self, info, **kwargs):
-        return self.cached_endorsements()
-
-    def resolve_endorsed(self, info, **kwargs):
-        return self.cached_endorsed()
 
     @resolver_blocker_for_students
     def resolve_direct_awards(self, info, **kwargs):

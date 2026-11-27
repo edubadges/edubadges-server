@@ -70,7 +70,6 @@ jobs:
           ROOT_INFO_SECRET_KEY: test
           UNSUBSCRIBE_SECRET_KEY: test
           EXTENSIONS_ROOT_URL: http://localhost/static
-          TIME_STAMPED_OPEN_BADGES_BASE_URL: http://localhost/
           UI_URL: http://localhost:8080
           DEFAULT_FROM_EMAIL: test@example.com
           EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend

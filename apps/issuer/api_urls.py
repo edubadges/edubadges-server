@@ -12,7 +12,6 @@ from issuer.api import (
     IssuerDeleteView,
     IssuerDetail,
     IssuerList,
-    TimestampedBadgeInstanceList,
 )
 
 urlpatterns = [
@@ -30,7 +29,6 @@ urlpatterns = [
         name="badgeclass_award_enrollments",
     ),
     path("revoke-assertions", BadgeInstanceRevoke.as_view(), name="badgeinstance_revoke"),
-    path("timestamped-assertions", TimestampedBadgeInstanceList.as_view(), name="timestamped_badgeinstances"),
     path("collections/create", BadgeInstanceCollectionDetailList.as_view(), name="badge_collection_create"),
     path("collections/edit/<str:entity_id>", BadgeInstanceCollectionDetail.as_view(), name="badge_collection_edit"),
     path("collections/delete/<str:entity_id>", BadgeInstanceCollectionDetail.as_view(), name="badge_collection_delete"),

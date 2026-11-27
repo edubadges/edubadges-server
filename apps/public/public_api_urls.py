@@ -8,7 +8,6 @@ from .public_api import (
     BadgeClassCriteria,
     BadgeClassImage,
     BadgeClassJson,
-    BadgeClassPublicKeyJson,
     BadgeInstanceImage,
     BadgeInstanceJson,
     FacultyImage,
@@ -17,7 +16,6 @@ from .public_api import (
     IssuerBadgesJson,
     IssuerImage,
     IssuerJson,
-    IssuerPublicKeyJson,
     ValidatorVersion,
 )
 
@@ -33,11 +31,6 @@ json_patterns = [
         name="issuer_json",
     ),
     re_path(
-        r"^issuers/(?P<entity_id>[^/.]+)/pubkey/(?P<public_key_id>[^/.]+)$",
-        xframe_options_exempt(IssuerPublicKeyJson.as_view(slugToEntityIdRedirect=True)),
-        name="issuer_public_key_json",
-    ),
-    re_path(
         r"^issuers/(?P<entity_id>[^/.]+)/badges$",
         xframe_options_exempt(IssuerBadgesJson.as_view(slugToEntityIdRedirect=False)),
         name="issuer_badges_json",
@@ -46,11 +39,6 @@ json_patterns = [
         r"^badges/(?P<entity_id>[^/.]+)$",
         xframe_options_exempt(BadgeClassJson.as_view(slugToEntityIdRedirect=False)),
         name="badgeclass_json",
-    ),
-    re_path(
-        r"^badges/(?P<entity_id>[^/.]+)/pubkey/(?P<public_key_id>[^/.]+)$",
-        xframe_options_exempt(BadgeClassPublicKeyJson.as_view(slugToEntityIdRedirect=False)),
-        name="badgeclass_public_key_json",
     ),
     re_path(
         r"^assertions/(?P<entity_id>[^/.]+)$",

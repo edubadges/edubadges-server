@@ -481,8 +481,6 @@ class EvidenceItemSerializer(serializers.Serializer):
 
 class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serializer):
     allow_uppercase = serializers.BooleanField(default=False, required=False, write_only=True)
-    issue_signed = serializers.BooleanField(required=False)
-    signing_password = serializers.CharField(max_length=1024, required=False)
     enrollment_entity_id = serializers.CharField(max_length=1024, required=False)
     extensions = serializers.DictField(source="extension_items", required=False, validators=[BadgeExtensionValidator()])
     grade_achieved = serializers.CharField(max_length=254, required=False, allow_blank=True, allow_null=True)
@@ -572,33 +570,18 @@ class BadgeInstanceSerializer(OriginalJsonSerializerMixin, serializers.Serialize
             )
         if enrollment.badge_instance:
             raise BadgrValidationError("Can't award enrollment, it has already been awarded", 213)
-        if self.context["request"].data.get("issue_signed", False):
-            assertion = badgeclass.issue_signed(
-                recipient=enrollment.user,
-                created_by=self.context.get("request").user,
-                allow_uppercase=validated_data.get("allow_uppercase"),
-                recipient_type=validated_data.get("recipient_type", BadgeInstance.RECIPIENT_TYPE_EDUID),
-                expires_at=expires_at,
-                extensions=validated_data.get("extension_items", None),
-                identifier=uuid.uuid4().urn,
-                signer=validated_data.get("created_by"),
-                issued_on=enrollment.date_created,
-                # evidence=validated_data.get('evidence_items', None)  # Dont forget this one when you re-implement signing  # noqa: E501
-                # narrative=validated_data.get('narrative', None)  # idem
-            )
-        else:
-            assertion = badgeclass.issue(
-                recipient=enrollment.user,
-                created_by=self.context.get("request").user,
-                allow_uppercase=validated_data.get("allow_uppercase"),
-                recipient_type=validated_data.get("recipient_type", BadgeInstance.RECIPIENT_TYPE_EDUID),
-                expires_at=expires_at,
-                extensions=validated_data.get("extension_items", None),
-                evidence=validated_data.get("evidence_items", None),
-                narrative=validated_data.get("narrative", None),
-                grade_achieved=validated_data.get("grade_achieved", None),
-                issued_on=enrollment.date_created,
-            )
+        assertion = badgeclass.issue(
+            recipient=enrollment.user,
+            created_by=self.context.get("request").user,
+            allow_uppercase=validated_data.get("allow_uppercase"),
+            recipient_type=validated_data.get("recipient_type", BadgeInstance.RECIPIENT_TYPE_EDUID),
+            expires_at=expires_at,
+            extensions=validated_data.get("extension_items", None),
+            evidence=validated_data.get("evidence_items", None),
+            narrative=validated_data.get("narrative", None),
+            grade_achieved=validated_data.get("grade_achieved", None),
+            issued_on=enrollment.date_created,
+        )
 
         enrollment.date_awarded = timezone.now()
         enrollment.badge_instance = assertion
